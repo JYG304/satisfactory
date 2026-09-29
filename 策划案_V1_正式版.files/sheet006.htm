@@ -1,0 +1,574 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="ProgId" content="Excel.Sheet">
+  <meta name="Generator" content="WPS Office ET">
+  <link id="Main-File" rel="Main-File" href="../策划案_V1_正式版.html">
+  <link rel="File-List" href="filelist.xml">
+  <link rel="Stylesheet" href="stylesheet.css">
+  <style>
+<!-- @page
+	{margin:0.75in 0.70in 0.75in 0.70in;
+	mso-header-margin:0.30in;
+	mso-footer-margin:0.30in;}
+ -->  </style>
+  <!--[if gte mso 9]>
+   <xml>
+    <x:WorksheetOptions>
+     <x:DefaultRowHeight>280</x:DefaultRowHeight>
+     <x:Panes>
+      <x:Pane>
+       <x:Number>3</x:Number>
+       <x:ActiveCol>0</x:ActiveCol>
+       <x:ActiveRow>0</x:ActiveRow>
+       <x:RangeSelection>A1:G1</x:RangeSelection>
+      </x:Pane>
+     </x:Panes>
+     <x:DoNotDisplayGridlines/>
+     <x:ProtectContents>False</x:ProtectContents>
+     <x:ProtectObjects>False</x:ProtectObjects>
+     <x:ProtectScenarios>False</x:ProtectScenarios>
+     <x:PageBreakZoom>100</x:PageBreakZoom>
+     <x:Print>
+      <x:PaperSizeIndex>9</x:PaperSizeIndex>
+     </x:Print>
+    </x:WorksheetOptions>
+   </xml>
+  <![endif]-->
+  <script language="JavaScript">
+	if (window.name!="frSheet")
+		window.location.replace("../策划案_V1_正式版.html");
+	else
+		parent.fnUpdateTabs(5);
+</script>
+ </head>
+ <body link="blue" vlink="purple">
+  <table width="2724" border="0" cellpadding="0" cellspacing="0" style='width:1362.00pt;border-collapse:collapse;table-layout:fixed;'>
+   <col width="84" style='mso-width-source:userset;mso-width-alt:1792;'/>
+   <col width="240" style='mso-width-source:userset;mso-width-alt:5120;'/>
+   <col width="408" style='mso-width-source:userset;mso-width-alt:8704;'/>
+   <col width="432" style='mso-width-source:userset;mso-width-alt:9216;'/>
+   <col width="696" style='mso-width-source:userset;mso-width-alt:14848;'/>
+   <col width="504" style='mso-width-source:userset;mso-width-alt:10752;'/>
+   <col width="360" style='mso-width-source:userset;mso-width-alt:7680;'/>
+   <col width="408" style='mso-width-source:userset;mso-width-alt:8704;'/>
+   <col width="156" style='mso-width-source:userset;mso-width-alt:3328;'/>
+   <col width="216" style='mso-width-source:userset;mso-width-alt:4608;'/>
+   <tr height="64" style='height:32.00pt;mso-height-source:userset;mso-height-alt:640;'>
+    <td class="xl72" height="64" width="2724" colspan="7" style='height:32.00pt;width:1362.00pt;border-right:none;border-bottom:none;' x:str>游戏流程｜DEMO模拟剧本（从世界加载完成后的第一帧开始）</td>
+   </tr>
+   <tr height="56" style='height:28.00pt;mso-height-source:userset;mso-height-alt:560;'>
+    <td class="xl73" height="56" colspan="7" style='height:28.00pt;border-right:none;border-bottom:none;' x:str>范围：练气→筑基。登录界面、开始游戏和世界加载不展开；每一行都按玩家实际操作推进，写清看见什么、做什么、机器怎么加工、产物下一步去哪。</td>
+   </tr>
+   <tr height="64" style='height:32.00pt;mso-height-source:userset;mso-height-alt:640;'>
+    <td class="xl74" height="64" colspan="7" style='height:32.00pt;border-right:none;border-bottom:none;' x:str>一眼总览：双金丹冲突→休眠舱受损→拆舱回收接线组件/电源模块→修复中央处理器→扫描并处理正道、邪道两具遗体→解析核辐射修仙与山河社稷图残卷→备用电量耗尽→挖煤供电→加工台→粉碎机→冶炼舱（上）→切割机→基础工厂→战斗取材→生物循环→中央处理器逐层研究认证→练气3/6、筑基3/6向造化金身供料→筑基6生产人造灵根原型×20并完成金身初启→可选山河社稷图→Demo结束</td>
+   </tr>
+   <tr height="56" style='height:28.00pt;mso-height-source:userset;mso-height-alt:560;'>
+    <td class="xl75" height="56" colspan="7" style='height:28.00pt;border-right:none;border-bottom:none;' x:str>阶段顺序：序章→练气1-3（基础矿物加工与中央处理器认证）→练气4-6（战斗取材、生物线与金身基座/骨架）→筑基1-3（高温、动力与金身经络）→筑基4（废液与煞气）→筑基5-6（人造灵根原型×20、金身终局与可选法宝）</td>
+   </tr>
+   <tr height="60" style='height:30.00pt;mso-height-source:userset;mso-height-alt:600;'>
+    <td class="xl76" height="60" style='height:30.00pt;' x:str>步</td>
+    <td class="xl77" x:str>场景</td>
+    <td class="xl77" x:str>玩家看到 / 听到</td>
+    <td class="xl77" x:str>玩家操作</td>
+    <td class="xl77" x:str>机器与配方</td>
+    <td class="xl77" x:str>产物下一站</td>
+    <td class="xl78" x:str>结果 / 解锁</td>
+   </tr>
+   <tr height="52" style='height:26.00pt;mso-height-source:userset;mso-height-alt:520;'>
+    <td class="xl79" height="52" colspan="7" style='height:26.00pt;border-right:none;border-bottom:.5pt solid #D1D5DB;' x:str>第一幕｜苏醒、修复中央处理器、解析两具遗体并发现法宝残卷</td>
+   </tr>
+   <tr height="132" style='height:66.00pt;mso-height-source:userset;mso-height-alt:1320;'>
+    <td class="xl82" height="132" style='height:66.00pt;' x:num>1</td>
+    <td class="xl83" x:str>地表上空</td>
+    <td class="xl83" x:str>两名金丹修士在废墟上空交战，法术和冲击波把地表能量读数推高</td>
+    <td class="xl83" x:str>观看过场，暂不可操作</td>
+    <td class="xl84" x:str>无生产；区域煞气值从事件开始累计</td>
+    <td class="xl85" x:str>冲击波沿地面扩散</td>
+    <td class="xl86" x:str>玩家尚未知道修仙等级</td>
+   </tr>
+   <tr height="132" style='height:66.00pt;mso-height-source:userset;mso-height-alt:1320;'>
+    <td class="xl82" height="132" style='height:66.00pt;' x:num>2</td>
+    <td class="xl87" x:str>冲击点</td>
+    <td class="xl87" x:str>双方同时失控，两具遗体坠落，地面裂开</td>
+    <td class="xl87" x:str>等待镜头落地</td>
+    <td class="xl88" x:str>无生产；两具遗体成为序章剧情对象</td>
+    <td class="xl89" x:str>遗体与冲击波砸向地下设施</td>
+    <td class="xl90" x:str>正道遗体A、邪道遗体B被固定生成</td>
+   </tr>
+   <tr height="132" style='height:66.00pt;mso-height-source:userset;mso-height-alt:1320;'>
+    <td class="xl82" height="132" style='height:66.00pt;' x:num>3</td>
+    <td class="xl83" x:str>地下设施</td>
+    <td class="xl83" x:str>休眠舱被砸穿，舱体破损但还有残余指示灯</td>
+    <td class="xl83" x:str>进入第一视角，等待舱门解锁</td>
+    <td class="xl84" x:str>休眠舱保留中央处理器、基础机器人和应急工具</td>
+    <td class="xl85" x:str>舱体破损处露出旧设备接口</td>
+    <td class="xl86" x:str>玩家从旧时代设施中苏醒</td>
+   </tr>
+   <tr height="132" style='height:66.00pt;mso-height-source:userset;mso-height-alt:1320;'>
+    <td class="xl82" height="132" style='height:66.00pt;' x:num>4</td>
+    <td class="xl87" x:str>休眠舱出口</td>
+    <td class="xl87" x:str>机器人手臂、低电量HUD和损坏环境进入视野</td>
+    <td class="xl87" x:str>爬出休眠舱，移动和观察</td>
+    <td class="xl88" x:str>玩家本体是中央处理器；机器人只是可替换执行载体</td>
+    <td class="xl89" x:str>前往冲击坑寻找遗体</td>
+    <td class="xl90" x:str>获得基础行动能力</td>
+   </tr>
+   <tr height="132" style='height:66.00pt;mso-height-source:userset;mso-height-alt:1320;'>
+    <td class="xl82" height="132" style='height:66.00pt;' x:num>5</td>
+    <td class="xl83" x:str>中央处理器自检</td>
+    <td class="xl83" x:str>电量、存储、解析模块和外设状态逐项自检；解析模块显示供电不足</td>
+    <td class="xl83" x:str>查看状态面板并接受“拆解休眠舱、回收维修件”任务</td>
+    <td class="xl84" x:str>中央处理器自带解析功能；当前不能建造或运行正式生产设备</td>
+    <td class="xl85" x:str>提示拆解休眠舱获取接线组件和电源模块，先修复自身核心</td>
+    <td class="xl86" x:str>确认玩家本体是中央处理器，机器人只是可替换执行载体</td>
+   </tr>
+   <tr height="132" style='height:66.00pt;mso-height-source:userset;mso-height-alt:1320;'>
+    <td class="xl82" height="132" style='height:66.00pt;' x:num>6</td>
+    <td class="xl87" x:str>拆解休眠舱</td>
+    <td class="xl87" x:str>中央处理器确认维修件缺失，休眠舱仍有可回收模块</td>
+    <td class="xl87" x:str>拆下非必要舱体模块，回收接线组件×2和电源模块×1；保留中央处理器与基础操作台</td>
+    <td class="xl88" x:str>休眠舱拆解：回收接线组件×2、电源模块×1；不是一次性剧情道具，后续仍可由操作台/加工台重复制造</td>
+    <td class="xl89" x:str>舱体失去完整休眠功能，中央处理器获得正式维修所需材料</td>
+    <td class="xl90" x:str>接线组件×1和电源模块×1用于修复中央处理器，剩余接线组件用于首台供电设备</td>
+   </tr>
+   <tr height="132" style='height:66.00pt;mso-height-source:userset;mso-height-alt:1320;'>
+    <td class="xl82" height="132" style='height:66.00pt;' x:num>7</td>
+    <td class="xl83" x:str>修复中央处理器</td>
+    <td class="xl83" x:str>回收材料已放入中央处理器维修槽</td>
+    <td class="xl83" x:str>用接线组件×1+电源模块×1修复中央处理器，启动内置解析模块和短时备用电量</td>
+    <td class="xl84" x:str>中央处理器维修：接线组件×1+电源模块×1→核心恢复；不需要先建解构机</td>
+    <td class="xl85" x:str>解析模块恢复，备用电量只够完成序章两具遗体的读取与首轮解析</td>
+    <td class="xl86" x:str>获得正式调查能力；应急工具仍保留给旧解构机维修</td>
+   </tr>
+   <tr height="132" style='height:66.00pt;mso-height-source:userset;mso-height-alt:1320;'>
+    <td class="xl82" height="132" style='height:66.00pt;' x:num>8</td>
+    <td class="xl87" x:str>扫描两具遗体</td>
+    <td class="xl87" x:str>中央处理器恢复解析后，冲击坑坐标和两具遗体标记可见</td>
+    <td class="xl87" x:str>走近冲击坑，扫描并拾取正道遗体A、邪道遗体B，依次放入回收托盘</td>
+    <td class="xl88" x:str>扫描只读信息，不消耗遗体；两具遗体均保留为序章固定样本</td>
+    <td class="xl89" x:str>两具样本显示“未知高能变异反应”，境界和阵营在解析后确认</td>
+    <td class="xl90" x:str>正道/邪道差异留作后续分支；本版都进入序章解析，不生成金丹生产线</td>
+   </tr>
+   <tr height="52" style='height:26.00pt;mso-height-source:userset;mso-height-alt:520;'>
+    <td class="xl79" height="52" colspan="7" style='height:26.00pt;border-right:none;border-bottom:.5pt solid #D1D5DB;' x:str>第二幕｜挖煤供电，搭建第一台小型工业</td>
+   </tr>
+   <tr height="132" style='height:66.00pt;mso-height-source:userset;mso-height-alt:1320;'>
+    <td class="xl82" height="132" style='height:66.00pt;' x:num>9</td>
+    <td class="xl87" x:str>修复应急解构机</td>
+    <td class="xl87" x:str>两具遗体已进入回收托盘，旧设备残骸接口被中央处理器识别</td>
+    <td class="xl87" x:str>只使用休眠舱应急工具修复旧解构机的应急模式；不扣除正式建造材料</td>
+    <td class="xl88" x:str>应急模式只处理序章固定样本；临时修复不消耗正式设备框架、接口件或电源模块；正式BD_140解构机在练气第4层建造</td>
+    <td class="xl89" x:str>解构机来源明确，不凭空生成，也不把应急设备当成正式量产设备</td>
+    <td class="xl90" x:str>获得可执行首轮解析的临时设备</td>
+   </tr>
+   <tr height="132" style='height:66.00pt;mso-height-source:userset;mso-height-alt:1320;'>
+    <td class="xl82" height="132" style='height:66.00pt;' x:num>10</td>
+    <td class="xl83" x:str>两具遗体进入应急解构机</td>
+    <td class="xl83" x:str>应急解构机已修复，中央处理器备用电量充足</td>
+    <td class="xl83" x:str>按队列把正道遗体A、邪道遗体B依次塞入解构机并启动两批应急处理</td>
+    <td class="xl84" x:str>序章固定遗体A/B→应急解构机；扫描不消耗遗体，解构才读取并拆分样本</td>
+    <td class="xl85" x:str>两具遗体均完成解析，产出通用生物材料和解析数据账户记录</td>
+    <td class="xl86" x:str>两具样本不转化为灵石或能量粉；剑匣与法宝残卷作为非物料剧情对象分开保留</td>
+   </tr>
+   <tr height="132" style='height:66.00pt;mso-height-source:userset;mso-height-alt:1320;'>
+    <td class="xl82" height="132" style='height:66.00pt;' x:num>11</td>
+    <td class="xl87" x:str>解析结果与法宝残卷</td>
+    <td class="xl87" x:str>两批应急解析完成</td>
+    <td class="xl87" x:str>查看报告，确认两具遗体的正邪标签、核辐射数据库吻合结果和携带物</td>
+    <td class="xl88" x:str>解析数据×8（两具金丹遗体各4点）进入中央处理器研究账户；发现山河社稷图残卷；残损剑匣单独进入剧情装备栏</td>
+    <td class="xl89" x:str>玩家第一次知道灵力是核辐射诱发的稳定变异能量；法宝概念提前出现但不占生产接口</td>
+    <td class="xl90" x:str>解锁剑匣研究入口、矿脉扫描研究和练气阶段里程碑研究点</td>
+   </tr>
+   <tr height="132" style='height:66.00pt;mso-height-source:userset;mso-height-alt:1320;'>
+    <td class="xl82" height="132" style='height:66.00pt;' x:num>12</td>
+    <td class="xl83" x:str>低功耗状态</td>
+    <td class="xl83" x:str>两具遗体解析完成，备用电量归零，HUD变暗但机器人仍可移动</td>
+    <td class="xl83" x:str>按照任务标记寻找煤炭节点和倒木</td>
+    <td class="xl84" x:str>关闭高阶解析、建造和生产；保留移动、观察和基础采集</td>
+    <td class="xl85" x:str>提示玩家先恢复正式电网，不能在断电状态下直接建工厂</td>
+    <td class="xl86" x:str>能源目标明确，玩家不会被卡在原地</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>13</td>
+    <td class="xl87" x:str>开局资源点</td>
+    <td class="xl87" x:str>地图标出煤炭节点和倒木，显示采集范围与背包容量</td>
+    <td class="xl87" x:str>挖煤、砍原木并带回休眠舱附近</td>
+    <td class="xl88" x:str>煤炭是主燃料；原木是备用燃料和建材；不使用灵石、能量粉或灵能</td>
+    <td class="xl89" x:str>煤炭/原木→预置燃料发电机</td>
+    <td class="xl90" x:str>拿到第一次正式供能的资源</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>14</td>
+    <td class="xl83" x:str>接入预置燃料发电机</td>
+    <td class="xl83" x:str>煤炭或原木已带回，休眠舱旁的预置设备接口亮起</td>
+    <td class="xl83" x:str>把燃料装入预置燃料发电机，接回中央处理器并启动电网；不是从零建造首台机器</td>
+    <td class="xl84" x:str>煤炭/原木/木板→预置燃料发电机→电能；新增燃料发电机才按建筑表建造配方结算</td>
+    <td class="xl85" x:str>电网指示灯由红转绿，恢复建造权限；全Demo只使用电能</td>
+    <td class="xl86" x:str>退出低功耗，进入正式工业阶段</td>
+   </tr>
+   <tr height="52" style='height:26.00pt;mso-height-source:userset;mso-height-alt:520;'>
+    <td class="xl79" height="52" colspan="7" style='height:26.00pt;border-right:none;border-bottom:.5pt solid #D1D5DB;' x:str>第三幕｜激活剑匣，战斗取材，建立练气生物线</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>15</td>
+    <td class="xl83" x:str>第一台小型工业</td>
+    <td class="xl83" x:str>玩家摆下建筑底座、储藏盒和直线传送带，看到物料开始流动</td>
+    <td class="xl83" x:str>先搭储藏和物流，再放第一台加工台</td>
+    <td class="xl84" x:str>建筑底座/储藏盒/传送带承接玄铁板、玄铁梁和设备框架建造</td>
+    <td class="xl85" x:str>储藏盒→加工台输入缓存</td>
+    <td class="xl86" x:str>形成可观察的工厂骨架</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>16</td>
+    <td class="xl87" x:str>加工台先加工矿物</td>
+    <td class="xl87" x:str>加工台输入玄铁锭后，界面显示板材和齿轮两个可切换配方</td>
+    <td class="xl87" x:str>投入玄铁锭，分别生产玄铁板和玄铁齿轮</td>
+    <td class="xl88" x:str>加工台：玄铁锭×2→玄铁板×3；玄铁锭×2→玄铁齿轮×1</td>
+    <td class="xl89" x:str>玄铁板→建筑底座/设备骨架；玄铁齿轮→传动骨架/后续设备</td>
+    <td class="xl90" x:str>玩家看懂“原矿→锭→通用零件”</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>17</td>
+    <td class="xl83" x:str>下一阶段：粉碎机</td>
+    <td class="xl83" x:str>加工台产出的玄铁齿轮还不够做高级设备，粉碎机蓝图解锁</td>
+    <td class="xl83" x:str>建造粉碎机，把玄铁锭送入粉碎机；灵磁齿轮改由加工台复用配方生产</td>
+    <td class="xl84" x:str>粉碎机：玄铁锭×1→玄铁粉×3/12秒；加工台：玄铁齿轮×1+玄铁粉×2→灵磁齿轮×1/10秒</td>
+    <td class="xl85" x:str>玄铁粉→加工台灵磁齿轮/耐火炉芯；灵磁齿轮→切割机和高阶设备建造</td>
+    <td class="xl86" x:str>加工深度从板材进入粉末与复合零件，设备归属清楚</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>18</td>
+    <td class="xl87" x:str>下一阶段：精炼炉</td>
+    <td class="xl87" x:str>加工台已产出基础建造件，玄铁粉可用于首枚耐火炉芯</td>
+    <td class="xl87" x:str>先用操作台/加工台做耐火炉芯，建造精炼炉并接入玄铁矿、赤铜矿；等待赤铜锭产出后再接切割机</td>
+    <td class="xl88" x:str>耐火炉芯：玄铁板×4+玄铁齿轮×1→耐火炉芯×1/60秒（操作台启动）；自动配方：玄铁板×4+玄铁粉×2→耐火炉芯×1/30秒（精炼炉）。精炼炉另产玄铁锭、赤铜锭。</td>
+    <td class="xl89" x:str>赤铜锭准备完成后流向切割机；玄铁粉继续补充耐火炉芯</td>
+    <td class="xl90" x:str>先完成矿物精炼，后续切割不缺赤铜锭</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>19</td>
+    <td class="xl83" x:str>赤铜切割与木材加工</td>
+    <td class="xl83" x:str>精炼炉已经稳定产出赤铜锭，切割机具备传送带接入条件</td>
+    <td class="xl83" x:str>建造切割机并接入赤铜锭、原木；按需求切换铜材和木材配方</td>
+    <td class="xl84" x:str>切割机：赤铜锭→导灵铜片或铜线；原木→木板；木板×2→木结构件</td>
+    <td class="xl85" x:str>导灵铜片/铜线→基础控制模块和电子生物芯片；木板→建筑与备用燃料</td>
+    <td class="xl86" x:str>矿物下级素材和木材都有明确后续用途</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>20</td>
+    <td class="xl87" x:str>补齐通用建造件</td>
+    <td class="xl87" x:str>建筑蓝图逐个显示设备框架、管件、传动骨架的缺口</td>
+    <td class="xl87" x:str>用加工台补齐设备骨架、设备框架、设备管件和传动件，放置采矿机、精炼炉、粉碎机、切割机、储藏盒</td>
+    <td class="xl88" x:str>玄铁梁+玄铁板→设备骨架；设备骨架+玄铁齿轮×2→设备框架；玄铁板×2+齿轮→设备管件</td>
+    <td class="xl89" x:str>设备框架/管件/传动件→后续流体、生物和能源建筑</td>
+    <td class="xl90" x:str>机器建造不再凭空出现材料</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>21</td>
+    <td class="xl83" x:str>练气1-3中央处理器认证与金身基座供料</td>
+    <td class="xl83" x:str>中央处理器研究认证界面按玄铁锭、赤铜锭、煤炭、设备件和导灵铜片逐层亮起；练气3后造化金身供奉基座界面单独开放。</td>
+    <td class="xl83" x:str>先向中央处理器提交练气1-3认证材料；完成练气3后，再把玄铁板×300、玄铁梁×100、木结构件×100、设备框架×50通过物流送入造化金身。</td>
+    <td class="xl84" x:str>中央处理器只解锁风力发电机和后续生物蓝图；造化金身只记录基座批量供料，不解锁配方。</td>
+    <td class="xl85" x:str>完成练气3认证与金身基座供料后进入剑匣研究和战斗取材。</td>
+    <td class="xl86" x:str>完成第一次小型工业教学</td>
+   </tr>
+   <tr height="52" style='height:26.00pt;mso-height-source:userset;mso-height-alt:520;'>
+    <td class="xl79" height="52" colspan="7" style='height:26.00pt;border-right:none;border-bottom:.5pt solid #D1D5DB;' x:str>第四幕｜进入筑基，处理废液并建立动力线</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>22</td>
+    <td class="xl83" x:str>激活剑匣攻击接口</td>
+    <td class="xl83" x:str>基础加工线稳定后，剑匣从锁定变为可研究</td>
+    <td class="xl83" x:str>领取攻击研究任务，装备剑匣并出门</td>
+    <td class="xl84" x:str>剑匣只作为装备使用，不占工厂接口</td>
+    <td class="xl85" x:str>地图开放练气/筑基修士目标</td>
+    <td class="xl86" x:str>战斗成为生物材料的可重复来源</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>23</td>
+    <td class="xl87" x:str>战斗获取尸体</td>
+    <td class="xl87" x:str>地图显示修士目标、战斗范围和掉落标记</td>
+    <td class="xl87" x:str>击败练气或筑基修士，拾取尸体</td>
+    <td class="xl88" x:str>重复生产只接练气/筑基尸体；开局金丹遗体不再作为后续产线来源</td>
+    <td class="xl89" x:str>尸体→储藏盒</td>
+    <td class="xl90" x:str>获得可持续的生物上游资源</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>24</td>
+    <td class="xl83" x:str>尸体装箱带回</td>
+    <td class="xl83" x:str>储藏盒显示实体容量，尸体被装入箱内后才能运输</td>
+    <td class="xl83" x:str>把尸体装入储藏盒，沿传送带或手提带回基地</td>
+    <td class="xl84" x:str>储藏盒只负责装箱和转运，不改变尸体数量</td>
+    <td class="xl85" x:str>储藏盒→解构机输入缓存</td>
+    <td class="xl86" x:str>战斗和工厂物流接上</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>25</td>
+    <td class="xl87" x:str>正式解构机</td>
+    <td class="xl87" x:str>BD_140显示尸体境界和输出预览，玩家可选择处理批次</td>
+    <td class="xl87" x:str>把练气/筑基尸体送入解构机并接三个固体输出</td>
+    <td class="xl88" x:str>解构机：练气尸体→鲜活组织×2/神经束×1/脱水组织×1；筑基尸体→3/2/2；同时生成解析数据账户记录</td>
+    <td class="xl89" x:str>鲜活组织→提取器；神经束→电子生物芯片；脱水组织→滤芯/生物胚料</td>
+    <td class="xl90" x:str>生物材料进入真正的重复生产</td>
+   </tr>
+   <tr height="52" style='height:26.00pt;mso-height-source:userset;mso-height-alt:520;'>
+    <td class="xl79" height="52" colspan="7" style='height:26.00pt;border-right:none;border-bottom:.5pt solid #D1D5DB;' x:str>第五幕｜人造灵根原型主线与山河社稷图法宝支线</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>26</td>
+    <td class="xl87" x:str>提取器与废液</td>
+    <td class="xl87" x:str>战斗尸体已装箱带回，提取器液体口和废液缓存已准备</td>
+    <td class="xl87" x:str>鲜活组织×2+原水或回用净化水→组织蛋白液；把同批生物浑浊废液先送入缓存</td>
+    <td class="xl88" x:str>提取器：鲜活生物组织×2+原水/回用净化水×1→组织蛋白液×1+生物浑浊废液×1/30秒；灵草萃取液复用同一建筑</td>
+    <td class="xl89" x:str>组织蛋白液→搅拌机；生物浑浊废液→筑基4回收处理塔；废液不是无来源副产物</td>
+    <td class="xl90" x:str>主产物和副产物都有明确去向</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>27</td>
+    <td class="xl83" x:str>液体与灵植循环</td>
+    <td class="xl83" x:str>培养皿、培养仓、搅拌机和离心机依次点亮，种子返还动画出现</td>
+    <td class="xl83" x:str>先做基础营养液，再种植成熟灵草、提取灵草萃取液、混合并离心；最后用沉淀物培育活性细胞团</td>
+    <td class="xl84" x:str>搅拌机：原水/回用净化水×2+组织蛋白液×1→基础营养液×1/20秒；培养皿：种子+基础营养液→成熟灵草+种子返还；提取器：成熟灵草×2+水→灵草萃取液+生物浑浊废液；搅拌机：组织蛋白液+灵草萃取液→活性生物混合液；离心机：活性生物混合液→组织精华液+营养沉淀物；培养仓：营养沉淀物+基础营养液→活性细胞团</td>
+    <td class="xl85" x:str>活性细胞团→生物胚料；组织精华液→生物复合板/灵根芯材/法宝稳脉液；基础营养液和种子形成可循环支线</td>
+    <td class="xl86" x:str>生物线可以启动、循环并持续供料，生物材料仍由战斗尸体补充</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>28</td>
+    <td class="xl87" x:str>芯片与控制件</td>
+    <td class="xl87" x:str>加工台出现电子生物芯片和设备控制插件配方</td>
+    <td class="xl87" x:str>先用导灵铜片+铜线+玄铁粉制作基础控制模块，再用神经束和导灵铜片制作芯片，补齐控制链</td>
+    <td class="xl88" x:str>加工台：导灵铜片×1+铜线×2+玄铁粉×1→基础控制模块；神经束×2+导灵铜片×1→电子生物芯片；基础控制模块+电子生物芯片→生物控制芯；生物控制芯+导电线圈→设备控制插件</td>
+    <td class="xl89" x:str>电子生物芯片→灵根芯材；设备控制插件×3→主控核心；基础控制模块同时服务矿脉定位件和多类建筑</td>
+    <td class="xl90" x:str>生物和机器两条线开始合流，控制件不是一次性专用物料</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>29</td>
+    <td class="xl83" x:str>练气4-6中央处理器认证与金身骨架供料</td>
+    <td class="xl83" x:str>中央处理器认证栏显示滤芯、组织液、成熟灵草、芯片和研究材料；练气6后造化金身骨架供料单独开放。</td>
+    <td class="xl83" x:str>先完成中央处理器练气4-6认证；再向造化金身供奉设备框架×100、设备接口件×80、电子生物芯片×40、生物蛋白滤芯×60、组织精华液×60。</td>
+    <td class="xl84" x:str>只使用煤电/风电；中央处理器不接收金身批量物料，造化金身也不解锁建筑配方。</td>
+    <td class="xl85" x:str>进入筑基1，形成小目标（认证）+大目标（金身供料）的双层节奏。</td>
+    <td class="xl86" x:str>完成练气阶段的可重复生物循环</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>30</td>
+    <td class="xl87" x:str>筑基1-3高温与动力</td>
+    <td class="xl87" x:str>冶炼舱（上）和组装机蓝图按顺序开放，负载读数变高但能源规则不变</td>
+    <td class="xl87" x:str>制造精炼玄铁锭、高温合金锭、生物胚料、生物复合板和电能核心</td>
+    <td class="xl88" x:str>冶炼舱（上）：玄铁锭×2→精炼玄铁锭；精炼玄铁锭+玄铁粉×3→高温合金锭；加工台：导电线圈+基础控制模块+玄铁粉×2→电能核心；冶炼舱（上）：高温合金锭×6+电能核心×2→动力核心</td>
+    <td class="xl89" x:str>动力核心→灵根胚体/渡劫台；高温合金锭→动力核心；复合板→灵根芯材/法宝阵图胚</td>
+    <td class="xl90" x:str>工业材料和生物材料第一次稳定合流</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>31</td>
+    <td class="xl83" x:str>筑基4废液回收</td>
+    <td class="xl83" x:str>回收处理塔先显示废液模式，任务明确要求先处理已有废液</td>
+    <td class="xl83" x:str>把生物浑浊废液和废液净化粉送入回收处理塔</td>
+    <td class="xl84" x:str>回收处理塔：生物浑浊废液或煞气腐化废液×1+废液净化粉×1→回用净化水×1+净化残渣×1/60秒；加工台：玄铁粉×2+组织蛋白液×1，或玄铁粉×1+营养沉淀物×1，或净化残渣×1+玄铁粉×1→废液净化粉×2</td>
+    <td class="xl85" x:str>回用净化水→提取器/搅拌机/法宝稳脉液；净化残渣→加工台回收为废液净化粉</td>
+    <td class="xl86" x:str>副产物回流，废液不再无出口</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>32</td>
+    <td class="xl87" x:str>筑基4煞气支线</td>
+    <td class="xl87" x:str>完成废液提交后，回收塔开放区域模式和地图煞气节点模式</td>
+    <td class="xl87" x:str>把建筑区域煞气或地图节点接入回收处理塔</td>
+    <td class="xl88" x:str>区域煞气/地图节点→煞气浓缩液；离心机：煞气浓缩液→煞气结晶+煞气腐化废液；腐化废液回塔</td>
+    <td class="xl89" x:str>煞气结晶→导脉合金/渡劫台；不生成气体物料</td>
+    <td class="xl90" x:str>法宝支线获得稳定上游资源</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>33</td>
+    <td class="xl83" x:str>筑基5人造灵根原型前置</td>
+    <td class="xl83" x:str>组装机终配预览显示两固体口和一高级液体口</td>
+    <td class="xl83" x:str>生产芯片×8、复合板×4、组织精华液，组装灵根芯材；插件×3+通用净化核心做主控核心</td>
+    <td class="xl84" x:str>组装机：芯片×8+复合板×4+组织精华液→灵根芯材；设备控制插件×3+通用净化核心→主控核心</td>
+    <td class="xl85" x:str>灵根芯材→灵根胚体；主控核心等待终配</td>
+    <td class="xl86" x:str>生物、控制、工业三线合流</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>34</td>
+    <td class="xl87" x:str>筑基6中央处理器认证与人造灵根原型终局供料</td>
+    <td class="xl87" x:str>中央处理器完成筑基6研究认证；组装机连续生产人造灵根原型，造化金身终局供料界面显示批量需求。</td>
+    <td class="xl87" x:str>组装机：灵根芯材×1+动力核心×1→灵根胚体×1/90秒；灵根胚体×1+主控核心×1+组织精华液×1→人造灵根原型×1/120秒；该配方不新增，单批产出×1，共生产20批。</td>
+    <td class="xl88" x:str>人造灵根原型×20只进入造化金身筑基6终局供料，不提交中央处理器；中央处理器只记录筑基6认证完成。</td>
+    <td class="xl89" x:str>主线最终物品完成，双提交目的清楚。</td>
+    <td class="xl90" x:str>主线最终物品完成</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>35</td>
+    <td class="xl83" x:str>并行制作山河社稷图</td>
+    <td class="xl83" x:str>法宝页显示阵图胚、炼宝台和渡劫台的顺序</td>
+    <td class="xl83" x:str>沿煞气、导脉和法宝液体支线生产法宝材料</td>
+    <td class="xl84" x:str>导脉合金→导脉薄片；组织精华液+回用净化水→法宝稳脉液；复合板×2+薄片×4+稳脉液×2→法宝阵图胚</td>
+    <td class="xl85" x:str>阵图胚+矿脉定位件+通用净化核心→炼宝台→渡劫前置态</td>
+    <td class="xl86" x:str>法宝线复用主线材料，不抢占人造灵根原型终配</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>36</td>
+    <td class="xl87" x:str>天劫淬炼法宝</td>
+    <td class="xl87" x:str>筑基6解锁渡劫台，法宝前置态和动力核心进入输入槽</td>
+    <td class="xl87" x:str>把渡劫前置态、动力核心和煞气结晶送入渡劫台</td>
+    <td class="xl88" x:str>渡劫台：渡劫前置态×1+动力核心×1+煞气结晶×4→山河社稷图（ART_001）</td>
+    <td class="xl89" x:str>法宝完成态离开普通物流网，进入法宝装备栏；不是普通物料，也不接入人造灵根原型终配</td>
+    <td class="xl90" x:str>获得可以改变工厂布局的法宝</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl82" height="152" style='height:76.00pt;' x:num>37</td>
+    <td class="xl83" x:str>使用山河社稷图</td>
+    <td class="xl83" x:str>地图/法宝界面高亮已扫描矿脉和基地附近合法位置</td>
+    <td class="xl83" x:str>打开地图→选已扫描矿脉→选基地附近位置→确认迁移→等待冷却</td>
+    <td class="xl84" x:str>法宝只改变矿脉节点位置，不复制资源总量；一次迁移一处，不跨地图层</td>
+    <td class="xl85" x:str>迁移后重新铺采矿机和传送带</td>
+    <td class="xl86" x:str>玩家真正使用法宝改变工厂布局</td>
+   </tr>
+   <tr height="152" style='height:76.00pt;mso-height-source:userset;mso-height-alt:1520;'>
+    <td class="xl91" height="152" style='height:76.00pt;' x:num>38</td>
+    <td class="xl92" x:str>造化金身终局与Demo结算</td>
+    <td class="xl92" x:str>中央处理器显示筑基6认证完成；造化金身完成基座、骨架、经络后等待终局批量供料；两个系统使用不同提交界面。</td>
+    <td class="xl92" x:str>向造化金身供奉高温合金锭×200、动力核心×20、主控核心×20、通用净化核心×30；再提交人造灵根原型×20。中央处理器不接收这批终局物料。</td>
+    <td class="xl93" x:str>造化金身完成终局塑造后植入人造灵根原型×20；中央处理器完成筑基6认证；法宝支线独立结算。</td>
+    <td class="xl94" x:str>造化金身初启，人工灵力转换接口建立。</td>
+    <td class="xl95" x:str>Demo结束；主线完成造化金身初启，法宝完成则显示可选支线成果；当前版本不进入金丹生产。</td>
+   </tr>
+   <tr height="114" style='height:57.00pt;mso-height-source:userset;mso-height-alt:1140;'>
+    <td height="114" colspan="7" style='height:57.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="114" style='height:57.00pt;mso-height-source:userset;mso-height-alt:1140;'>
+    <td height="114" colspan="7" style='height:57.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="114" style='height:57.00pt;mso-height-source:userset;mso-height-alt:1140;'>
+    <td height="114" colspan="7" style='height:57.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="114" style='height:57.00pt;mso-height-source:userset;mso-height-alt:1140;'>
+    <td height="114" colspan="7" style='height:57.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="114" style='height:57.00pt;mso-height-source:userset;mso-height-alt:1140;'>
+    <td height="114" colspan="7" style='height:57.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="114" style='height:57.00pt;mso-height-source:userset;mso-height-alt:1140;'>
+    <td height="114" colspan="7" style='height:57.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="114" style='height:57.00pt;mso-height-source:userset;mso-height-alt:1140;'>
+    <td height="114" colspan="7" style='height:57.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="114" style='height:57.00pt;mso-height-source:userset;mso-height-alt:1140;'>
+    <td height="114" colspan="7" style='height:57.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="114" style='height:57.00pt;mso-height-source:userset;mso-height-alt:1140;'>
+    <td height="114" colspan="7" style='height:57.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="114" style='height:57.00pt;mso-height-source:userset;mso-height-alt:1140;'>
+    <td height="114" colspan="7" style='height:57.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="114" style='height:57.00pt;mso-height-source:userset;mso-height-alt:1140;'>
+    <td height="114" colspan="7" style='height:57.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="56" style='height:28.00pt;mso-xlrowspan:2;'>
+    <td height="56" colspan="7" style='height:28.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="60" style='height:30.00pt;mso-height-source:userset;mso-height-alt:600;'>
+    <td height="60" colspan="7" style='height:30.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="72" style='height:36.00pt;mso-height-source:userset;mso-height-alt:720;'>
+    <td height="72" colspan="7" style='height:36.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <tr height="156" style='height:78.00pt;mso-height-source:userset;mso-height-alt:1560;'>
+    <td height="156" colspan="7" style='height:78.00pt;mso-ignore:colspan;'></td>
+   </tr>
+   <![if supportMisalignedColumns]>
+    <tr width="0" style='display:none;'>
+     <td width="84" style='width:42;'></td>
+     <td width="240" style='width:120;'></td>
+     <td width="408" style='width:204;'></td>
+     <td width="432" style='width:216;'></td>
+     <td width="696" style='width:348;'></td>
+     <td width="504" style='width:252;'></td>
+     <td width="360" style='width:180;'></td>
+     <td width="408" style='width:204;'></td>
+     <td width="156" style='width:78;'></td>
+     <td width="216" style='width:108;'></td>
+    </tr>
+   <![endif]>
+  </table>
+ </body>
+</html>

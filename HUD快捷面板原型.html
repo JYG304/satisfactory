@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>修仙工厂 - 屏幕右下角快捷面板规范原型</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #0b111e; color: #f1f5f9; }
+    .glow-box {
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 15px rgba(0, 229, 255, 0.2);
+    }
+    .key-active {
+      background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+      border: 1.5px solid #00f0ff;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.35);
+    }
+    .key-disabled {
+      background: rgba(20, 30, 45, 0.65);
+      border: 1px dashed rgba(100, 116, 139, 0.4);
+      color: #64748b;
+    }
+  </style>
+</head>
+<body class="p-6 select-none flex flex-col items-center justify-center min-h-screen">
+
+  <!-- 模拟测试控制器 -->
+  <div class="mb-6 bg-slate-900/90 border border-slate-700/80 rounded-xl p-4 shadow-lg text-xs max-w-[500px] w-full">
+    <div class="flex items-center justify-between mb-3">
+      <span class="font-bold text-slate-200 flex items-center gap-1.5">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+        情境联动测试器（点击切换状态）
+      </span>
+      <span class="text-slate-400">2×5 ACTIONS 标准规范</span>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      <button onclick="toggleState('map')" id="btn-map" class="px-2.5 py-1.5 rounded border border-cyan-800 bg-cyan-950/40 text-cyan-300 hover:bg-cyan-900/60 transition-all text-left">
+        🗺️ MAM解锁地图<br><span id="txt-map" class="font-bold text-slate-400 text-[10px]">未解锁(灰)</span>
+      </button>
+      <button onclick="toggleState('vehicle')" id="btn-vehicle" class="px-2.5 py-1.5 rounded border border-cyan-800 bg-cyan-950/40 text-cyan-300 hover:bg-cyan-900/60 transition-all text-left">
+        🚜 坐上载具<br><span id="txt-vehicle" class="font-bold text-slate-400 text-[10px]">步履中(灰)</span>
+      </button>
+      <button onclick="toggleState('craft')" id="btn-craft" class="px-2.5 py-1.5 rounded border border-cyan-800 bg-cyan-950/40 text-cyan-300 hover:bg-cyan-900/60 transition-all text-left">
+        🔨 选中配方<br><span id="txt-craft" class="font-bold text-slate-400 text-[10px]">未选中(灰)</span>
+      </button>
+      <button onclick="toggleState('upgrade')" id="btn-upgrade" class="px-2.5 py-1.5 rounded border border-cyan-800 bg-cyan-950/40 text-cyan-300 hover:bg-cyan-900/60 transition-all text-left">
+        🏛️ 靠近主终端<br><span id="txt-upgrade" class="font-bold text-slate-400 text-[10px]">远离中(灰)</span>
+      </button>
+      <button onclick="toggleState('mam')" id="btn-mam" class="px-2.5 py-1.5 rounded border border-cyan-800 bg-cyan-950/40 text-cyan-300 hover:bg-cyan-900/60 transition-all text-left">
+        🔬 靠近MAM终端<br><span id="txt-mam" class="font-bold text-slate-400 text-[10px]">远离中(灰)</span>
+      </button>
+      <button onclick="toggleState('blueprint')" id="btn-blueprint" class="px-2.5 py-1.5 rounded border border-cyan-800 bg-cyan-950/40 text-cyan-300 hover:bg-cyan-900/60 transition-all text-left">
+        📐 靠近蓝图台<br><span id="txt-blueprint" class="font-bold text-slate-400 text-[10px]">未交互(灰)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 主面板：右下角 2x5 ACTIONS -->
+  <div class="relative">
+    <div class="flex items-center justify-between px-1 mb-2">
+      <div class="flex items-center gap-1.5 text-cyan-300 text-xs font-semibold tracking-wider">
+        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]"></span>
+        主要按键 / 功能
+      </div>
+      <div class="text-[11px] font-mono tracking-widest text-cyan-400/80 uppercase">
+        2×5 Actions
+      </div>
+    </div>
+
+    <!-- 2行5列外框 -->
+    <div class="p-2.5 rounded-2xl bg-[#091522]/95 backdrop-blur-md border-2 border-cyan-400/90 glow-box">
+      <div class="grid grid-cols-5 gap-2 w-[460px]">
+
+        <!-- 第 1 列：建造工程 -->
+        <!-- [1,1] Q 建设菜单 (常亮) -->
+        <div class="key-active rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-300 hover:scale-105 cursor-pointer group">
+          <span class="text-xs font-bold text-blue-600 mb-0.5">Q</span>
+          <svg class="w-5 h-5 text-blue-600 mb-1 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11l-8-8-8 8m16 0l-8 8-8-8"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
+          </svg>
+          <span class="text-[11px] font-bold text-slate-800">建设</span>
+        </div>
+
+        <!-- 第 2 列：物资背包 -->
+        <!-- [1,2] Tab 物品/装备 (常亮) -->
+        <div class="key-active rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-300 hover:scale-105 cursor-pointer group">
+          <span class="text-xs font-bold text-indigo-600 mb-0.5">Tab</span>
+          <svg class="w-5 h-5 text-indigo-600 mb-1 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-[11px] font-bold text-slate-800">物品/装备</span>
+        </div>
+
+        <!-- 第 3 列：远行探险 -->
+        <!-- [1,3] M 地图 (默认置灰锁定) -->
+        <div id="slot-map" class="key-disabled rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-300 group">
+          <div class="flex items-center gap-1 mb-0.5">
+            <span id="key-map-label" class="text-xs font-bold text-slate-500">M</span>
+            <svg id="icon-map-lock" class="w-2.5 h-2.5 text-amber-500/80" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <svg id="icon-map-svg" class="w-5 h-5 text-slate-500 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+          </svg>
+          <span id="txt-map-name" class="text-[11px] font-medium text-slate-500">地图</span>
+        </div>
+
+        <!-- 第 4 列：主线知识 -->
+        <!-- [1,4] X 法典 (常亮) -->
+        <div class="key-active rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-300 hover:scale-105 cursor-pointer group">
+          <span class="text-xs font-bold text-emerald-600 mb-0.5">X</span>
+          <svg class="w-5 h-5 text-emerald-600 mb-1 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+          </svg>
+          <span class="text-[11px] font-bold text-slate-800">法典</span>
+        </div>
+
+        <!-- 第 5 列：科研检索 -->
+        <!-- [1,5] N 快速搜索 (常亮) -->
+        <div class="key-active rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-300 hover:scale-105 cursor-pointer group">
+          <span class="text-xs font-bold text-sky-600 mb-0.5">N</span>
+          <svg class="w-5 h-5 text-sky-600 mb-1 group-hover:rotate-45 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <span class="text-[11px] font-bold text-slate-800">快速搜索</span>
+        </div>
+
+        <!-- 下排：进阶与情境系统（未激活时置灰） -->
+
+        <!-- [2,1] 蓝图台 (对应建设) -->
+        <div id="slot-blueprint" class="key-disabled rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-300 group">
+          <span id="key-blueprint-label" class="text-[10px] font-bold text-slate-500 mb-0.5">蓝图台</span>
+          <svg id="icon-blueprint-svg" class="w-5 h-5 text-slate-500 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+          </svg>
+          <span id="txt-blueprint-name" class="text-[11px] font-medium text-slate-500">蓝图设计</span>
+        </div>
+
+        <!-- [2,2] 制作菜单 (对应Tab背包配方) -->
+        <div id="slot-craft" class="key-disabled rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-300 group">
+          <span id="key-craft-label" class="text-[10px] font-bold text-slate-500 mb-0.5">长按制作</span>
+          <svg id="icon-craft-svg" class="w-5 h-5 text-slate-500 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+          </svg>
+          <span id="txt-craft-name" class="text-[11px] font-medium text-slate-500">制作菜单</span>
+        </div>
+
+        <!-- [2,3] C 载具界面 (对应地图探险) -->
+        <div id="slot-vehicle" class="key-disabled rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-300 group">
+          <span id="key-vehicle-label" class="text-xs font-bold text-slate-500 mb-0.5">C</span>
+          <svg id="icon-vehicle-svg" class="w-5 h-5 text-slate-500 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+            <circle cx="7" cy="17" r="2" stroke="currentColor"/>
+            <circle cx="17" cy="17" r="2" stroke="currentColor"/>
+          </svg>
+          <span id="txt-vehicle-name" class="text-[11px] font-medium text-slate-500">载具交互</span>
+        </div>
+
+        <!-- [2,4] 升级终端 (对应法典) -->
+        <div id="slot-upgrade" class="key-disabled rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-300 group">
+          <span id="key-upgrade-label" class="text-[10px] font-bold text-slate-500 mb-0.5">主终端</span>
+          <svg id="icon-upgrade-svg" class="w-5 h-5 text-slate-500 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          <span id="txt-upgrade-name" class="text-[11px] font-medium text-slate-500">升级界面</span>
+        </div>
+
+        <!-- [2,5] MAM终端 (对应快速搜索) -->
+        <div id="slot-mam" class="key-disabled rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-300 group">
+          <span id="key-mam-label" class="text-[10px] font-bold text-slate-500 mb-0.5">MAM终端</span>
+          <svg id="icon-mam-svg" class="w-5 h-5 text-slate-500 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+          </svg>
+          <span id="txt-mam-name" class="text-[11px] font-medium text-slate-500">研究科技</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      map: false,
+      vehicle: false,
+      craft: false,
+      upgrade: false,
+      mam: false,
+      blueprint: false
+    };
+
+    function toggleState(key) {
+      state[key] = !state[key];
+      render();
+    }
+
+    function render() {
+      // 1. 地图
+      const slotMap = document.getElementById('slot-map');
+      const keyMapLabel = document.getElementById('key-map-label');
+      const iconMapSvg = document.getElementById('icon-map-svg');
+      const txtMapName = document.getElementById('txt-map-name');
+      const lockIcon = document.getElementById('icon-map-lock');
+      const txtMap = document.getElementById('txt-map');
+      if (state.map) {
+        slotMap.className = 'key-active rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-300 hover:scale-105 cursor-pointer group';
+        keyMapLabel.className = 'text-xs font-bold text-amber-600';
+        iconMapSvg.className = 'w-5 h-5 text-amber-600 mb-1 group-hover:scale-110 transition-transform';
+        txtMapName.className = 'text-[11px] font-bold text-slate-800';
+        lockIcon.classList.add('hidden');
+        txtMap.innerText = '已解锁(亮)';
+        txtMap.className = 'font-bold text-cyan-400 text-[10px]';
+      } else {
+        slotMap.className = 'key-disabled rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-300 group';
+        keyMapLabel.className = 'text-xs font-bold text-slate-500';
+        iconMapSvg.className = 'w-5 h-5 text-slate-500 mb-1';
+        txtMapName.className = 'text-[11px] font-medium text-slate-500';
+        lockIcon.classList.remove('hidden');
+        txtMap.innerText = '未解锁(灰)';
+        txtMap.className = 'font-bold text-slate-400 text-[10px]';
+      }
+
+      // 2. 载具
+      updateSlot('vehicle', 'text-amber-500', '已登车(亮)', '步履中(灰)');
+      // 3. 制作
+      updateSlot('craft', 'text-orange-500', '可长按(亮)', '未选中(灰)');
+      // 4. 升级
+      updateSlot('upgrade', 'text-red-500', '已交互(亮)', '远离中(灰)');
+      // 5. MAM
+      updateSlot('mam', 'text-purple-500', '已交互(亮)', '远离中(灰)');
+      // 6. 蓝图
+      updateSlot('blueprint', 'text-cyan-500', '已交互(亮)', '未交互(灰)');
+    }
+
+    function updateSlot(key, activeColor, onText, offText) {
+      const slot = document.getElementById(`slot-${key}`);
+      const label = document.getElementById(`key-${key}-label`);
+      const icon = document.getElementById(`icon-${key}-svg`);
+      const name = document.getElementById(`txt-${key}-name`);
+      const btnText = document.getElementById(`txt-${key}`);
+
+      if (state[key]) {
+        slot.className = 'key-active rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-300 hover:scale-105 cursor-pointer group';
+        label.className = `text-[10px] font-bold ${activeColor}`;
+        icon.className = `w-5 h-5 ${activeColor} mb-1 group-hover:scale-110 transition-transform`;
+        name.className = 'text-[11px] font-bold text-slate-800';
+        btnText.innerText = onText;
+        btnText.className = 'font-bold text-cyan-400 text-[10px]';
+      } else {
+        slot.className = 'key-disabled rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-300 group';
+        label.className = 'text-[10px] font-bold text-slate-500 mb-0.5';
+        icon.className = 'w-5 h-5 text-slate-500 mb-1';
+        name.className = 'text-[11px] font-medium text-slate-500';
+        btnText.innerText = offText;
+        btnText.className = 'font-bold text-slate-400 text-[10px]';
+      }
+    }
+  </script>
+</body>
+</html>

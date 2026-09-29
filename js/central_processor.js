@@ -1,0 +1,1373 @@
+// =========================================================================
+// js/central_processor.js - 中央处理器节点信号系统
+// 玩法：4个区域各自独立，玩家往输入端口投入游戏材料 → 信号沿节点传播 → 到达核心 → 全厂获得增益
+// 区域解锁：序章只开物流区；练气结束开生产区+电力区；筑基结束开研究区
+// 节点类型：输入端口 / 增幅矩阵 / 分流晶体 / 谐振腔 / 稳压储能 / 转化器 / 区域核心
+// 信号衰减：每经过1个中间节点损耗12%，逼玩家精简路线
+// =========================================================================
+
+// 全局工控基座与蓝图连线状态
+const CPU_BLUEPRINT_STATE = {
+  // 画布视口平移与缩放 (Pan & Zoom)
+  zoom: 0.82,
+  panX: -15,
+  panY: -15,
+  rotation: 0,
+  activeZoneId: 'zone1', // 'zone1', 'zone2', 'zone3', 'zone4'
+
+  // 解锁进度：'prologue' | 'lianqi' | 'zhuji'
+  // 序章：只有zone1可用  练气完成：zone1/2/3可用  筑基完成：全部可用
+  gameStage: 'prologue',
+
+  // 节点槽位上限（随阶段扩展）
+  // prologue: 2槽, lianqi: 4槽, zhuji: 6槽
+  slotCaps: { prologue: 2, lianqi: 4, zhuji: 6 },
+
+  // 已解锁的节点类型（按阶段累积）
+  // prologue: 输入端口+增幅矩阵  lianqi追加: 分流晶体+稳压储能  zhuji追加: 谐振腔+转化器
+  unlockedNodeTypes: ['input', 'amplifier', 'core'],
+
+  // 四大区域
+  zones: {
+    zone1: {
+      id: 'zone1',
+      name: '物流区',
+      shortName: '物流',
+      themeColor: '#38bdf8',
+      icon: 'fa-solid fa-conveyor-belt-boxes',
+      rect: { x: 50, y: 50, width: 880, height: 500 },
+      unlocked: true,
+      satisfied: false,
+      // 增益配置
+      buffType: 'logistics',
+      buffLabel: '传送带吞吐量',
+      buffLabel2: '升降机速度',
+      buffValue: 0,       // 当前增益（%）
+      buffValue2: 0,
+      // 接受的输入材料及其信号强度
+      inputMaterials: {
+        '玄铁齿轮':   { signal: 60,  rate: 8,  icon: 'fa-solid fa-gear' },
+        '灵磁齿轮':   { signal: 100, rate: 6,  icon: 'fa-solid fa-gear' },
+        '设备传动件': { signal: 250, rate: 3,  icon: 'fa-solid fa-cog' }
+      },
+      // 当前接入的材料（输入端口节点读取）
+      activeInput: null,
+      activeInput2: null,
+      coreRequirement: '将信号传入物流核心节点'
+    },
+    zone2: {
+      id: 'zone2',
+      name: '生产区',
+      shortName: '生产',
+      themeColor: '#f59e0b',
+      icon: 'fa-solid fa-industry',
+      rect: { x: 1040, y: 50, width: 880, height: 500 },
+      unlocked: false,
+      satisfied: false,
+      buffType: 'production',
+      buffLabel: '设备工作速度',
+      buffLabel2: '热量效率',
+      buffValue: 0,
+      buffValue2: 0,
+      inputMaterials: {
+        '煤炭':       { signal: 40,  rate: 10, icon: 'fa-solid fa-fire' },
+        '耐火炉芯':   { signal: 90,  rate: 4,  icon: 'fa-solid fa-fire-burner' },
+        '精炼玄铁锭': { signal: 140, rate: 2,  icon: 'fa-solid fa-cube' }
+      },
+      activeInput: null,
+      activeInput2: null,
+      unlockRequirement: '完成练气阶段所有认证后解锁',
+      coreRequirement: '将信号传入生产核心节点'
+    },
+    zone3: {
+      id: 'zone3',
+      name: '电力区',
+      shortName: '电力',
+      themeColor: '#a855f7',
+      icon: 'fa-solid fa-bolt',
+      rect: { x: 1040, y: 620, width: 880, height: 500 },
+      unlocked: false,
+      satisfied: false,
+      buffType: 'power',
+      buffLabel: '全厂耗电降低',
+      buffLabel2: '发电机产出',
+      buffValue: 0,
+      buffValue2: 0,
+      inputMaterials: {
+        '铜线':     { signal: 40,  rate: 15, icon: 'fa-solid fa-plug' },
+        '导电线圈': { signal: 100, rate: 4,  icon: 'fa-solid fa-circle-notch' },
+        '电能核心': { signal: 200, rate: 1,  icon: 'fa-solid fa-atom' }
+      },
+      activeInput: null,
+      activeInput2: null,
+      unlockRequirement: '完成练气阶段所有认证后解锁',
+      coreRequirement: '将信号传入电力核心节点'
+    },
+    zone4: {
+      id: 'zone4',
+      name: '研究区',
+      shortName: '研究',
+      themeColor: '#10b981',
+      icon: 'fa-solid fa-flask',
+      rect: { x: 50, y: 620, width: 880, height: 500 },
+      unlocked: false,
+      satisfied: false,
+      buffType: 'research',
+      buffLabel: '解析数据产出',
+      buffLabel2: '认证消耗减免',
+      buffValue: 0,
+      buffValue2: 0,
+      inputMaterials: {
+        '基础控制模块': { signal: 50,  rate: 4, icon: 'fa-solid fa-microchip' },
+        '电子生物芯片': { signal: 175, rate: 1, icon: 'fa-solid fa-dna' }
+      },
+      activeInput: null,
+      activeInput2: null,
+      unlockRequirement: '完成筑基阶段所有认证后解锁',
+      coreRequirement: '将信号传入研究核心节点'
+    }
+  },
+
+  // 跨区域全版图节点集与电缆集
+  nodes: [],
+  wires: [],
+
+  // 当前连线中临时状态
+  connectingPin: null, // { nodeId, pinId, pinType: 'out'|'in', x, y, color }
+
+  // 节点拖动
+  draggingNodeId: null,
+  dragStartMouse: { x: 0, y: 0 },
+  initialNodePos: { x: 0, y: 0 },
+
+  // 画布平移交互
+  isPanning: false,
+  panStartMouse: { x: 0, y: 0 },
+  initialPanPos: { x: 0, y: 0 },
+
+  // 选中的节点
+  selectedEntity: null,
+
+  // 宏观运行与大招状态
+  pulseActive: false,
+  pulseSecondsLeft: 0,
+  paramLockedUntil: 0
+};
+
+// =========================================================================
+// 节点预置：每区有固定布局，序章只显示物流区节点
+// 节点类型说明：
+//   input     = 输入端口（唯一接受游戏材料的节点）
+//   amplifier = 增幅矩阵（放大信号，耗电）
+//   branch    = 分流晶体（一分二，各得55%）
+//   resonator = 谐振腔（双路输入触发×1.6乘法加成）
+//   stabilizer= 稳压储能（断供保护，储能缓冲）
+//   converter = 转化器（跨区域信号转换，×0.5效率）
+//   core      = 区域核心（终点，输出增益值）
+// =========================================================================
+const CPU_WORLD_NODES_PRESET = [
+  // -----------------------------------------------------------------------
+  // 物流区 (zone1) — 序章即可用，初始已预连
+  // -----------------------------------------------------------------------
+  {
+    id: 'z1_input_a', zoneId: 'zone1',
+    type: 'input', name: '输入端口 A', category: '材料输入',
+    x: 80, y: 130, width: 175, themeColor: '#38bdf8', icon: 'fa-solid fa-arrow-right-to-bracket',
+    valText: '未接入材料', material: null, signalOut: 0,
+    inPins: [],
+    outPins: [{ id: 'out_a', label: '信号 OUT', color: '#38bdf8' }]
+  },
+  {
+    id: 'z1_amp_1', zoneId: 'zone1',
+    type: 'amplifier', name: '增幅矩阵', category: 'CPU运算 · 增幅',
+    x: 320, y: 220, width: 185, themeColor: '#f59e0b', icon: 'fa-solid fa-chart-line',
+    valText: '信号 ×1.5 | 耗电 +6 MW', ampLevel: 1,
+    inPins:  [{ id: 'in',  label: '信号 IN',  color: '#f59e0b' }],
+    outPins: [{ id: 'out', label: '信号 OUT', color: '#f59e0b' }]
+  },
+  {
+    id: 'z1_core', zoneId: 'zone1',
+    type: 'core', name: '物流核心', category: '区域核心',
+    x: 570, y: 220, width: 190, themeColor: '#38bdf8', icon: 'fa-solid fa-microchip',
+    valText: '等待信号接入…', signalIn: 0,
+    inPins:  [{ id: 'in', label: '信号 IN', color: '#38bdf8', isGold: true }],
+    outPins: []
+  },
+
+  // -----------------------------------------------------------------------
+  // 生产区 (zone2) — 练气阶段完成后解锁
+  // -----------------------------------------------------------------------
+  {
+    id: 'z2_input_a', zoneId: 'zone2',
+    type: 'input', name: '输入端口 A', category: '材料输入',
+    x: 1080, y: 130, width: 175, themeColor: '#f59e0b', icon: 'fa-solid fa-arrow-right-to-bracket',
+    valText: '未接入材料', material: null, signalOut: 0,
+    inPins: [],
+    outPins: [{ id: 'out_a', label: '信号 OUT', color: '#f59e0b' }]
+  },
+  {
+    id: 'z2_amp_1', zoneId: 'zone2',
+    type: 'amplifier', name: '增幅矩阵', category: 'CPU运算 · 增幅',
+    x: 1310, y: 220, width: 185, themeColor: '#f59e0b', icon: 'fa-solid fa-chart-line',
+    valText: '信号 ×1.5 | 耗电 +6 MW', ampLevel: 1,
+    inPins:  [{ id: 'in',  label: '信号 IN',  color: '#f59e0b' }],
+    outPins: [{ id: 'out', label: '信号 OUT', color: '#f59e0b' }]
+  },
+  {
+    id: 'z2_core', zoneId: 'zone2',
+    type: 'core', name: '生产核心', category: '区域核心',
+    x: 1560, y: 220, width: 190, themeColor: '#f59e0b', icon: 'fa-solid fa-industry',
+    valText: '等待信号接入…', signalIn: 0,
+    inPins:  [{ id: 'in', label: '信号 IN', color: '#f59e0b', isGold: true }],
+    outPins: []
+  },
+
+  // -----------------------------------------------------------------------
+  // 电力区 (zone3) — 练气阶段完成后解锁
+  // -----------------------------------------------------------------------
+  {
+    id: 'z3_input_a', zoneId: 'zone3',
+    type: 'input', name: '输入端口 A', category: '材料输入',
+    x: 1080, y: 700, width: 175, themeColor: '#a855f7', icon: 'fa-solid fa-arrow-right-to-bracket',
+    valText: '未接入材料', material: null, signalOut: 0,
+    inPins: [],
+    outPins: [{ id: 'out_a', label: '信号 OUT', color: '#a855f7' }]
+  },
+  {
+    id: 'z3_amp_1', zoneId: 'zone3',
+    type: 'amplifier', name: '增幅矩阵', category: 'CPU运算 · 增幅',
+    x: 1310, y: 790, width: 185, themeColor: '#f59e0b', icon: 'fa-solid fa-chart-line',
+    valText: '信号 ×1.5 | 耗电 +6 MW', ampLevel: 1,
+    inPins:  [{ id: 'in',  label: '信号 IN',  color: '#f59e0b' }],
+    outPins: [{ id: 'out', label: '信号 OUT', color: '#f59e0b' }]
+  },
+  {
+    id: 'z3_core', zoneId: 'zone3',
+    type: 'core', name: '电力核心', category: '区域核心',
+    x: 1560, y: 790, width: 190, themeColor: '#a855f7', icon: 'fa-solid fa-bolt',
+    valText: '等待信号接入…', signalIn: 0,
+    inPins:  [{ id: 'in', label: '信号 IN', color: '#a855f7', isGold: true }],
+    outPins: []
+  },
+
+  // -----------------------------------------------------------------------
+  // 研究区 (zone4) — 筑基阶段完成后解锁
+  // -----------------------------------------------------------------------
+  {
+    id: 'z4_input_a', zoneId: 'zone4',
+    type: 'input', name: '输入端口 A', category: '材料输入',
+    x: 80, y: 700, width: 175, themeColor: '#10b981', icon: 'fa-solid fa-arrow-right-to-bracket',
+    valText: '未接入材料', material: null, signalOut: 0,
+    inPins: [],
+    outPins: [{ id: 'out_a', label: '信号 OUT', color: '#10b981' }]
+  },
+  {
+    id: 'z4_amp_1', zoneId: 'zone4',
+    type: 'amplifier', name: '增幅矩阵', category: 'CPU运算 · 增幅',
+    x: 310, y: 790, width: 185, themeColor: '#f59e0b', icon: 'fa-solid fa-chart-line',
+    valText: '信号 ×1.5 | 耗电 +6 MW', ampLevel: 1,
+    inPins:  [{ id: 'in',  label: '信号 IN',  color: '#f59e0b' }],
+    outPins: [{ id: 'out', label: '信号 OUT', color: '#f59e0b' }]
+  },
+  {
+    id: 'z4_core', zoneId: 'zone4',
+    type: 'core', name: '研究核心', category: '区域核心',
+    x: 560, y: 790, width: 190, themeColor: '#10b981', icon: 'fa-solid fa-flask',
+    valText: '等待信号接入…', signalIn: 0,
+    inPins:  [{ id: 'in', label: '信号 IN', color: '#10b981', isGold: true }],
+    outPins: []
+  }
+];
+
+// 初始连线预置：物流区输入端口→增幅矩阵→核心，开箱即见发光回路
+const CPU_INITIAL_WIRES_PRESET = [
+  { id: 'w_z1_in_amp', fromNode: 'z1_input_a', fromPin: 'out_a', toNode: 'z1_amp_1', toPin: 'in', color: '#38bdf8' },
+  { id: 'w_z1_amp_core', fromNode: 'z1_amp_1', fromPin: 'out', toNode: 'z1_core', toPin: 'in', color: '#f59e0b', isGold: true }
+];
+
+// =========================================================================
+// 初始化
+// =========================================================================
+function initCentralProcessorBlueprint() {
+  CPU_BLUEPRINT_STATE.nodes = JSON.parse(JSON.stringify(CPU_WORLD_NODES_PRESET));
+  CPU_BLUEPRINT_STATE.wires = JSON.parse(JSON.stringify(CPU_INITIAL_WIRES_PRESET));
+  CPU_BLUEPRINT_STATE.connectingPin = null;
+  CPU_BLUEPRINT_STATE.draggingNodeId = null;
+
+  // 根据游戏阶段设置区域解锁状态
+  const stage = CPU_BLUEPRINT_STATE.gameStage;
+  CPU_BLUEPRINT_STATE.zones.zone1.unlocked = true;
+  CPU_BLUEPRINT_STATE.zones.zone2.unlocked = (stage === 'lianqi' || stage === 'zhuji');
+  CPU_BLUEPRINT_STATE.zones.zone3.unlocked = (stage === 'lianqi' || stage === 'zhuji');
+  CPU_BLUEPRINT_STATE.zones.zone4.unlocked = (stage === 'zhuji');
+
+  // 根据阶段设置可用节点类型
+  if (stage === 'prologue') {
+    CPU_BLUEPRINT_STATE.unlockedNodeTypes = ['input', 'amplifier', 'core'];
+  } else if (stage === 'lianqi') {
+    CPU_BLUEPRINT_STATE.unlockedNodeTypes = ['input', 'amplifier', 'branch', 'stabilizer', 'core'];
+  } else {
+    CPU_BLUEPRINT_STATE.unlockedNodeTypes = ['input', 'amplifier', 'branch', 'stabilizer', 'resonator', 'converter', 'core'];
+  }
+
+  updateCanvasTransform();
+  renderBlueprintPhaseTabs();
+  renderBlueprintZonesHtml();
+  renderBlueprintNodesHtml();
+  renderBlueprintWiresSvg();
+  updateBlueprintMonitorStats();
+
+  requestAnimationFrame(() => {
+    renderBlueprintWiresSvg();
+    setTimeout(() => renderBlueprintWiresSvg(), 40);
+  });
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// =========================================================================
+// 1. 画布平移 (Pan) 与滚轮缩放 (Zoom) 核心驱动
+// =========================================================================
+
+function updateCanvasTransform() {
+  const container = document.getElementById('cpuWorldContainer');
+  if (container) {
+    container.style.transform = `translate(${CPU_BLUEPRINT_STATE.panX}px, ${CPU_BLUEPRINT_STATE.panY}px) scale(${CPU_BLUEPRINT_STATE.zoom})`;
+  }
+
+  const badge = document.getElementById('cpuZoomBadge');
+  if (badge) {
+    badge.textContent = `${Math.round(CPU_BLUEPRINT_STATE.zoom * 100)}%`;
+  }
+}
+
+// 按钮缩放增量
+function handleZoomCanvas(delta) {
+  playUiSound('click');
+  const vp = document.getElementById('paragonViewport');
+  const vpRect = vp ? vp.getBoundingClientRect() : { width: 880, height: 500 };
+  const centerX = vpRect.width / 2;
+  const centerY = vpRect.height / 2;
+
+  const oldZoom = CPU_BLUEPRINT_STATE.zoom;
+  const newZoom = Math.max(0.32, Math.min(2.2, oldZoom + delta));
+
+  // 以视口中心为基准缩放
+  CPU_BLUEPRINT_STATE.panX = centerX - (centerX - CPU_BLUEPRINT_STATE.panX) * (newZoom / oldZoom);
+  CPU_BLUEPRINT_STATE.panY = centerY - (centerY - CPU_BLUEPRINT_STATE.panY) * (newZoom / oldZoom);
+  CPU_BLUEPRINT_STATE.zoom = newZoom;
+
+  updateCanvasTransform();
+  renderBlueprintWiresSvg();
+}
+
+// 鼠标滚轮平滑缩放 (以鼠标指针为中心)
+function handleCanvasWheel(e) {
+  e.preventDefault();
+  const vp = document.getElementById('paragonViewport');
+  if (!vp) return;
+
+  const vpRect = vp.getBoundingClientRect();
+  const mouseX = e.clientX - vpRect.left;
+  const mouseY = e.clientY - vpRect.top;
+
+  const zoomFactor = e.deltaY < 0 ? 1.12 : 0.89;
+  const oldZoom = CPU_BLUEPRINT_STATE.zoom;
+  const newZoom = Math.max(0.32, Math.min(2.2, oldZoom * zoomFactor));
+
+  // 算法：鼠标所在世界坐标保持不变
+  CPU_BLUEPRINT_STATE.panX = mouseX - (mouseX - CPU_BLUEPRINT_STATE.panX) * (newZoom / oldZoom);
+  CPU_BLUEPRINT_STATE.panY = mouseY - (mouseY - CPU_BLUEPRINT_STATE.panY) * (newZoom / oldZoom);
+  CPU_BLUEPRINT_STATE.zoom = newZoom;
+
+  updateCanvasTransform();
+  renderBlueprintWiresSvg();
+}
+
+// 画布空白处按住鼠标拖拽平移
+function handleCanvasMouseDown(e) {
+  // 如果点击的是节点、引脚、按钮或滑块，不触发画布平移
+  if (e.target.closest('.bp-node-card') || e.target.closest('button') || e.target.closest('input')) {
+    return;
+  }
+
+  CPU_BLUEPRINT_STATE.isPanning = true;
+  CPU_BLUEPRINT_STATE.panStartMouse.x = e.clientX;
+  CPU_BLUEPRINT_STATE.panStartMouse.y = e.clientY;
+  CPU_BLUEPRINT_STATE.initialPanPos.x = CPU_BLUEPRINT_STATE.panX;
+  CPU_BLUEPRINT_STATE.initialPanPos.y = CPU_BLUEPRINT_STATE.panY;
+
+  const vp = document.getElementById('paragonViewport');
+  if (vp) vp.classList.add('bp-viewport-panning');
+}
+
+// 重置视角至 100% (居中对齐启道区)
+function resetCanvasView() {
+  playUiSound('toggle');
+  CPU_BLUEPRINT_STATE.zoom = 1.0;
+  CPU_BLUEPRINT_STATE.panX = -20;
+  CPU_BLUEPRINT_STATE.panY = -20;
+  updateCanvasTransform();
+  renderBlueprintWiresSvg();
+  showNotification('视角已重置至 100% 原始标称尺寸');
+}
+
+// 全景俯瞰四区 (自动居中完整容纳 2200x1300 大世界)
+function fitAllZonesCanvasView() {
+  playUiSound('toggle');
+  const vp = document.getElementById('paragonViewport');
+  const vpRect = vp ? vp.getBoundingClientRect() : { width: 880, height: 500 };
+
+  // 计算适配缩放比
+  const scaleX = vpRect.width / 2150;
+  const scaleY = vpRect.height / 1250;
+  const fitZoom = Math.max(0.34, Math.min(0.55, Math.min(scaleX, scaleY) * 0.95));
+
+  CPU_BLUEPRINT_STATE.zoom = fitZoom;
+  CPU_BLUEPRINT_STATE.panX = Math.round((vpRect.width - 2000 * fitZoom) / 2);
+  CPU_BLUEPRINT_STATE.panY = Math.round((vpRect.height - 1200 * fitZoom) / 2);
+
+  updateCanvasTransform();
+  renderBlueprintWiresSvg();
+  showNotification('已切换至【全景俯瞰模式】：四大区域与跨区导灵光缆尽收眼底！');
+}
+
+// 快速平移跳至指定区域
+function jumpToZone(zoneId) {
+  playUiSound('click');
+  const zone = CPU_BLUEPRINT_STATE.zones[zoneId];
+  if (!zone) return;
+
+  CPU_BLUEPRINT_STATE.activeZoneId = zoneId;
+
+  const vp = document.getElementById('paragonViewport');
+  const vpRect = vp ? vp.getBoundingClientRect() : { width: 880, height: 500 };
+  const targetZoom = 0.85;
+
+  // 将区域中心平移至视口中心
+  const zoneCenterX = zone.rect.x + zone.rect.width / 2;
+  const zoneCenterY = zone.rect.y + zone.rect.height / 2;
+
+  CPU_BLUEPRINT_STATE.zoom = targetZoom;
+  CPU_BLUEPRINT_STATE.panX = Math.round(vpRect.width / 2 - zoneCenterX * targetZoom);
+  CPU_BLUEPRINT_STATE.panY = Math.round(vpRect.height / 2 - zoneCenterY * targetZoom);
+
+  // 更新顶部导航高亮
+  ['zone1', 'zone2', 'zone3', 'zone4'].forEach(z => {
+    const btn = document.getElementById(`jumpBtn_${z}`);
+    if (btn) {
+      if (z === zoneId) {
+        btn.className = 'px-2 py-0.5 rounded bg-cyan-500/30 text-cyan-200 border border-cyan-400 font-bold transition cursor-pointer shadow-[0_0_8px_rgba(0,240,255,0.4)]';
+      } else {
+        btn.className = 'px-2 py-0.5 rounded bg-white/5 text-white/60 border border-white/10 hover:text-white font-bold transition cursor-pointer';
+      }
+    }
+  });
+
+  renderBlueprintPhaseTabs();
+  updateCanvasTransform();
+  renderBlueprintWiresSvg();
+  showNotification(`已平移聚焦至：【${zone.name}】！`);
+}
+
+// 渲染顶栏阶段 Tabs (同步高亮与锁定图标)
+function renderBlueprintPhaseTabs() {
+  const container = document.getElementById('cpuBlueprintPhaseTabs');
+  if (!container) return;
+
+  const zones = [
+    { key: 'zone1', name: '1. 物流区', icon: 'fa-solid fa-conveyor-belt-boxes' },
+    { key: 'zone2', name: '2. 生产区', icon: 'fa-solid fa-industry' },
+    { key: 'zone3', name: '3. 电力区', icon: 'fa-solid fa-bolt' },
+    { key: 'zone4', name: '4. 研究区', icon: 'fa-solid fa-flask' }
+  ];
+
+  let html = '';
+  zones.forEach(z => {
+    const isCur = z.key === CPU_BLUEPRINT_STATE.activeZoneId;
+    const isUn = CPU_BLUEPRINT_STATE.zones[z.key]?.unlocked;
+    const zData = CPU_BLUEPRINT_STATE.zones[z.key];
+    const buffVal = zData?.buffValue || 0;
+    html += `
+      <button onclick="jumpToZone('${z.key}');"
+              id="topTabBtn_${z.key}"
+              class="px-2.5 py-1 rounded text-xs font-bold transition cursor-pointer flex items-center space-x-1.5 border ${
+                isCur
+                  ? 'bg-amber-500 text-black border-amber-400 shadow-[0_0_12px_rgba(245,146,30,0.6)]'
+                  : (isUn ? 'bg-black/50 text-white/80 border-white/10 hover:border-amber-400/50 hover:text-white' : 'bg-black/40 text-white/40 border-white/5 cursor-pointer')
+              }">
+        <i class="${z.icon} text-xs"></i>
+        <span>${z.name}</span>
+        ${isUn && buffVal > 0 ? `<span class="text-green-300 text-[9px] font-mono">+${buffVal.toFixed(0)}%</span>` : ''}
+        ${isUn ? '' : '<i class="fa-solid fa-lock text-[9px] text-red-400 ml-0.5"></i>'}
+      </button>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+
+
+
+// 顺时针旋转拓扑 90°
+function rotateCpuBlueprintTopology() {
+  playUiSound('toggle');
+  CPU_BLUEPRINT_STATE.rotation = (CPU_BLUEPRINT_STATE.rotation + 90) % 360;
+  
+  const badge = document.getElementById('cpuTopologyAngleBadge');
+  if (badge) {
+    badge.textContent = `⟳ 拓扑旋转: ${CPU_BLUEPRINT_STATE.rotation}°`;
+  }
+
+  showNotification(`已顺时针旋转拓扑 90°！当前阵盘朝向: ${CPU_BLUEPRINT_STATE.rotation}°`);
+}
+
+// 接下页阵盘 (自动顺延至下一区域)
+function attachNextCpuCircuitPage() {
+  playUiSound('zap');
+  const zoneOrder = ['zone1', 'zone2', 'zone3', 'zone4'];
+  const curIdx = zoneOrder.indexOf(CPU_BLUEPRINT_STATE.activeZoneId);
+  const nextIdx = (curIdx + 1) % zoneOrder.length;
+  jumpToZone(zoneOrder[nextIdx]);
+}
+
+// =========================================================================
+// 2. 渲染四大区域底板、锁定遮罩与跨区引线指引 (HTML Layer)
+// =========================================================================
+function renderBlueprintZonesHtml() {
+  const container = document.getElementById('cpuWiringZonesLayer');
+  if (!container) return;
+
+  let html = '';
+  Object.keys(CPU_BLUEPRINT_STATE.zones).forEach(zKey => {
+    const z = CPU_BLUEPRINT_STATE.zones[zKey];
+    const isUnlocked = z.unlocked;
+    const isSatisfied = z.satisfied;
+
+    let statusBadge = '';
+    if (!isUnlocked) {
+      statusBadge = '<span class="text-[10px] font-mono bg-red-950/80 text-red-300 border border-red-500/50 px-2 py-0.5 rounded flex items-center space-x-1"><i class="fa-solid fa-lock text-[9px]"></i><span>待引线解锁</span></span>';
+    } else if (isSatisfied) {
+      statusBadge = '<span class="text-[10px] font-mono bg-amber-500/20 text-amber-300 border border-amber-400/60 px-2 py-0.5 rounded flex items-center space-x-1"><i class="fa-solid fa-check text-[9px]"></i><span>★ 核心已满足</span></span>';
+    } else {
+      statusBadge = '<span class="text-[10px] font-mono bg-cyan-950/80 text-cyan-300 border border-cyan-400/50 px-2 py-0.5 rounded flex items-center space-x-1"><i class="fa-solid fa-circle-notch animate-spin text-[9px]"></i><span>工控调配中</span></span>';
+    }
+
+    // 锁定层遮罩 HTML
+    let lockOverlayHtml = '';
+    if (!isUnlocked) {
+      lockOverlayHtml = `
+        <div class="bp-zone-lock-overlay p-6 text-center space-y-3">
+          <div class="w-14 h-14 rounded-full bg-red-950/70 border-2 border-red-500 flex items-center justify-center text-red-400 text-2xl shadow-[0_0_20px_#ef4444] animate-pulse">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+          <h4 class="text-sm font-black text-white tracking-wider">${z.name} · 封禁待通电</h4>
+          <p class="text-xs text-white/80 max-w-[380px] leading-relaxed">
+            ${z.unlockRequirement || '需满足前置区域核心要求，并引线接入解锁！'}
+          </p>
+          <button onclick="unlockZoneDirect('${z.id}');" class="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-[#f5921e] hover:from-amber-400 hover:to-orange-500 text-black font-black text-xs rounded shadow-[0_0_12px_rgba(245,146,30,0.6)] cursor-pointer transition flex items-center space-x-1.5 mx-auto active:scale-95">
+            <i class="fa-solid fa-bolt text-xs"></i>
+            <span>强制引线通电破封 (调试)</span>
+          </button>
+        </div>
+      `;
+    }
+
+    html += `
+      <div id="zoneCard_${z.id}" 
+           style="left: ${z.rect.x}px; top: ${z.rect.y}px; width: ${z.rect.width}px; height: ${z.rect.height}px;" 
+           class="bp-zone-card ${isUnlocked ? 'zone-unlocked' : ''} ${isSatisfied ? 'zone-satisfied' : ''}">
+        
+        <!-- 区域顶栏信息 -->
+        <div class="p-3 border-b border-white/10 flex items-center justify-between pointer-events-auto">
+          <div class="flex items-center space-x-2">
+            <i class="${z.icon} text-sm" style="color: ${z.themeColor};"></i>
+            <span class="text-xs font-black text-white font-mono tracking-wider">${z.name}</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            ${statusBadge}
+          </div>
+        </div>
+
+        <!-- 区域核心要求提示浮签 (左下角) -->
+        <div class="absolute bottom-2.5 left-3.5 text-[10px] font-mono text-white/40 pointer-events-none select-none flex items-center space-x-1.5">
+          <i class="fa-solid fa-bullseye text-cyan-400 text-xs"></i>
+          <span>核心要求: ${z.coreRequirement}</span>
+        </div>
+
+        ${lockOverlayHtml}
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+// 直接解锁指定区域
+function unlockZoneDirect(zoneId) {
+  playUiSound('zap');
+  const z = CPU_BLUEPRINT_STATE.zones[zoneId];
+  if (!z) return;
+
+  z.unlocked = true;
+  renderBlueprintZonesHtml();
+  renderBlueprintPhaseTabs();
+  updateBlueprintMonitorStats();
+  showNotification(`⚡【${z.name}】已成功解锁并通电！可自由操作本区节点！`);
+}
+
+// =========================================================================
+// 3. 渲染节点卡片 HTML 层 (高保真虚幻蓝图风格，支持鼠标拖拽)
+// =========================================================================
+function renderBlueprintNodesHtml() {
+  const layer = document.getElementById('cpuWiringNodesLayer');
+  if (!layer) return;
+
+  let html = '';
+  CPU_BLUEPRINT_STATE.nodes.forEach(node => {
+    // 输入引脚 (左侧)
+    let inPinsHtml = '';
+    if (node.inPins && node.inPins.length > 0) {
+      inPinsHtml = '<div class="flex flex-col space-y-2 py-1">';
+      node.inPins.forEach(pin => {
+        inPinsHtml += `
+          <div class="flex items-center space-x-1.5 group cursor-pointer" 
+               onclick="handleBlueprintPinClick('${node.id}', '${pin.id}', 'in', event);"
+               title="点击连接至该输入引脚 [IN]">
+            <div id="pin_${node.id}_${pin.id}" 
+                 class="bp-pin bp-pin-in" 
+                 style="border-color: ${pin.color || '#00f0ff'};">
+              <span class="w-1.5 h-1.5 rounded-full bg-cyan-300"></span>
+            </div>
+            <span class="text-[9px] font-mono text-white/80 group-hover:text-cyan-300 transition whitespace-nowrap leading-none">${pin.label}</span>
+          </div>
+        `;
+      });
+      inPinsHtml += '</div>';
+    }
+
+    // 输出引脚 (右侧)
+    let outPinsHtml = '';
+    if (node.outPins && node.outPins.length > 0) {
+      outPinsHtml = '<div class="flex flex-col space-y-2 py-1 items-end">';
+      node.outPins.forEach(pin => {
+        outPinsHtml += `
+          <div class="flex items-center space-x-1.5 group cursor-pointer justify-end" 
+               onclick="handleBlueprintPinClick('${node.id}', '${pin.id}', 'out', event);"
+               title="点击引脚拉出导灵光缆 [OUT]">
+            <span class="text-[9px] font-mono text-white/80 group-hover:text-amber-300 transition whitespace-nowrap leading-none">${pin.label}</span>
+            <div id="pin_${node.id}_${pin.id}" 
+                 class="bp-pin bp-pin-out" 
+                 style="border-color: ${pin.color || '#f59e0b'};">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-300"></span>
+            </div>
+          </div>
+        `;
+      });
+      outPinsHtml += '</div>';
+    }
+
+    // 中间微调控件（若是分流器或限流阀，内嵌交互滑块）
+    let customWidgetHtml = '';
+    if (node.type === 'splitter') {
+      customWidgetHtml = `
+        <div class="my-1.5 px-2 py-1 bg-black/40 rounded border border-white/5 flex flex-col space-y-1">
+          <div class="flex justify-between text-[9px] font-mono text-white/60">
+            <span>分流比:</span>
+            <span class="text-cyan-300 font-bold" id="sliderVal_${node.id}">${node.ratio || 50} : ${100 - (node.ratio || 50)}</span>
+          </div>
+          <input type="range" min="10" max="90" value="${node.ratio || 50}" 
+                 oninput="handleNodeRatioChange('${node.id}', this.value);"
+                 class="w-full h-1 bg-cyan-950 rounded appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      `;
+    } else if (node.type === 'valve') {
+      customWidgetHtml = `
+        <div class="my-1.5 px-2 py-1 bg-black/40 rounded border border-white/5 flex flex-col space-y-1">
+          <div class="flex justify-between text-[9px] font-mono text-white/60">
+            <span>主路截留:</span>
+            <span class="text-amber-300 font-bold" id="sliderVal_${node.id}">${node.limit || 75}%</span>
+          </div>
+          <input type="range" min="20" max="95" value="${node.limit || 75}" 
+                 oninput="handleNodeRatioChange('${node.id}', this.value);"
+                 class="w-full h-1 bg-amber-950 rounded appearance-none cursor-pointer accent-amber-400">
+        </div>
+      `;
+    }
+
+    html += `
+      <div id="node_${node.id}" 
+           style="left: ${node.x}px; top: ${node.y}px; width: ${node.width || 180}px;" 
+           class="bp-node-card">
+        
+        <!-- 节点顶栏 (鼠标按住可全画布拖拽) -->
+        <div class="bp-node-header" 
+             onmousedown="startDragBlueprintNode('${node.id}', event);">
+          <div class="flex items-center space-x-1.5">
+            <i class="${node.icon} text-xs" style="color: ${node.themeColor || '#00f0ff'};"></i>
+            <span class="text-xs font-bold text-white whitespace-nowrap">${node.name}</span>
+          </div>
+          <i class="fa-solid fa-grip-lines text-white/30 text-[10px]"></i>
+        </div>
+
+        <!-- 节点主体数据 -->
+        <div class="p-2 space-y-1">
+          <div class="flex items-center justify-between text-[10px] font-mono text-white/50">
+            <span>${node.category}</span>
+            <span class="font-bold" style="color: ${node.themeColor || '#00f0ff'};">${node.valText || '就绪'}</span>
+          </div>
+
+          ${customWidgetHtml}
+
+          <!-- 引脚出入口横排分布 -->
+          <div class="flex items-center justify-between pt-1 border-t border-white/5">
+            ${inPinsHtml || '<div class="w-1"></div>'}
+            ${outPinsHtml || '<div class="w-1"></div>'}
+          </div>
+        </div>
+
+      </div>
+    `;
+  });
+
+  layer.innerHTML = html;
+}
+
+// =========================================================================
+// 4. 计算引脚精确绝对坐标 (世界坐标系，与 SVG 1:1 对齐)
+// =========================================================================
+function getBlueprintPinCoords(nodeId, pinId) {
+  const node = CPU_BLUEPRINT_STATE.nodes.find(n => n.id === nodeId);
+  if (!node) return { x: 100, y: 100 };
+
+  const nodeWidth = node.width || 180;
+  const inPins = node.inPins || [];
+  const inIdx = inPins.findIndex(p => p.id === pinId);
+  const hasSlider = (node.type === 'splitter' || node.type === 'valve');
+  const basePinY = node.y + (hasSlider ? 95 : 62);
+
+  if (inIdx !== -1) {
+    return {
+      x: node.x + 14,
+      y: basePinY + inIdx * 24
+    };
+  }
+
+  const outPins = node.outPins || [];
+  const outIdx = outPins.findIndex(p => p.id === pinId);
+  if (outIdx !== -1) {
+    return {
+      x: node.x + nodeWidth - 14,
+      y: basePinY + outIdx * 24
+    };
+  }
+
+  return { x: node.x + nodeWidth / 2, y: node.y + 50 };
+}
+
+// 渲染发光贝塞尔曲线光缆 (SVG 层)
+function renderBlueprintWiresSvg() {
+  const svg = document.getElementById('cpuWiringSvg');
+  if (!svg) return;
+
+  let wiresHtml = '';
+
+  // 1. 渲染已连接电缆
+  CPU_BLUEPRINT_STATE.wires.forEach((wire, wIdx) => {
+    const p1 = getBlueprintPinCoords(wire.fromNode, wire.fromPin);
+    const p2 = getBlueprintPinCoords(wire.toNode, wire.toPin);
+    const x1 = p1.x, y1 = p1.y, x2 = p2.x, y2 = p2.y;
+
+    // 贝塞尔控制点计算 (流畅 S 弯曲线)
+    const dx = Math.max(50, Math.abs(x2 - x1) * 0.55);
+    const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+
+    const isInterZone = wire.fromPin.includes('zone') || wire.toPin.includes('zone') || wire.isGold;
+    const wireColor = isInterZone ? '#ffd700' : (wire.color || '#00f0ff');
+    const flowClass = isInterZone ? 'flowing-wire-gold inter-zone-wire' : 'flowing-wire';
+
+    wiresHtml += `
+      <!-- 背景粗光晕线 -->
+      <path d="${d}" fill="none" stroke="${wireColor}" stroke-width="${isInterZone ? '7' : '5'}" opacity="0.35" 
+            filter="drop-shadow(0 0 12px ${wireColor})" />
+      
+      <!-- 动态流水光斑导线 -->
+      <path d="${d}" fill="none" stroke="${wireColor}" stroke-width="${isInterZone ? '3.5' : '2.8'}" 
+            class="${flowClass} bp-wire-path" 
+            onclick="removeBlueprintWire(${wIdx});"
+            title="点击剪断/拆除此连线" />
+
+      <!-- 导线核心白炽光流 -->
+      <path d="${d}" fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.85" pointer-events="none" />
+    `;
+  });
+
+  // 2. 渲染正在拉伸的临时连线 (Rubber-band wire)
+  if (CPU_BLUEPRINT_STATE.connectingPin) {
+    const pin = CPU_BLUEPRINT_STATE.connectingPin;
+    const x1 = pin.x, y1 = pin.y;
+    const x2 = pin.curX || (x1 + 60), y2 = pin.curY || y1;
+    const dx = Math.max(30, Math.abs(x2 - x1) * 0.5);
+    const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+
+    wiresHtml += `
+      <path d="${d}" fill="none" stroke="#f5921e" stroke-width="3.5" stroke-dasharray="6 4" class="flowing-wire" />
+      <circle cx="${x2}" cy="${y2}" r="5" fill="#f5921e" filter="drop-shadow(0 0 8px #f5921e)" />
+    `;
+  }
+
+  svg.innerHTML = wiresHtml;
+}
+
+// =========================================================================
+// 5. 节点拖拽与画布平移交互 (受 zoom 缩放比精确变换)
+// =========================================================================
+function startDragBlueprintNode(nodeId, e) {
+  e.stopPropagation();
+  e.preventDefault();
+
+  const node = CPU_BLUEPRINT_STATE.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+
+  CPU_BLUEPRINT_STATE.draggingNodeId = nodeId;
+  CPU_BLUEPRINT_STATE.dragStartMouse.x = e.clientX;
+  CPU_BLUEPRINT_STATE.dragStartMouse.y = e.clientY;
+  CPU_BLUEPRINT_STATE.initialNodePos.x = node.x;
+  CPU_BLUEPRINT_STATE.initialNodePos.y = node.y;
+
+  // 高亮该节点
+  document.querySelectorAll('.bp-node-card').forEach(c => c.classList.remove('bp-node-active'));
+  const card = document.getElementById(`node_${nodeId}`);
+  if (card) card.classList.add('bp-node-active');
+
+  inspectBlueprintNode(node);
+}
+
+// 全局鼠标移动监听 (驱动画布平移、节点拖拽与拉线实时跟随)
+document.addEventListener('mousemove', (e) => {
+  // 1. 画布平移
+  if (CPU_BLUEPRINT_STATE.isPanning) {
+    const dx = e.clientX - CPU_BLUEPRINT_STATE.panStartMouse.x;
+    const dy = e.clientY - CPU_BLUEPRINT_STATE.panStartMouse.y;
+    CPU_BLUEPRINT_STATE.panX = CPU_BLUEPRINT_STATE.initialPanPos.x + dx;
+    CPU_BLUEPRINT_STATE.panY = CPU_BLUEPRINT_STATE.initialPanPos.y + dy;
+    updateCanvasTransform();
+    return;
+  }
+
+  // 2. 拖动节点 (精确除以 zoom 缩放比)
+  if (CPU_BLUEPRINT_STATE.draggingNodeId) {
+    const node = CPU_BLUEPRINT_STATE.nodes.find(n => n.id === CPU_BLUEPRINT_STATE.draggingNodeId);
+    if (node) {
+      const dx = (e.clientX - CPU_BLUEPRINT_STATE.dragStartMouse.x) / CPU_BLUEPRINT_STATE.zoom;
+      const dy = (e.clientY - CPU_BLUEPRINT_STATE.dragStartMouse.y) / CPU_BLUEPRINT_STATE.zoom;
+
+      node.x = Math.round(CPU_BLUEPRINT_STATE.initialNodePos.x + dx);
+      node.y = Math.round(CPU_BLUEPRINT_STATE.initialNodePos.y + dy);
+
+      const card = document.getElementById(`node_${node.id}`);
+      if (card) {
+        card.style.left = `${node.x}px`;
+        card.style.top = `${node.y}px`;
+      }
+
+      renderBlueprintWiresSvg();
+    }
+  }
+
+  // 3. 正在拉动临时连线 (转换至世界坐标)
+  if (CPU_BLUEPRINT_STATE.connectingPin) {
+    const vp = document.getElementById('paragonViewport');
+    const vpRect = vp ? vp.getBoundingClientRect() : { left: 0, top: 0 };
+    const mouseWorldX = (e.clientX - vpRect.left - CPU_BLUEPRINT_STATE.panX) / CPU_BLUEPRINT_STATE.zoom;
+    const mouseWorldY = (e.clientY - vpRect.top - CPU_BLUEPRINT_STATE.panY) / CPU_BLUEPRINT_STATE.zoom;
+
+    CPU_BLUEPRINT_STATE.connectingPin.curX = mouseWorldX;
+    CPU_BLUEPRINT_STATE.connectingPin.curY = mouseWorldY;
+    renderBlueprintWiresSvg();
+  }
+});
+
+// 全局鼠标释放
+document.addEventListener('mouseup', () => {
+  if (CPU_BLUEPRINT_STATE.isPanning) {
+    CPU_BLUEPRINT_STATE.isPanning = false;
+    const vp = document.getElementById('paragonViewport');
+    if (vp) vp.classList.remove('bp-viewport-panning');
+  }
+
+  if (CPU_BLUEPRINT_STATE.draggingNodeId) {
+    CPU_BLUEPRINT_STATE.draggingNodeId = null;
+    playUiSound('click');
+  }
+});
+
+// =========================================================================
+// 6. 引脚交互：点击出线与跨区引线吸附
+// =========================================================================
+function handleBlueprintPinClick(nodeId, pinId, pinType, e) {
+  e.stopPropagation();
+
+  const coords = getBlueprintPinCoords(nodeId, pinId);
+  const px = coords.x;
+  const py = coords.y;
+  const pinEl = document.getElementById(`pin_${nodeId}_${pinId}`);
+
+  // 1. 如果尚未处于连线状态，点击输出引脚 [OUT]，开启拉线
+  if (!CPU_BLUEPRINT_STATE.connectingPin) {
+    if (pinType === 'out') {
+      playUiSound('click');
+      CPU_BLUEPRINT_STATE.connectingPin = {
+        nodeId: nodeId,
+        pinId: pinId,
+        pinType: 'out',
+        x: px, y: py,
+        curX: px, curY: py
+      };
+      if (pinEl) pinEl.classList.add('bp-pin-connecting');
+      renderBlueprintWiresSvg();
+      showNotification('正在拉出导灵光缆... 请点击目标节点的输入引脚 [IN] 闭合回路！');
+    } else {
+      showNotification('提示：请先点击左侧节点的输出引脚 [OUT]，再连接到目标输入引脚！');
+    }
+    return;
+  }
+
+  // 2. 如果已经有正在拉动的线
+  const source = CPU_BLUEPRINT_STATE.connectingPin;
+
+  // 若点击同一个引脚，取消拉线
+  if (source.nodeId === nodeId && source.pinId === pinId) {
+    cancelBlueprintConnecting();
+    return;
+  }
+
+  // 不能连接同一节点的出入口
+  if (source.nodeId === nodeId) {
+    showNotification('无法自连！必须连接到不同逻辑节点的输入引脚');
+    cancelBlueprintConnecting();
+    return;
+  }
+
+  // 必须连接到输入引脚 [IN]
+  if (pinType !== 'in') {
+    showNotification('连线必须接入输入引脚 [IN]！');
+    cancelBlueprintConnecting();
+    return;
+  }
+
+  // 检查是否已经存在该连线
+  const exists = CPU_BLUEPRINT_STATE.wires.some(w => w.fromNode === source.nodeId && w.fromPin === source.pinId && w.toNode === nodeId && w.toPin === pinId);
+  if (exists) {
+    showNotification('该连线回路已存在');
+    cancelBlueprintConnecting();
+    return;
+  }
+
+  // 创建新连线
+  const fromNode = CPU_BLUEPRINT_STATE.nodes.find(n => n.id === source.nodeId);
+  const outPinDef = fromNode ? fromNode.outPins.find(p => p.id === source.pinId) : null;
+  const isGoldWire = (outPinDef && outPinDef.isGold) || source.pinId.includes('zone') || pinId.includes('zone') || nodeId.includes('core');
+
+  CPU_BLUEPRINT_STATE.wires.push({
+    id: `wire_${Date.now()}`,
+    fromNode: source.nodeId,
+    fromPin: source.pinId,
+    toNode: nodeId,
+    toPin: pinId,
+    color: outPinDef ? outPinDef.color : '#00f0ff',
+    isGold: isGoldWire
+  });
+
+  playUiSound('zap');
+  cancelBlueprintConnecting();
+  renderBlueprintWiresSvg();
+  updateBlueprintMonitorStats();
+  showNotification('★ 导灵回路已闭合！高能光流正在跨区超导传输！');
+}
+
+// 取消拉线
+function cancelBlueprintConnecting() {
+  document.querySelectorAll('.bp-pin').forEach(p => p.classList.remove('bp-pin-connecting'));
+  CPU_BLUEPRINT_STATE.connectingPin = null;
+  renderBlueprintWiresSvg();
+}
+
+// 拆除单条连线
+function removeBlueprintWire(wireIdx) {
+  if (wireIdx >= 0 && wireIdx < CPU_BLUEPRINT_STATE.wires.length) {
+    playUiSound('click');
+    CPU_BLUEPRINT_STATE.wires.splice(wireIdx, 1);
+    renderBlueprintWiresSvg();
+    updateBlueprintMonitorStats();
+    showNotification('已剪断该段导灵光缆回路');
+  }
+}
+
+// =========================================================================
+// 7. 快捷生成节点、一键贯通全部回路与重置
+// =========================================================================
+function spawnBlueprintNode(nodeType) {
+  playUiSound('click');
+  const count = CPU_BLUEPRINT_STATE.nodes.length + 1;
+  const newId = `node_${nodeType}_${Date.now()}`;
+
+  // 在当前视野中心生成
+  const vp = document.getElementById('paragonViewport');
+  const vpRect = vp ? vp.getBoundingClientRect() : { width: 880, height: 500 };
+  const spawnX = Math.round((vpRect.width / 2 - CPU_BLUEPRINT_STATE.panX) / CPU_BLUEPRINT_STATE.zoom - 90);
+  const spawnY = Math.round((vpRect.height / 2 - CPU_BLUEPRINT_STATE.panY) / CPU_BLUEPRINT_STATE.zoom - 40);
+
+  let newNode = null;
+  if (nodeType === 'splitter') {
+    newNode = {
+      id: newId, zoneId: CPU_BLUEPRINT_STATE.activeZoneId,
+      type: 'splitter', name: `分流器 Mk.${count}`, category: '逻辑分流',
+      x: spawnX, y: spawnY, width: 180,
+      themeColor: '#38bdf8', icon: 'fa-solid fa-code-branch',
+      valText: '分流比: 50 : 50', ratio: 50,
+      inPins: [{ id: 'in_split', label: '输入 IN', color: '#00f0ff' }],
+      outPins: [
+        { id: 'out_a', label: '支路 A', color: '#00f0ff', flow: 50 },
+        { id: 'out_b', label: '支路 B', color: '#00f0ff', flow: 50 }
+      ]
+    };
+  } else if (nodeType === 'valve') {
+    newNode = {
+      id: newId, zoneId: CPU_BLUEPRINT_STATE.activeZoneId,
+      type: 'valve', name: `限流阀 Mk.${count}`, category: '流量调校',
+      x: spawnX, y: spawnY, width: 180,
+      themeColor: '#fbbf24', icon: 'fa-solid fa-sliders',
+      valText: '限流比: 75 : 25', limit: 75,
+      inPins: [{ id: 'in_valve', label: '入口 IN', color: '#fbbf24' }],
+      outPins: [
+        { id: 'out_main', label: '主路 (75)', color: '#fbbf24', flow: 75 },
+        { id: 'out_bypass', label: '旁路 (25)', color: '#fbbf24', flow: 25 }
+      ]
+    };
+  } else if (nodeType === 'fuser') {
+    newNode = {
+      id: newId, zoneId: CPU_BLUEPRINT_STATE.activeZoneId,
+      type: 'fuser', name: `三元融合编译台`, category: '总线聚合',
+      x: spawnX, y: spawnY, width: 190,
+      themeColor: '#c084fc', icon: 'fa-solid fa-network-wired',
+      valText: '融合中',
+      inPins: [
+        { id: 'in_1', label: '输入 A', color: '#ef4444' },
+        { id: 'in_2', label: '输入 B', color: '#00f0ff' },
+        { id: 'in_3', label: '输入 C', color: '#10b981' }
+      ],
+      outPins: [
+        { id: 'out_gold', label: '真理金光', color: '#ffd700', flow: 100, isGold: true }
+      ]
+    };
+  }
+
+  if (newNode) {
+    CPU_BLUEPRINT_STATE.nodes.push(newNode);
+    renderBlueprintNodesHtml();
+    renderBlueprintWiresSvg();
+    showNotification(`已在当前视野中央部署【${newNode.name}】！`);
+  }
+}
+
+// 一键贯通全部回路 (解锁四大区域并全线串联)
+function autoConnectBlueprintOptimal() {
+  playUiSound('zap');
+
+  // 解锁全部四大区域
+  Object.keys(CPU_BLUEPRINT_STATE.zones).forEach(zKey => {
+    CPU_BLUEPRINT_STATE.zones[zKey].unlocked = true;
+    CPU_BLUEPRINT_STATE.zones[zKey].satisfied = true;
+  });
+
+  // 全量重置节点位置
+  CPU_BLUEPRINT_STATE.nodes = JSON.parse(JSON.stringify(CPU_WORLD_NODES_PRESET));
+
+  // 铺设全域最佳连线回路 (包括内部工控与三大跨区大总线)
+  CPU_BLUEPRINT_STATE.wires = [
+    // 区域 1: 启道物流
+    { id: 'w_coal_split', fromNode: 'logi_src_coal', fromPin: 'out_coal', toNode: 'logi_splitter', toPin: 'in_split', color: '#ef4444' },
+    { id: 'w_power_fuser', fromNode: 'logi_src_power', fromPin: 'out_power', toNode: 'logi_fuser', toPin: 'in_fuser_blue', color: '#00f0ff' },
+    { id: 'w_fluid_valve', fromNode: 'logi_src_fluid', fromPin: 'out_fluid', toNode: 'logi_valve', toPin: 'in_valve', color: '#10b981' },
+    { id: 'w_split_fuser', fromNode: 'logi_splitter', fromPin: 'out_split_a', toNode: 'logi_fuser', toPin: 'in_fuser_red', color: '#ef4444' },
+    { id: 'w_valve_fuser', fromNode: 'logi_valve', fromPin: 'out_valve_main', toNode: 'logi_fuser', toPin: 'in_fuser_green', color: '#10b981' },
+    { id: 'w_fuser_core', fromNode: 'logi_fuser', fromPin: 'out_fuser_gold', toNode: 'logi_core', toPin: 'in_core_gold', color: '#ffd700', isGold: true },
+
+    // ★ 跨区引线 1 ➔ 2 (启道运算核心 ➔ 乾元高能受能闸门)
+    { id: 'w_cross_1_2', fromNode: 'logi_core', fromPin: 'out_zone1_bus', toNode: 'heat_intake_gate', toPin: 'in_zone2_gate', color: '#ffd700', isGold: true },
+
+    // 区域 2: 乾元炉温
+    { id: 'w_gate_pwr_ex', fromNode: 'heat_intake_gate', fromPin: 'out_zone2_pwr', toNode: 'heat_exchanger', toPin: 'in_exchanger_cold', color: '#00f0ff' },
+    { id: 'w_magma_ex', fromNode: 'heat_src_magma', fromPin: 'out_magma', toNode: 'heat_exchanger', toPin: 'in_exchanger_hot', color: '#ef4444' },
+    { id: 'w_ex_tank', fromNode: 'heat_exchanger', fromPin: 'out_exchanger_equil', toNode: 'heat_tank', toPin: 'in_tank_flow', color: '#fbbf24' },
+    { id: 'w_tank_smelter', fromNode: 'heat_tank', fromPin: 'out_tank_safe', toNode: 'heat_smelter_core', toPin: 'in_smelter_heat', color: '#10b981', isGold: true },
+
+    // ★ 跨区引线 2 ➔ 3 (乾元精炼核心 ➔ 坎离相位受能闸门)
+    { id: 'w_cross_2_3', fromNode: 'heat_smelter_core', fromPin: 'out_zone2_bus', toNode: 'grid_intake_gate', toPin: 'in_zone3_gate', color: '#ffd700', isGold: true },
+
+    // 区域 3: 坎离电网
+    { id: 'w_gate_bridge', fromNode: 'grid_intake_gate', fromPin: 'out_zone3_pwr', toNode: 'grid_bridge', toPin: 'in_bridge_noise', color: '#c084fc' },
+    { id: 'w_base_cap', fromNode: 'grid_src_base', fromPin: 'out_base_wave', toNode: 'grid_cap', toPin: 'in_cap_base', color: '#ffffff' },
+    { id: 'w_bridge_cap', fromNode: 'grid_bridge', fromPin: 'out_bridge_inv', toNode: 'grid_cap', toPin: 'in_cap_inv', color: '#a855f7' },
+    { id: 'w_cap_core', fromNode: 'grid_cap', fromPin: 'out_cap_flat', toNode: 'grid_bus_core', toPin: 'in_bus_core', color: '#ffd700', isGold: true },
+
+    // ★ 跨区引线 3 ➔ 4 (坎离超导核心 ➔ 太虚极阳受能闸门)
+    { id: 'w_cross_3_4', fromNode: 'grid_bus_core', fromPin: 'out_zone3_bus', toNode: 'pulse_intake_gate', toPin: 'in_zone4_gate', color: '#ffd700', isGold: true },
+
+    // 区域 4: 太虚极阳脉冲
+    { id: 'w_gate_mult', fromNode: 'pulse_intake_gate', fromPin: 'out_zone4_pwr', toNode: 'pulse_multiplier', toPin: 'in_mult_ion', color: '#ef4444' },
+    { id: 'w_tank_mult', fromNode: 'pulse_src_tank', fromPin: 'out_tank', toNode: 'pulse_multiplier', toPin: 'in_mult_energy', color: '#fbbf24' },
+    { id: 'w_mult_gate', fromNode: 'pulse_multiplier', fromPin: 'out_mult_high', toNode: 'pulse_vacuum_gate', toPin: 'in_gate_high', color: '#ff2222' },
+    { id: 'w_gate_emitter', fromNode: 'pulse_vacuum_gate', fromPin: 'out_gate_ready', toNode: 'pulse_emitter_core', toPin: 'in_emitter_ready', color: '#ffd700', isGold: true }
+  ];
+
+  renderBlueprintZonesHtml();
+  renderBlueprintPhaseTabs();
+  renderBlueprintNodesHtml();
+  renderBlueprintWiresSvg();
+  requestAnimationFrame(() => renderBlueprintWiresSvg());
+  updateBlueprintMonitorStats();
+
+  showNotification('★ 已一键贯通四大区域！高能真理超导大环网全面闭合！');
+}
+
+// 清空当前回路
+function resetCurrentBlueprintCircuit() {
+  playUiSound('click');
+  CPU_BLUEPRINT_STATE.wires = [];
+  renderBlueprintWiresSvg();
+  updateBlueprintMonitorStats();
+  showNotification('全部回路连线已清空，可从各区输入源重新引线调配');
+}
+
+// 调节滑块
+function handleNodeRatioChange(nodeId, val) {
+  const node = CPU_BLUEPRINT_STATE.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+
+  const num = parseInt(val, 10);
+  if (node.type === 'splitter') {
+    node.ratio = num;
+    const label = document.getElementById(`sliderVal_${nodeId}`);
+    if (label) label.textContent = `${num} : ${100 - num}`;
+  } else if (node.type === 'valve') {
+    node.limit = num;
+    const label = document.getElementById(`sliderVal_${nodeId}`);
+    if (label) label.textContent = `${num}%`;
+  }
+  updateBlueprintMonitorStats();
+}
+
+// 检视节点
+function inspectBlueprintNode(node) {
+  const titleEl = document.getElementById('pNodeTitle');
+  const labelEl = document.getElementById('pNodeTypeLabel');
+  const buffEl = document.getElementById('pNodeBuffText');
+  const iconEl = document.getElementById('pNodeIcon');
+
+  if (titleEl) titleEl.textContent = node.name;
+  if (labelEl) labelEl.textContent = `${node.category} · 坐标 [${node.x}, ${node.y}]`;
+  if (buffEl) buffEl.textContent = `实时工况: ${node.valText || '满负荷稳定运转'}；已连接 ${CPU_BLUEPRINT_STATE.wires.filter(w=>w.fromNode===node.id||w.toNode===node.id).length} 根导灵光缆。`;
+  if (iconEl) iconEl.className = `${node.icon} text-sm text-cyan-300`;
+}
+
+// =========================================================================
+// 8. 核心要求判定、跨区引线检测与宏观增益监控
+// =========================================================================
+function updateBlueprintMonitorStats() {
+  const wires = CPU_BLUEPRINT_STATE.wires;
+
+  // 1. 区域 1 (启道区) 满足判定：运算核心已被连入
+  const z1Satisfied = wires.some(w => w.toNode === 'logi_core');
+  CPU_BLUEPRINT_STATE.zones.zone1.satisfied = z1Satisfied;
+
+  // 2. 跨区引线检测：Zone 1 ➔ Zone 2 (解锁 Zone 2)
+  const wire1To2 = wires.some(w => w.fromNode === 'logi_core' && w.toNode === 'heat_intake_gate');
+  if (wire1To2 && !CPU_BLUEPRINT_STATE.zones.zone2.unlocked) {
+    CPU_BLUEPRINT_STATE.zones.zone2.unlocked = true;
+    renderBlueprintZonesHtml();
+    renderBlueprintPhaseTabs();
+    playUiSound('zap');
+    showNotification('🎉【乾元区 · 炉温导热精炼核】已解锁并通电！可开始调配地火与玄阴导热！');
+  }
+
+  // 3. 区域 2 (乾元区) 满足判定：冶炼核心已被连入
+  const z2Satisfied = CPU_BLUEPRINT_STATE.zones.zone2.unlocked && wires.some(w => w.toNode === 'heat_smelter_core');
+  CPU_BLUEPRINT_STATE.zones.zone2.satisfied = z2Satisfied;
+
+  // 4. 跨区引线检测：Zone 2 ➔ Zone 3 (解锁 Zone 3)
+  const wire2To3 = wires.some(w => w.fromNode === 'heat_smelter_core' && w.toNode === 'grid_intake_gate');
+  if (wire2To3 && !CPU_BLUEPRINT_STATE.zones.zone3.unlocked) {
+    CPU_BLUEPRINT_STATE.zones.zone3.unlocked = true;
+    renderBlueprintZonesHtml();
+    renderBlueprintPhaseTabs();
+    playUiSound('zap');
+    showNotification('🎉【坎离区 · 电网相位超导核】已解锁！可开始对冲因果杂波！');
+  }
+
+  // 5. 区域 3 (坎离区) 满足判定：超导母排核心已被连入
+  const z3Satisfied = CPU_BLUEPRINT_STATE.zones.zone3.unlocked && wires.some(w => w.toNode === 'grid_bus_core');
+  CPU_BLUEPRINT_STATE.zones.zone3.satisfied = z3Satisfied;
+
+  // 6. 跨区引线检测：Zone 3 ➔ Zone 4 (解锁 Zone 4)
+  const wire3To4 = wires.some(w => w.fromNode === 'grid_bus_core' && w.toNode === 'pulse_intake_gate');
+  if (wire3To4 && !CPU_BLUEPRINT_STATE.zones.zone4.unlocked) {
+    CPU_BLUEPRINT_STATE.zones.zone4.unlocked = true;
+    renderBlueprintZonesHtml();
+    renderBlueprintPhaseTabs();
+    playUiSound('zap');
+    showNotification('🎉【太虚区 · 焚天极阳脉冲核】终极封印已解除！');
+  }
+
+  // 7. 区域 4 (太虚区) 满足判定：脉冲发射极已连接
+  const z4Satisfied = CPU_BLUEPRINT_STATE.zones.zone4.unlocked && wires.some(w => w.toNode === 'pulse_emitter_core');
+  CPU_BLUEPRINT_STATE.zones.zone4.satisfied = z4Satisfied;
+
+  // 更新已解锁数量徽章
+  let unlockedCount = 0;
+  Object.keys(CPU_BLUEPRINT_STATE.zones).forEach(k => {
+    if (CPU_BLUEPRINT_STATE.zones[k].unlocked) unlockedCount++;
+  });
+
+  const legTag = document.getElementById('statBuffLegendary');
+  if (legTag) {
+    legTag.textContent = `★ ${unlockedCount}/4 区域解锁`;
+  }
+
+  const progText = document.getElementById('zoneProgressText');
+  if (progText) {
+    progText.textContent = `${unlockedCount} / 4 区域`;
+  }
+
+  // 渲染右侧区域清单
+  const listEl = document.getElementById('zoneProgressList');
+  if (listEl) {
+    let listHtml = '';
+    const zOrder = ['zone1', 'zone2', 'zone3', 'zone4'];
+    zOrder.forEach((zk, idx) => {
+      const z = CPU_BLUEPRINT_STATE.zones[zk];
+      const isUn = z.unlocked;
+      const isSat = z.satisfied;
+      let badge = '';
+      if (!isUn) {
+        badge = '<span class="text-red-400">待引线</span>';
+      } else if (isSat) {
+        badge = '<span class="text-amber-300 font-bold">已满足 ✓</span>';
+      } else {
+        badge = '<span class="text-cyan-300">调配中</span>';
+      }
+
+      listHtml += `
+        <div onclick="jumpToZone('${z.id}');" class="flex items-center justify-between p-1 rounded bg-black/40 hover:bg-white/10 cursor-pointer transition border border-white/5">
+          <span class="${isUn ? 'text-white/90' : 'text-white/40'}">${idx+1}. ${z.shortName}</span>
+          ${badge}
+        </div>
+      `;
+    });
+    listEl.innerHTML = listHtml;
+  }
+
+  // 更新宏观增益
+  const sLog = document.getElementById('statBuffLogistics');
+  if (sLog) sLog.textContent = z1Satisfied ? '+80% (极速流光)' : '+30%';
+
+  const sSmelt = document.getElementById('statBuffSmelt');
+  if (sSmelt) sSmelt.textContent = z2Satisfied ? '-30% (双倍出锭)' : (CPU_BLUEPRINT_STATE.zones.zone2.unlocked ? '-10%' : '未激活 (乾元区锁定)');
+
+  const sGrid = document.getElementById('statBuffGrid');
+  if (sGrid) sGrid.textContent = z3Satisfied ? '0.0 Ω (无线超导)' : (CPU_BLUEPRINT_STATE.zones.zone3.unlocked ? '+10%' : '未激活 (坎离区锁定)');
+
+  const sRes = document.getElementById('statBuffResonance');
+  if (sRes) {
+    if (z4Satisfied) sRes.textContent = '★ 四象全贯通·大圆满';
+    else if (z3Satisfied) sRes.textContent = '三才共鸣激活';
+    else if (z2Satisfied) sRes.textContent = '两仪双相激活';
+    else sRes.textContent = '启道原核启动';
+  }
+
+  // 终极大招引爆按键
+  const pulseBtn = document.getElementById('paragonTriggerPulseBtn');
+  if (pulseBtn) {
+    if (z4Satisfied) {
+      pulseBtn.classList.remove('hidden');
+    } else {
+      pulseBtn.classList.add('hidden');
+    }
+  }
+}
+
+// 锁存参数
+function confirmParagonParamLock() {
+  playUiSound('toggle');
+  showNotification('★ 蓝图工控回路参数已锁存！全平原工厂超频增益已在后续 15 分钟内常驻生效！');
+}
+
+// 引爆 60 秒狂暴大招
+function triggerParagonPulseOvercharge() {
+  playUiSound('zap');
+  CPU_BLUEPRINT_STATE.pulseActive = true;
+  CPU_BLUEPRINT_STATE.pulseSecondsLeft = 60;
+
+  const banner = document.getElementById('cpuPulseBanner');
+  if (banner) banner.classList.remove('hidden');
+
+  showNotification('⚡【大日极阳·全厂狂暴生产脉冲已引爆！】全平原传送带流速 +100%，冶炼 3 倍爆率！');
+
+  const timerEl = document.getElementById('cpuPulseBannerTimer');
+  const interval = setInterval(() => {
+    CPU_BLUEPRINT_STATE.pulseSecondsLeft--;
+    if (timerEl) timerEl.textContent = `剩余: ${CPU_BLUEPRINT_STATE.pulseSecondsLeft} 秒`;
+    if (CPU_BLUEPRINT_STATE.pulseSecondsLeft <= 0) {
+      clearInterval(interval);
+      CPU_BLUEPRINT_STATE.pulseActive = false;
+      if (banner) banner.classList.add('hidden');
+      showNotification('生产脉冲暴走结束，中央处理器转入稳定巡航');
+    }
+  }, 1000);
+}
+
+// =========================================================================
+// HUD 窗口开关桥接
+// =========================================================================
+function openCentralProcessorHUD() {
+  playUiSound('click');
+  const modal = document.getElementById('cpuProcessorModal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    initCentralProcessorBlueprint();
+    requestAnimationFrame(() => {
+      updateCanvasTransform();
+      renderBlueprintWiresSvg();
+      setTimeout(() => renderBlueprintWiresSvg(), 50);
+      setTimeout(() => renderBlueprintWiresSvg(), 150);
+    });
+  }
+}
+
+function closeCentralProcessorHUD() {
+  playUiSound('click');
+  cancelBlueprintConnecting();
+  const modal = document.getElementById('cpuProcessorModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+// 页面挂载自动初始化
+document.addEventListener('DOMContentLoaded', () => {
+  initCentralProcessorBlueprint();
+});

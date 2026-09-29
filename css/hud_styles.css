@@ -1,0 +1,885 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;600;700;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
+
+* {
+  user-select: none;
+  -webkit-user-select: none;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #0c121e;
+  font-family: 'Noto Sans SC', 'Inter', sans-serif;
+}
+
+/* 工业全息扫描线与景深暗角 */
+.viewport-overlay {
+  pointer-events: none;
+  background: radial-gradient(circle at center, transparent 45%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+/* 手电筒光圈遮罩 */
+.flashlight-overlay {
+  pointer-events: none;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.08) 35%, rgba(0, 5, 12, 0.85) 75%);
+}
+
+/* 拆除模式橙色全息扫描滤镜 */
+.dismantle-overlay {
+  pointer-events: none;
+  background: linear-gradient(rgba(245, 146, 30, 0.12) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(245, 146, 30, 0.12) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* 快捷栏轮廓折线 */
+.hotbar-contour {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: none;
+  position: relative;
+}
+.hotbar-contour::before, .hotbar-contour::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  width: 48px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.25);
+}
+.hotbar-contour::before {
+  left: -48px;
+  transform: rotate(20deg);
+  transform-origin: right top;
+}
+.hotbar-contour::after {
+  right: -48px;
+  transform: rotate(-20deg);
+  transform-origin: left top;
+}
+
+/* 工业斜切血条 */
+.hp-segment {
+  transform: skewX(-16deg);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 机械臂手持与收起过渡 */
+.arm-wrapper {
+  transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28), opacity 0.3s ease;
+}
+.arm-holstered {
+  transform: translate(50px, 320px) !important;
+  opacity: 0.1;
+}
+
+/* 爪尖高压电弧闪烁 */
+@keyframes zap {
+  0%, 100% { opacity: 0.2; transform: scaleY(0.7) scaleX(0.8); }
+  25% { opacity: 1; transform: scaleY(1.3) scaleX(1.15); }
+  50% { opacity: 0.4; transform: scaleY(0.9) scaleX(0.9); }
+  75% { opacity: 0.95; transform: scaleY(1.4) scaleX(1.2); }
+}
+.electric-arc {
+  animation: zap 0.9s infinite ease-in-out;
+}
+
+/* 交互按钮微触感动效 */
+.hud-btn {
+  transition: all 0.12s ease-out;
+}
+.hud-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.25);
+}
+.hud-btn:active {
+  transform: translateY(1px) scale(0.96);
+  filter: brightness(0.9);
+}
+
+/* 科技感发光文字与边框 */
+.tech-glow-orange {
+  text-shadow: 0 0 8px rgba(245, 146, 30, 0.7);
+}
+
+/* 地表机器交互外发光与浮动 */
+.machine-entity {
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.25s ease;
+}
+.machine-entity:hover {
+  transform: translateY(-6px) scale(1.03);
+  filter: drop-shadow(0 0 16px rgba(245, 146, 30, 0.85));
+}
+.machine-tag {
+  transition: all 0.2s ease;
+  transform: translate(-50%, -100%);
+}
+.machine-entity:hover .machine-tag {
+  transform: translate(-50%, -115%) scale(1.08);
+}
+
+/* 烟囱排气脉动动画 */
+@keyframes steamExhaust {
+  0% { transform: translateY(0) scale(0.8); opacity: 0.6; }
+  50% { transform: translateY(-12px) scale(1.3); opacity: 0.25; }
+  100% { transform: translateY(-24px) scale(1.8); opacity: 0; }
+}
+.steam-particle {
+  animation: steamExhaust 2s infinite ease-out;
+}
+
+/* 钻头活塞冲压动画 */
+@keyframes drillStab {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+.drill-active {
+  animation: drillStab 1.1s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 工业质感自定义极细滚动条 */
+.ficsit-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.ficsit-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.35);
+}
+.ficsit-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+.ficsit-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #f5921e;
+}
+
+/* 手工制作打铁长按脉动与环形光圈 */
+@keyframes craftGlow {
+  0%, 100% { box-shadow: 0 0 15px rgba(245, 146, 30, 0.4); }
+  50% { box-shadow: 0 0 35px rgba(245, 146, 30, 0.95), inset 0 0 20px rgba(255, 255, 255, 0.3); }
+}
+.craft-btn-active {
+  animation: craftGlow 0.45s infinite alternate ease-in-out;
+  transform: scale(0.98);
+  filter: brightness(1.2);
+}
+
+/* 浮动飞出的 +1 获得物料徽章 */
+@keyframes floatUpFade {
+  0% { opacity: 0; transform: translateY(12px) scale(0.7); }
+  30% { opacity: 1; transform: translateY(-8px) scale(1.15); }
+  80% { opacity: 1; transform: translateY(-24px) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.85); }
+}
+.item-fly-badge {
+  animation: floatUpFade 0.95s forwards cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* 建造器左侧 Tab 工业选中状态切角 */
+.ficsit-tab-active {
+  background-color: #f5921e !important;
+  color: #0d0f14 !important;
+  position: relative;
+}
+.ficsit-tab-active::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-right: 6px solid #2b313d;
+}
+
+/* ==================== COMBAT HUD & 装备界面专属科技动效 ==================== */
+@keyframes dialRotate {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+.equip-dial-anim {
+  animation: dialRotate 120s linear infinite;
+}
+
+@keyframes chevronPulse {
+  0%, 100% { opacity: 0.35; filter: drop-shadow(0 0 2px #38bdf8); }
+  50% { opacity: 1; filter: drop-shadow(0 0 8px #38bdf8); }
+}
+.chevron-glow {
+  animation: chevronPulse 1.8s infinite ease-in-out;
+}
+
+/* 3D 浮空装备卡片微浮动 */
+@keyframes cardFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+.floating-card-anim {
+  animation: cardFloat 3.5s ease-in-out infinite;
+}
+.floating-card-anim-delay {
+  animation: cardFloat 3.5s ease-in-out 1.75s infinite;
+}
+
+/* 斜向能量/灵气分段格 */
+.slant-meter-seg {
+  transform: skewX(-24deg);
+  transition: all 0.2s ease;
+}
+
+/* 工业 3D 实体大按键拟物凹凸阴影 */
+.ficsit-btn-3d {
+  box-shadow: 0 4px 0 #8c4c00, 0 6px 12px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.4);
+  transition: all 0.08s ease;
+}
+.ficsit-btn-3d:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #8c4c00, 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 2px rgba(0,0,0,0.4);
+}
+
+/* 荧光顶灯效果 (Image 1 核心视觉) */
+.tube-lamp-glow {
+  box-shadow: 0 0 16px rgba(255, 255, 230, 0.8), 0 0 32px rgba(245, 146, 30, 0.4);
+}
+
+/* 天雷淬体全屏闪电特效 */
+@keyframes lightningFlash {
+  0% { opacity: 0; }
+  10% { opacity: 0.95; }
+  25% { opacity: 0.2; }
+  40% { opacity: 0.9; }
+  60% { opacity: 0.15; }
+  80% { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+.lightning-anim {
+  animation: lightningFlash 0.75s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
+
+/* 剑匣四绝剑悬浮灵光 */
+@keyframes swordHover {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(0.8deg); }
+}
+.sword-floating {
+  animation: swordHover 3s ease-in-out infinite;
+}
+
+/* ==================== 任务目标与 ADA 对话窗口专属样式 (New HUD Additions) ==================== */
+/* 任务目标卡片 (Image 1 对应) */
+.quest-objective-card {
+  background: rgba(18, 22, 28, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+}
+.quest-header-bar {
+  background: linear-gradient(90deg, #1b2029 0%, #252c38 100%);
+  border-bottom: 2px solid #f5921e;
+}
+
+/* ADA 对话窗口 (Image 2 对应) */
+.ada-dialogue-container {
+  background: rgba(18, 20, 26, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+}
+.ada-pill-badge {
+  background: #ffffff;
+  color: #12161f;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+.ada-pill-badge .ada-icon-dot {
+  background: #2563eb;
+  box-shadow: 0 0 6px #3b82f6;
+}
+
+/* 拾取通知浮动卡 (Bottom Left Loot Feed) */
+.loot-feed-item {
+  background: rgba(15, 18, 24, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(6px);
+  animation: lootSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes lootSlideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* 打字机光标闪烁 */
+.typewriter-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background-color: #f5921e;
+  vertical-align: text-bottom;
+  animation: cursorBlink 0.8s infinite;
+}
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ==================== 1:1 拆除模式与建造模式专属 HUD (media_1790442746779 / 47796 / 48700) ==================== */
+
+/* 1. 拆除模式全屏橙色边框 (1:1 还原 media_1790442746779.png) */
+.dismantle-screen-border {
+  box-shadow: inset 0 0 0 4px #f5921e, inset 0 0 30px rgba(245, 146, 30, 0.25);
+  pointer-events: none;
+}
+
+/* 2. 目标建筑拆除高亮橙色横向条纹网格 (1:1 media_1790442746779.png) */
+.dismantle-target-outline {
+  outline: 3px solid #ff7700 !important;
+  box-shadow: 0 0 25px rgba(255, 119, 0, 0.7), inset 0 0 20px rgba(255, 100, 0, 0.5) !important;
+  position: relative;
+}
+.dismantle-target-outline::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(245, 110, 15, 0.45) 0px,
+    rgba(245, 110, 15, 0.45) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+  pointer-events: none;
+  z-index: 5;
+  mix-blend-mode: screen;
+}
+
+/* 3. 3秒拆除进度条 (1:1 还原 media_1790442747796.png) */
+.dismantle-progress-track {
+  background: rgba(10, 14, 20, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+.dismantle-progress-fill {
+  background: linear-gradient(90deg, #ffffff 0%, #e2e8f0 100%);
+  box-shadow: 0 0 10px #ffffff;
+  transition: width 0.05s linear;
+}
+
+/* 4. 建造模式全息半透明建筑幽灵体 (1:1 还原 media_1790442748700.png) */
+.build-hologram-ghost {
+  opacity: 0.82;
+  filter: drop-shadow(0 0 16px rgba(0, 240, 255, 0.75)) hue-rotate(170deg) brightness(1.2);
+  pointer-events: none;
+  transition: transform 0.08s ease-out;
+}
+.build-hologram-ghost::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 240, 255, 0.3) 0px,
+    rgba(0, 240, 255, 0.3) 2px,
+    transparent 2px,
+    transparent 8px
+  );
+  pointer-events: none;
+}
+
+/* 5. 底部拟真工控快捷条 (1:1 还原两张截图底部控制条) */
+.ficsit-console-strip {
+  background: linear-gradient(180deg, rgba(20, 24, 32, 0.95) 0%, rgba(12, 14, 20, 0.98) 100%);
+  border-top: 2px solid #2b3342;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+}
+.ficsit-key-badge {
+  background: #f5921e;
+  color: #000000;
+  font-weight: 800;
+  font-family: monospace;
+  padding: 1px 5px;
+  border-radius: 2px;
+  font-size: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* ==================== 剑匣与背包拖拽交互专用样式 ==================== */
+.drag-slot-over {
+  border-color: #f5921e !important;
+  box-shadow: 0 0 18px rgba(245, 146, 30, 0.9), inset 0 0 12px rgba(245, 146, 30, 0.45) !important;
+  transform: scale(1.08) !important;
+  background-color: rgba(245, 146, 30, 0.25) !important;
+  transition: all 0.1s ease-out;
+  z-index: 30;
+}
+
+.dragging-item {
+  opacity: 0.35 !important;
+  transform: scale(0.92) !important;
+  border-style: dashed !important;
+}
+
+.casket-slot-active {
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.6), inset 0 0 8px rgba(245, 158, 11, 0.2);
+}
+
+/* ==================== 聚灵罗盘与法宝切换动态光效 ==================== */
+.compass-luopan-active {
+  filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.85)) drop-shadow(0 0 24px rgba(0, 240, 255, 0.6));
+  animation: luopanPulse 2s ease-in-out infinite alternate;
+}
+@keyframes luopanPulse {
+  0% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.7)); }
+  100% { transform: scale(1.02); filter: drop-shadow(0 0 16px rgba(245, 158, 11, 1)) drop-shadow(0 0 25px rgba(0, 240, 255, 0.8)); }
+}
+.compass-luopan-active #compassTrack span {
+  color: #ffbe3b !important;
+  text-shadow: 0 0 8px rgba(245, 158, 11, 0.9);
+}
+
+/* ==================== 戴森球风格建筑分类筛选快捷栏样式 (极简纯名美观版) ==================== */
+.dsp-cat-btn {
+  transition: all 0.15s ease-out;
+  white-space: nowrap;
+}
+.dsp-cat-btn.active-dsp-cat {
+  background: rgba(0, 240, 255, 0.22) !important;
+  border-color: #00f0ff !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.45) !important;
+}
+.dsp-bld-btn {
+  transition: all 0.12s ease-out;
+  white-space: nowrap;
+}
+.dsp-bld-btn:hover {
+  border-color: #00f0ff !important;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.35);
+  transform: translateY(-1px);
+}
+.dsp-bld-btn.active-dsp-bld {
+  background: rgba(245, 146, 30, 0.25) !important;
+  border-color: #f5921e !important;
+  color: #ffbe3b !important;
+  box-shadow: 0 0 10px rgba(245, 146, 30, 0.6) !important;
+}
+
+/* ==================== 天元全息罗盘仪 (Holo-Compass Core 1:1 还原 Image 2 & 草图) ==================== */
+.holo-dial-spin-slow {
+  animation: holoDialSpin 60s linear infinite;
+  transform-origin: center center;
+}
+.holo-dial-spin-reverse {
+  animation: holoDialSpinReverse 45s linear infinite;
+  transform-origin: center center;
+}
+@keyframes holoDialSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes holoDialSpinReverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+/* 1:1 还原 Image 2 纯白科技发光方块按键 */
+.holo-card-btn {
+  background: rgba(255, 255, 255, 0.92);
+  color: #0f172a;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.65), 0 0 30px rgba(0, 240, 255, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+.holo-card-btn:hover {
+  background: #ffffff;
+  border-color: #00f0ff;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.95), 0 0 40px rgba(0, 240, 255, 0.6);
+  transform: scale(1.08);
+}
+.holo-card-btn.holo-card-active {
+  background: #ffffff !important;
+  border-color: #00f0ff !important;
+  box-shadow: 0 0 30px #ffffff, 0 0 50px rgba(0, 240, 255, 0.9), inset 0 0 10px rgba(0, 240, 255, 0.5) !important;
+  transform: scale(1.1) !important;
+  outline: 3px solid rgba(0, 240, 255, 0.6);
+  outline-offset: 2px;
+}
+
+/* 1:1 还原 Image 2 底部斜向平行四边形能量/灵气条 */
+.holo-skew-bar-cyan {
+  transform: skewX(-25deg);
+  background: #00f0ff;
+  box-shadow: 0 0 8px #00f0ff;
+}
+.holo-skew-bar-cyan-dim {
+  transform: skewX(-25deg);
+  background: rgba(0, 240, 255, 0.2);
+}
+.holo-skew-bar-orange {
+  transform: skewX(-25deg);
+  background: #ff5533;
+  box-shadow: 0 0 8px #ff5533;
+}
+.holo-skew-bar-orange-dim {
+  transform: skewX(-25deg);
+  background: rgba(255, 85, 51, 0.2);
+}
+
+/* 草图底部投射臂光导轨线框 */
+.holo-arm-line {
+  stroke: #00f0ff;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.8));
+  opacity: 0.85;
+}
+.holo-arm-accent {
+  stroke: #ffffff;
+  stroke-width: 1.5;
+  stroke-dasharray: 6 8;
+  opacity: 0.7;
+}
+
+/* 雷达脉冲扫描动画 */
+@keyframes radarSweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.radar-sweep-beam {
+  animation: radarSweep 4s linear infinite;
+  transform-origin: center center;
+}
+
+/* ==================== 中央处理器 连线玩法与槽位解锁动效 ==================== */
+/* 动态光流电缆连线 */
+@keyframes wireFlow {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
+}
+.flowing-wire {
+  stroke-dasharray: 8 4;
+  animation: wireFlow 0.8s linear infinite;
+}
+.flowing-wire-gold {
+  stroke-dasharray: 10 5;
+  animation: wireFlow 0.5s linear infinite;
+  filter: drop-shadow(0 0 8px #ffd700);
+}
+
+/* 引脚脉动光环 */
+@keyframes pinPulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.35); opacity: 0.4; }
+}
+.pin-active-pulse {
+  animation: pinPulse 0.8s ease-in-out infinite;
+}
+
+/* 机械爪闭合咬合装配动画 */
+@keyframes clampLock {
+  0% { transform: scale(1.15); opacity: 0; filter: brightness(2); }
+  60% { transform: scale(0.95); opacity: 1; filter: brightness(1.5); }
+  100% { transform: scale(1); opacity: 1; filter: brightness(1); }
+}
+.slot-unlocked-anim {
+  animation: clampLock 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+}
+
+/* 蓝图连线画布底纹 */
+.blueprint-grid-bg {
+  background-color: #0b111a;
+  background-image: 
+    linear-gradient(rgba(0, 240, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+  background-size: 80px 80px, 80px 80px, 16px 16px, 16px 16px;
+}
+
+/* ==================== 暗黑巅峰点式阵盘连线系统 (Paragon Board Wiring System) ==================== */
+/* 阵盘平滑旋转动效 (0° / 90° / 180° / 270°) */
+.board-rotate-anim {
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 阵盘网格未连通底轨与已连通超导导轨 (高反差清晰发光蓝图导轨) */
+.paragon-track-unlit {
+  stroke: #00f0ff;
+  stroke-width: 3.5;
+  stroke-dasharray: 6 5;
+  opacity: 0.55;
+  filter: drop-shadow(0 0 4px rgba(0, 240, 255, 0.45));
+}
+.paragon-track-lit {
+  stroke-width: 6;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 12px currentColor);
+}
+
+/* 巅峰点节点基础与状态 */
+.p-node {
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
+}
+.p-node:hover {
+  transform: translate(-50%, -50%) scale(1.22) !important;
+  filter: brightness(1.3) drop-shadow(0 0 16px currentColor);
+  z-index: 50;
+}
+
+/* 普通节点 (Normal Dot) */
+.node-circle-normal {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+}
+
+/* 稀有节点 (Rare Hexagon) */
+.node-hex-rare {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.node-hex-rare > * {
+  transform: rotate(-45deg);
+}
+
+/* 传奇阵眼 (Legendary Core) */
+@keyframes coreSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.node-core-legendary {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  box-shadow: 0 0 35px rgba(192, 132, 252, 0.85);
+}
+.core-spin-ring {
+  animation: coreSpin 10s linear infinite;
+}
+
+/* 跃迁大门 (Attachment Gate) */
+.node-gate-exit {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+}
+@keyframes gateBeacon {
+  0%, 100% { opacity: 0.85; transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 15px #f5921e; }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.18); box-shadow: 0 0 30px #f5921e, 0 0 45px rgba(245, 146, 30, 0.6); }
+}
+.gate-beacon-pulse {
+  animation: gateBeacon 1.2s infinite ease-in-out;
+}
+
+/* 跨盘高能超导光纤 */
+.cross-board-wire {
+  stroke-dasharray: 12 6;
+  animation: wireFlow 0.6s linear infinite;
+  filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.9));
+}
+
+/* ==================== 虚幻蓝图式节点卡片与引脚高能连线样式 ==================== */
+.bp-node-card {
+  position: absolute;
+  user-select: none;
+  border-radius: 10px;
+  background: rgba(11, 18, 30, 0.96);
+  border: 1.5px solid rgba(0, 240, 255, 0.45);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(0, 240, 255, 0.05);
+  transition: box-shadow 0.15s, border-color 0.15s;
+  pointer-events: auto;
+  z-index: 25;
+}
+.bp-node-card:hover {
+  border-color: #00f0ff;
+  box-shadow: 0 12px 35px rgba(0, 240, 255, 0.35);
+  z-index: 30;
+}
+.bp-node-card.bp-node-active {
+  border-color: #f59e0b;
+  box-shadow: 0 0 35px rgba(245, 158, 11, 0.6);
+}
+.bp-node-header {
+  cursor: grab;
+  padding: 6px 10px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), transparent);
+}
+.bp-node-header:active {
+  cursor: grabbing;
+}
+.bp-pin {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.15s, box-shadow 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bp-pin:hover {
+  transform: scale(1.45);
+}
+.bp-pin-in {
+  background: #062335;
+  border: 2px solid #00f0ff;
+  box-shadow: 0 0 8px #00f0ff;
+}
+.bp-pin-out {
+  background: #2b1803;
+  border: 2px solid #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+}
+.bp-pin-connecting {
+  animation: pinPulse 0.6s ease-in-out infinite;
+  transform: scale(1.5) !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 0 16px #00f0ff !important;
+}
+
+/* 贝塞尔连线悬停与交互 */
+.bp-wire-path {
+  cursor: pointer;
+  transition: stroke-width 0.15s;
+}
+.bp-wire-path:hover {
+  stroke-width: 8 !important;
+  filter: drop-shadow(0 0 14px #ffffff) !important;
+}
+
+/* ==================== 多区域蓝图版图与画布滑动缩放样式 ==================== */
+.bp-viewport-pannable {
+  cursor: grab;
+}
+.bp-viewport-panning {
+  cursor: grabbing !important;
+}
+
+/* 区域版图卡片边框 */
+.bp-zone-card {
+  position: absolute;
+  border-radius: 14px;
+  background: radial-gradient(circle at 15% 15%, rgba(13, 22, 38, 0.75), rgba(7, 12, 20, 0.95));
+  border: 2px dashed rgba(0, 240, 255, 0.35);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8), 0 8px 32px rgba(0, 0, 0, 0.6);
+  pointer-events: auto;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.bp-zone-card.zone-unlocked {
+  border-style: solid;
+  border-color: rgba(0, 240, 255, 0.6);
+  box-shadow: inset 0 0 40px rgba(0, 240, 255, 0.05), 0 0 30px rgba(0, 240, 255, 0.15);
+}
+.bp-zone-card.zone-satisfied {
+  border-color: rgba(245, 158, 11, 0.8);
+  box-shadow: inset 0 0 45px rgba(245, 158, 11, 0.1), 0 0 35px rgba(245, 158, 11, 0.25);
+}
+
+/* 区域锁定遮罩层 */
+.bp-zone-lock-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(10, 16, 26, 0.88),
+    rgba(10, 16, 26, 0.88) 12px,
+    rgba(18, 28, 44, 0.92) 12px,
+    rgba(18, 28, 44, 0.92) 24px
+  );
+  backdrop-filter: blur(4px);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+/* 跨区高能主导光缆 */
+.inter-zone-wire {
+  stroke-dasharray: 14 6;
+  animation: wireFlow 0.5s linear infinite;
+  filter: drop-shadow(0 0 16px #f59e0b) !important;
+}
+
+/* 画布缩放指示徽章 */
+.zoom-control-badge {
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: 0.05em;
+}
+
+/* ==================== 被动加工器 (Passive Processor 1:1 media_1790616834760.png) 样式 ==================== */
+.hazard-bar-cyan {
+  background: repeating-linear-gradient(
+    -45deg,
+    #00e5ff,
+    #00e5ff 10px,
+    #082738 10px,
+    #082738 20px
+  );
+}
+
+.telemetry-hatch-purple {
+  background: repeating-linear-gradient(
+    -45deg,
+    #8b5cf6,
+    #8b5cf6 6px,
+    #3b0764 6px,
+    #3b0764 12px
+  );
+}
+
+.telemetry-hatch-orange {
+  background: repeating-linear-gradient(
+    -45deg,
+    #f59e0b,
+    #f59e0b 6px,
+    #78350f 6px,
+    #78350f 12px
+  );
+}
+
+@keyframes passiveFlow {
+  0% { transform: translateX(-12px); opacity: 0.2; }
+  50% { opacity: 1; filter: drop-shadow(0 0 10px #00f0ff); }
+  100% { transform: translateX(12px); opacity: 0.2; }
+}
+.passive-flow-chevron {
+  animation: passiveFlow 1.2s ease-in-out infinite;
+}
+
+@keyframes spinClockwise {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes spinCounterClockwise {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+.passive-ring-spin {
+  animation: spinClockwise 18s linear infinite;
+}
+.passive-ring-spin-reverse {
+  animation: spinCounterClockwise 24s linear infinite;
+}
