@@ -689,44 +689,49 @@ body {
   filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.9));
 }
 
-/* ==================== 虚幻蓝图式节点卡片与引脚高能连线样式 ==================== */
+/* ==================== 虚幻蓝图式与PCB集成电路芯片样式 ==================== */
 .bp-node-card {
-  position: absolute;
+  position: absolute !important;
   user-select: none;
-  border-radius: 10px;
-  background: rgba(11, 18, 30, 0.96);
+  border-radius: 8px;
+  background: #090e17;
   border: 1.5px solid rgba(0, 240, 255, 0.45);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(0, 240, 255, 0.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.95), inset 0 0 15px rgba(0, 240, 255, 0.08);
   transition: box-shadow 0.15s, border-color 0.15s;
   pointer-events: auto;
   z-index: 25;
 }
 .bp-node-card:hover {
   border-color: #00f0ff;
-  box-shadow: 0 12px 35px rgba(0, 240, 255, 0.35);
-  z-index: 30;
+  box-shadow: 0 12px 35px rgba(0, 240, 255, 0.5), inset 0 0 20px rgba(0, 240, 255, 0.2);
+  z-index: 40;
 }
 .bp-node-card.bp-node-active {
   border-color: #f59e0b;
-  box-shadow: 0 0 35px rgba(245, 158, 11, 0.6);
+  box-shadow: 0 0 35px rgba(245, 158, 11, 0.7);
 }
-.bp-node-header {
-  cursor: grab;
-  padding: 6px 10px;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), transparent);
+
+/* PCB 芯片元件封装 (1:1 还原参考图集成电路与金属引脚) */
+.pcb-ic-package {
+  border: 2px solid #2a3a50;
+  background: #0a0f18;
+  border-radius: 4px;
 }
-.bp-node-header:active {
-  cursor: grabbing;
+.pcb-chip-pin-left, .pcb-chip-pin-right, .pcb-chip-pin-top, .pcb-chip-pin-bottom {
+  position: absolute;
+  background: #475569;
+  box-shadow: 0 0 4px rgba(255,255,255,0.2);
 }
+
+/* 区域核心主芯片 (参考图核心 CPU) */
+.pcb-core-diamond {
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.35), inset 0 0 20px rgba(0, 240, 255, 0.2);
+}
+
+/* PCB 焊盘引脚 (Via Pad) */
 .bp-pin {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   cursor: pointer;
   position: relative;
@@ -734,36 +739,40 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: #06101c;
 }
 .bp-pin:hover {
-  transform: scale(1.45);
+  transform: scale(1.6);
+  filter: drop-shadow(0 0 8px currentColor);
 }
 .bp-pin-in {
-  background: #062335;
   border: 2px solid #00f0ff;
-  box-shadow: 0 0 8px #00f0ff;
+  box-shadow: 0 0 6px #00f0ff;
 }
 .bp-pin-out {
-  background: #2b1803;
   border: 2px solid #f59e0b;
-  box-shadow: 0 0 8px #f59e0b;
+  box-shadow: 0 0 6px #f59e0b;
 }
 .bp-pin-connecting {
-  animation: pinPulse 0.6s ease-in-out infinite;
-  transform: scale(1.5) !important;
+  animation: pinPulse 0.5s ease-in-out infinite;
+  transform: scale(1.6) !important;
   border-color: #ffffff !important;
-  box-shadow: 0 0 16px #00f0ff !important;
+  box-shadow: 0 0 16px #00f0ff, 0 0 25px #00f0ff !important;
 }
 
-/* 贝塞尔连线悬停与交互 */
+/* 45°/90° PCB 走线路径 */
 .bp-wire-path {
   cursor: pointer;
+  stroke-linejoin: round;
+  stroke-linecap: square;
   transition: stroke-width 0.15s;
+  pointer-events: stroke !important;
 }
 .bp-wire-path:hover {
-  stroke-width: 8 !important;
-  filter: drop-shadow(0 0 14px #ffffff) !important;
+  stroke-width: 6 !important;
+  filter: drop-shadow(0 0 16px #ffffff) !important;
 }
+
 
 /* ==================== 多区域蓝图版图与画布滑动缩放样式 ==================== */
 .bp-viewport-pannable {
@@ -773,24 +782,47 @@ body {
   cursor: grabbing !important;
 }
 
-/* 区域版图卡片边框 */
+/* 区域版图卡片边框 (世界树 PCB 母板封装) */
 .bp-zone-card {
   position: absolute;
-  border-radius: 14px;
-  background: radial-gradient(circle at 15% 15%, rgba(13, 22, 38, 0.75), rgba(7, 12, 20, 0.95));
+  border-radius: 12px;
+  background: radial-gradient(circle at 20% 20%, rgba(13, 24, 40, 0.88), rgba(6, 10, 18, 0.96));
   border: 2px dashed rgba(0, 240, 255, 0.35);
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8), 0 8px 32px rgba(0, 0, 0, 0.6);
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.85), 0 10px 40px rgba(0, 0, 0, 0.7);
   pointer-events: auto;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
 }
 .bp-zone-card.zone-unlocked {
   border-style: solid;
-  border-color: rgba(0, 240, 255, 0.6);
-  box-shadow: inset 0 0 40px rgba(0, 240, 255, 0.05), 0 0 30px rgba(0, 240, 255, 0.15);
+  border-color: rgba(0, 240, 255, 0.55);
+  box-shadow: inset 0 0 40px rgba(0, 240, 255, 0.06), 0 0 30px rgba(0, 240, 255, 0.15);
 }
 .bp-zone-card.zone-satisfied {
   border-color: rgba(245, 158, 11, 0.8);
-  box-shadow: inset 0 0 45px rgba(245, 158, 11, 0.1), 0 0 35px rgba(245, 158, 11, 0.25);
+  box-shadow: inset 0 0 45px rgba(245, 158, 11, 0.12), 0 0 35px rgba(245, 158, 11, 0.25);
+}
+.bp-zone-card.zone-active-selected {
+  border-color: #f5921e !important;
+  border-width: 3px !important;
+  box-shadow: inset 0 0 60px rgba(245, 146, 30, 0.2), 0 0 50px rgba(245, 146, 30, 0.6) !important;
+}
+
+/* 世界树电路背景走线专属动效 */
+@keyframes treeTrunkPulse {
+  0% { stroke-dashoffset: 60; }
+  100% { stroke-dashoffset: 0; }
+}
+.world-tree-pulse-line {
+  stroke-dasharray: 12 8;
+  animation: treeTrunkPulse 1.8s linear infinite;
+}
+.world-tree-pulse-gold {
+  stroke-dasharray: 14 10;
+  animation: treeTrunkPulse 1.4s linear infinite reverse;
+}
+.world-tree-branch-flow {
+  stroke-dasharray: 8 6;
+  animation: treeTrunkPulse 2.4s linear infinite;
 }
 
 /* 区域锁定遮罩层 */

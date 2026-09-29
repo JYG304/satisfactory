@@ -8,24 +8,24 @@
 // ---------------------------------------------------------------------
 const adaDialogueScript = [
   {
-    speaker: 'ADA',
-    text: '已获取全新的外星物种样本。此类物种的几个显著特点为：适合研磨的转角牙齿，这意味着它们很有可能为食草动物。',
-    tag: '样本分析'
+    speaker: '器灵·天工智脑',
+    text: '中央处理器 (CPU_BASE_001) 拓扑已接入。请在终端装填玄铁锭、赤铜锭与玄铁板各100份，以交付练气1层科研认证。',
+    tag: '主线突破'
   },
   {
-    speaker: 'ADA',
-    text: '运灵法轨（传送带）系统已接入电网拓扑。请确保输入口与输出口朝向正确，以实现生产流水线的完全无人值守自动化。',
+    speaker: '器灵·天工智脑',
+    text: '运灵法轨（传送带 BD_125）系统已接入电网拓扑。请确保采矿机 (BD_101) 与精炼炉 (BD_102) 端口朝向正确，以实现流水线完全自动化。',
     tag: '自动化指引'
   },
   {
-    speaker: 'ADA',
-    text: '侦测到周遭雷磁暴聚集。建议开拓者在装备界面的【天雷淬体】中引雷淬脉，打破肉身界限，扩充随身 72 格储物空间。',
+    speaker: '器灵·天工智脑',
+    text: '侦测到周遭天劫雷暴聚集。建议在修士装备界面 [Tab] 的【天雷淬体】中引雷淬脉，打破肉身界限，扩充随身 72 格储物气海。',
     tag: '雷劫淬体'
   },
   {
-    speaker: 'ADA',
-    text: '阶段目标物料已就绪。请前往中央处理器控制台装填玄铁板与赤铜线圈，准备点火完成枢纽阶段突破。',
-    tag: '枢纽升级'
+    speaker: '器灵·天工智脑',
+    text: '炼宝台 (BD_148) 与渡劫台 (BD_150) 前置蓝图已标定。可运用搅拌机 (BD_110) 调配法宝稳脉液，向渡劫前置态法宝注入 1000 煞气浓缩液引动天劫。',
+    tag: '法宝渡劫'
   }
 ];
 
@@ -50,7 +50,7 @@ function showAdaDialogue(index = 0) {
 
   box.classList.remove('hidden');
   box.style.opacity = '1';
-  if (speakerElem) speakerElem.innerText = data.speaker || 'ADA';
+  if (speakerElem) speakerElem.innerText = data.speaker || '器灵·天工智脑';
 
   // 开始打字机动画
   currentFullDialogueText = data.text;
@@ -96,7 +96,7 @@ function skipAdaDialogue() {
       showAdaDialogue(currentDialogueIndex);
     } else {
       closeAdaDialogue();
-      showNotification('【ADA 广播】通讯挂断');
+      showNotification('【器灵广播】通讯挂断');
     }
   }
 }
@@ -132,30 +132,30 @@ const questObjectiveList = [
     actionText: '按 [M] 接入中央处理器扩展基座'
   },
   {
-    id: 'hub_5',
-    category: '入职培训目标9:',
-    title: '完成枢纽升级 5',
+    id: 'lianqi_milestone',
+    category: '科研突破目标:',
+    title: '练气 1 层中央处理器认证',
     bullets: [
-      '传送带用于建筑间资源运输的完全自动化。',
-      '传送带可以连接各个建筑的输入以及输出口。'
+      '在采矿机 (BD_101) 与精炼炉 (BD_102) 建立金属锭产线。',
+      '向中央处理器交付 玄铁锭×100、赤铜锭×100、玄铁板×100。'
     ],
     tipTitle: '提示:',
-    tip: '便携式采矿器无法连接传送带。',
-    footer: 'FICSIT 开拓者强制入职培训项目',
-    actionText: '点击打开枢纽终端装填物料'
+    tip: '点击右上角里程碑卡片或按 [M] 可一键装填物料。',
+    footer: '天工开物 · 宗门传承工控总署',
+    actionText: '点击打开中央处理器交付插槽'
   },
   {
-    id: 'space_elevator',
-    category: '入职培训目标10:',
-    title: '建造太空电梯 (筑造通天梯)',
+    id: 'fabao_refining',
+    category: '终极飞升目标:',
+    title: '炼宝台重铸与渡劫飞升',
     bullets: [
-      '太空电梯需放置在宽阔坚固的地基之上。',
-      '电梯用于向轨道输送封存高级合金构件。'
+      '建造炼宝台 (BD_148) 注入 1000 煞气浓缩液合成法宝阵图胚。',
+      '部署渡劫台 (BD_150) 引九重天劫洗礼，达成极品后天灵宝。'
     ],
     tipTitle: '提示:',
-    tip: '按 [Q] 开启建造菜单即可定位太空电梯。',
-    footer: 'FICSIT 星际总署轨道拓殖工程',
-    actionText: '按 [Q] 打开建造菜单部署设施'
+    tip: '按 [N] 打开法宝系统，可查看本命神识绑定与淬火进度。',
+    footer: '天工造化 · 渡劫飞升总工程',
+    actionText: '按 [N] 打开法宝工控系统'
   },
   {
     id: 'thunder_training',
@@ -249,8 +249,8 @@ function handleQuestCardClick() {
     if (typeof openCentralProcessorHUD === 'function') openCentralProcessorHUD();
   } else if (q.id === 'thunder_training') {
     toggleInventoryModal();
-  } else if (q.id === 'space_elevator') {
-    toggleBuildMenu();
+  } else if (q.id === 'fabao_refining') {
+    if (typeof toggleFabaoModal === 'function') toggleFabaoModal();
   } else {
     openHubMilestoneModal();
   }

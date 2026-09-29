@@ -5,60 +5,78 @@
 const craftingRecipes = {
   iron_ingot: {
     id: 'iron_ingot',
-    name: '玄铁金属锭',
-    icon: 'fa-solid fa-bars text-amber-300',
+    name: '玄铁锭',
+    icon: 'fa-solid fa-square text-stone-300',
     outCode: 'iron_ingot',
     outAmount: 1,
     timeSec: 0.5,
-    ingredients: [{ code: 'iron_ore', name: '玄铁原矿', need: 1, icon: 'fa-cube' }]
+    ingredients: [{ code: 'iron_ore', name: '玄铁矿', need: 1, icon: 'fa-gem' }]
+  },
+  copper_ingot: {
+    id: 'copper_ingot',
+    name: '赤铜锭',
+    icon: 'fa-solid fa-square text-amber-500',
+    outCode: 'copper_ingot',
+    outAmount: 1,
+    timeSec: 0.5,
+    ingredients: [{ code: 'copper_ore', name: '赤铜矿', need: 1, icon: 'fa-gem' }]
   },
   iron_plate: {
     id: 'iron_plate',
-    name: '工业玄铁板',
+    name: '玄铁板',
     icon: 'fa-solid fa-sheet-plastic text-stone-200',
     outCode: 'iron_plate',
     outAmount: 1,
     timeSec: 0.75,
-    ingredients: [{ code: 'iron_ingot', name: '玄铁金属锭', need: 3, icon: 'fa-bars' }]
+    ingredients: [{ code: 'iron_ingot', name: '玄铁锭', need: 2, icon: 'fa-square' }]
   },
-  iron_rod: {
-    id: 'iron_rod',
-    name: '标准铁棒',
-    icon: 'fa-solid fa-lines-leaning text-stone-300',
-    outCode: 'iron_rod',
+  iron_gear: {
+    id: 'iron_gear',
+    name: '玄铁齿轮',
+    icon: 'fa-solid fa-gear text-stone-400',
+    outCode: 'iron_gear',
     outAmount: 1,
-    timeSec: 0.5,
-    ingredients: [{ code: 'iron_ingot', name: '玄铁金属锭', need: 1, icon: 'fa-bars' }]
+    timeSec: 0.8,
+    ingredients: [{ code: 'iron_ingot', name: '玄铁锭', need: 1, icon: 'fa-square' }]
   },
-  screw: {
-    id: 'screw',
-    name: '高强度螺丝',
-    icon: 'fa-solid fa-gear text-stone-300',
-    outCode: 'screw',
-    outAmount: 4,
-    timeSec: 0.5,
-    ingredients: [{ code: 'iron_rod', name: '标准铁棒', need: 1, icon: 'fa-lines-leaning' }]
+  iron_beam: {
+    id: 'iron_beam',
+    name: '玄铁梁',
+    icon: 'fa-solid fa-bars-staggered text-stone-300',
+    outCode: 'iron_beam',
+    outAmount: 1,
+    timeSec: 1.0,
+    ingredients: [{ code: 'iron_ingot', name: '玄铁锭', need: 3, icon: 'fa-square' }]
   },
-  reinforced_plate: {
-    id: 'reinforced_plate',
-    name: '增强型玄铁板',
-    icon: 'fa-solid fa-shield text-blue-400',
-    outCode: 'reinforced_plate',
+  copper_wire: {
+    id: 'copper_wire',
+    name: '铜线',
+    icon: 'fa-solid fa-plug text-yellow-400',
+    outCode: 'copper_wire',
+    outAmount: 2,
+    timeSec: 0.5,
+    ingredients: [{ code: 'copper_ingot', name: '赤铜锭', need: 1, icon: 'fa-square' }]
+  },
+  wiring_assembly: {
+    id: 'wiring_assembly',
+    name: '接线组件',
+    icon: 'fa-solid fa-network-wired text-yellow-400',
+    outCode: 'wiring_assembly',
+    outAmount: 1,
+    timeSec: 1.0,
+    ingredients: [{ code: 'copper_wire', name: '铜线', need: 4, icon: 'fa-plug' }]
+  },
+  power_supply_module: {
+    id: 'power_supply_module',
+    name: '电源模块',
+    icon: 'fa-solid fa-car-battery text-amber-400',
+    outCode: 'power_supply_module',
     outAmount: 1,
     timeSec: 1.2,
     ingredients: [
-      { code: 'iron_plate', name: '工业玄铁板', need: 6, icon: 'fa-sheet-plastic' },
-      { code: 'screw', name: '高强度螺丝', need: 12, icon: 'fa-gear' }
+      { code: 'wiring_assembly', name: '接线组件', need: 2, icon: 'fa-network-wired' },
+      { code: 'iron_plate', name: '玄铁板', need: 2, icon: 'fa-sheet-plastic' }
     ]
-  },
-  wire: {
-    id: 'wire',
-    name: '赤铜线圈',
-    icon: 'fa-solid fa-plug text-yellow-400',
-    outCode: 'wire',
-    outAmount: 2,
-    timeSec: 0.5,
-    ingredients: [{ code: 'copper_ingot', name: '赤铜金属锭', need: 1, icon: 'fa-bars' }]
   }
 };
 

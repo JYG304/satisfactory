@@ -5,8 +5,8 @@
 let currentHubViewType = 'current'; // 'select' | 'current'
 let currentHubStage = 1; // 阶段 1
 let selectedHubCategoryKey = 'base'; // 'base' | 'logi' | 'explore'
-let hubDelivered = { iron_rod: 75, copper_wire: 50, concrete: 20 };
-let hubRequired = { iron_rod: 75, copper_wire: 50, concrete: 20 };
+let hubDelivered = { iron_ingot: 100, copper_ingot: 100, iron_plate: 100 };
+let hubRequired = { iron_ingot: 100, copper_ingot: 100, iron_plate: 100 };
 
 function openHubMilestoneModal() {
   playUiSound('click');
@@ -74,9 +74,9 @@ function renderHubDeliverySlots() {
   const s0 = document.getElementById('hubSlotStock_0');
   const s1 = document.getElementById('hubSlotStock_1');
   const s2 = document.getElementById('hubSlotStock_2');
-  if (s0) s0.innerText = `${hubDelivered.iron_rod}/${hubRequired.iron_rod}`;
-  if (s1) s1.innerText = `${hubDelivered.copper_wire}/${hubRequired.copper_wire}`;
-  if (s2) s2.innerText = `${hubDelivered.concrete}/${hubRequired.concrete}`;
+  if (s0) s0.innerText = `${hubDelivered.iron_ingot}/${hubRequired.iron_ingot}`;
+  if (s1) s1.innerText = `${hubDelivered.copper_ingot}/${hubRequired.copper_ingot}`;
+  if (s2) s2.innerText = `${hubDelivered.iron_plate}/${hubRequired.iron_plate}`;
 }
 
 function depositHubItem(code) {
@@ -93,17 +93,17 @@ function depositHubItem(code) {
 
 function depositAllHubMatched() {
   playUiSound('click');
-  hubDelivered.iron_rod = hubRequired.iron_rod;
-  hubDelivered.copper_wire = hubRequired.copper_wire;
-  hubDelivered.concrete = hubRequired.concrete;
+  hubDelivered.iron_ingot = hubRequired.iron_ingot;
+  hubDelivered.copper_ingot = hubRequired.copper_ingot;
+  hubDelivered.iron_plate = hubRequired.iron_plate;
   renderHubDeliverySlots();
   showNotification('已一键装填所有匹配物料！中央处理器准备就绪！');
 }
 
 function upgradeHubLaunch() {
-  const isComplete = (hubDelivered.iron_rod >= hubRequired.iron_rod) &&
-                     (hubDelivered.copper_wire >= hubRequired.copper_wire) &&
-                     (hubDelivered.concrete >= hubRequired.concrete);
+  const isComplete = (hubDelivered.iron_ingot >= hubRequired.iron_ingot) &&
+                     (hubDelivered.copper_ingot >= hubRequired.copper_ingot) &&
+                     (hubDelivered.iron_plate >= hubRequired.iron_plate);
   if (!isComplete) {
     playUiSound('craft_fail');
     showNotification('请先装填满足所有材料插槽需求，方可启动中央处理器升级！');
@@ -115,9 +115,9 @@ function upgradeHubLaunch() {
   if (btn) btn.classList.add('scale-95');
   setTimeout(() => { if (btn) btn.classList.remove('scale-95'); }, 300);
 
-  showNotification('🚀【中央处理器升级大突破！】阶段 1 里程碑圆满交付！天工基地建筑群已全线解锁！');
+  showNotification('🚀【中央处理器研究认证突破！】练气 1 层科研圆满交付！天工基地建筑群已全线解锁！');
   const titleElem = document.getElementById('currentHubMilestoneTitle');
-  if (titleElem) titleElem.innerText = '中央处理器升级 1 - 交付完成！阶段 2 规划开启';
+  if (titleElem) titleElem.innerText = '中央处理器认证 1 - 交付完成！阶段 2 规划开启';
 }
 
 function renderHubItemsGrid() {

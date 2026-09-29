@@ -8,7 +8,7 @@ const playerEquipmentSlots = {
     slotKey: 'artifact',
     category: '法宝',
     id: 'fabao_array_embryo',
-    matId: 'MAT_072',
+    matId: 'MAT_076',
     name: '法宝阵图胚',
     icon: 'fa-solid fa-scroll text-yellow-400',
     quality: '法宝中间态',
@@ -234,17 +234,24 @@ function sortStoragePlayerBag() {
 
 // 全局随身背包库存系统 (用于工作台、建造器物料消耗与同步)
 const playerInventory = {
-  iron_ore: 100,       // 玄铁原矿 (MAT_001)
-  iron_ingot: 58,      // 玄铁金属锭 (MAT_005)
-  iron_plate: 120,     // 工业玄铁板 (MAT_008)
-  iron_rod: 64,        // 标准玄铁棒 (MAT_007)
-  screw: 96,           // 超细螺丝 (MAT_009)
-  copper_ore: 80,      // 赤铜原矿 (MAT_002)
-  copper_ingot: 45,    // 导电赤铜锭 (MAT_006)
-  wire: 200,           // 铜线 (MAT_016)
-  cable: 50,           // 导电线圈 (MAT_013)
-  reinforced_plate: 12,// 建筑基础模块 (MAT_011)
-  iron_powder: 78      // 铁粉 (MAT_022)
+  iron_ore: 100,            // 玄铁矿 (MAT_001)
+  copper_ore: 80,           // 赤铜矿 (MAT_002)
+  coal: 65,                 // 煤炭 (MAT_004)
+  iron_ingot: 100,          // 玄铁锭 (MAT_006)
+  copper_ingot: 80,         // 赤铜锭 (MAT_007)
+  iron_plate: 120,          // 玄铁板 (MAT_008)
+  iron_powder: 78,          // 玄铁粉 (MAT_009)
+  iron_gear: 60,            // 玄铁齿轮 (MAT_011)
+  lingci_gear: 30,          // 灵磁齿轮 (MAT_012)
+  ling_copper_sheet: 25,    // 导灵铜片 (MAT_013)
+  iron_beam: 50,            // 玄铁梁 (MAT_014)
+  device_interface: 20,     // 设备接口件 (MAT_015)
+  electric_coil: 50,        // 导电线圈 (MAT_016)
+  basic_control_module: 20, // 基础控制模块 (MAT_017)
+  copper_wire: 150,         // 铜线 (MAT_019)
+  refractory_core: 15,      // 耐火炉芯 (MAT_045)
+  wiring_assembly: 30,      // 接线组件 (MAT_069)
+  power_supply_module: 15   // 电源模块 (MAT_070)
 };
 
 // 运行期玩家背包物料列表 (基于 xiuxian_data.js 中的 INITIAL_PLAYER_INVENTORY)
@@ -255,7 +262,7 @@ let backpackInventory = (typeof INITIAL_PLAYER_INVENTORY !== 'undefined') ? [...
   { item: 'copper_ingot', count: 25 },
   { item: 'copper_wire', count: 23 },
   { item: 'iron_plate', count: 17 },
-  { item: 'screw', count: 120 },
+  { item: 'iron_gear', count: 20 },
   { item: 'cultivator_corpse', count: 2 },
   { item: 'living_tissue', count: 5 },
   { item: 'neural_bundle', count: 2 },
@@ -280,29 +287,29 @@ const activePlayerBagItems = [
   { id: 'assembler', name: '加工台', count: 1, icon: 'fa-solid fa-screwdriver-wrench text-amber-300', desc: '基础零件装配成型', matId: 'BD_104' },
   { id: 'cutter', name: '切割机', count: 1, icon: 'fa-solid fa-bolt text-sky-400', desc: '高速线材与板材精密下料设备', matId: 'BD_105' },
   { id: 'portable_miner', name: '便携式采矿器', count: 3, icon: 'fa-solid fa-gears text-stone-300', desc: '单体便携手持采掘器', matId: 'TOOL_01' },
-  { id: 'iron_ore', name: '玄铁原矿', count: 100, icon: 'fa-solid fa-mountain text-stone-400', desc: '精炼玄铁锭的基础重金属矿石', matId: 'MAT_001' },
-  { id: 'copper_ore', name: '赤铜原矿', count: 80, icon: 'fa-solid fa-cubes text-amber-500', desc: '精炼导电赤铜锭的基础有色金属矿石', matId: 'MAT_002' },
-  { id: 'coal', name: '煤炭', count: 65, icon: 'fa-solid fa-fire-flame-curved text-stone-500', desc: '含碳可燃矿物，用于冶炼燃料与热能供应', matId: 'MAT_003' },
-  { id: 'iron_ingot', name: '玄铁金属锭', count: 58, icon: 'fa-solid fa-bars text-stone-300', desc: '由精炼炉冶炼玄铁原矿所得的基础材料', matId: 'MAT_005' },
-  { id: 'copper_ingot', name: '导电赤铜锭', count: 45, icon: 'fa-solid fa-bars text-amber-400', desc: '由精炼炉熔炼赤铜原矿所得的高导电材料', matId: 'MAT_006' },
-  { id: 'iron_rod', name: '标准玄铁棒', count: 64, icon: 'fa-solid fa-lines-leaning text-stone-300', desc: '圆截面基础金属棒材，用于框架与传动', matId: 'MAT_007' },
-  { id: 'iron_plate', name: '工业玄铁板', count: 120, icon: 'fa-solid fa-sheet-plastic text-stone-200', desc: '大面积结构用板材，用于设备外壳与传送带', matId: 'MAT_008' },
-  { id: 'screw', name: '超细螺丝', count: 96, icon: 'fa-solid fa-screwdriver text-cyan-300', desc: '精密连接与微型机械固定件', matId: 'MAT_009' },
-  { id: 'copper_wire', name: '铜线', count: 150, icon: 'fa-solid fa-plug text-yellow-400', desc: '基础导电用单丝线材，用于绕制线圈与电力传输', matId: 'MAT_016' },
-  { id: 'ling_copper_sheet', name: '导灵铜片', count: 25, icon: 'fa-solid fa-microchip text-yellow-300', desc: '高纯度赤铜经压延所得的灵气微流薄片', matId: 'MAT_017' },
-  { id: 'iron_powder', name: '铁粉', count: 30, icon: 'fa-solid fa-braille text-stone-400', desc: '玄铁金属粉末，用于烧结与催化', matId: 'MAT_022' },
-  { id: 'cultivator_corpse', name: '练气修士尸体', count: 2, icon: 'fa-solid fa-skull text-purple-400', desc: '具有完整经脉结构与微弱残余灵气的修士躯体（策划案官方资源）', matId: 'MAT_018' },
-  { id: 'living_tissue', name: '鲜活组织', count: 12, icon: 'fa-solid fa-dna text-rose-400', desc: '含有活性细胞的生物组织块，用于生物合成与芯片接口', matId: 'MAT_019' },
-  { id: 'neural_bundle', name: '神经束', count: 6, icon: 'fa-solid fa-network-wired text-cyan-400', desc: '生物神经信号传导纤维，用于电子生物芯片与灵机控制', matId: 'MAT_020' },
-  { id: 'dry_tissue', name: '干燥生物质', count: 10, icon: 'fa-solid fa-leaf text-amber-600', desc: '脱水脱活后的生物有机残渣，用于低级能源', matId: 'MAT_021' },
-  { id: 'bio_chip', name: '电子生物芯片', count: 4, icon: 'fa-solid fa-memory text-purple-300', desc: '生物与机器之间的工控元件', matId: 'MAT_015' },
-  { id: 'basic_control_module', name: '基础控制模块', count: 8, icon: 'fa-solid fa-microchip text-emerald-400', desc: '智能物流、加工台、组装机的通用控制零件', matId: 'MAT_014' },
-  { id: 'electric_coil', name: '导电线圈', count: 15, icon: 'fa-solid fa-spinner text-yellow-400', desc: '电能核心、风力发电机和控制设备的通用电力零件', matId: 'MAT_013' },
-  { id: 'device_interface', name: '设备接口件', count: 12, icon: 'fa-solid fa-satellite-dish text-sky-400', desc: '通用设备接口；不承担生物加工功能', matId: 'MAT_012' },
-  { id: 'building_block', name: '建筑基础模块', count: 50, icon: 'fa-solid fa-cubes-stacked text-stone-400', desc: '建筑底座、支撑、设备框架基础件', matId: 'MAT_011' },
-  { id: 'wood_plank', name: '木板', count: 50, icon: 'fa-solid fa-tree text-amber-700', desc: '原始木质建材，用于初级支撑', matId: 'MAT_024' },
-  { id: 'raw_water', name: '生水', count: 40, icon: 'fa-solid fa-droplet text-blue-400', desc: '未经净化的天然水体，用于冷却与清洗', matId: 'MAT_025' },
-  { id: 'ling_stone', name: '灵石碎块', count: 128, icon: 'fa-solid fa-gem text-cyan-300', desc: '蕴含微量天地灵气的灵石残片', matId: 'MAT_073' },
+  { id: 'iron_ore', name: '玄铁矿', count: 100, icon: 'fa-solid fa-mountain text-stone-400', desc: '精炼玄铁锭的基础重金属矿石', matId: 'MAT_001' },
+  { id: 'copper_ore', name: '赤铜矿', count: 80, icon: 'fa-solid fa-cubes text-amber-500', desc: '精炼导电赤铜锭的基础有色金属矿石', matId: 'MAT_002' },
+  { id: 'coal', name: '煤炭', count: 65, icon: 'fa-solid fa-fire-flame-curved text-stone-500', desc: '含碳可燃矿物，用于冶炼燃料与热能供应', matId: 'MAT_004' },
+  { id: 'iron_ingot', name: '玄铁锭', count: 58, icon: 'fa-solid fa-bars text-stone-300', desc: '由精炼炉冶炼玄铁矿所得的基础材料', matId: 'MAT_006' },
+  { id: 'copper_ingot', name: '赤铜锭', count: 45, icon: 'fa-solid fa-bars text-amber-400', desc: '由精炼炉熔炼赤铜矿所得的高导电材料', matId: 'MAT_007' },
+  { id: 'iron_plate', name: '玄铁板', count: 120, icon: 'fa-solid fa-sheet-plastic text-stone-200', desc: '大面积结构用板材，用于设备外壳与传送带', matId: 'MAT_008' },
+  { id: 'iron_powder', name: '玄铁粉', count: 30, icon: 'fa-solid fa-braille text-stone-400', desc: '玄铁金属粉末，用于烧结与催化', matId: 'MAT_009' },
+  { id: 'iron_gear', name: '玄铁齿轮', count: 60, icon: 'fa-solid fa-gear text-stone-300', desc: '基础物流、传动骨架与机械零件', matId: 'MAT_011' },
+  { id: 'lingci_gear', name: '灵磁齿轮', count: 25, icon: 'fa-solid fa-gear text-cyan-400', desc: '设备传动件与自动化控制组件', matId: 'MAT_012' },
+  { id: 'ling_copper_sheet', name: '导灵铜片', count: 25, icon: 'fa-solid fa-microchip text-yellow-300', desc: '高纯度赤铜经压延所得的灵气微流薄片', matId: 'MAT_013' },
+  { id: 'iron_beam', name: '玄铁梁', count: 40, icon: 'fa-solid fa-bars-staggered text-stone-400', desc: '设备骨架与设备框架重载结构支撑', matId: 'MAT_014' },
+  { id: 'device_interface', name: '设备接口件', count: 12, icon: 'fa-solid fa-satellite-dish text-sky-400', desc: '通用设备接口；不承担生物加工功能', matId: 'MAT_015' },
+  { id: 'electric_coil', name: '导电线圈', count: 15, icon: 'fa-solid fa-spinner text-yellow-400', desc: '电能核心、动力核心与控制设备的通用电力零件', matId: 'MAT_016' },
+  { id: 'basic_control_module', name: '基础控制模块', count: 8, icon: 'fa-solid fa-microchip text-emerald-400', desc: '智能物流、加工台、主控核心的通用控制零件', matId: 'MAT_017' },
+  { id: 'bio_chip', name: '电子生物芯片', count: 4, icon: 'fa-solid fa-memory text-purple-300', desc: '生物与机器之间的工控元件', matId: 'MAT_018' },
+  { id: 'copper_wire', name: '铜线', count: 150, icon: 'fa-solid fa-plug text-yellow-400', desc: '基础导电用单丝线材，用于绕制线圈与电力传输', matId: 'MAT_019' },
+  { id: 'cultivator_corpse', name: '练气修士尸体', count: 2, icon: 'fa-solid fa-skull text-purple-400', desc: '具有完整经脉结构与微弱残余灵气的修士躯体（策划案官方资源）', matId: 'MAT_020' },
+  { id: 'living_tissue', name: '鲜活生物组织', count: 12, icon: 'fa-solid fa-dna text-rose-400', desc: '含有活性细胞的生物组织块，用于生物合成与芯片接口', matId: 'MAT_021' },
+  { id: 'neural_bundle', name: '神经束', count: 6, icon: 'fa-solid fa-network-wired text-cyan-400', desc: '生物神经信号传导纤维，用于电子生物芯片与灵机控制', matId: 'MAT_022' },
+  { id: 'dry_tissue', name: '脱水生物组织', count: 10, icon: 'fa-solid fa-leaf text-amber-600', desc: '脱水干燥处理后的生物体组织残片', matId: 'MAT_024' },
+  { id: 'raw_water', name: '水源', count: 40, icon: 'fa-solid fa-droplet text-blue-400', desc: '基础天然水体，用于冷却、稀释与溶液配制', matId: 'MAT_033' },
+  { id: 'wiring_assembly', name: '接线组件', count: 30, icon: 'fa-solid fa-diagram-project text-blue-400', desc: '电缆端头、母线排与接线排总成', matId: 'MAT_069' },
+  { id: 'power_supply_module', name: '电源模块', count: 15, icon: 'fa-solid fa-car-battery text-amber-400', desc: '集成变压稳压的独立电源模块', matId: 'MAT_070' },
   // 特别放入 3 柄飞剑供玩家体验从背包拖入剑匣！
   { id: 'sword_thunder', name: '紫霄惊雷剑', count: 1, icon: 'fa-solid fa-khanda text-yellow-300 rotate-45', desc: '雷系神品飞剑，九霄天罚，杀伤力+490，暴击率+35%', type: 'weapon', matId: 'SWORD_04' },
   { id: 'sword_iron', name: '寒铁飞剑', count: 1, icon: 'fa-solid fa-khanda text-cyan-200 rotate-45', desc: '高寒精铁千锤百炼飞剑，御剑杀伤+260，破甲+25%', type: 'weapon', matId: 'SWORD_05' },
@@ -728,51 +735,40 @@ function selectEquipSlot(slotType, title, desc) {
 let currentHoloTab = 'main'; // 'main' (角色与背包一体化), 'map', 'hub', 'craft', 'codex', 'todo', 'stats'
 let currentStatsSubTab = 'world'; // 'player' | 'world' | 'cert'
 
-// 统计面板数据 (严格复刻参考图 21 个世界参数及全域指标，采用纯正赛博工控科技风呈现)
+// 统计面板数据 (严格对照《修仙工厂》策划案_V1_正式版：工控参数、能源负荷、煞气环保与主线进度)
 const STATS_DATA = {
   world: [
-    { label: '设备工作速度', value: '100%', icon: 'fa-solid fa-industry', cat: '流水线效能', color: 'text-[#00f0ff]' },
-    { label: '热量消耗速度', value: '100%', icon: 'fa-solid fa-fire-burner', cat: '热工能耗', color: 'text-amber-400' },
-    { label: '燃料热值', value: '100%', icon: 'fa-solid fa-fire', cat: '能源转化', color: 'text-orange-400' },
-    { label: '肥料营养值', value: '100%', icon: 'fa-solid fa-seedling', cat: '生物灵植', color: 'text-emerald-400' },
-    { label: '弹射器射速', value: '60/min', icon: 'fa-solid fa-crosshairs', cat: '物流发射', color: 'text-sky-400' },
-    { label: '加农炮射速', value: '120/min', icon: 'fa-solid fa-bullseye', cat: '深空投送', color: 'text-rose-400' },
-    { label: '萃取机产量', value: '100%', icon: 'fa-solid fa-flask-vial', cat: '精细化工', color: 'text-teal-400' },
-    { label: '蒸馏器产量', value: '100%', icon: 'fa-solid fa-atom', cat: '流体提纯', color: 'text-cyan-300' },
-    { label: '店铺利润', value: '140%', icon: 'fa-solid fa-store', cat: '商市营收', color: 'text-yellow-400' },
-    { label: '杂货利润', value: '180%', icon: 'fa-solid fa-boxes-packing', cat: '常规货殖', color: 'text-amber-300' },
-    { label: '药剂利润', value: '180%', icon: 'fa-solid fa-prescription-bottle', cat: '灵丹仙酿', color: 'text-emerald-300' },
-    { label: '酒水利润', value: '180%', icon: 'fa-solid fa-wine-glass', cat: '琼浆玉液', color: 'text-purple-300' },
-    { label: '珠宝首饰利润', value: '180%', icon: 'fa-solid fa-gem', cat: '灵宝首饰', color: 'text-pink-400' },
-    { label: '圣物利润', value: '180%', icon: 'fa-solid fa-scroll', cat: '古修遗蜕', color: 'text-yellow-300' },
-    { label: '顾客购物数量加成', value: '0%', icon: 'fa-solid fa-cart-shopping', cat: '客商吞吐', color: 'text-white/60' },
-    { label: '大传送门客流量', value: '250%', icon: 'fa-solid fa-dungeon', cat: '星门枢纽', color: 'text-purple-400' },
-    { label: '任务报酬', value: '100%', icon: 'fa-solid fa-award', cat: '悬赏结付', color: 'text-amber-400' },
-    { label: '每日随机任务', value: '1', icon: 'fa-solid fa-clipboard-list', cat: '因果机缘', color: 'text-cyan-300' },
-    { label: '采购合同数量加成', value: '300%', icon: 'fa-solid fa-file-contract', cat: '大宗契约', color: 'text-emerald-400' },
-    { label: '采购合同价格加成', value: '60%', icon: 'fa-solid fa-hand-holding-dollar', cat: '商行议价', color: 'text-amber-300' },
-    { label: '圣物提取加成', value: '0%', icon: 'fa-solid fa-vial-circle-check', cat: '道韵提萃', color: 'text-white/60' }
+    { label: '电网总发电量', value: '95 MW', icon: 'fa-solid fa-bolt', cat: '动力电网', color: 'text-yellow-400' },
+    { label: '电网总用电量', value: '62 MW', icon: 'fa-solid fa-plug', cat: '能耗负载', color: 'text-[#00f0ff]' },
+    { label: '电网负荷率', value: '65.3%', icon: 'fa-solid fa-gauge-high', cat: '供电稳态', color: 'text-emerald-400' },
+    { label: '灵力引擎产热', value: '150 ☼', icon: 'fa-solid fa-fire', cat: '母座热能', color: 'text-amber-500' },
+    { label: '冶炼舱热力消耗', value: '100 ☼', icon: 'fa-solid fa-fire-burner', cat: '高温冶炼', color: 'text-orange-400' },
+    { label: '区域环境煞气值', value: '48 / 100', icon: 'fa-solid fa-skull-crossbones', cat: '环境煞气', color: 'text-purple-400' },
+    { label: '回收处理塔浓缩率', value: '100%', icon: 'fa-solid fa-filter', cat: 'BD_150环保', color: 'text-emerald-300' },
+    { label: '煞气浓缩液存量', value: '36 m³', icon: 'fa-solid fa-flask-vial', cat: 'MAT_077物流', color: 'text-purple-300' },
+    { label: '传送带物流吞吐', value: '120 件/分', icon: 'fa-solid fa-arrows-split-up-and-left', cat: '固体干线', color: 'text-sky-400' },
+    { label: '流体管网总流量', value: '45 L/分', icon: 'fa-solid fa-droplet', cat: '流体水路', color: 'text-cyan-300' }
   ],
-  player: [
-    { label: '修士奔袭速度', value: '100%', icon: 'fa-solid fa-person-running', cat: '基础机动', color: 'text-[#00f0ff]' },
-    { label: '地表采矿挖掘倍率', value: '100%', icon: 'fa-solid fa-pickaxe', cat: '地脉开采', color: 'text-amber-400' },
-    { label: '手工装配制作速度', value: '100%', icon: 'fa-solid fa-screwdriver-wrench', cat: '随身研造', color: 'text-orange-400' },
-    { label: '飞剑破甲真伤加成', value: '120%', icon: 'fa-solid fa-khanda', cat: '破罡斩击', color: 'text-rose-400' },
-    { label: '护体罡气护盾上限', value: '500 点', icon: 'fa-solid fa-shield-halved', cat: '本命护盾', color: 'text-emerald-400' },
-    { label: '随身储物经脉格数', value: '72 格', icon: 'fa-solid fa-boxes-stacked', cat: '经脉芥子', color: 'text-cyan-300' },
-    { label: '灵压极限耐受负荷', value: '8,420 Pa', icon: 'fa-solid fa-gauge-high', cat: '肉身负荷', color: 'text-purple-300' },
-    { label: '地脉煞气抗性加成', value: '45%', icon: 'fa-solid fa-biohazard', cat: '环境抗逆', color: 'text-teal-400' },
-    { label: '高空坠落冲击缓释', value: '30%', icon: 'fa-solid fa-feather-pointed', cat: '御气缓冲', color: 'text-blue-300' },
-    { label: '神识探测扫描半径', value: '500 米', icon: 'fa-solid fa-tower-broadcast', cat: '全息感知', color: 'text-sky-400' }
+  facility: [
+    { label: '采矿机 (BD_135)', value: '2 台', icon: 'fa-solid fa-mountain', cat: '采掘设备', color: 'text-amber-400' },
+    { label: '精炼炉 (BD_136)', value: '2 台', icon: 'fa-solid fa-fire-burner', cat: '冶炼生产', color: 'text-orange-400' },
+    { label: '粉碎机 (BD_137)', value: '1 台', icon: 'fa-solid fa-braille', cat: '中间件研磨', color: 'text-zinc-300' },
+    { label: '加工台 (BD_138)', value: '1 台', icon: 'fa-solid fa-screwdriver-wrench', cat: '基础机械', color: 'text-stone-300' },
+    { label: '切割机 (BD_139)', value: '1 台', icon: 'fa-solid fa-scissors', cat: '精密切削', color: 'text-yellow-300' },
+    { label: '搅拌机 (BD_143)', value: '1 台', icon: 'fa-solid fa-blender', cat: '流固混合', color: 'text-teal-400' },
+    { label: '离心机 (BD_144)', value: '1 台', icon: 'fa-solid fa-atom', cat: '多相分离', color: 'text-sky-300' },
+    { label: '组装机 (BD_146)', value: '1 台', icon: 'fa-solid fa-industry', cat: '双轨组装', color: 'text-[#00f0ff]' },
+    { label: '复合建筑母机座', value: '3 座', icon: 'fa-solid fa-cubes-stacked', cat: '引擎/营养/流体', color: 'text-emerald-400' },
+    { label: '法宝工坊 (BD_156/157)', value: '2 座', icon: 'fa-solid fa-scroll', cat: '炼宝台/渡劫台', color: 'text-amber-300' }
   ],
-  cert: [
-    { label: '宗门商业资质', value: '认证通过 (特等)', icon: 'fa-solid fa-stamp', cat: '仙宗官印', color: 'text-emerald-400' },
-    { label: '流水线自动化评级', value: '甲等上乘', icon: 'fa-solid fa-diagram-project', cat: '工控评定', color: 'text-[#00f0ff]' },
-    { label: '全厂物流平衡效率', value: '94.6%', icon: 'fa-solid fa-scale-balanced', cat: '拓扑平衡', color: 'text-amber-400' },
-    { label: '煞气回收环保达标率', value: '99.8%', icon: 'fa-solid fa-leaf', cat: '天道衡平', color: 'text-emerald-300' },
-    { label: '主电网稳态冗余', value: '165 MW', icon: 'fa-solid fa-bolt', cat: '动力储备', color: 'text-yellow-400' },
-    { label: '每日产值收益估算', value: '28,400 灵石', icon: 'fa-solid fa-coins', cat: '商业推演', color: 'text-amber-300' },
-    { label: '仙宗商盟信誉评级', value: '天阶商契', icon: 'fa-solid fa-certificate', cat: '商道威望', color: 'text-purple-400' }
+  progression: [
+    { label: '当前修士境界', value: '练气期四层', icon: 'fa-solid fa-user-astronaut', cat: '道基修为', color: 'text-cyan-300' },
+    { label: '中央处理器认证', value: '练气·第4层', icon: 'fa-solid fa-microchip', cat: '技术认证', color: 'text-amber-400' },
+    { label: '造化金身阶段供料', value: '阶段二 (金身骨架)', icon: 'fa-solid fa-child', cat: '奇观工程', color: 'text-yellow-400' },
+    { label: '人造灵根原型储备', value: '4 / 20 件', icon: 'fa-solid fa-dna', cat: '终局收束', color: 'text-rose-400' },
+    { label: '山河社稷图淬炼', value: '渡劫前置态 (待引雷)', icon: 'fa-solid fa-cloud-bolt', cat: 'ART_001法宝', color: 'text-purple-300' },
+    { label: '随身储物芥子空间', value: '32 / 72 格', icon: 'fa-solid fa-boxes-stacked', cat: '经脉容量', color: 'text-emerald-400' },
+    { label: '地脉勘探标定矿点', value: '4 处富矿', icon: 'fa-solid fa-map-location-dot', cat: '罗盘信标', color: 'text-sky-400' }
   ]
 };
 
@@ -781,7 +777,7 @@ function switchStatsSubTab(subTab) {
   playUiSound('click');
   currentStatsSubTab = subTab;
 
-  ['world', 'player', 'cert'].forEach(t => {
+  ['world', 'facility', 'progression'].forEach(t => {
     const btn = document.getElementById(`btnStatsTab_${t}`);
     if (!btn) return;
     if (t === subTab) {
