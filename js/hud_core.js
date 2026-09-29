@@ -24,83 +24,166 @@ function showNotification(msg) {
 }
 
 // =========================================================================
-// 戴森球风格建筑分类筛选快捷栏系统 (严格对照策划表 配置.txt，纯中文按钮)
+// 官方建筑数据表驱动引擎 (100% 读表 XIUXIAN_BUILDINGS & XIUXIAN_ITEMS，消除硬编码)
 // =========================================================================
-const DSP_BUILD_CATEGORIES = [
-  {
-    id: 'prod',
-    name: '生产制造',
-    subTitle: '采矿·精炼·加工',
-    shortcut: '1',
-    desc: '采矿机、精炼炉、粉碎机、加工台、切割机、离心机、解构机、培育仓、提取器、搅拌机、组装机、冶炼舱',
-    buildings: [
-      { key: 'miner', code: 'BD_101', name: '采矿机', sub: '采掘 5MW', desc: '必须对准矿脉，探测范围10米', costText: '玄铁×3 板×2' },
-      { key: 'smelter', code: 'BD_102', name: '精炼炉', sub: '冶炼 10MW', desc: '高温熔炼矿石为金属锭', costText: '玄铁×6 板×4' },
-      { key: 'crusher', code: 'BD_103', name: '粉碎机', sub: '粉碎 8MW', desc: '金属锭研磨为玄铁粉', costText: '玄铁×2 板×1' },
-      { key: 'assembler', code: 'BD_104', name: '加工台', sub: '零件 6MW', desc: '加工齿轮、线圈、控制模块', costText: '玄铁×4 板×2' },
-      { key: 'constructor', code: 'BD_105', name: '切割机', sub: '精密 12MW', desc: '精密高速切割铜线与薄片', costText: '玄铁×4 齿轮×2' },
-      { key: 'centrifuge', code: 'BD_106', name: '离心机', sub: '提纯 15MW', desc: '离心提取组织精华与煞气分离', costText: '玄铁×5 铜锭×3' },
-      { key: 'deconstructor', code: 'BD_107', name: '解构机', sub: '生物 20MW', desc: '解构修士提取生物组织与神经束', costText: '玄铁×8 板×4' },
-      { key: 'incubator', code: 'BD_108', name: '培育仓', sub: '生化 8MW', desc: '流固混合培育生物材料', costText: '玄铁×6 铜锭×4' },
-      { key: 'extractor', code: 'BD_109', name: '提取器', sub: '萃取 10MW', desc: '提取组织蛋白液与灵草液', costText: '玄铁×3 铜锭×2' },
-      { key: 'mixer', code: 'BD_110', name: '搅拌机', sub: '调配 14MW', desc: '流固混合调配营养液与稳脉液', costText: '玄铁×4 齿轮×2' },
-      { key: 'assembler_heavy', code: 'BD_111', name: '组装机', sub: '重工 25MW', desc: '双轨校验合成人造灵根与阵图胚', costText: '玄铁×8 铜锭×6' },
-      { key: 'smelt_chamber', code: 'BD_113', name: '冶炼舱', sub: '插件 高温', desc: '挂载灵力引擎的高温冶炼舱', costText: '玄铁×4 铜锭×2' }
-    ]
-  },
-  {
-    id: 'logi',
-    name: '传送物流',
-    subTitle: '传送带·分流·管网',
-    shortcut: '2',
-    desc: '传送带类型：传送带、分流器、水管、垂直传送带',
-    buildings: [
-      { key: 'conveyor', code: 'BD_125', name: '传送带', sub: '双向固体', desc: '自带供电传输的物料传送带', costText: '玄铁锭×2' },
-      { key: 'splitter', code: 'BD_124', name: '分流器', sub: '1进3出', desc: '支持物料品质过滤分流', costText: '玄铁×3 齿轮×1' },
-      { key: 'pipe', code: 'BD_127', name: '水管', sub: '双向流体', desc: '流体专用管道输送水与药液', costText: '玄铁锭×2' },
-      { key: 'vert_conveyor', code: 'BD_129', name: '垂直传送带', sub: 'Z轴升降', desc: 'Z轴立体运输，高度可拖拽3-8米', costText: '玄铁×4 齿轮×2' }
-    ]
-  },
-  {
-    id: 'struct',
-    name: '地基结构',
-    subTitle: '地基·玄铁梁·置物桌',
-    shortcut: '3',
-    desc: '地基类型：地基1x1、地基4x4、地基16x16、玄铁梁、置物桌',
-    buildings: [
-      { key: 'foundation_1x1', code: 'BD_119', name: '地基 1x1', sub: '平整承重', desc: '1x1 规格基础平整地基', costText: '玄铁板×1' },
-      { key: 'foundation', code: 'BD_120', name: '地基 4x4', sub: '标准地基', desc: '4x4 规格工业承重混凝土地基', costText: '玄铁板×4' },
-      { key: 'foundation_16x16', code: 'BD_121', name: '地基 16x16', sub: '巨型平台', desc: '16x16 规格无限承重巨型地基', costText: '玄铁板×8' },
-      { key: 'iron_beam_bld', code: 'BD_122', name: '玄铁梁', sub: '8米桥架', desc: '重型承重工字梁，跨越地形障碍', costText: '玄铁锭×2' },
-      { key: 'storage_desk', code: 'BD_123', name: '置物桌', sub: '操作台面', desc: '便携台面与临时置物基台', costText: '玄铁锭×1' }
-    ]
-  },
-  {
-    id: 'power',
-    name: '能源供电',
-    subTitle: '供能机·灵力引擎',
-    shortcut: '4',
-    desc: '供能机、灵力引擎无线输电供热',
-    buildings: [
-      { key: 'power_burner', code: 'BD_117', name: '供能机', sub: '魂火发电', desc: '烧燃料发电，无线供电范围50米', costText: '玄铁×5 板×3' },
-      { key: 'power_engine', code: 'BD_112', name: '灵力引擎', sub: '无线供热', desc: '提供无线电网与3个冶炼插槽', costText: '玄铁×8 铜锭×6' }
-    ]
-  },
-  {
-    id: 'aux',
-    name: '辅助设施',
-    subTitle: '箱子·抽水·净化·传送',
-    shortcut: '5',
-    desc: '箱子、大箱子、抽水机、净化塔、传送门',
-    buildings: [
-      { key: 'storage_box', code: 'BD_115', name: '个人储物箱', sub: '16格仓储', desc: '初始便携储物箱，容量16格', costText: '玄铁×2 板×2' },
-      { key: 'storage_box_large', code: 'BD_115_L', name: '大储物箱', sub: '32格仓储', desc: '工业级大箱子，容量32格', costText: '玄铁×4 板×4' },
-      { key: 'water_pump', code: 'BD_116', name: '抽水机', sub: '流体抽取', desc: '必须放置在水上，持续抽取水源', costText: '玄铁×3 板×2' },
-      { key: 'purifier', code: 'BD_118', name: '净化塔', sub: '污染净化', desc: '抵消污染与煞气扩散，范围20米', costText: '玄铁×6 铜锭×4' },
-      { key: 'portal', code: 'BD_114', name: '传送门', sub: '空间跃迁', desc: '配对频段瞬移传输，耗电50MW', costText: '玄铁×8 板×4' }
-    ]
+
+// 工业矢量 SVG 生成器 (为数据表中的各类工业建筑自适应生成 Satisfactory 美学矢量图标)
+function getBuildingSvg(bld, key) {
+  const grp = bld.group || 'prod';
+  const k = (key || bld.id || '').toLowerCase();
+
+  if (k === 'furnace' || k === 'smelter') {
+    return `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow"><ellipse cx="80" cy="142" rx="48" ry="12" fill="rgba(0,0,0,0.5)"/><rect x="68" y="24" width="24" height="20" rx="2" fill="#20242d" stroke="#111" stroke-width="2"/><line x1="64" y1="24" x2="96" y2="24" stroke="#f5921e" stroke-width="3"/><path d="M 38 138 L 48 44 L 112 44 L 122 138 Z" fill="#272d38" stroke="#12161f" stroke-width="3"/><polygon points="54,52 106,52 114,130 46,130" fill="#f5921e" stroke="#111" stroke-width="2"/><rect x="64" y="85" width="32" height="36" rx="3" fill="#15171d" stroke="#000" stroke-width="2"/><rect x="68" y="90" width="24" height="26" rx="2" fill="#ff5500" class="animate-pulse shadow-[inset_0_0_10px_#ffeb3b]"/><line x1="68" y1="98" x2="92" y2="98" stroke="#ffd000" stroke-width="2"/><line x1="68" y1="106" x2="92" y2="106" stroke="#ffd000" stroke-width="2"/><rect x="60" y="128" width="40" height="14" fill="#12151c" stroke="#333" stroke-width="1.5"/><rect x="68" y="132" width="24" height="6" fill="#ffd400"/></svg>`;
   }
-];
+  if (k === 'miner') {
+    return `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow"><polygon points="30,140 45,100 115,100 130,140" fill="#1b2029" stroke="#111"/><rect x="45" y="70" width="70" height="40" fill="#e0770b" stroke="#111" stroke-width="2"/><rect x="68" y="25" width="24" height="45" fill="#3d4657" stroke="#111"/><polygon points="80,142 65,115 95,115" fill="#ffd400"/></svg>`;
+  }
+  if (k === 'crusher') {
+    return `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow"><rect x="35" y="45" width="90" height="85" rx="4" fill="#293241" stroke="#111" stroke-width="2"/><polygon points="50,60 80,95 110,60" fill="#e0770b"/><line x1="80" y1="95" x2="80" y2="120" stroke="#f5921e" stroke-width="3"/></svg>`;
+  }
+  if (k === 'assembler') {
+    return `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow"><rect x="25" y="40" width="110" height="90" rx="6" fill="#242c38" stroke="#111" stroke-width="3"/><rect x="35" y="50" width="40" height="70" fill="#f5921e"/><rect x="85" y="50" width="40" height="70" fill="#e0770b"/><circle cx="55" cy="85" r="12" fill="#111"/><circle cx="105" cy="85" r="12" fill="#111"/></svg>`;
+  }
+  if (k === 'cutter' || k === 'constructor') {
+    return `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow"><polygon points="25,138 45,100 115,100 135,138" fill="#20252f" stroke="#111" stroke-width="2"/><rect x="38" y="45" width="84" height="18" rx="2" fill="#e57d07" stroke="#111" stroke-width="2"/><rect x="36" y="60" width="14" height="42" fill="#2b313d"/><rect x="110" y="60" width="14" height="42" fill="#2b313d"/><rect x="68" y="58" width="24" height="20" fill="#ffd400"/><line x1="80" y1="78" x2="80" y2="108" stroke="#7fe8ff" stroke-width="3" stroke-linecap="round"/></svg>`;
+  }
+  if (k === 'centrifuge') {
+    return `<svg viewBox="0 0 180 180" class="w-full h-full drop-shadow"><rect x="45" y="55" width="90" height="90" rx="6" fill="#1c2533" stroke="#111" stroke-width="2"/><circle cx="90" cy="100" r="30" fill="none" stroke="#38bdf8" stroke-width="4" stroke-dasharray="8 4" class="animate-spin"/></svg>`;
+  }
+  if (k === 'deconstructor') {
+    return `<svg viewBox="0 0 180 180" class="w-full h-full drop-shadow"><rect x="40" y="50" width="100" height="95" rx="4" fill="#2b2025" stroke="#f43f5e" stroke-width="2"/><line x1="55" y1="65" x2="125" y2="135" stroke="#f43f5e" stroke-width="3"/><line x1="125" y1="65" x2="55" y2="135" stroke="#f43f5e" stroke-width="3"/></svg>`;
+  }
+  if (k === 'incubator' || k === 'petri_dish') {
+    return `<svg viewBox="0 0 200 180" class="w-full h-full drop-shadow"><rect x="45" y="45" width="110" height="100" rx="6" fill="#142820" stroke="#10b981" stroke-width="2"/><circle cx="100" cy="95" r="26" fill="#059669" class="animate-pulse"/></svg>`;
+  }
+  if (k === 'extractor') {
+    return `<svg viewBox="0 0 180 160" class="w-full h-full drop-shadow"><rect x="40" y="40" width="100" height="90" rx="4" fill="#202938" stroke="#111" stroke-width="2"/><circle cx="90" cy="85" r="22" fill="#00f0ff" opacity="0.8"/></svg>`;
+  }
+  if (k === 'mixer') {
+    return `<svg viewBox="0 0 180 180" class="w-full h-full drop-shadow"><rect x="45" y="45" width="90" height="90" rx="6" fill="#1e293b" stroke="#00f0ff" stroke-width="2"/><circle cx="90" cy="90" r="22" fill="#0284c7"/><line x1="90" y1="50" x2="90" y2="130" stroke="#fff" stroke-width="3"/></svg>`;
+  }
+  if (k === 'assembler_heavy') {
+    return `<svg viewBox="0 0 200 180" class="w-full h-full drop-shadow"><rect x="30" y="45" width="140" height="90" rx="8" fill="#1e293b" stroke="#00f0ff" stroke-width="3"/><rect x="45" y="60" width="45" height="60" fill="#f5921e"/><rect x="110" y="60" width="45" height="60" fill="#00f0ff"/></svg>`;
+  }
+  if (k === 'smelt_chamber') {
+    return `<svg viewBox="0 0 180 180" class="w-full h-full drop-shadow"><rect x="40" y="45" width="100" height="90" rx="6" fill="#3f1d1d" stroke="#ef4444" stroke-width="2"/><circle cx="90" cy="90" r="25" fill="#f97316" class="animate-ping opacity-75"/></svg>`;
+  }
+  if (k.includes('conveyor') || k.includes('splitter') || k.includes('merger') || k.includes('pipe') || grp === 'logi') {
+    return `<svg viewBox="0 0 160 160" class="w-full h-full text-cyan-400"><rect x="25" y="65" width="110" height="30" rx="4" fill="#1f2937" stroke="#38bdf8" stroke-width="2"/><polygon points="65,72 85,80 65,88" fill="#38bdf8"/><polygon points="90,72 110,80 90,88" fill="#38bdf8"/></svg>`;
+  }
+  if (k.includes('power') || grp === 'power') {
+    return `<svg viewBox="0 0 160 160" class="w-full h-full text-yellow-400"><rect x="35" y="45" width="90" height="85" rx="6" fill="#1c1917" stroke="#eab308" stroke-width="2"/><polygon points="85,55 65,85 82,85 75,115 95,85 78,85" fill="#facc15"/></svg>`;
+  }
+  if (k.includes('foundation') || k.includes('beam') || k.includes('table') || grp === 'org' || grp === 'struct') {
+    return `<svg viewBox="0 0 160 160" class="w-full h-full text-stone-300"><polygon points="80,45 140,75 80,105 20,75" fill="#374151" stroke="#9ca3af" stroke-width="2"/><polygon points="20,75 80,105 80,125 20,95" fill="#1f2937" stroke="#9ca3af" stroke-width="1.5"/><polygon points="140,75 80,105 80,125 140,95" fill="#111827" stroke="#9ca3af" stroke-width="1.5"/></svg>`;
+  }
+  if (k === 'storage_box' || k === 'storage_box_large') {
+    return `<svg viewBox="0 0 160 160" class="w-full h-full text-amber-300"><rect x="35" y="45" width="90" height="75" rx="3" fill="#e0770b" stroke="#111" stroke-width="3"/><rect x="65" y="70" width="30" height="20" fill="#111"/></svg>`;
+  }
+  if (k === 'refining_bench' || k === 'tribulation_platform' || k === 'teleporter' || k === 'portal' || grp === 'special') {
+    return `<svg viewBox="0 0 180 180" class="w-full h-full drop-shadow"><rect x="30" y="40" width="120" height="100" rx="8" fill="#1b172a" stroke="#ffd700" stroke-width="3"/><circle cx="90" cy="90" r="30" fill="#a855f7" class="animate-pulse"/></svg>`;
+  }
+  return `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow"><rect x="35" y="45" width="90" height="80" rx="4" fill="#1e293b" stroke="#f5921e" stroke-width="2"/><circle cx="80" cy="85" r="20" fill="#f5921e" opacity="0.6"/></svg>`;
+}
+
+// 动态读表生成建筑数据库 (完全读取 XIUXIAN_BUILDINGS 与 XIUXIAN_ITEMS，消除硬编码)
+function buildDatabaseFromTable() {
+  const db = {};
+  if (typeof XIUXIAN_BUILDINGS !== 'undefined') {
+    Object.entries(XIUXIAN_BUILDINGS).forEach(([key, b]) => {
+      let grp = b.group;
+      if (!grp) {
+        if (b.category === '生产' || b.category === '生产/辅助') grp = 'prod';
+        else if (b.category === '物流') grp = 'logi';
+        else if (b.category === '建筑' || b.category === '仓储') grp = 'org';
+        else if (b.category === '电力') grp = 'power';
+        else grp = 'special';
+      }
+
+      const costs = (b.costs || []).map(c => {
+        const item = (typeof XIUXIAN_ITEMS !== 'undefined' && XIUXIAN_ITEMS[c.code]) ? XIUXIAN_ITEMS[c.code] : null;
+        let iconCls = 'fa-cube';
+        if (item && item.icon) {
+          const match = item.icon.match(/fa-[a-z0-9-]+/g);
+          if (match && match.length > 0) iconCls = match[match.length - 1];
+        }
+        return {
+          code: c.code,
+          need: c.need,
+          name: item ? item.name : (c.name || c.code),
+          icon: iconCls
+        };
+      });
+
+      let powerText = '0MW';
+      if (b.power !== undefined) {
+        if (b.power > 0) powerText = `${b.power}MW`;
+        else if (b.power < 0) powerText = `+${Math.abs(b.power)}MW`;
+      }
+
+      db[key] = {
+        key: key,
+        code: b.code || key,
+        title: `${b.name} (${b.code || key})`,
+        name: b.name,
+        group: grp,
+        desc: b.desc || '《修仙工厂》标准工业建筑设施。',
+        power: powerText,
+        heat: b.heat || 0,
+        costs: costs,
+        svg: getBuildingSvg(b, key)
+      };
+    });
+  }
+  return db;
+}
+
+// 动态读表生成戴森球风格建筑分类快捷栏 (完全读取 XIUXIAN_BUILDINGS)
+function getDspBuildCategoriesFromTable() {
+  const meta = [
+    { id: 'prod', name: '生产制造', subTitle: '采矿·精炼·加工', shortcut: '1', filterGroup: 'prod' },
+    { id: 'logi', name: '传送物流', subTitle: '传送带·分流·管网', shortcut: '2', filterGroup: 'logi' },
+    { id: 'struct', name: '地基结构', subTitle: '地基·玄铁梁·置物桌', shortcut: '3', filterGroup: 'org' },
+    { id: 'power', name: '能源供电', subTitle: '供能机·灵力引擎', shortcut: '4', filterGroup: 'power' },
+    { id: 'aux', name: '辅助设施', subTitle: '箱子·大箱子·传送门', shortcut: '5', filterGroup: ['aux', 'special'] }
+  ];
+
+  const db = buildDatabaseFromTable();
+  return meta.map(cat => {
+    const blds = Object.values(db).filter(b => {
+      if (Array.isArray(cat.filterGroup)) return cat.filterGroup.includes(b.group);
+      return b.group === cat.filterGroup;
+    });
+
+    const descList = blds.map(b => b.name).slice(0, 10).join('、');
+    return {
+      id: cat.id,
+      name: cat.name,
+      subTitle: cat.subTitle,
+      shortcut: cat.shortcut,
+      desc: descList,
+      buildings: blds.map(b => {
+        const costSummary = b.costs.slice(0, 2).map(c => `${c.name.replace('工业', '').replace('玄铁', '玄铁')}×${c.need}`).join(' ') || '基础材料';
+        return {
+          key: b.key,
+          code: b.code,
+          name: b.name,
+          sub: b.power !== '0MW' ? b.power : '无功耗',
+          desc: b.desc,
+          costText: costSummary
+        };
+      })
+    };
+  });
+}
+
+// 全局读表动态实例
+let buildingDatabase = buildDatabaseFromTable();
+let DSP_BUILD_CATEGORIES = getDspBuildCategoriesFromTable();
+window.buildingDatabase = buildingDatabase;
+window.DSP_BUILD_CATEGORIES = DSP_BUILD_CATEGORIES;
+window.buildDatabaseFromTable = buildDatabaseFromTable;
+window.getDspBuildCategoriesFromTable = getDspBuildCategoriesFromTable;
 
 let currentDspCategory = 'prod';
 let currentDspBuilding = null;
@@ -338,368 +421,33 @@ function handleSearchCalc(val) {
   } catch (e) {}
 }
 
-// 关闭除了当前之外的其它所有弹窗
+// 关闭除了当前之外的其它所有弹窗 (严格全局 HUD 互斥)
 function closeOtherModals(current) {
-  ['buildModal', 'craftModal', 'invModal', 'searchModal', 'machineModal', 'swordCasketModal', 'hubMilestoneModal', 'codexModal', 'cpuProcessorModal', 'jinShenModal', 'fabaoModal'].forEach(id => {
-    if (id !== current) {
-      const el = document.getElementById(id);
-      if (el) el.classList.add('hidden');
-    }
-  });
-}
-
-// =========================================================================
-// 建造器数据与菜单逻辑
-// =========================================================================
-const buildingDatabase = {
-  // --- 生产制造类 (prod) ---
-  miner: {
-    key: 'miner',
-    code: 'BD_101',
-    title: '采矿机 (BD_101)',
-    name: '采矿机',
-    group: 'prod',
-    desc: '必须对准矿脉，持续开采地下玄铁矿、赤铜矿与煤炭。',
-    power: '5MW',
-    costs: [
-      { name: '玄铁板', code: 'iron_plate', need: 10, icon: 'fa-sheet-plastic' },
-      { name: '玄铁齿轮', code: 'iron_gear', need: 5, icon: 'fa-gear' }
-    ],
-    svg: `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow"><polygon points="30,140 45,100 115,100 130,140" fill="#1b2029" stroke="#111"/><rect x="45" y="70" width="70" height="40" fill="#e0770b" stroke="#111" stroke-width="2"/><rect x="68" y="25" width="24" height="45" fill="#3d4657" stroke="#111"/><polygon points="80,142 65,115 95,115" fill="#ffd400"/></svg>`
-  },
-  smelter: {
-    key: 'smelter',
-    code: 'BD_102',
-    title: '精炼炉 (BD_102)',
-    name: '精炼炉',
-    group: 'prod',
-    desc: '基础矿石冶炼设备，将玄铁矿/赤铜矿高温熔炼为金属锭。',
-    power: '10MW',
-    costs: [
-      { name: '玄铁板', code: 'iron_plate', need: 8, icon: 'fa-sheet-plastic' },
-      { name: '耐火炉芯', code: 'refractory_core', need: 2, icon: 'fa-fire-burner' }
-    ],
-    svg: `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow"><ellipse cx="80" cy="142" rx="48" ry="12" fill="rgba(0,0,0,0.5)"/><rect x="68" y="24" width="24" height="20" rx="2" fill="#20242d" stroke="#111" stroke-width="2"/><line x1="64" y1="24" x2="96" y2="24" stroke="#f5921e" stroke-width="3"/><path d="M 38 138 L 48 44 L 112 44 L 122 138 Z" fill="#272d38" stroke="#12161f" stroke-width="3"/><polygon points="54,52 106,52 114,130 46,130" fill="#f5921e" stroke="#111" stroke-width="2"/><rect x="64" y="85" width="32" height="36" rx="3" fill="#15171d" stroke="#000" stroke-width="2"/><rect x="68" y="90" width="24" height="26" rx="2" fill="#ff5500" class="animate-pulse shadow-[inset_0_0_10px_#ffeb3b]"/><line x1="68" y1="98" x2="92" y2="98" stroke="#ffd000" stroke-width="2"/><line x1="68" y1="106" x2="92" y2="106" stroke="#ffd000" stroke-width="2"/><rect x="60" y="128" width="40" height="14" fill="#12151c" stroke="#333" stroke-width="1.5"/><rect x="68" y="132" width="24" height="6" fill="#ffd400"/></svg>`
-  },
-  crusher: {
-    key: 'crusher',
-    code: 'BD_103',
-    title: '粉碎机 (BD_103)',
-    name: '粉碎机',
-    group: 'prod',
-    desc: '将金属锭研磨粉碎为加工中间件玄铁粉。',
-    power: '8MW',
-    costs: [
-      { name: '玄铁板', code: 'iron_plate', need: 6, icon: 'fa-sheet-plastic' },
-      { name: '玄铁齿轮', code: 'iron_gear', need: 4, icon: 'fa-gear' }
-    ],
-    svg: `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow"><rect x="35" y="45" width="90" height="85" rx="4" fill="#293241" stroke="#111" stroke-width="2"/><polygon points="50,60 80,95 110,60" fill="#e0770b"/><line x1="80" y1="95" x2="80" y2="120" stroke="#f5921e" stroke-width="3"/></svg>`
-  },
-  assembler: {
-    key: 'assembler',
-    code: 'BD_104',
-    title: '加工台 (BD_104)',
-    name: '加工台',
-    group: 'prod',
-    desc: '制作基础机械零件，加工玄铁板、齿轮、玄铁梁、控制模块与设备框架。',
-    power: '6MW',
-    costs: [
-      { name: '玄铁板', code: 'iron_plate', need: 8, icon: 'fa-sheet-plastic' },
-      { name: '玄铁齿轮', code: 'iron_gear', need: 4, icon: 'fa-gear' }
-    ],
-    svg: `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow"><rect x="25" y="40" width="110" height="90" rx="6" fill="#242c38" stroke="#111" stroke-width="3"/><rect x="35" y="50" width="40" height="70" fill="#f5921e"/><rect x="85" y="50" width="40" height="70" fill="#e0770b"/><circle cx="55" cy="85" r="12" fill="#111"/><circle cx="105" cy="85" r="12" fill="#111"/></svg>`
-  },
-  constructor: {
-    key: 'constructor',
-    code: 'BD_105',
-    title: '切割机 (BD_105)',
-    name: '切割机',
-    group: 'prod',
-    desc: '基础精密材料加工设备，将赤铜锭切割为铜线、导灵铜片，加工木板和导脉薄片。',
-    power: '12MW',
-    costs: [
-      { name: '玄铁板', code: 'iron_plate', need: 10, icon: 'fa-sheet-plastic' },
-      { name: '玄铁齿轮', code: 'iron_gear', need: 6, icon: 'fa-gear' }
-    ],
-    svg: `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow"><polygon points="25,138 45,100 115,100 135,138" fill="#20252f" stroke="#111" stroke-width="2"/><rect x="38" y="45" width="84" height="18" rx="2" fill="#e57d07" stroke="#111" stroke-width="2"/><rect x="36" y="60" width="14" height="42" fill="#2b313d"/><rect x="110" y="60" width="14" height="42" fill="#2b313d"/><rect x="68" y="58" width="24" height="20" fill="#ffd400"/><line x1="80" y1="78" x2="80" y2="108" stroke="#7fe8ff" stroke-width="3" stroke-linecap="round"/></svg>`
-  },
-  centrifuge: {
-    key: 'centrifuge',
-    code: 'BD_106',
-    title: '离心机 (BD_106)',
-    name: '离心机',
-    group: 'prod',
-    desc: '分离生物液体中的不同成分，离心提取组织精华液与煞气分离。',
-    power: '15MW',
-    costs: [
-      { name: '玄铁板', code: 'iron_plate', need: 10, icon: 'fa-sheet-plastic' },
-      { name: '赤铜锭', code: 'copper_ingot', need: 6, icon: 'fa-square' }
-    ],
-    svg: `<svg viewBox="0 0 180 180" class="w-full h-full drop-shadow"><rect x="45" y="55" width="90" height="90" rx="6" fill="#1c2533" stroke="#111" stroke-width="2"/><circle cx="90" cy="100" r="30" fill="none" stroke="#38bdf8" stroke-width="4" stroke-dasharray="8 4" class="animate-spin"/></svg>`
-  },
-  deconstructor: {
-    key: 'deconstructor',
-    code: 'BD_107',
-    title: '解构机 (BD_107)',
-    name: '解构机',
-    group: 'prod',
-    desc: '专门解构修士尸体，提取鲜活生物组织、神经束与脱水生物组织。',
-    power: '20MW',
-    costs: [
-      { name: '玄铁板', code: 'iron_plate', need: 12, icon: 'fa-sheet-plastic' },
-      { name: '玄铁齿轮', code: 'iron_gear', need: 8, icon: 'fa-gear' }
-    ],
-    svg: `<svg viewBox="0 0 180 180" class="w-full h-full drop-shadow"><rect x="40" y="50" width="100" height="95" rx="4" fill="#2b2025" stroke="#f43f5e" stroke-width="2"/><line x1="55" y1="65" x2="125" y2="135" stroke="#f43f5e" stroke-width="3"/><line x1="125" y1="65" x2="55" y2="135" stroke="#f43f5e" stroke-width="3"/></svg>`
-  },
-  incubator: {
-    key: 'incubator',
-    code: 'BD_108',
-    title: '培育仓 (BD_108)',
-    name: '培育仓',
-    group: 'prod',
-    desc: '多用处流固混合培育设备，具备灵草基础培育、催生增产闭环与细胞扩增。',
-    power: '8MW',
-    costs: [
-      { name: '玄铁板', code: 'iron_plate', need: 10, icon: 'fa-sheet-plastic' },
-      { name: '赤铜锭', code: 'copper_ingot', need: 8, icon: 'fa-square' }
-    ],
-    svg: `<svg viewBox="0 0 200 180" class="w-full h-full drop-shadow"><rect x="45" y="45" width="110" height="100" rx="6" fill="#142820" stroke="#10b981" stroke-width="2"/><circle cx="100" cy="95" r="26" fill="#059669" class="animate-pulse"/></svg>`
-  },
-  extractor: {
-    key: 'extractor',
-    code: 'BD_109',
-    title: '提取器 (BD_109)',
-    name: '提取器',
-    group: 'prod',
-    desc: '从生物材料中提取组织蛋白液与灵草萃取液。',
-    power: '10MW',
-    costs: [
-      { name: '玄铁板', code: 'iron_plate', need: 8, icon: 'fa-sheet-plastic' },
-      { name: '铜线', code: 'copper_wire', need: 12, icon: 'fa-plug' }
-    ],
-    svg: `<svg viewBox="0 0 180 160" class="w-full h-full drop-shadow"><rect x="40" y="40" width="100" height="90" rx="4" fill="#202938" stroke="#111" stroke-width="2"/><circle cx="90" cy="85" r="22" fill="#00f0ff" opacity="0.8"/></svg>`
-  },
-  mixer: {
-    key: 'mixer',
-    code: 'BD_110',
-    title: '搅拌机 (BD_110)',
-    name: '搅拌机',
-    group: 'prod',
-    desc: '流体/固体混合调配，合成基础营养液、活性混合液与法宝稳脉液。',
-    power: '14MW',
-    costs: [
-      { name: '玄铁板', code: 'iron_plate', need: 10, icon: 'fa-sheet-plastic' },
-      { name: '玄铁齿轮', code: 'iron_gear', need: 6, icon: 'fa-gear' }
-    ],
-    svg: `<svg viewBox="0 0 180 180" class="w-full h-full drop-shadow"><rect x="40" y="45" width="100" height="95" rx="4" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/><circle cx="90" cy="92" r="24" fill="#0284c7" class="animate-spin"/></svg>`
-  },
-  assembler_heavy: {
-    key: 'assembler_heavy',
-    code: 'BD_111',
-    title: '组装机 (BD_111)',
-    name: '组装机',
-    group: 'prod',
-    desc: '重工双轨校验组装，合成生物胚料、灵根胚体、人造灵根与法宝阵图胚。',
-    power: '25MW',
-    costs: [
-      { name: '玄铁梁', code: 'iron_beam', need: 8, icon: 'fa-bars-staggered' },
-      { name: '玄铁齿轮', code: 'iron_gear', need: 10, icon: 'fa-gear' }
-    ],
-    svg: `<svg viewBox="0 0 220 200" class="w-full h-full drop-shadow"><rect x="35" y="60" width="150" height="110" rx="4" fill="#262d3a" stroke="#121620" stroke-width="3"/><rect x="45" y="70" width="60" height="90" fill="#f5921e"/><circle cx="75" cy="115" r="16" fill="#111"/><circle cx="145" cy="115" r="16" fill="#111"/></svg>`
-  },
-  smelt_chamber: {
-    key: 'smelt_chamber',
-    code: 'BD_113',
-    title: '冶炼舱 (BD_113)',
-    name: '冶炼舱',
-    group: 'prod',
-    desc: '挂载灵力引擎的高温冶炼舱插件，汲取高热自动提纯精炼玄铁与高温合金。',
-    power: '35MW',
-    costs: [
-      { name: '玄铁板', code: 'iron_plate', need: 10, icon: 'fa-sheet-plastic' },
-      { name: '耐火炉芯', code: 'refractory_core', need: 4, icon: 'fa-fire-burner' }
-    ],
-    svg: `<svg viewBox="0 0 170 170" class="w-full h-full drop-shadow"><rect x="40" y="40" width="90" height="90" rx="4" fill="#2d1c08" stroke="#f5921e" stroke-width="2"/><circle cx="85" cy="85" r="22" fill="#ea580c" class="animate-pulse"/></svg>`
-  },
-
-  // --- 传送物流类 (logi) ---
-  conveyor: {
-    key: 'conveyor',
-    code: 'BD_125',
-    title: '传送带 (BD_125)',
-    name: '传送带',
-    group: 'logi',
-    desc: '自带供电传输的标准物料传送带，支持建筑间无人化运输。',
-    power: '0MW',
-    costs: [{ name: '玄铁板', code: 'iron_plate', need: 1, icon: 'fa-sheet-plastic' }],
-    svg: `<svg viewBox="0 0 160 160" class="w-full h-full text-emerald-400 flex items-center justify-center"><path d="M 20 80 Q 80 40, 140 80 Q 80 120, 20 80 Z" fill="#20252f" stroke="#3bb2e6" stroke-width="4"/></svg>`
-  },
-  splitter: {
-    key: 'splitter',
-    code: 'BD_124',
-    title: '分流器 (BD_124)',
-    name: '分流器',
-    group: 'logi',
-    desc: '1进3出物流分流节点，支持品质过滤与流向分配。',
-    power: '0MW',
-    costs: [
-      { name: '玄铁板', code: 'iron_plate', need: 4, icon: 'fa-sheet-plastic' },
-      { name: '玄铁齿轮', code: 'iron_gear', need: 2, icon: 'fa-gear' }
-    ],
-    svg: `<svg viewBox="0 0 160 140" class="w-full h-full drop-shadow"><rect x="35" y="35" width="90" height="70" rx="4" fill="#2a3342" stroke="#111" stroke-width="2"/><polygon points="80,40 70,50 90,50" fill="#00f0ff"/><polygon points="40,70 50,60 50,80" fill="#00f0ff"/><polygon points="120,70 110,60 110,80" fill="#00f0ff"/></svg>`
-  },
-  pipe: {
-    key: 'pipe',
-    code: 'BD_127',
-    title: '水管 (BD_127)',
-    name: '水管',
-    group: 'logi',
-    desc: '双向流体导管，用于运送原水、营养液及煞气浓缩液。',
-    power: '0MW',
-    costs: [{ name: '玄铁锭', code: 'iron_ingot', need: 2, icon: 'fa-cube' }],
-    svg: `<svg viewBox="0 0 160 140" class="w-full h-full drop-shadow"><rect x="20" y="55" width="120" height="28" rx="6" fill="#1a2736" stroke="#00f0ff" stroke-width="2"/><circle cx="40" cy="69" r="8" fill="#00f0ff" opacity="0.7"/><circle cx="80" cy="69" r="8" fill="#00f0ff" opacity="0.7"/><circle cx="120" cy="69" r="8" fill="#00f0ff" opacity="0.7"/></svg>`
-  },
-  vert_conveyor: {
-    key: 'vert_conveyor',
-    code: 'BD_129',
-    title: '垂直传送带 (BD_129)',
-    name: '垂直传送带',
-    group: 'logi',
-    desc: 'Z轴立体运输升降架，高度可拖拽 3~8 米。',
-    power: '0MW',
-    costs: [
-      { name: '玄铁板', code: 'iron_plate', need: 4, icon: 'fa-sheet-plastic' },
-      { name: '玄铁齿轮', code: 'iron_gear', need: 4, icon: 'fa-gear' }
-    ],
-    svg: `<svg viewBox="0 0 160 180" class="w-full h-full drop-shadow"><rect x="50" y="30" width="60" height="130" rx="4" fill="#222c3a" stroke="#111" stroke-width="2"/><line x1="50" y1="60" x2="110" y2="60" stroke="#f5921e" stroke-width="2"/><line x1="50" y1="90" x2="110" y2="90" stroke="#f5921e" stroke-width="2"/></svg>`
-  },
-
-  // --- 能源动力类 (power) ---
-  power_burner: {
-    key: 'power_burner',
-    code: 'BD_117',
-    title: '供能机 (BD_117)',
-    name: '供能机',
-    group: 'power',
-    desc: '燃烧煤炭或木材发电，无线供电覆盖 50 米半径。',
-    power: '发电: 20MW',
-    costs: [
-      { name: '玄铁板', code: 'iron_plate', need: 10, icon: 'fa-sheet-plastic' },
-      { name: '铜线', code: 'copper_wire', need: 10, icon: 'fa-plug' }
-    ],
-    svg: `<svg viewBox="0 0 180 180" class="w-full h-full drop-shadow"><polygon points="35,150 55,60 125,60 145,150" fill="#252d3a" stroke="#111" stroke-width="2.5"/><circle cx="90" cy="115" r="26" fill="#f5921e" class="animate-pulse shadow-[0_0_18px_#ff9900]"/></svg>`
-  },
-  power_engine: {
-    key: 'power_engine',
-    code: 'BD_112',
-    title: '灵力引擎 (BD_112)',
-    name: '灵力引擎',
-    group: 'power',
-    desc: '复合建筑母机座子，本身无线供电 50MW，提供顶部 3 个 1x2 插槽供热供能。',
-    power: '发电: 50MW',
-    costs: [
-      { name: '玄铁梁', code: 'iron_beam', need: 10, icon: 'fa-bars-staggered' },
-      { name: '接线组件', code: 'wiring_assembly', need: 6, icon: 'fa-plug' }
-    ],
-    svg: `<svg viewBox="0 0 200 180" class="w-full h-full drop-shadow"><rect x="30" y="50" width="140" height="100" rx="6" fill="#182332" stroke="#00f0ff" stroke-width="2.5"/><circle cx="100" cy="100" r="32" fill="none" stroke="#00f0ff" stroke-width="4" stroke-dasharray="10 5" class="animate-spin"/><circle cx="100" cy="100" r="16" fill="#f5921e" class="animate-ping"/></svg>`
-  },
-
-  // --- 结构仓储类 (org) ---
-  foundation: {
-    key: 'foundation',
-    code: 'BD_120',
-    title: '地基 4x4 (BD_120)',
-    name: '地基 4x4',
-    group: 'org',
-    desc: '标准 4x4 工业平整承重地基，支持建筑网格化吸附部署。',
-    power: '0MW',
-    costs: [
-      { name: '玄铁梁', code: 'iron_beam', need: 2, icon: 'fa-bars-staggered' },
-      { name: '玄铁板', code: 'iron_plate', need: 5, icon: 'fa-sheet-plastic' }
-    ],
-    svg: `<svg viewBox="0 0 240 180" class="w-full h-full drop-shadow"><polygon points="20,160 50,90 190,90 220,160" fill="#2d333f" stroke="#1a1e27" stroke-width="3"/><polygon points="50,90 120,45 190,90 120,110" fill="#3d4656" stroke="#1a1e27" stroke-width="2"/><path d="M 45 88 L 120 42 L 195 88" fill="none" stroke="#f5921e" stroke-width="5" stroke-linecap="round"/></svg>`
-  },
-  foundation_1x1: {
-    key: 'foundation_1x1',
-    code: 'BD_119',
-    title: '地基 1x1 (BD_119)',
-    name: '地基 1x1',
-    group: 'org',
-    desc: '小型 1x1 基础平整地基。',
-    power: '0MW',
-    costs: [{ name: '玄铁板', code: 'iron_plate', need: 1, icon: 'fa-sheet-plastic' }],
-    svg: `<svg viewBox="0 0 160 160" class="w-full h-full drop-shadow"><rect x="30" y="30" width="100" height="100" rx="4" fill="#333a47" stroke="#111" stroke-width="2"/></svg>`
-  },
-  iron_beam_bld: {
-    key: 'iron_beam_bld',
-    code: 'BD_122',
-    title: '玄铁梁 (BD_122)',
-    name: '玄铁梁',
-    group: 'org',
-    desc: '重型承重工字梁，跨越地形障碍架设管线。',
-    power: '0MW',
-    costs: [{ name: '玄铁梁', code: 'iron_beam', need: 2, icon: 'fa-bars-staggered' }],
-    svg: `<svg viewBox="0 0 200 120" class="w-full h-full drop-shadow"><rect x="20" y="50" width="160" height="22" fill="#3a4454" stroke="#111" stroke-width="2"/></svg>`
-  },
-  storage_box: {
-    key: 'storage_box',
-    code: 'BD_115',
-    title: '个人储物箱 (BD_115)',
-    name: '个人储物箱',
-    group: 'org',
-    desc: '标准随身物品存放箱，具有 24 格储物空间。',
-    power: '0MW',
-    costs: [
-      { name: '玄铁板', code: 'iron_plate', need: 4, icon: 'fa-sheet-plastic' },
-      { name: '玄铁锭', code: 'iron_ingot', need: 4, icon: 'fa-cube' }
-    ],
-    svg: `<svg viewBox="0 0 160 160" class="w-full h-full text-amber-300"><rect x="35" y="45" width="90" height="75" rx="3" fill="#e0770b" stroke="#111" stroke-width="3"/><rect x="65" y="70" width="30" height="20" fill="#111"/></svg>`
-  },
-
-  // --- 特殊建筑类 (special) ---
-  refining_bench: {
-    key: 'refining_bench',
-    code: 'BD_148',
-    title: '炼宝台 (BD_148)',
-    name: '炼宝台',
-    group: 'special',
-    desc: '法宝支线核心工作台，注入煞气浓缩液与稳脉液重铸本命法宝。',
-    power: '30MW',
-    costs: [
-      { name: '玄铁梁', code: 'iron_beam', need: 20, icon: 'fa-bars-staggered' },
-      { name: '导脉合金', code: 'daomai_alloy', need: 5, icon: 'fa-gem' }
-    ],
-    svg: `<svg viewBox="0 0 180 180" class="w-full h-full drop-shadow"><rect x="30" y="40" width="120" height="100" rx="8" fill="#1b172a" stroke="#ffd700" stroke-width="3"/><circle cx="90" cy="90" r="30" fill="#a855f7" class="animate-pulse"/></svg>`
-  },
-  tribulation_platform: {
-    key: 'tribulation_platform',
-    code: 'BD_150',
-    title: '渡劫台 (BD_150)',
-    name: '渡劫台',
-    group: 'special',
-    desc: '引九重天劫洗礼，法宝渡劫化生后天灵宝。',
-    power: '50MW',
-    costs: [
-      { name: '玄铁梁', code: 'iron_beam', need: 30, icon: 'fa-bars-staggered' },
-      { name: '接线组件', code: 'wiring_assembly', need: 20, icon: 'fa-plug' }
-    ],
-    svg: `<svg viewBox="0 0 180 180" class="w-full h-full drop-shadow"><ellipse cx="90" cy="90" rx="70" ry="70" fill="#080e1a" stroke="#00f0ff" stroke-width="3"/><path d="M 90 20 L 90 160 M 20 90 L 160 90" stroke="#ffd700" stroke-width="2"/></svg>`
-  },
-  portal: {
-    key: 'portal',
-    code: 'BD_114',
-    title: '传送门 (BD_114)',
-    name: '传送门',
-    group: 'special',
-    desc: '空间跃迁传输，配对频段瞬移传输。',
-    power: '50MW',
-    costs: [
-      { name: '玄铁梁', code: 'iron_beam', need: 15, icon: 'fa-bars-staggered' },
-      { name: '电源模块', code: 'power_supply_module', need: 5, icon: 'fa-bolt' }
-    ],
-    svg: `<svg viewBox="0 0 180 180" class="w-full h-full drop-shadow"><rect x="40" y="40" width="100" height="110" rx="8" fill="#161e2e" stroke="#a855f7" stroke-width="3"/><ellipse cx="90" cy="95" rx="35" ry="45" fill="#7e22ce" class="animate-pulse"/></svg>`
+  if (typeof window.ALL_HUD_MODAL_IDS !== 'undefined') {
+    window.ALL_HUD_MODAL_IDS.forEach(id => {
+      if (id !== current) {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      }
+    });
+  } else {
+    ['buildModal', 'craftModal', 'invModal', 'searchModal', 'machineModal', 'swordCasketModal', 'hubMilestoneModal', 'codexModal', 'cpuProcessorModal', 'jinShenModal', 'fabaoModal'].forEach(id => {
+      if (id !== current) {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      }
+    });
   }
-};
+  if (current !== 'buildModal' && typeof exitBuildPlacingMode === 'function') {
+    exitBuildPlacingMode();
+  }
+}
+window.closeOtherModals = closeOtherModals;
+
+// 确保 buildingDatabase 动态读表
+if (typeof buildDatabaseFromTable === 'function') {
+  buildingDatabase = buildDatabaseFromTable();
+}
 
 let currentSelectedBuilding = 'smelter';
 
@@ -883,13 +631,17 @@ function toggleBuildMenu() {
   }
 }
 
-// 同步 HUD 右上角里程碑物料追踪卡片 (严格对接官方 XIUXIAN_ITEMS)
+// 同步 HUD 右上角里程碑物料追踪卡片 (严格对接官方 XIUXIAN_MILESTONES 与 XIUXIAN_ITEMS)
 function syncMilestoneTrackerDisplay() {
   const container = document.getElementById('hudMilestoneCardsContainer');
   if (!container) return;
   container.innerHTML = '';
 
-  const requirements = [
+  const cfg = (typeof getCurrentMilestoneConfig === 'function') 
+    ? getCurrentMilestoneConfig() 
+    : ((typeof XIUXIAN_MILESTONES !== 'undefined' && XIUXIAN_MILESTONES[1]) ? XIUXIAN_MILESTONES[1] : null);
+
+  const requirements = cfg ? cfg.requirements : [
     { code: 'iron_ingot', need: 100 },
     { code: 'copper_ingot', need: 100 },
     { code: 'iron_plate', need: 100 }
@@ -909,6 +661,7 @@ function syncMilestoneTrackerDisplay() {
     container.appendChild(card);
   });
 }
+
 
 // 点击生命值分段测试扣血与回血
 function toggleHealthDamage() {
@@ -1051,13 +804,6 @@ function updateCombatEquipmentUI(playAudio = true) {
   if (compassWrapper) {
     if (item.id === 'luopan') {
       compassWrapper.classList.add('compass-luopan-active');
-      // 切换到罗盘时自动呼出天元全息罗盘中枢
-      if (playAudio) {
-        const invModal = document.getElementById('invModal');
-        if (invModal && invModal.classList.contains('hidden') && typeof toggleInventoryModal === 'function') {
-          toggleInventoryModal('main');
-        }
-      }
     } else {
       compassWrapper.classList.remove('compass-luopan-active');
     }
@@ -1068,13 +814,18 @@ function updateCombatEquipmentUI(playAudio = true) {
 // 全局事件监听器绑定
 // =========================================================================
 
-// 点击大视界任意区域：当前手持装备攻击与交互联动
+// 点击大视界任意区域：当前手持装备攻击与交互联动 (带严格 HUD 互斥)
 document.addEventListener('click', (e) => {
-  if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select') || e.target.closest('#buildModal') || e.target.closest('#craftModal') || e.target.closest('#invModal') || e.target.closest('#swordCasketModal') || e.target.closest('#hubMilestoneModal') || e.target.closest('#codexModal') || e.target.closest('#machineModal') || e.target.closest('#cpuProcessorModal')) {
+  // 1. 严格 HUD 互斥：若当前有任何界面/模态窗打开，点击任何地方均不触发手持装备攻击与交互！
+  if (typeof isAnyModalOpen === 'function' && isAnyModalOpen()) {
     return;
   }
-  const cpuModal = document.getElementById('cpuProcessorModal');
-  if (cpuModal && !cpuModal.classList.contains('hidden')) {
+  // 2. 避免点击在模态弹窗内穿透
+  if (e.target.closest('#buildModal, #craftModal, #invModal, #searchModal, #machineModal, #storageBoxModal, #swordCasketModal, #hubMilestoneModal, #codexModal, #cpuProcessorModal, #jinShenModal, #fabaoModal')) {
+    return;
+  }
+  // 3. 避免点击交互控件触发攻击
+  if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select') || e.target.closest('a') || e.target.closest('.build-item-card')) {
     return;
   }
   if (!isHolstered) {
@@ -1091,7 +842,7 @@ document.addEventListener('click', (e) => {
         if (arc) arc.style.transform = '';
       }, 120);
     } else if (curItem.id === 'luopan') {
-      // 2. 罗盘探测：天池磁针旋转与地脉波动
+      // 2. 罗盘探测：天池磁针旋转与地脉波动 (不自动打开全屏大界面，保持纯净探测)
       playUiSound('toggle');
       const arm = document.getElementById('armLuopan');
       const needle = document.getElementById('luopanNeedle');
@@ -1101,11 +852,7 @@ document.addEventListener('click', (e) => {
         if (arm) arm.style.transform = '';
         if (needle) needle.style.transform = 'rotate(45deg)';
       }, 250);
-      showNotification('【罗盘探测】地脉灵气共鸣，灵穴丰度已标定 (点击或按 Tab 可展开全息中枢)');
-      const invModal = document.getElementById('invModal');
-      if (invModal && invModal.classList.contains('hidden') && typeof toggleInventoryModal === 'function') {
-        toggleInventoryModal('main');
-      }
+      showNotification('【罗盘探测】地脉灵气共鸣，灵穴丰度已标定 (按 [Tab] 可展开全息中枢)');
     } else if (curItem.id === 'sword_casket') {
       // 3. 剑匣挥斩：剑气破空与飞剑出鞘剑鸣
       playUiSound('sword_draw');
@@ -1489,6 +1236,20 @@ function handleCodexSearchCalc(query) {
 
 // 页面载入初始化
 window.addEventListener('DOMContentLoaded', () => {
+  // 严格杜绝事件穿透：所有 HUD 模态弹窗内部阻止 mousedown 和 click 向下穿透到视界！
+  const modalIds = window.ALL_HUD_MODAL_IDS || [
+    'buildModal', 'craftModal', 'invModal', 'searchModal', 'machineModal',
+    'storageBoxModal', 'swordCasketModal', 'hubMilestoneModal', 'codexModal',
+    'cpuProcessorModal', 'jinShenModal', 'fabaoModal'
+  ];
+  modalIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('mousedown', (e) => e.stopPropagation());
+      el.addEventListener('click', (e) => e.stopPropagation());
+    }
+  });
+
   if (typeof syncInventoryDisplay === 'function') {
     syncInventoryDisplay();
   }
@@ -1496,11 +1257,11 @@ window.addEventListener('DOMContentLoaded', () => {
   if (typeof updateCombatEquipmentUI === 'function') {
     updateCombatEquipmentUI(false);
   }
-  // 初始化戴森球建筑分类筛选快捷栏 (纯中文按钮)
+  // 初始化戴森球建筑分类筛选快捷栏 (动态读表)
   if (typeof selectDspCategory === 'function') {
     selectDspCategory('prod');
   }
-  // 初始化 Q 键建筑建造树形卡片 (纯官方数据库 XIUXIAN_BUILDINGS 驱动)
+  // 初始化 Q 键建筑建造树形卡片 (动态读表 XIUXIAN_BUILDINGS 驱动)
   if (typeof renderBuildingListTree === 'function') {
     renderBuildingListTree('prod');
   }
@@ -1527,9 +1288,10 @@ window.addEventListener('wheel', (e) => {
     return;
   }
 
-  // 2. 如果当前有模态弹窗处于打开状态，不劫持滚轮事件
-  const openModal = document.querySelector('#buildModal:not(.hidden), #craftModal:not(.hidden), #invModal:not(.hidden), #searchModal:not(.hidden), #machineModal:not(.hidden), #storageBoxModal:not(.hidden), #hubMilestoneModal:not(.hidden), #codexModal:not(.hidden)');
-  if (openModal) return;
+  // 2. 如果当前有任何模态弹窗处于打开状态，不劫持滚轮事件
+  if (typeof isAnyModalOpen === 'function' && isAnyModalOpen()) {
+    return;
+  }
 
   // 如果事件发生在特定的滚动容器内（如背包、建造列表），不拦截
   if (e.target.closest('#bagGrid72Container') || e.target.closest('.overflow-y-auto') || e.target.closest('#buildGridContainer')) {

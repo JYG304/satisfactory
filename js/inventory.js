@@ -65,16 +65,44 @@ function inspectEquipmentSlot(slotKey) {
   }
 }
 
+// 全局标准 HUD 模态弹窗列表 (用于 100% 严格互斥与防止点击穿透)
+const ALL_HUD_MODAL_IDS = [
+  'buildModal',
+  'craftModal',
+  'invModal',
+  'searchModal',
+  'machineModal',
+  'storageBoxModal',
+  'swordCasketModal',
+  'hubMilestoneModal',
+  'codexModal',
+  'cpuProcessorModal',
+  'jinShenModal',
+  'fabaoModal'
+];
+
+function isAnyModalOpen() {
+  return ALL_HUD_MODAL_IDS.some(id => {
+    const el = document.getElementById(id);
+    return el && !el.classList.contains('hidden');
+  });
+}
+window.isAnyModalOpen = isAnyModalOpen;
+window.ALL_HUD_MODAL_IDS = ALL_HUD_MODAL_IDS;
+
 // 关闭除指定窗口外的其他模态弹窗
 function closeOtherModals(keepId) {
-  const modals = ['buildModal', 'craftModal', 'invModal', 'searchModal', 'machineModal', 'hubMilestoneModal', 'storageBoxModal', 'cpuProcessorModal', 'codexModal'];
-  modals.forEach(id => {
+  ALL_HUD_MODAL_IDS.forEach(id => {
     if (id !== keepId) {
       const el = document.getElementById(id);
       if (el) el.classList.add('hidden');
     }
   });
+  if (keepId !== 'buildModal' && typeof exitBuildPlacingMode === 'function') {
+    exitBuildPlacingMode();
+  }
 }
+window.closeOtherModals = closeOtherModals;
 
 // =========================================================================
 // 储物盒 (箱子 BD_115) 存储系统 (1:1 还原用户上传 Image 1: media_1790463961108.png)
@@ -823,6 +851,24 @@ function renderStatsList() {
 
 function switchHoloCompassTab(tabId) {
   playUiSound('toggle');
+
+  // 直接打开真实专属界面，不重复维护内嵌两套假视图
+  if (tabId === 'hub') {
+    toggleInventoryModal();
+    if (typeof openCentralProcessorHUD === 'function') openCentralProcessorHUD();
+    return;
+  }
+  if (tabId === 'craft') {
+    toggleInventoryModal();
+    if (typeof toggleCraftModal === 'function') toggleCraftModal();
+    return;
+  }
+  if (tabId === 'codex') {
+    toggleInventoryModal();
+    if (typeof toggleCodexModal === 'function') toggleCodexModal();
+    return;
+  }
+
   currentHoloTab = tabId;
 
   // 1. 更新按钮高亮 (1:1 还原 Image 2 白色高亮发光方块)
@@ -883,6 +929,8 @@ function toggleInventoryModal(defaultTab) {
     showNotification('已展开【天元全息罗盘仪中枢】(角色装备与背包同屏展示)');
   }
 }
+window.switchHoloCompassTab = switchHoloCompassTab;
+window.toggleInventoryModal = toggleInventoryModal;
 
 // 背包排序 (按策划案物料分类与数量自动排序)
 function sortPlayerBackpack() {

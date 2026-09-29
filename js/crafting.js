@@ -2,83 +2,70 @@
 // js/crafting.js - 手工操作台 (制作台 Image 1 还原与打铁系统)
 // ====================================================================
 
-const craftingRecipes = {
-  iron_ingot: {
-    id: 'iron_ingot',
-    name: '玄铁锭',
-    icon: 'fa-solid fa-square text-stone-300',
-    outCode: 'iron_ingot',
-    outAmount: 1,
-    timeSec: 0.5,
-    ingredients: [{ code: 'iron_ore', name: '玄铁矿', need: 1, icon: 'fa-gem' }]
-  },
-  copper_ingot: {
-    id: 'copper_ingot',
-    name: '赤铜锭',
-    icon: 'fa-solid fa-square text-amber-500',
-    outCode: 'copper_ingot',
-    outAmount: 1,
-    timeSec: 0.5,
-    ingredients: [{ code: 'copper_ore', name: '赤铜矿', need: 1, icon: 'fa-gem' }]
-  },
-  iron_plate: {
-    id: 'iron_plate',
-    name: '玄铁板',
-    icon: 'fa-solid fa-sheet-plastic text-stone-200',
-    outCode: 'iron_plate',
-    outAmount: 1,
-    timeSec: 0.75,
-    ingredients: [{ code: 'iron_ingot', name: '玄铁锭', need: 2, icon: 'fa-square' }]
-  },
-  iron_gear: {
-    id: 'iron_gear',
-    name: '玄铁齿轮',
-    icon: 'fa-solid fa-gear text-stone-400',
-    outCode: 'iron_gear',
-    outAmount: 1,
-    timeSec: 0.8,
-    ingredients: [{ code: 'iron_ingot', name: '玄铁锭', need: 1, icon: 'fa-square' }]
-  },
-  iron_beam: {
-    id: 'iron_beam',
-    name: '玄铁梁',
-    icon: 'fa-solid fa-bars-staggered text-stone-300',
-    outCode: 'iron_beam',
-    outAmount: 1,
-    timeSec: 1.0,
-    ingredients: [{ code: 'iron_ingot', name: '玄铁锭', need: 3, icon: 'fa-square' }]
-  },
-  copper_wire: {
-    id: 'copper_wire',
-    name: '铜线',
-    icon: 'fa-solid fa-plug text-yellow-400',
-    outCode: 'copper_wire',
-    outAmount: 2,
-    timeSec: 0.5,
-    ingredients: [{ code: 'copper_ingot', name: '赤铜锭', need: 1, icon: 'fa-square' }]
-  },
-  wiring_assembly: {
-    id: 'wiring_assembly',
-    name: '接线组件',
-    icon: 'fa-solid fa-network-wired text-yellow-400',
-    outCode: 'wiring_assembly',
-    outAmount: 1,
-    timeSec: 1.0,
-    ingredients: [{ code: 'copper_wire', name: '铜线', need: 4, icon: 'fa-plug' }]
-  },
-  power_supply_module: {
-    id: 'power_supply_module',
-    name: '电源模块',
-    icon: 'fa-solid fa-car-battery text-amber-400',
-    outCode: 'power_supply_module',
-    outAmount: 1,
-    timeSec: 1.2,
-    ingredients: [
-      { code: 'wiring_assembly', name: '接线组件', need: 2, icon: 'fa-network-wired' },
-      { code: 'iron_plate', name: '玄铁板', need: 2, icon: 'fa-sheet-plastic' }
-    ]
+// 动态构建官方配方库
+function getCraftingRecipesFromTable() {
+  const recipes = {};
+  if (typeof XIUXIAN_RECIPES === 'undefined' || typeof XIUXIAN_ITEMS === 'undefined') {
+    return recipes;
   }
-};
+
+  Object.values(XIUXIAN_RECIPES).forEach(rcp => {
+    const outCode = rcp.output ? rcp.output.item : null;
+    if (!outCode) return;
+    const outItem = XIUXIAN_ITEMS[outCode] || { name: rcp.name, icon: 'fa-solid fa-cube text-white' };
+    
+    const ingredients = (rcp.inputs || []).map(inp => {
+      const it = XIUXIAN_ITEMS[inp.item] || { name: inp.item, icon: 'fa-solid fa-cube' };
+      const iconClass = (it.icon || 'fa-solid fa-cube').replace('fa-solid ', '').split(' ')[0];
+      return {
+        code: inp.item,
+        name: it.name,
+        need: inp.count || inp.amount || 1,
+        icon: iconClass
+      };
+    });
+
+    const entry = {
+      id: rcp.id,
+      key: outCode,
+      name: rcp.name || outItem.name,
+      category: rcp.category || '基础加工',
+      icon: outItem.icon || 'fa-solid fa-cube text-white',
+      outCode: outCode,
+      outAmount: rcp.output.amount || rcp.output.count || 1,
+      timeSec: Math.max(0.4, Math.min(2.0, (rcp.timeSec || 10) * 0.08)),
+      ingredients: ingredients,
+      desc: rcp.desc || ''
+    };
+
+    recipes[rcp.id] = entry;
+    if (!recipes[outCode]) {
+      recipes[outCode] = entry;
+    }
+  });
+
+  return recipes;
+}
+
+// 全局配方代理对象，保证任何代码访问直接读表
+const craftingRecipes = new Proxy({}, {
+  get(target, prop) {
+    if (typeof prop !== 'string') return target[prop];
+    const liveRecipes = getCraftingRecipesFromTable();
+    return liveRecipes[prop] || target[prop];
+  },
+  ownKeys() {
+    const liveRecipes = getCraftingRecipesFromTable();
+    return Object.keys(liveRecipes);
+  },
+  getOwnPropertyDescriptor(target, prop) {
+    const liveRecipes = getCraftingRecipesFromTable();
+    if (prop in liveRecipes) {
+      return { configurable: true, enumerable: true, value: liveRecipes[prop], writable: true };
+    }
+    return undefined;
+  }
+});
 
 let currentCraftRecipeKey = 'iron_plate';
 let isCraftingHolding = false;
@@ -88,6 +75,79 @@ let craftAnimFrameId = null;
 let lastCraftHitSoundTime = 0;
 let comboCraftCount = 0;
 
+// 动态渲染手工制作台左侧分类配方树 (依据 XIUXIAN_RECIPES 官方分类)
+function renderCraftingRecipeList() {
+  const container = document.getElementById('recipeListContainer');
+  if (!container) return;
+
+  const liveRecipes = getCraftingRecipesFromTable();
+  const categories = {};
+  
+  // 按照 category 进行归类 (去重同一配方的多重索引)
+  const seenIds = new Set();
+  Object.values(liveRecipes).forEach(rcp => {
+    if (seenIds.has(rcp.id)) return;
+    seenIds.add(rcp.id);
+    const cat = rcp.category || '基础加工';
+    if (!categories[cat]) categories[cat] = [];
+    categories[cat].push(rcp);
+  });
+
+  container.innerHTML = '';
+
+  Object.entries(categories).forEach(([catName, list]) => {
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'recipe-group mb-1.5';
+
+    // 分组头 (手风琴)
+    const header = document.createElement('div');
+    header.className = 'recipe-group-header flex items-center justify-between px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-white/80 text-[11px] font-bold rounded cursor-pointer transition select-none';
+    header.onclick = function() { toggleRecipeGroupAccordion(this); };
+    header.innerHTML = `
+      <div class="flex items-center space-x-1.5">
+        <i class="fa-solid fa-folder-open text-[#f5921e] text-[10px]"></i>
+        <span>${catName}</span>
+        <span class="text-[10px] text-white/40 font-mono">(${list.length})</span>
+      </div>
+      <span class="group-arrow text-[11px] text-white/40 font-bold">-</span>
+    `;
+    groupDiv.appendChild(header);
+
+    // 配方项容器
+    const itemsContainer = document.createElement('div');
+    itemsContainer.className = 'group-items pl-1 pt-1 space-y-1';
+
+    list.forEach(rec => {
+      let maxCanMake = 9999;
+      rec.ingredients.forEach(ing => {
+        const avail = Math.floor(((typeof playerInventory !== 'undefined' ? playerInventory[ing.code] : 0) || 0) / ing.need);
+        if (avail < maxCanMake) maxCanMake = avail;
+      });
+
+      const isCurrent = (rec.id === currentCraftRecipeKey || rec.outCode === currentCraftRecipeKey);
+      const row = document.createElement('div');
+      row.id = `rcard-${rec.outCode}`;
+      row.setAttribute('data-recipe-id', rec.id);
+      row.className = isCurrent 
+        ? 'recipe-row px-2.5 py-1.5 rounded flex items-center justify-between text-xs cursor-pointer bg-[#e0770b] text-white font-bold shadow transition'
+        : 'recipe-row px-2.5 py-1.5 rounded flex items-center justify-between text-xs cursor-pointer hover:bg-white/10 text-white/80 transition';
+      row.onclick = () => selectCraftRecipe(rec.outCode);
+      
+      row.innerHTML = `
+        <div class="flex items-center space-x-2 truncate pr-2">
+          <i class="${rec.icon} text-xs"></i>
+          <span class="truncate">${rec.name}</span>
+        </div>
+        <span class="text-[11px] font-mono font-bold shrink-0 ${isCurrent ? 'text-white' : (maxCanMake > 0 ? 'text-emerald-400' : 'text-white/30')}" id="rcard-stock-${rec.outCode}">[${maxCanMake}]</span>
+      `;
+      itemsContainer.appendChild(row);
+    });
+
+    groupDiv.appendChild(itemsContainer);
+    container.appendChild(groupDiv);
+  });
+}
+
 // 打开/关闭手工加工台
 function toggleCraftModal() {
   playUiSound('click');
@@ -96,6 +156,8 @@ function toggleCraftModal() {
   const isOpening = modal.classList.contains('hidden');
   modal.classList.toggle('hidden');
   if (isOpening) {
+    renderCraftingRecipeList();
+    selectCraftRecipe(currentCraftRecipeKey);
     renderCraftModalInventory();
   }
 }
@@ -103,17 +165,25 @@ function toggleCraftModal() {
 // 选中某个工艺配方
 function selectCraftRecipe(key) {
   playUiSound('click');
-  currentCraftRecipeKey = key;
   const rec = craftingRecipes[key];
   if (!rec) return;
+  currentCraftRecipeKey = key;
 
   // 切换左侧高亮
-  document.querySelectorAll('.recipe-card').forEach(card => {
-    card.className = 'recipe-card p-2 rounded bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber-400 cursor-pointer flex items-center justify-between transition group';
+  document.querySelectorAll('.recipe-row').forEach(row => {
+    row.className = 'recipe-row px-2.5 py-1.5 rounded flex items-center justify-between text-xs cursor-pointer hover:bg-white/10 text-white/80 transition';
+    const stockSpan = row.querySelector('span[id^="rcard-stock-"]');
+    if (stockSpan) {
+      const num = parseInt(stockSpan.innerText.replace(/\D/g, '')) || 0;
+      stockSpan.className = `text-[11px] font-mono font-bold shrink-0 ${num > 0 ? 'text-emerald-400' : 'text-white/30'}`;
+    }
   });
-  const currentCard = document.getElementById(`rcard-${key}`);
+
+  const currentCard = document.getElementById(`rcard-${key}`) || document.querySelector(`[data-recipe-id="${key}"]`);
   if (currentCard) {
-    currentCard.className = 'recipe-card p-2 rounded bg-amber-500/20 border-2 border-amber-400 cursor-pointer flex items-center justify-between transition';
+    currentCard.className = 'recipe-row px-2.5 py-1.5 rounded flex items-center justify-between text-xs cursor-pointer bg-[#e0770b] text-white font-bold shadow transition';
+    const activeStock = currentCard.querySelector('span[id^="rcard-stock-"]');
+    if (activeStock) activeStock.className = 'text-[11px] font-mono font-bold shrink-0 text-white';
   }
 
   // 更新右侧头部
@@ -360,6 +430,7 @@ function syncInventoryDisplay() {
 
   Object.keys(craftingRecipes).forEach(key => {
     const r = craftingRecipes[key];
+    if (!r || !r.ingredients) return;
     let maxCanMake = 9999;
     r.ingredients.forEach(ing => {
       const avail = Math.floor((playerInventory[ing.code] || 0) / ing.need);
@@ -367,8 +438,9 @@ function syncInventoryDisplay() {
     });
     const stockLabel = document.getElementById(`rcard-stock-${key}`);
     if (stockLabel) {
-      stockLabel.innerText = `${maxCanMake} 可造`;
-      stockLabel.className = `text-[11px] font-mono font-bold ${maxCanMake > 0 ? 'text-emerald-400' : 'text-white/30'}`;
+      stockLabel.innerText = `[${maxCanMake}]`;
+      const isCurrent = (key === currentCraftRecipeKey || r.id === currentCraftRecipeKey);
+      stockLabel.className = `text-[11px] font-mono font-bold shrink-0 ${isCurrent ? 'text-white' : (maxCanMake > 0 ? 'text-emerald-400' : 'text-white/30')}`;
     }
   });
 
@@ -432,3 +504,11 @@ function renderCraftModalInventory() {
     grid.appendChild(div);
   });
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+  renderCraftingRecipeList();
+  if (typeof currentCraftRecipeKey !== 'undefined') {
+    selectCraftRecipe(currentCraftRecipeKey);
+  }
+});
+

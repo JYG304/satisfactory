@@ -2638,7 +2638,7 @@
           </button>
 
           <button id="btnHolo_craft" 
-                  onclick="switchHoloCompassTab('craft');" 
+                  onclick="toggleInventoryModal(); toggleCraftModal();" 
                   title="[按键 4] 打开手工操作台与配方装配制造"
                   class="holo-card-btn w-16 h-16 sm:w-20 sm:h-20 rounded-xl flex flex-col items-center justify-center cursor-pointer">
             <i class="fa-solid fa-screwdriver-wrench text-xl sm:text-2xl text-amber-600 mb-1"></i>
@@ -2647,7 +2647,7 @@
           </button>
 
           <button id="btnHolo_codex" 
-                  onclick="switchHoloCompassTab('codex');" 
+                  onclick="toggleInventoryModal(); toggleCodexModal();" 
                   title="[按键 5] 调阅天工法典万象百科全书图鉴"
                   class="holo-card-btn w-16 h-16 sm:w-20 sm:h-20 rounded-xl flex flex-col items-center justify-center cursor-pointer">
             <i class="fa-solid fa-book-bookmark text-xl sm:text-2xl text-emerald-600 mb-1"></i>
@@ -4207,7 +4207,7 @@
               <button class="flex items-center space-x-1 px-3 py-1 bg-white/10 text-white rounded text-xs font-bold">
                 <i class="fa-regular fa-file-lines mr-1"></i>Info (详情)
               </button>
-              <button onclick="toggleInventoryModal();" class="flex items-center space-x-1 px-3 py-1 bg-transparent hover:bg-white/5 text-white/50 hover:text-white rounded text-xs font-bold transition cursor-pointer">
+              <button onclick="closeOtherModals('invModal'); toggleInventoryModal();" class="flex items-center space-x-1 px-3 py-1 bg-transparent hover:bg-white/5 text-white/50 hover:text-white rounded text-xs font-bold transition cursor-pointer">
                 <i class="fa-solid fa-box-open mr-1"></i>Inventory (背包)
               </button>
             </div>

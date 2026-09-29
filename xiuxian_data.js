@@ -884,7 +884,9 @@ const XIUXIAN_BUILDINGS = {
       "rcp_copper_ingot",
       "rcp_refractory_core"
     ],
-    "desc": "基础矿石冶炼设备，将玄铁矿/赤铜矿高温熔炼为金属锭。"
+    "desc": "基础矿石冶炼设备，将玄铁矿/赤铜矿高温熔炼为金属锭。",
+    "group": "prod",
+    "costs": [{ "code": "iron_plate", "need": 4 }, { "code": "iron_ingot", "need": 6 }]
   },
   "cutter": {
     "id": "cutter",
@@ -904,7 +906,9 @@ const XIUXIAN_BUILDINGS = {
       "rcp_wood_structural_part",
       "rcp_daomai_sheet"
     ],
-    "desc": "基础精密材料加工设备，将赤铜锭切割为铜线、导灵铜片，加工木板和导脉薄片。"
+    "desc": "基础精密材料加工设备，将赤铜锭切割为铜线、导灵铜片，加工木板和导脉薄片。",
+    "group": "prod",
+    "costs": [{ "code": "iron_plate", "need": 2 }, { "code": "iron_ingot", "need": 4 }, { "code": "iron_gear", "need": 2 }]
   },
   "assembler": {
     "id": "assembler",
@@ -934,7 +938,9 @@ const XIUXIAN_BUILDINGS = {
       "rcp_waste_purify_powder",
       "rcp_ore_vein_locator"
     ],
-    "desc": "制作基础机械零件，加工玄铁板、齿轮、玄铁梁、控制模块与设备框架。"
+    "desc": "制作基础机械零件，加工玄铁板、齿轮、玄铁梁、控制模块与设备框架。",
+    "group": "prod",
+    "costs": [{ "code": "iron_plate", "need": 2 }, { "code": "iron_ingot", "need": 4 }]
   },
   "crusher": {
     "id": "crusher",
@@ -950,7 +956,9 @@ const XIUXIAN_BUILDINGS = {
     "recipes": [
       "rcp_iron_powder"
     ],
-    "desc": "将金属锭粉碎为加工中间件玄铁粉。"
+    "desc": "将金属锭粉碎为加工中间件玄铁粉。",
+    "group": "prod",
+    "costs": [{ "code": "iron_plate", "need": 1 }, { "code": "iron_ingot", "need": 2 }]
   },
   "deconstructor": {
     "id": "deconstructor",
@@ -971,7 +979,9 @@ const XIUXIAN_BUILDINGS = {
       "rcp_decon_lianqi",
       "rcp_decon_zhuji"
     ],
-    "desc": "专门解构生物，只接受修士尸体，解构提取鲜活生物组织、神经束与脱水生物组织。"
+    "desc": "专门解构生物，只接受修士尸体，解构提取鲜活生物组织、神经束与脱水生物组织。",
+    "group": "prod",
+    "costs": [{ "code": "iron_plate", "need": 4 }, { "code": "iron_ingot", "need": 8 }]
   },
   "miner": {
     "id": "miner",
@@ -992,7 +1002,9 @@ const XIUXIAN_BUILDINGS = {
       "rcp_mine_copper",
       "rcp_mine_coal"
     ],
-    "desc": "必须对准矿脉，持续开采地下玄铁矿、赤铜矿与煤炭。"
+    "desc": "必须对准矿脉，持续开采地下玄铁矿、赤铜矿与煤炭。",
+    "group": "prod",
+    "costs": [{ "code": "iron_plate", "need": 2 }, { "code": "iron_ingot", "need": 3 }]
   },
   "centrifuge": {
     "id": "centrifuge",
@@ -1012,7 +1024,9 @@ const XIUXIAN_BUILDINGS = {
       "rcp_tissue_essence",
       "rcp_sha_separation"
     ],
-    "desc": "分离生物液体中的不同成分，离心提取组织精华液与煞气分离。"
+    "desc": "分离生物液体中的不同成分，离心提取组织精华液与煞气分离。",
+    "group": "prod",
+    "costs": [{ "code": "iron_plate", "need": 3 }, { "code": "iron_ingot", "need": 5 }, { "code": "copper_ingot", "need": 3 }]
   },
   "extractor": {
     "id": "extractor",
@@ -1032,7 +1046,9 @@ const XIUXIAN_BUILDINGS = {
       "rcp_protein_fluid",
       "rcp_ling_grass_extract"
     ],
-    "desc": "从生物材料中提取组织蛋白液与灵草萃取液。"
+    "desc": "从生物材料中提取组织蛋白液与灵草萃取液。",
+    "group": "prod",
+    "costs": [{ "code": "iron_plate", "need": 2 }, { "code": "iron_ingot", "need": 3 }, { "code": "copper_ingot", "need": 2 }]
   },
   "incubator": {
     "id": "incubator",
@@ -1055,7 +1071,9 @@ const XIUXIAN_BUILDINGS = {
       "rcp_cell_cultivation",
       "rcp_sediment_nutrient"
     ],
-    "desc": "多用处流固混合培育设备，具备灵草基础培育、催生增产闭环、细胞扩增及养分沉淀发酵四大核心功能，支持时间加速器挂载。"
+    "desc": "多用处流固混合培育设备，具备灵草基础培育、催生增产闭环、细胞扩增及养分沉淀发酵四大核心功能，支持时间加速器挂载。",
+    "group": "prod",
+    "costs": [{ "code": "iron_plate", "need": 4 }, { "code": "iron_ingot", "need": 6 }, { "code": "copper_ingot", "need": 4 }]
   },
   "mixer": {
     "id": "mixer",
@@ -1077,7 +1095,9 @@ const XIUXIAN_BUILDINGS = {
       "rcp_bio_mix_liquid",
       "rcp_fabao_pulse_liquid"
     ],
-    "desc": "流体/固体混合处理，合成基础营养液、活性生物混合液与法宝稳脉液。"
+    "desc": "流体/固体混合处理，合成基础营养液、活性生物混合液与法宝稳脉液。",
+    "group": "prod",
+    "costs": [{ "code": "iron_plate", "need": 3 }, { "code": "iron_ingot", "need": 4 }, { "code": "iron_gear", "need": 2 }]
   },
   "assembler_heavy": {
     "id": "assembler_heavy",
@@ -1101,7 +1121,9 @@ const XIUXIAN_BUILDINGS = {
       "rcp_artificial_linggen",
       "rcp_fabao_array_embryo"
     ],
-    "desc": "双轨物料校验组装，合成生物胚料、灵根胚体、人造灵根与法宝阵图胚。"
+    "desc": "双轨物料校验组装，合成生物胚料、灵根胚体、人造灵根与法宝阵图胚。",
+    "group": "prod",
+    "costs": [{ "code": "iron_plate", "need": 6 }, { "code": "iron_ingot", "need": 10 }, { "code": "copper_ingot", "need": 6 }, { "code": "iron_gear", "need": 4 }]
   },
   "power_engine": {
     "id": "power_engine",
@@ -1124,7 +1146,9 @@ const XIUXIAN_BUILDINGS = {
       "rcp_engine_thermal_power",
       "rcp_engine_super_steam"
     ],
-    "desc": "复合建筑母机座子，本身为热能转化加工建筑，同时提供顶部3个模型插槽供被动冶炼舱等插件挂载并供能供热。"
+    "desc": "复合建筑母机座子，本身为热能转化加工建筑，同时提供顶部3个模型插槽供被动冶炼舱等插件挂载并供能供热。",
+    "group": "power",
+    "costs": [{ "code": "iron_plate", "need": 6 }, { "code": "iron_ingot", "need": 12 }, { "code": "copper_ingot", "need": 8 }]
   },
   "smelt_chamber": {
     "id": "smelt_chamber",
@@ -1147,7 +1171,9 @@ const XIUXIAN_BUILDINGS = {
       "rcp_daomai_alloy",
       "rcp_power_drive_core"
     ],
-    "desc": "挂载在灵力引擎座子上的被动加工器模型插件，汲取底座高热自动识别放入的材料转化提纯高级金属。"
+    "desc": "挂载在灵力引擎座子上的被动加工器模型插件，汲取底座高热自动识别放入的材料转化提纯高级金属。",
+    "group": "prod",
+    "costs": [{ "code": "iron_ingot", "need": 4 }, { "code": "copper_ingot", "need": 2 }]
   },
   "bio_base": {
     "id": "bio_base",
@@ -1167,7 +1193,9 @@ const XIUXIAN_BUILDINGS = {
     "recipes": [
       "rcp_bio_base_infusion"
     ],
-    "desc": "大型生物复合底座，提供高压营养液内循环管网与恒温生物载台。顶部专设1个标准卡座，承托单个生物设备（培养仓BD_108或培养皿BD_131二选一），直供高纯营养液并强化微培增产。"
+    "desc": "大型生物复合底座，提供高压营养液内循环管网与恒温生物载台。顶部专设1个标准卡座，承托单个生物设备（培养仓BD_108或培养皿BD_131二选一），直供高纯营养液并强化微培增产。",
+    "group": "prod",
+    "costs": [{ "code": "iron_plate", "need": 6 }, { "code": "iron_beam", "need": 4 }]
   },
   "petri_dish": {
     "id": "petri_dish",
@@ -1186,7 +1214,9 @@ const XIUXIAN_BUILDINGS = {
       "rcp_spore_culture",
       "rcp_herb_seedling"
     ],
-    "desc": "精密生物发酵培养皿，插在营养基座上工作，可加入木炭灰改良基质，精密培育活性菌丝胚与灵草幼胚。"
+    "desc": "精密生物发酵培养皿，插在营养基座上工作，可加入木炭灰改良基质，精密培育活性菌丝胚与灵草幼胚。",
+    "group": "prod",
+    "costs": [{ "code": "iron_plate", "need": 3 }, { "code": "copper_ingot", "need": 2 }]
   },
   "fluid_hub": {
     "id": "fluid_hub",
@@ -1206,7 +1236,193 @@ const XIUXIAN_BUILDINGS = {
     "recipes": [
       "rcp_fluid_hub_boost"
     ],
-    "desc": "单设备承载型高压流体复合母座，集成高压离心泵与多相流分配阀室。顶部专设1个标准卡座，只能且必须放置一个加工设备（支持搅拌机BD_110、离心机BD_106或提取器BD_109三选一），提供集中流体输送与增压加成！"
+    "desc": "单设备承载型高压流体复合母座，集成高压离心泵与多相流分配阀室。顶部专设1个标准卡座，只能且必须放置一个加工设备（支持搅拌机BD_110、离心机BD_106或提取器BD_109三选一），提供集中流体输送与增压加成！",
+    "group": "prod",
+    "costs": [{ "code": "iron_beam", "need": 12 }, { "code": "power_supply_module", "need": 4 }]
+  },
+
+  // ================= 传送物流类 (logi) =================
+  "conveyor": {
+    "id": "conveyor",
+    "code": "BD_125",
+    "name": "传送带",
+    "category": "物流",
+    "group": "logi",
+    "typeDesc": "物流 / 标准物料输送",
+    "power": 0,
+    "costs": [{ "code": "iron_plate", "need": 1 }],
+    "desc": "自带供电传输的标准物料传送带，支持建筑间无人化运输。"
+  },
+  "splitter": {
+    "id": "splitter",
+    "code": "BD_124",
+    "name": "分流器",
+    "category": "物流",
+    "group": "logi",
+    "typeDesc": "物流 / 1进3出分流",
+    "power": 0,
+    "costs": [{ "code": "iron_plate", "need": 4 }, { "code": "iron_gear", "need": 2 }],
+    "desc": "1进3出物流分流节点，支持品质过滤与流向分配。"
+  },
+  "merger": {
+    "id": "merger",
+    "code": "BD_128",
+    "name": "合流器",
+    "category": "物流",
+    "group": "logi",
+    "typeDesc": "物流 / 3进1出合流",
+    "power": 0,
+    "costs": [{ "code": "iron_plate", "need": 4 }, { "code": "iron_gear", "need": 2 }],
+    "desc": "3进1出物流汇集节点，实现多产线物料汇流。"
+  },
+  "pipe": {
+    "id": "pipe",
+    "code": "BD_127",
+    "name": "水管",
+    "category": "物流",
+    "group": "logi",
+    "typeDesc": "流体 / 双向导管",
+    "power": 0,
+    "costs": [{ "code": "iron_ingot", "need": 2 }],
+    "desc": "双向流体导管，用于运送原水、营养液及煞气浓缩液。"
+  },
+  "vert_conveyor": {
+    "id": "vert_conveyor",
+    "code": "BD_129",
+    "name": "垂直传送带",
+    "category": "物流",
+    "group": "logi",
+    "typeDesc": "物流 / 立体升降架",
+    "power": 0,
+    "costs": [{ "code": "iron_plate", "need": 4 }, { "code": "iron_gear", "need": 4 }],
+    "desc": "Z轴立体运输升降架，高度可拖拽 3~8 米。"
+  },
+
+  // ================= 能源动力类 (power) =================
+  "power_burner": {
+    "id": "power_burner",
+    "code": "BD_117",
+    "name": "供能机",
+    "category": "电力",
+    "group": "power",
+    "typeDesc": "能源 / 燃烧发电",
+    "power": -20,
+    "costs": [{ "code": "iron_plate", "need": 10 }, { "code": "copper_wire", "need": 10 }],
+    "desc": "燃烧煤炭或木材发电，无线供电覆盖 50 米半径。"
+  },
+  "power_generator": {
+    "id": "power_generator",
+    "code": "BD_118",
+    "name": "灵石发电机",
+    "category": "电力",
+    "group": "power",
+    "typeDesc": "能源 / 灵能高阶发电",
+    "power": -80,
+    "costs": [{ "code": "iron_beam", "need": 10 }, { "code": "power_supply_module", "need": 4 }],
+    "desc": "消耗灵石驱动的高阶发电机组，输出稳定强劲灵能。"
+  },
+
+  // ================= 组织结构与仓储类 (org) =================
+  "storage_box": {
+    "id": "storage_box",
+    "code": "BD_115",
+    "name": "个人储物箱",
+    "category": "仓储",
+    "group": "org",
+    "typeDesc": "仓储 / 随身箱",
+    "power": 0,
+    "costs": [{ "code": "iron_plate", "need": 4 }, { "code": "iron_ingot", "need": 4 }],
+    "desc": "标准随身物品存放箱，具有 24 格储物空间。"
+  },
+  "foundation_1x1": {
+    "id": "foundation_1x1",
+    "code": "BD_119",
+    "name": "地基 1x1",
+    "category": "建筑",
+    "group": "org",
+    "typeDesc": "结构 / 小型基础平整",
+    "power": 0,
+    "costs": [{ "code": "iron_plate", "need": 1 }],
+    "desc": "小型 1x1 基础平整地基。"
+  },
+  "foundation_4x4": {
+    "id": "foundation_4x4",
+    "code": "BD_120",
+    "name": "地基 4x4",
+    "category": "建筑",
+    "group": "org",
+    "typeDesc": "结构 / 标准工业地基",
+    "power": 0,
+    "costs": [{ "code": "iron_plate", "need": 4 }],
+    "desc": "平整施工地基，提供平坦的工业建造表面。"
+  },
+  "foundation_16x16": {
+    "id": "foundation_16x16",
+    "code": "BD_121",
+    "name": "地基 16x16",
+    "category": "建筑",
+    "group": "org",
+    "typeDesc": "结构 / 重型大跨度地基",
+    "power": 0,
+    "costs": [{ "code": "iron_plate", "need": 16 }],
+    "desc": "超大重型平整地基，大面积厂区硬化地面。"
+  },
+  "iron_beam_bld": {
+    "id": "iron_beam_bld",
+    "code": "BD_122",
+    "name": "玄铁梁",
+    "category": "建筑",
+    "group": "org",
+    "typeDesc": "结构 / 承重工字梁",
+    "power": 0,
+    "costs": [{ "code": "iron_beam", "need": 2 }],
+    "desc": "重型承重工字梁，跨越地形障碍架设管线。"
+  },
+  "table": {
+    "id": "table",
+    "code": "BD_123",
+    "name": "置物桌",
+    "category": "建筑",
+    "group": "org",
+    "typeDesc": "结构 / 工坊家具",
+    "power": 0,
+    "costs": [{ "code": "iron_plate", "need": 2 }],
+    "desc": "小型工坊操作与物品整备桌。"
+  },
+
+  // ================= 特殊设施类 (special) =================
+  "refining_bench": {
+    "id": "refining_bench",
+    "code": "BD_148",
+    "name": "炼宝台",
+    "category": "特殊",
+    "group": "special",
+    "typeDesc": "法宝 / 三阶注灵台",
+    "power": 30,
+    "costs": [{ "code": "iron_beam", "need": 12 }, { "code": "daomai_sheet", "need": 6 }],
+    "desc": "三阶注灵法宝淬炼台，完成本命法宝山河社稷图前置态注灵。"
+  },
+  "tribulation_platform": {
+    "id": "tribulation_platform",
+    "code": "BD_150",
+    "name": "渡劫台",
+    "category": "特殊",
+    "group": "special",
+    "typeDesc": "飞升 / 天劫洗礼台",
+    "power": 100,
+    "costs": [{ "code": "iron_beam", "need": 20 }, { "code": "sha_crystal", "need": 10 }],
+    "desc": "接引九重天劫洗礼法宝，渡劫飞升成就极品后天灵宝。"
+  },
+  "teleporter": {
+    "id": "teleporter",
+    "code": "BD_114",
+    "name": "传送门",
+    "category": "特殊",
+    "group": "special",
+    "typeDesc": "空间 / 频段跃迁",
+    "power": 50,
+    "costs": [{ "code": "iron_beam", "need": 15 }, { "code": "power_supply_module", "need": 5 }],
+    "desc": "空间跃迁传输，配对频段瞬移传输。"
   }
 };
 
@@ -3479,13 +3695,74 @@ const INITIAL_PLAYER_INVENTORY = [
   }
 ];
 
+const XIUXIAN_MILESTONES = {
+  1: {
+    id: 1,
+    tier: 'T1',
+    realm: '炼气期',
+    title: '中央处理器研究认证 (炼气 1 层)',
+    subTitle: '天工基建',
+    desc: '交付基础冶炼产物，升级天元中央处理器，全线解锁精炼炉、粉碎机、加工台与分流设施。',
+    requirements: [
+      { code: 'iron_ingot', need: 100 },
+      { code: 'copper_ingot', need: 100 },
+      { code: 'iron_plate', need: 100 }
+    ],
+    rewards: ['BD_102 精炼炉', 'BD_103 粉碎机', 'BD_104 加工台', 'BD_124 分流器']
+  },
+  2: {
+    id: 2,
+    tier: 'T2',
+    realm: '筑基期',
+    title: '精密机械与流体工业 (筑基 1 层)',
+    subTitle: '精密物流',
+    desc: '交付基础机械构件，打通切割、流体中枢与生物培育技术链路。',
+    requirements: [
+      { code: 'iron_gear', need: 150 },
+      { code: 'copper_wire', need: 300 },
+      { code: 'iron_beam', need: 100 }
+    ],
+    rewards: ['BD_105 切割机', 'BD_106 离心机', 'BD_108 培育仓', 'BD_110 搅拌机']
+  },
+  3: {
+    id: 3,
+    tier: 'T3',
+    realm: '金丹期',
+    title: '高阶神机与法脉组装 (金丹 1 层)',
+    subTitle: '灵能矩阵',
+    desc: '交付精密电气与灵能部件，解锁多轨校验重型组装机与空间跃迁传送门。',
+    requirements: [
+      { code: 'ling_copper_sheet', need: 200 },
+      { code: 'power_supply_module', need: 100 },
+      { code: 'wiring_assembly', need: 150 }
+    ],
+    rewards: ['BD_111 组装机', 'BD_114 传送门', 'BD_148 炼宝台']
+  },
+  4: {
+    id: 4,
+    tier: 'T4',
+    realm: '元婴期',
+    title: '元婴化神与通天飞升 (元婴 1 层)',
+    subTitle: '终局飞升',
+    desc: '交付法宝阵图胚与导脉构件，开启通天飞升矩阵与万仙中枢。',
+    requirements: [
+      { code: 'fabao_array_embryo', need: 50 },
+      { code: 'daomai_sheet', need: 100 },
+      { code: 'sha_crystal', need: 100 }
+    ],
+    rewards: ['BD_150 终局飞升矩阵', '万仙中枢全息互联']
+  }
+};
+
 if (typeof window !== "undefined") {
   window.XIUXIAN_ITEMS = XIUXIAN_ITEMS;
   window.XIUXIAN_BUILDINGS = XIUXIAN_BUILDINGS;
   window.XIUXIAN_RECIPES = XIUXIAN_RECIPES;
+  window.XIUXIAN_MILESTONES = XIUXIAN_MILESTONES;
   window.INITIAL_PLAYER_INVENTORY = INITIAL_PLAYER_INVENTORY;
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { XIUXIAN_ITEMS, XIUXIAN_BUILDINGS, XIUXIAN_RECIPES, INITIAL_PLAYER_INVENTORY };
+  module.exports = { XIUXIAN_ITEMS, XIUXIAN_BUILDINGS, XIUXIAN_RECIPES, XIUXIAN_MILESTONES, INITIAL_PLAYER_INVENTORY };
 }
+

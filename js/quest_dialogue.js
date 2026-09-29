@@ -303,29 +303,32 @@ function triggerSampleLoot() {
 }
 
 // ---------------------------------------------------------------------
-// 4. 右上角当前里程碑追踪卡 (1:1 还原 media_1790441067843.png 右上角)
+// 4. 右上角当前里程碑追踪卡 (委托至官方策划表驱动的 syncMilestoneTrackerDisplay)
 // ---------------------------------------------------------------------
-function syncMilestoneTrackerDisplay() {
-  const c1 = document.getElementById('milestoneTrackVal1');
-  const c2 = document.getElementById('milestoneTrackVal2');
-  const c3 = document.getElementById('milestoneTrackVal3');
+function syncMilestoneTrackerDisplayFallback() {
+  const cfg = (typeof getCurrentMilestoneConfig === 'function') 
+    ? getCurrentMilestoneConfig() 
+    : ((typeof XIUXIAN_MILESTONES !== 'undefined' && XIUXIAN_MILESTONES[1]) ? XIUXIAN_MILESTONES[1] : null);
 
-  if (c1 && typeof playerInventory !== 'undefined') {
-    const val = playerInventory.concrete || 78;
-    c1.innerText = `${val} / 200`;
-    c1.className = `text-[10px] font-mono font-bold ${val >= 200 ? 'text-emerald-400' : 'text-stone-300'}`;
-  }
-  if (c2 && typeof playerInventory !== 'undefined') {
-    const val = playerInventory.iron_plate || 120;
-    c2.innerText = `${val} / 100`;
-    c2.className = `text-[10px] font-mono font-bold ${val >= 100 ? 'text-emerald-400' : 'text-stone-300'}`;
-  }
-  if (c3 && typeof playerInventory !== 'undefined') {
-    const val = playerInventory.iron_rod || 64;
-    c3.innerText = `${val} / 100`;
-    c3.className = `text-[10px] font-mono font-bold ${val >= 100 ? 'text-emerald-400' : 'text-stone-300'}`;
-  }
+  const requirements = cfg ? cfg.requirements : [
+    { code: 'iron_ingot', need: 100 },
+    { code: 'copper_ingot', need: 100 },
+    { code: 'iron_plate', need: 100 }
+  ];
+
+  requirements.forEach((req, idx) => {
+    const elem = document.getElementById(`milestoneTrackVal${idx + 1}`);
+    if (elem && typeof playerInventory !== 'undefined') {
+      const stock = playerInventory[req.code] || 0;
+      elem.innerText = `${Math.min(stock, req.need)} / ${req.need}`;
+      elem.className = `text-[10px] font-mono font-bold ${stock >= req.need ? 'text-emerald-400' : 'text-stone-300'}`;
+    }
+  });
 }
+if (typeof syncMilestoneTrackerDisplay !== 'function') {
+  window.syncMilestoneTrackerDisplay = syncMilestoneTrackerDisplayFallback;
+}
+
 
 // 页面初始化时挂载
 window.addEventListener('DOMContentLoaded', () => {
