@@ -2158,7 +2158,21 @@
       combat:   { charged: false, detached: false, placedAtDock: null }
     };
 
-    // ★ 三大主盘采用完全统一的【基础环】半径规制 (1环R=66, 2环R=106, 3环R=146, 4环R=186)
+    // ★ 芯片中心图标颜色规则：攻击类型=红色图标，辅助类型=黄色图标，蓝色(工业/变轨)保持原有蓝色不改
+    function getChipCenterIconStyle(spec) {
+      if (!spec || spec.isCenterCore || spec.type === 'shift_in') return '';
+      const b = spec.buff || {};
+      if (b.atk || b.atspd || b.crit || b.sword_funnel || spec.category === 'funnel') {
+        return 'color: #f43f5e !important; filter: drop-shadow(0 0 4px rgba(244,63,94,0.45));';
+      }
+      if (spec.category === 'mobility' || b.def || b.hp || b.speed || b.stamina || b.flight_battery || b.inventory) {
+        return 'color: #f59e0b !important; filter: drop-shadow(0 0 4px rgba(245,158,11,0.4));';
+      }
+      return '';
+    }
+    window.getChipCenterIconStyle = getChipCenterIconStyle;
+
+    // ★ 三大主盘采用完全统一的【基础环】半径与槽位规制 (1环6槽, 2环10槽, 3环16槽, 4环24槽；相邻差值 +4/+6/+8 等差递增，除以2恰为 3/5/8/12 斐波那契步进数，且 6+10=16)
     const DISC_CONFIG = {
       support: {
         key: 'support',
@@ -2171,9 +2185,9 @@
         coreColorHex: '#0284c7',
         rings: [
           { tier: 1, id: 'support_1', name: '辅助盘·基础1环', radius: 66,  slotCount: 6 },
-          { tier: 2, id: 'support_2', name: '辅助盘·基础2环', radius: 106, slotCount: 8 },
-          { tier: 3, id: 'support_3', name: '辅助盘·基础3环', radius: 146, slotCount: 10 },
-          { tier: 4, id: 'support_4', name: '辅助盘·基础4环', radius: 186, slotCount: 16 }
+          { tier: 2, id: 'support_2', name: '辅助盘·基础2环', radius: 106, slotCount: 10 },
+          { tier: 3, id: 'support_3', name: '辅助盘·基础3环', radius: 146, slotCount: 16 },
+          { tier: 4, id: 'support_4', name: '辅助盘·基础4环', radius: 186, slotCount: 24 }
         ]
       },
       industry: {
@@ -2187,9 +2201,9 @@
         coreColorHex: '#d97706',
         rings: [
           { tier: 1, id: 'industry_1', name: '工厂盘·基础1环', radius: 66,  slotCount: 6 },
-          { tier: 2, id: 'industry_2', name: '工厂盘·基础2环', radius: 106, slotCount: 8 },
-          { tier: 3, id: 'industry_3', name: '工厂盘·基础3环', radius: 146, slotCount: 10 },
-          { tier: 4, id: 'industry_4', name: '工厂盘·基础4环', radius: 186, slotCount: 16 }
+          { tier: 2, id: 'industry_2', name: '工厂盘·基础2环', radius: 106, slotCount: 10 },
+          { tier: 3, id: 'industry_3', name: '工厂盘·基础3环', radius: 146, slotCount: 16 },
+          { tier: 4, id: 'industry_4', name: '工厂盘·基础4环', radius: 186, slotCount: 24 }
         ]
       },
       combat: {
@@ -2203,9 +2217,9 @@
         coreColorHex: '#e11d48',
         rings: [
           { tier: 1, id: 'combat_1', name: '攻击盘·基础1环', radius: 66,  slotCount: 6 },
-          { tier: 2, id: 'combat_2', name: '攻击盘·基础2环', radius: 106, slotCount: 8 },
-          { tier: 3, id: 'combat_3', name: '攻击盘·基础3环', radius: 146, slotCount: 10 },
-          { tier: 4, id: 'combat_4', name: '攻击盘·基础4环', radius: 186, slotCount: 16 }
+          { tier: 2, id: 'combat_2', name: '攻击盘·基础2环', radius: 106, slotCount: 10 },
+          { tier: 3, id: 'combat_3', name: '攻击盘·基础3环', radius: 146, slotCount: 16 },
+          { tier: 4, id: 'combat_4', name: '攻击盘·基础4环', radius: 186, slotCount: 24 }
         ]
       }
     };
@@ -3109,7 +3123,7 @@ function renderPalette() {
         return;
       }
 
-      const keys = Object.keys(CHIP_SPECS).filter(k => !k.startsWith('chip_atk_') && !k.startsWith('chip_def_') && !k.startsWith('chip_belt_') && !k.startsWith('chip_herb_'));
+      const keys = Object.keys(CHIP_SPECS).filter(k => !CHIP_SPECS[k].isCenterCore && !k.startsWith('chip_atk_') && !k.startsWith('chip_def_') && !k.startsWith('chip_belt_') && !k.startsWith('chip_herb_'));
 
       let filteredKeys = keys;
       if (CURRENT_PALETTE_FILTER === 's1') {
@@ -3151,7 +3165,7 @@ function renderPalette() {
                title="${spec.name}\n${spec.buffDesc}\n${spec.stepDesc}\n【点击】选中后点击盘面插槽直接放置\n【拖拽】直接拖拽至插槽">
             
             <div class="w-9 h-9 ${spec.shape} ${spec.matClass} flex items-center justify-center relative shrink-0">
-              <i class="fa-solid ${spec.icon} text-sm"></i>
+              <i class="fa-solid ${spec.icon} text-sm" style="${typeof getChipCenterIconStyle === 'function' ? getChipCenterIconStyle(spec) : ''}"></i>
             </div>
 
             <div class="flex-1 min-w-0">
@@ -3289,7 +3303,7 @@ function renderPalette() {
             <div class="relative w-full h-full flex items-center justify-center cursor-pointer group" title="${spec.name} (${spec.tag})\n${spec.buffDesc}\n${spec.stepDesc}\n【点击或右键取回】">
               <div class="absolute -inset-1 rounded-full border-2 ${discMeta.nodeBorder} pointer-events-none"></div>
               <div class="w-7 h-7 ${spec.shape} ${spec.matClass} flex items-center justify-center relative z-10 transition-transform group-hover:scale-110 shadow-md">
-                <i class="fa-solid ${spec.icon} text-xs pointer-events-none"></i>
+                <i class="fa-solid ${spec.icon} text-xs pointer-events-none" style="${getChipCenterIconStyle(spec)}"></i>
               </div>
               <div class="pointer-events-none absolute -bottom-2 -right-2 px-1 rounded text-[7px] font-mono-sci font-bold border shadow-xs z-20 ${discMeta.nodeBadge}">
                 ${runeTag}
@@ -3943,10 +3957,10 @@ function renderPalette() {
         desc: '七星跨三盘贯通（辅助盘2星 · 工厂盘2星 · 攻击盘3星）：任意星位放上芯片并通电，该节点直接增加 +120% 效果！',
         mult: 2.2,
         nodes: [
-          // ⚔️ 攻击盘 (斗魁 3 星)
-          { id: 'dipper_1', disc: 'combat',   num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe',    x: 324,  y: 490, bx: 205, by: 455, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram',  title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          // ⚔️ 攻击盘 (斗魁 3 星：适配 1环6槽 / 2环10槽)
+          { id: 'dipper_1', disc: 'combat',   num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe',    x: 390,  y: 424, bx: 265, by: 405, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram',  title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
           { id: 'dipper_2', disc: 'combat',   num: 'Ⅱ', name: '天璇·巨门', en: 'Merak',    x: 390,  y: 596, bx: 406, by: 585, color: '#0284c7', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress',  title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
-          { id: 'dipper_3', disc: 'combat',   num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda',   x: 496,  y: 490, bx: 512, by: 475, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'dipper_3', disc: 'combat',   num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda',   x: 491,  y: 523, bx: 508, by: 510, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
           // ⚙️ 工厂盘 (斗身 2 星)
           { id: 'dipper_4', disc: 'industry', num: 'Ⅳ', name: '天权·文曲', en: 'Megrez',   x: 947,  y: 397, bx: 963, by: 385, color: '#6366f1', bg: '#eef2ff', border: '#4f46e5', shape: 'hexagram',  title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
           { id: 'dipper_5', disc: 'industry', num: 'Ⅴ', name: '玉衡·廉贞', en: 'Alioth',   x: 890,  y: 364, bx: 765, by: 342, color: '#a855f7', bg: '#faf5ff', border: '#9333ea', shape: 'diamond',   title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
@@ -4328,27 +4342,26 @@ function renderPalette() {
         BOARD_SLOTS['industry_1_1'].chip = 't0_mine_2';      // 踩中【Ⅳ 天权】(+120%效果) ➔ 3
         BOARD_SLOTS['industry_1_3'].chip = 'chip_triangle_in'; // 3 ➔ 射入工厂盘中心！
 
-        // 3. 将【工厂盘中心核】插入 ⚔️ 攻击盘【可旋转独立外圈 · 外圈槽A (dock_combat_0)】，并将独立外圈旋转 90° 对准正东 0°！
-        DISK_RINGS['combat_dock'].currentAngle = 90;
+        // 3. 将【工厂盘中心核】插入 ⚔️ 攻击盘【可旋转独立外圈 · 外圈射入槽 (dock_combat_0)】，并将独立外圈旋转 108° 对准 2环第4槽(18°)！
+        DISK_RINGS['combat_dock'].currentAngle = 108;
         OUTER_DOCK_SLOTS['dock_combat_0'].coreChip = 'core_industry';
         CENTER_CORE_STATE.industry.detached = true;
         CENTER_CORE_STATE.industry.placedAtDock = 'dock_combat_0';
 
-        // 攻击盘 基础2环 (8槽，R=106)：从第3槽(索引2，正东0°)接收入射，点亮北斗第3星(天玑)、第2星(天璇)并向内折射入基础1环！
-        BOARD_SLOTS['combat_2_2'].chip = 't0_burn_2';        // 踩中【Ⅲ 天玑】(+120%效果) ➔ 4
-        BOARD_SLOTS['combat_2_4'].chip = 't0_def_2';         // 踩中【Ⅱ 天璇】(+120%效果) ➔ 6
-        BOARD_SLOTS['combat_2_6'].chip = 'chip_triangle_in'; // 6 (180°) ➔ 向心折射入攻击盘基础1环！
+        // 攻击盘 基础2环 (10槽，R=106)：从第4槽(索引3，18°)接收入射，点亮北斗第3星(天玑)、第2星(天璇)并向内折射入基础1环！
+        BOARD_SLOTS['combat_2_3'].chip = 't0_atspd_2';       // 踩中【Ⅲ 天玑】(+120%效果) ➔ 5
+        BOARD_SLOTS['combat_2_5'].chip = 't2_atk_5';         // 踩中【Ⅱ 天璇】(+120%效果) ➔ 0
+        BOARD_SLOTS['combat_2_0'].chip = 'chip_triangle_in'; // 0 (-90°) ➔ 向心折射入攻击盘基础1环！
 
-        // 4. 攻击盘 基础1环 (6槽，R=66)：旋转 30° 使第5槽(索引4)对准 180°，点亮北斗第1星(天枢)并射入攻击盘中心！
-        DISK_RINGS['combat_1'].currentAngle = 30;
-        BOARD_SLOTS['combat_1_4'].chip = 't0_belt_2';        // 踩中【Ⅰ 天枢】(+120%效果) ➔ 0
-        BOARD_SLOTS['combat_1_0'].chip = 'chip_triangle_in'; // 0 ➔ 射入攻击盘中心！
+        // 4. 攻击盘 基础1环 (6槽，R=66)：第1槽(索引0，-90°)接收入射，点亮北斗第1星(天枢)并射入攻击盘中心！
+        BOARD_SLOTS['combat_1_0'].chip = 't1_crit_3';        // 踩中【Ⅰ 天枢】(+120%效果) ➔ 3
+        BOARD_SLOTS['combat_1_3'].chip = 'chip_triangle_in'; // 3 ➔ 射入攻击盘中心！
       } else if (type === 'outer_chain') {
         switchFloorShape('dipper');
         CURRENT_REALM = 'qi';
         SPEC_DISC = 'combat';
 
-        // 演示待连线工况：三盘内部芯片已就绪，辅助盘已射入中心，等待玩家点一下辅助盘中心取下极核并拖到工厂盘【独立最外圈·北外接槽】！
+        // 演示待连线工况：三盘内部芯片已就绪，辅助盘已射入中心，等待玩家点一下辅助盘中心取下极核并拖到工厂盘【独立最外圈·外圈射入槽】！
         DISK_RINGS['support_1'].currentAngle = 15.2;
         BOARD_SLOTS['support_1_1'].chip = 't0_speed_1';
         BOARD_SLOTS['support_1_2'].chip = 't0_atk_1';
@@ -4358,12 +4371,12 @@ function renderPalette() {
         BOARD_SLOTS['industry_1_1'].chip = 't0_mine_2';
         BOARD_SLOTS['industry_1_3'].chip = 'chip_triangle_in';
 
-        BOARD_SLOTS['combat_2_2'].chip = 't0_burn_2';
-        BOARD_SLOTS['combat_2_4'].chip = 't0_def_2';
-        BOARD_SLOTS['combat_2_6'].chip = 'chip_triangle_in';
-        DISK_RINGS['combat_1'].currentAngle = 30;
-        BOARD_SLOTS['combat_1_4'].chip = 't0_belt_2';
-        BOARD_SLOTS['combat_1_0'].chip = 'chip_triangle_in';
+        DISK_RINGS['combat_dock'].currentAngle = 108;
+        BOARD_SLOTS['combat_2_3'].chip = 't0_atspd_2';
+        BOARD_SLOTS['combat_2_5'].chip = 't2_atk_5';
+        BOARD_SLOTS['combat_2_0'].chip = 'chip_triangle_in';
+        BOARD_SLOTS['combat_1_0'].chip = 't1_crit_3';
+        BOARD_SLOTS['combat_1_3'].chip = 'chip_triangle_in';
       }
 
       setRealm(CURRENT_REALM);
