@@ -2100,10 +2100,10 @@
 
 
     /* =========================================================================
-       3. 三大主盘结构定义 + 独立最外圈接引环(不计入基础环) + 境界环数配比
+       3. 三大主盘结构定义 + 可旋转独立最外圈(不计入基础环) + 境界环数配比
           ★ 核心要求1：除1个大盘(主修盘)外，另外两个小盘大小100%对齐！
-          ★ 核心要求2：放极核插槽的圈是【独立在最外面那一圈】，不算在基础环里面！
-          ★ 核心要求3：全屏 / 2K / 4K 分辨率自适应缩放支持
+          ★ 核心要求2：放极核插槽的外圈是【独立在最外面那一圈】，不算在基础环内，且【外圈也能旋转】！
+          ★ 核心要求3：彻底去掉多余的“射出点”！
        ========================================================================= */
     const STAGE_LOGICAL_W = 1640;
     const STAGE_LOGICAL_H = 860;
@@ -2154,14 +2154,12 @@
     };
 
     // ★ 三大主盘采用完全统一的【基础环】半径规制 (1环R=66, 2环R=106, 3环R=146, 4环R=186)
-    // 在基础环的最外围，还有一圈独立的【最外圈接引环 (R = 最外基础环 + 36)】，不算在基础环内！
     const DISC_CONFIG = {
       support: {
         key: 'support',
         name: '🛡️ 辅助盘',
         shortTag: '辅',
         cx: 1310, cy: 250,
-        emitAngleDeg: 155, // 独立最外圈固定方位射出角
         nodeBorder: 'border-sky-500 hover:border-sky-700 bg-sky-50/95 hover:bg-sky-100',
         nodeDot: 'bg-sky-500',
         nodeBadge: 'bg-sky-600 text-white border-sky-300',
@@ -2178,7 +2176,6 @@
         name: '⚙️ 工厂盘',
         shortTag: '工',
         cx: 890, cy: 430,
-        emitAngleDeg: 162, // 独立最外圈固定方位射出角
         nodeBorder: 'border-amber-500 hover:border-amber-700 bg-amber-50/95 hover:bg-amber-100',
         nodeDot: 'bg-amber-500',
         nodeBadge: 'bg-amber-600 text-white border-amber-300',
@@ -2195,7 +2192,6 @@
         name: '⚔️ 攻击盘',
         shortTag: '攻',
         cx: 390, cy: 490,
-        emitAngleDeg: 342, // 独立最外圈固定方位射出角
         nodeBorder: 'border-rose-500 hover:border-rose-700 bg-rose-50/95 hover:bg-rose-100',
         nodeDot: 'bg-rose-500',
         nodeBadge: 'bg-rose-600 text-white border-rose-300',
@@ -2222,56 +2218,12 @@
       };
     }
 
-    // 获取某盘【独立最外圈接引环】的当前半径（始终位于最外层基础环之外 +36px，不计入基础环数）
+    // 获取某盘【可旋转独立最外圈】的当前半径（始终位于最外层基础环之外 +36px，不计入基础环数）
     function getOuterDockRadius(discKey) {
       const counts = getActiveRingCounts();
       const maxTier = counts[discKey] || 1;
       const maxBasicR = DISC_CONFIG[discKey].rings[maxTier - 1].radius;
       return maxBasicR + 36;
-    }
-
-    // ★ 独立最外圈接引插槽定义：每个盘在独立最外圈设有 4 个专用外接插槽 (北-90° / 东0° / 南90° / 西180°)
-    // 专门用来插从其他盘中心取下的中心节点，绝不占用基础环芯片槽位！
-    const DOCK_ANGLES = [
-      { idx: 0, angleDeg: 270, dirName: '北(上)' }, // -90°
-      { idx: 1, angleDeg: 0,   dirName: '东(右)' }, // 0°
-      { idx: 2, angleDeg: 90,  dirName: '南(下)' }, // 90°
-      { idx: 3, angleDeg: 180, dirName: '西(左)' }  // 180°
-    ];
-
-    let OUTER_DOCK_SLOTS = {};
-    function initOuterDockSlots() {
-      const prev = Object.assign({}, OUTER_DOCK_SLOTS);
-      OUTER_DOCK_SLOTS = {};
-      for (const dKey of ['support', 'industry', 'combat']) {
-        DOCK_ANGLES.forEach(da => {
-          const dockKey = `dock_${dKey}_${da.idx}`;
-          OUTER_DOCK_SLOTS[dockKey] = {
-            dockKey,
-            discKey: dKey,
-            dockIndex: da.idx,
-            angleDeg: da.angleDeg,
-            dirName: da.dirName,
-            coreChip: prev[dockKey] ? prev[dockKey].coreChip : null
-          };
-        });
-      }
-    }
-
-    function getOuterDockWorldPos(dockKey) {
-      const dSlot = OUTER_DOCK_SLOTS[dockKey];
-      if (!dSlot) return { x: 0, y: 0, angleDeg: 0, radius: 100 };
-      const dMeta = DISC_CONFIG[dSlot.discKey];
-      const r = getOuterDockRadius(dSlot.discKey);
-      const rad = (dSlot.angleDeg * Math.PI) / 180;
-      return {
-        x: dMeta.cx + r * Math.cos(rad),
-        y: dMeta.cy + r * Math.sin(rad),
-        angleDeg: dSlot.angleDeg,
-        radius: r,
-        cx: dMeta.cx,
-        cy: dMeta.cy
-      };
     }
 
     const DISK_RINGS = {};
@@ -2281,6 +2233,7 @@
           id: r.id,
           discKey: dKey,
           tier: r.tier,
+          isDockRing: false,
           name: r.name,
           cx: dMeta.cx,
           cy: dMeta.cy,
@@ -2292,6 +2245,71 @@
           degId: 'deg_' + r.id
         };
       });
+      // ★ 每个盘最外层的【可旋转独立外圈】也注册进 DISK_RINGS，与基础环一样支持拖拽旋转和滚轮旋转！
+      const dockRingId = `${dKey}_dock`;
+      DISK_RINGS[dockRingId] = {
+        id: dockRingId,
+        discKey: dKey,
+        tier: 99,
+        isDockRing: true,
+        name: `${dMeta.name}·独立外圈`,
+        cx: dMeta.cx,
+        cy: dMeta.cy,
+        radius: 102,
+        slotCount: 12,
+        currentAngle: 0,
+        slotOffset: 0,
+        elId: 'ringEl_' + dockRingId,
+        degId: 'deg_' + dockRingId
+      };
+    }
+
+    // ★ 独立最外圈上的外接插槽：跟随该盘的独立外圈 (`${dKey}_dock`) 一起旋转！
+    // 每个盘的独立外圈设 2 个对称外接插槽 (0号位在正北 -90°，1号位在正南 90°，由于外圈可任意旋转，可转到360°任意方位！)
+    const DOCK_BASE_SLOTS = [
+      { idx: 0, baseDeg: -90, label: '外圈槽A' },
+      { idx: 1, baseDeg: 90,  label: '外圈槽B' }
+    ];
+
+    let OUTER_DOCK_SLOTS = {};
+    function initOuterDockSlots() {
+      const prev = Object.assign({}, OUTER_DOCK_SLOTS);
+      OUTER_DOCK_SLOTS = {};
+      for (const dKey of ['support', 'industry', 'combat']) {
+        DOCK_BASE_SLOTS.forEach(bs => {
+          const dockKey = `dock_${dKey}_${bs.idx}`;
+          OUTER_DOCK_SLOTS[dockKey] = {
+            dockKey,
+            discKey: dKey,
+            ringId: `${dKey}_dock`,
+            dockIndex: bs.idx,
+            baseDeg: bs.baseDeg,
+            label: bs.label,
+            coreChip: prev[dockKey] ? prev[dockKey].coreChip : null
+          };
+        });
+      }
+    }
+
+    // 计算独立外圈插槽旋转后的实时世界坐标与当前角度
+    function getOuterDockWorldPos(dockKey) {
+      const dSlot = OUTER_DOCK_SLOTS[dockKey];
+      if (!dSlot) return { x: 0, y: 0, angleDeg: 0, radius: 100 };
+      const dMeta = DISC_CONFIG[dSlot.discKey];
+      const dockRing = DISK_RINGS[dSlot.ringId];
+      const r = getOuterDockRadius(dSlot.discKey);
+      if (dockRing) dockRing.radius = r;
+      const rot = dockRing ? dockRing.currentAngle : 0;
+      const effDeg = (dSlot.baseDeg + rot + 720) % 360;
+      const rad = (effDeg * Math.PI) / 180;
+      return {
+        x: dMeta.cx + r * Math.cos(rad),
+        y: dMeta.cy + r * Math.sin(rad),
+        angleDeg: effDeg,
+        radius: r,
+        cx: dMeta.cx,
+        cy: dMeta.cy
+      };
     }
 
     let BOARD_SLOTS = {};
@@ -2299,6 +2317,7 @@
       const prev = Object.assign({}, BOARD_SLOTS);
       BOARD_SLOTS = {};
       for (const [ringKey, ringMeta] of Object.entries(DISK_RINGS)) {
+        if (ringMeta.isDockRing) continue;
         for (let i = 0; i < ringMeta.slotCount; i++) {
           const sKey = `${ringKey}_${i}`;
           BOARD_SLOTS[sKey] = {
@@ -2348,7 +2367,7 @@
     }
     window.setSpecDisc = setSpecDisc;
 
-    // ★ 动态绘制三大主盘 SVG 精密工程外框 (包含独立最外圈接引环轨道与卡尺，两个小盘100%等大对齐)
+    // ★ 动态绘制三大主盘 SVG 精密工程外框 (保持第一版黑白青浑天仪卡尺制图风格，无多余射出点，两个小盘100%对齐)
     function renderDynamicSvgDiscCasings() {
       const g = document.getElementById('dynamicSvgDiscCasings');
       if (!g) return;
@@ -2356,16 +2375,13 @@
       let svgHtml = '';
 
       for (const [dKey, dMeta] of Object.entries(DISC_CONFIG)) {
-        const maxTier = counts[dKey];
-        const maxBasicR = dMeta.rings[maxTier - 1].radius; // 基础环最外半径
-        const dockR = getOuterDockRadius(dKey);            // 独立外接圈半径 (maxBasicR + 36)
-        const bezelR = dockR + 16;
-        const caliperR = dockR + 28;
-        const caliperOuterR = dockR + 40;
+        const dockR = getOuterDockRadius(dKey);
+        const bezelR = dockR + 18;
+        const caliperR = dockR + 30;
+        const caliperOuterR = dockR + 42;
         const cx = dMeta.cx;
         const cy = dMeta.cy;
 
-        // 梳状精密分度卡尺弧 (位于盘体左上侧 145° ~ 225°)
         const a1 = 145 * Math.PI / 180;
         const a2 = 225 * Math.PI / 180;
         const c1x = (cx + caliperR * Math.cos(a1)).toFixed(1);
@@ -2389,23 +2405,6 @@
           ticksHtml += `<line x1="${ix}" y1="${iy}" x2="${ox}" y2="${oy}" stroke="#0f172a" stroke-width="${sw}" />`;
         }
 
-        // 独立外接圈与基础环之间的4道正交导光桥接轨
-        let bridgeLinesHtml = '';
-        [0, 90, 180, 270].forEach(deg => {
-          const rad = deg * Math.PI / 180;
-          const x1 = (cx + maxBasicR * Math.cos(rad)).toFixed(1);
-          const y1 = (cy + maxBasicR * Math.sin(rad)).toFixed(1);
-          const x2 = (cx + dockR * Math.cos(rad)).toFixed(1);
-          const y2 = (cy + dockR * Math.sin(rad)).toFixed(1);
-          bridgeLinesHtml += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="2 2" />`;
-        });
-
-        // 盘底暗渠 (盘心 -> 独立最外圈固定射出点)
-        const emitRad = (dMeta.emitAngleDeg * Math.PI) / 180;
-        const emitX = (cx + dockR * Math.cos(emitRad)).toFixed(1);
-        const emitY = (cy + dockR * Math.sin(emitRad)).toFixed(1);
-
-        // 45° 剖面斜纹工程铭牌底框
         const hatchW = Math.round(dockR * 1.05);
         const hatchH = 44;
         const hatchX = Math.round(cx - hatchW / 2);
@@ -2418,24 +2417,15 @@
             <!-- 盘体纯白工程底盘与外圈分度环 (保持第一版黑白青精密工程风) -->
             <circle cx="${cx}" cy="${cy}" r="${bezelR + 6}" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="3 4" fill="none" />
             <circle cx="${cx}" cy="${cy}" r="${bezelR}" stroke="#0f172a" stroke-width="1.6" fill="#ffffff" />
-            
-            <!-- ★ 独立在最外面的【外接导光环轨道】(r = dockR，与内部基础环明显区分) ★ -->
-            <circle cx="${cx}" cy="${cy}" r="${dockR}" stroke="#0284c7" stroke-width="2" stroke-dasharray="6 3" fill="none" opacity="0.85" />
-            <circle cx="${cx}" cy="${cy}" r="${dockR - 14}" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2 3" fill="#f8fafc" fill-opacity="0.45" />
-            ${bridgeLinesHtml}
-
             <!-- 黄道面刻度椭圆 -->
             <ellipse cx="${cx}" cy="${cy}" rx="${bezelR + 4}" ry="${Math.round(bezelR * 0.35)}" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="3 4" fill="none" transform="rotate(-21.6 ${cx} ${cy})" opacity="0.65" />
             <!-- 90° 梳状精密分度卡尺弧 -->
             <path d="M ${c1x} ${c1y} A ${caliperR} ${caliperR} 0 0 1 ${c2x} ${c2y}" fill="none" stroke="#0f172a" stroke-width="1.8" />
             <path d="M ${o1x} ${o1y} A ${caliperOuterR} ${caliperOuterR} 0 0 1 ${o2x} ${o2y}" fill="none" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="2 2" />
             <g>${ticksHtml}</g>
-            <!-- 盘底暗渠虚线 (盘心 ➔ 独立最外圈射出点) -->
-            <line x1="${cx}" y1="${cy}" x2="${emitX}" y2="${emitY}" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="3 3" opacity="0.75" />
           </g>
         `;
 
-        // 同步更新该盘下方标牌的位置，使其紧贴外框底部
         const badgeWrap = document.getElementById('discBadgeWrap_' + dKey);
         if (badgeWrap) {
           badgeWrap.style.left = `${cx}px`;
@@ -2443,7 +2433,7 @@
         }
       }
 
-      // 辅助盘右侧始发准直虚线与状态标签 (接入辅助盘最外层基础环)
+      // 辅助盘右侧始发准直虚线与状态标签
       const supMaxTier = counts.support;
       const supOutR = DISC_CONFIG.support.rings[supMaxTier - 1].radius;
       const entryRad = (345.17 * Math.PI) / 180;
@@ -2461,7 +2451,7 @@
       g.innerHTML = svgHtml;
     }
 
-    // 渲染三盘【基础环】DOM (1~4环，不改盘体颜色) + 独立外圈标识
+    // 渲染三盘【可旋转独立外圈】+【内部基础环 (1~4环)】DOM
     function renderDynamicRingsDOM() {
       const container = document.getElementById('dynamicRingsDomContainer');
       if (!container) return;
@@ -2471,6 +2461,9 @@
       for (const [dKey, dMeta] of Object.entries(DISC_CONFIG)) {
         const maxTier = counts[dKey];
         const dockR = getOuterDockRadius(dKey);
+        const dockRingObj = DISK_RINGS[`${dKey}_dock`];
+        if (dockRingObj) dockRingObj.radius = dockR;
+
         const badgeEl = document.getElementById('badge_disc_' + dKey);
         if (badgeEl) {
           const isSpec = (SPEC_DISC === dKey);
@@ -2480,13 +2473,21 @@
             : 'text-[9.5px] font-mono-sci font-bold px-1.5 rounded bg-slate-100 text-slate-600';
         }
 
-        // 1. 渲染独立最外圈的环顶铭牌 (明确标识：独立外圈·不计入基础环)
-        htmlStr += `
-          <div class="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 px-1.5 py-0.2 rounded bg-sky-950 text-sky-200 border border-sky-400 text-[7.5px] font-mono-sci font-bold shadow-xs whitespace-nowrap"
-               style="left: ${dMeta.cx}px; top: ${dMeta.cy - dockR - 12}px;">
-            ◎ 独立外接圈 (放中心核·不占基础环)
-          </div>
-        `;
+        // 1. ★ 渲染最外层【可旋转独立外圈】DOM 轨道（支持直接拖拽/滚轮旋转）
+        if (dockRingObj) {
+          const dSize = dockR * 2;
+          const dLeft = dMeta.cx - dockR;
+          const dTop = dMeta.cy - dockR;
+          htmlStr += `
+            <div id="${dockRingObj.elId}" class="absolute rounded-full border-2 border-dashed border-sky-600/85 ring-trans pointer-events-none"
+                 style="width: ${dSize}px; height: ${dSize}px; left: ${dLeft}px; top: ${dTop}px; transform: rotate(${dockRingObj.currentAngle}deg);">
+              <div class="absolute inset-2 rounded-full border border-slate-300/80"></div>
+              <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[7.5px] font-mono-sci text-sky-900 font-bold bg-sky-50 px-1.5 rounded border border-sky-400 shadow-xs whitespace-nowrap">
+                ◎ 独立外圈(可旋转·放中心核)
+              </div>
+            </div>
+          `;
+        }
 
         // 2. 渲染内部基础环 (1~maxTier)
         dMeta.rings.forEach(r => {
@@ -2511,34 +2512,12 @@
       container.innerHTML = htmlStr;
     }
 
-    // 渲染每盘【独立最外圈】上的固定方位射出点 + 4个独立外接插槽 (专门用来放置取下的中心极核！)
+    // 渲染每盘【可旋转独立最外圈】上的外接插槽 (已彻底移除多余的“射出点”！)
     function renderOuterFixedNozzles() {
       const layer = document.getElementById('outerFixedNozzlesLayer');
       if (!layer) return;
       let htmlStr = '';
 
-      // 1. 每个盘独立最外圈上的固定【射出点】
-      for (const [dKey, dMeta] of Object.entries(DISC_CONFIG)) {
-        const dockR = getOuterDockRadius(dKey);
-        const rad = (dMeta.emitAngleDeg * Math.PI) / 180;
-        const nx = dMeta.cx + dockR * Math.cos(rad);
-        const ny = dMeta.cy + dockR * Math.sin(rad);
-
-        htmlStr += `
-          <div class="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none"
-               style="left: ${nx}px; top: ${ny}px;"
-               title="【${dMeta.name} · 独立外圈固定射出点】">
-            <div class="w-4 h-4 rounded-full bg-slate-900 border-2 border-sky-400 shadow flex items-center justify-center">
-              <div class="w-1.5 h-1.5 rounded-full bg-sky-300 animate-ping"></div>
-            </div>
-            <span class="absolute -bottom-3.5 px-1 rounded bg-slate-900 text-sky-300 text-[7px] font-mono-sci font-bold whitespace-nowrap border border-sky-500/60 shadow-xs">
-              射出点
-            </span>
-          </div>
-        `;
-      }
-
-      // 2. 每个盘独立最外圈上的 4 个专用【外接极核插槽 (OUTER_DOCK_SLOTS)】
       for (const [dockKey, dSlot] of Object.entries(OUTER_DOCK_SLOTS)) {
         const pos = getOuterDockWorldPos(dockKey);
         const dMeta = DISC_CONFIG[dSlot.discKey];
@@ -2554,7 +2533,7 @@
                  oncontextmenu="removeCoreFromDock('${dockKey}', event); return false;"
                  class="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 w-9 h-9 rounded-lg bg-slate-900 border-2 border-amber-400 shadow-xl flex items-center justify-center cursor-grab active:cursor-grabbing group z-40 transition-transform hover:scale-115"
                  style="left: ${pos.x}px; top: ${pos.y}px;"
-                 title="【${dMeta.name}·独立外圈${dSlot.dirName}接引槽】&#10;当前已插入：${spec.name}&#10;• 按住可拖拽换槽&#10;• 点击或右键可取下">
+                 title="【${dMeta.name} · 独立外圈插槽】&#10;当前已插入：${spec.name}&#10;• 可直接旋转独立外圈对准内部任意基础环插槽！&#10;• 按住可拖拽换槽 / 点击或右键取下">
               <div class="w-7 h-7 rounded-full ${spec.matClass} flex items-center justify-center">
                 <i class="fa-solid ${spec.icon} text-xs pointer-events-none"></i>
               </div>
@@ -2572,12 +2551,12 @@
                  ondrop="handleDockSlotDrop('${dockKey}', event)"
                  class="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-md bg-white/95 hover:bg-sky-50 border-2 border-slate-800 hover:border-sky-500 shadow-sm flex items-center justify-center cursor-pointer group z-30 transition-all"
                  style="left: ${pos.x}px; top: ${pos.y}px;"
-                 title="【${dMeta.name} · 独立最外圈${dSlot.dirName}接引插槽】&#10;★ 独立于基础环之外，专门用于插入从其他盘中心取下的【中心节点】以激活跨盘导入线！">
+                 title="【${dMeta.name} · 独立外圈插槽】&#10;★ 位于可旋转的独立最外圈上（不占基础环），把其他盘取下的【中心节点】拖到这里即可连上导入线，并可随外圈旋转对准任意内圈插槽！">
               <div class="w-4 h-4 rounded-xs border border-dashed border-sky-600 flex items-center justify-center">
                 <i class="fa-solid fa-plug text-[8px] text-sky-700 pointer-events-none"></i>
               </div>
               <span class="pointer-events-none absolute -bottom-2.5 px-1 rounded bg-slate-800 text-sky-200 text-[6px] font-mono-sci font-bold whitespace-nowrap border border-sky-400/50">
-                外接·${dSlot.dirName.slice(0,1)}
+                ${dSlot.label}
               </span>
             </div>
           `;
@@ -2587,7 +2566,6 @@
       layer.innerHTML = htmlStr;
     }
 
-    // 将中心核放入某盘【独立最外圈插槽】
     function placeCoreInOuterDock(dockKey, coreChipId) {
       const dSlot = OUTER_DOCK_SLOTS[dockKey];
       const spec = CHIP_SPECS[coreChipId];
@@ -2595,16 +2573,14 @@
 
       const srcDisc = spec.sourceDisc;
       if (dSlot.discKey === srcDisc) {
-        alert(`【${spec.name}】是从${DISC_CONFIG[srcDisc].name}取下的中心核，请将它拖到【其他盘子的独立最外圈插槽】上！`);
+        alert(`【${spec.name}】是从${DISC_CONFIG[srcDisc].name}取下的中心核，请将它拖到【其他盘子的独立外圈插槽】上！`);
         return;
       }
 
-      // 清理该中心核原先所在的独立外圈槽
       const cState = CENTER_CORE_STATE[srcDisc];
       if (cState.placedAtDock && OUTER_DOCK_SLOTS[cState.placedAtDock]) {
         OUTER_DOCK_SLOTS[cState.placedAtDock].coreChip = null;
       }
-      // 如果目标外圈槽原本插着别的中心核，将其释放回待拖拽状态
       if (dSlot.coreChip && CHIP_SPECS[dSlot.coreChip] && dSlot.coreChip !== coreChipId) {
         const oldSrc = CHIP_SPECS[dSlot.coreChip].sourceDisc;
         CENTER_CORE_STATE[oldSrc].placedAtDock = null;
@@ -2630,7 +2606,7 @@
       if (spec && spec.isCenterCore) {
         const srcDisc = spec.sourceDisc;
         CENTER_CORE_STATE[srcDisc].placedAtDock = null;
-        CENTER_CORE_STATE[srcDisc].detached = true; // 取下后悬浮在原盘心旁，方便随时重拖
+        CENTER_CORE_STATE[srcDisc].detached = true;
       }
       dSlot.coreChip = null;
       if (audio) audio.playRemove();
@@ -2684,7 +2660,7 @@
     window.handlePlacedDockCoreMouseDown = handlePlacedDockCoreMouseDown;
 
     /* =========================================================================
-       ★ 核心交互：点一下盘心取下中心节点 ➔ 按住拖拽到另外盘子的【独立最外圈插槽】连上导入线！
+       ★ 核心交互：点一下盘心取下中心节点 ➔ 按住拖拽到另外盘子的【可旋转独立外圈插槽】连上导入线！
        ========================================================================= */
     let IS_DRAGGING_CORE = false;
     let DRAGGING_CORE_DISC = null;
@@ -2697,7 +2673,6 @@
       const state = CENTER_CORE_STATE[discKey];
       const coreChipId = 'core_' + discKey;
 
-      // 如果该中心核此前已经插在其他盘的独立外圈插槽上，点一下原盘心 ➔ 立即取下回到盘心旁待拖拽状态！
       if (state.placedAtDock && OUTER_DOCK_SLOTS[state.placedAtDock]) {
         OUTER_DOCK_SLOTS[state.placedAtDock].coreChip = null;
         state.placedAtDock = null;
@@ -2758,7 +2733,6 @@
     }
     window.handleCenterHubMouseDown = handleCenterHubMouseDown;
 
-    // 按住取下的中心节点拖拽至其他盘【独立最外圈插槽 (OUTER_DOCK_SLOTS)】
     function startCorePointerDrag(discKey, startEvent) {
       if (startEvent) {
         startEvent.preventDefault();
@@ -2777,7 +2751,6 @@
       ACTIVE_SELECTED_CHIP = coreChipId;
       updateSelectedChipIndicator();
 
-      // 高亮其他两个盘【独立最外圈】上的全部专用外接插槽！
       for (const [dockKey, dSlot] of Object.entries(OUTER_DOCK_SLOTS)) {
         if (dSlot.discKey !== discKey) {
           const el = document.getElementById('dockEl_' + dockKey);
@@ -2785,7 +2758,6 @@
         }
       }
 
-      // 创建跟随鼠标的实体极核拖拽浮标
       let ghost = document.getElementById('coreDragGhostEl');
       if (ghost) ghost.remove();
       ghost = document.createElement('div');
@@ -2796,12 +2768,12 @@
           <i class="fa-solid ${spec.icon} text-sm"></i>
         </div>
         <span class="mt-1 px-2 py-0.5 rounded-full bg-slate-900/95 text-amber-300 border border-sky-400 text-[10px] font-mono-sci font-bold shadow-lg whitespace-nowrap">
-          ⚡ 拖至其他盘【独立最外圈·外接槽】松开即连上！
+          ⚡ 拖至其他盘【独立外圈插槽】松开即连上！
         </span>
       `;
       document.body.appendChild(ghost);
 
-      // 创建 SVG 动态预览导入线 (从源盘独立外圈射出点拉向鼠标)
+      // 动态预览导入线：直接从源盘中心拉向鼠标/目标盘独立外圈插槽！
       let previewLine = document.getElementById('coreDragPreviewBeam');
       if (previewLine) previewLine.remove();
       previewLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -2812,12 +2784,8 @@
       previewLine.setAttribute('opacity', '0.9');
       if (svgBeams) svgBeams.appendChild(previewLine);
 
-      const srcDockR = getOuterDockRadius(discKey);
-      const emitRad = (dMeta.emitAngleDeg * Math.PI) / 180;
-      const emitX = dMeta.cx + srcDockR * Math.cos(emitRad);
-      const emitY = dMeta.cy + srcDockR * Math.sin(emitRad);
-      previewLine.setAttribute('x1', emitX);
-      previewLine.setAttribute('y1', emitY);
+      previewLine.setAttribute('x1', dMeta.cx);
+      previewLine.setAttribute('y1', dMeta.cy);
 
       let hoveredTargetDockKey = null;
 
@@ -2830,9 +2798,8 @@
         const stageX = (clientX - rect.left) / scale;
         const stageY = (clientY - rect.top) / scale;
 
-        // 寻找距离鼠标最近的其他盘【独立最外圈插槽】(吸附半径 65px)
         let bestDockKey = null;
-        let minDist = 65;
+        let minDist = 75;
         for (const [dockKey, dSlot] of Object.entries(OUTER_DOCK_SLOTS)) {
           if (dSlot.discKey === discKey) continue;
           const pos = getOuterDockWorldPos(dockKey);
@@ -2896,7 +2863,6 @@
     }
     window.startCorePointerDrag = startCorePointerDrag;
 
-    // 更新三大盘心与“已取下悬浮极核节点”的 DOM 表现
     function updateCenterHubsDOM() {
       const detachedLayer = document.getElementById('detachedCoresLayer');
       let detachedHtml = '';
@@ -2913,7 +2879,7 @@
           const targetDock = OUTER_DOCK_SLOTS[state.placedAtDock];
           const targetDiscName = DISC_CONFIG[targetDock.discKey].shortTag;
           boxEl.className = 'relative w-11 h-11 rounded-full bg-slate-100 border-2 border-dashed border-sky-500 flex items-center justify-center shadow-inner transition-transform group-hover:scale-110';
-          textEl.textContent = `🔗已连入[${targetDiscName}·外接${targetDock.dirName.slice(0,1)}](点此取下)`;
+          textEl.textContent = `🔗已连入[${targetDiscName}·${targetDock.label}](点此取下)`;
           badgeEl.className = 'mt-0.5 px-1.5 py-0.5 rounded bg-slate-900 text-[7.5px] font-mono-sci font-bold text-sky-300 border border-sky-400 whitespace-nowrap shadow-xs';
         } else if (state.detached) {
           boxEl.className = 'relative w-10 h-10 rounded-full bg-slate-200/80 border-2 border-dashed border-slate-500 flex items-center justify-center shadow-inner opacity-75';
@@ -2927,7 +2893,7 @@
                  onmousedown="startCorePointerDrag('${dKey}', event)"
                  class="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing flex flex-col items-center group z-50"
                  style="left: ${popX}px; top: ${popY}px;"
-                 title="【已取下的${dMeta.name}中心节点】&#10;按住鼠标左键将它拖拽到其他盘子的【独立最外圈·外接槽】上，松开即可连上导入线！">
+                 title="【已取下的${dMeta.name}中心节点】&#10;按住鼠标左键将它拖拽到其他盘子的【可旋转独立外圈插槽】上，松开即可连上导入线！">
               <div class="relative w-11 h-11 rounded-full ${spec.matClass} flex items-center justify-center shadow-2xl ring-4 ring-amber-300/80 animate-bounce group-hover:scale-125 transition-transform">
                 <i class="fa-solid ${spec.icon} text-sm pointer-events-none"></i>
               </div>
@@ -3329,7 +3295,6 @@ function renderPalette() {
             </div>
           `;
         } else {
-          // 基础环空插槽：红盘红节点、黄盘黄节点、蓝盘蓝节点
           slotEl.setAttribute("data-has-chip", "false");
           slotEl.style.display = "block";
           slotEl.style.opacity = "1";
@@ -3354,7 +3319,6 @@ function renderPalette() {
       const targetSlot = BOARD_SLOTS[slotKey];
       if (!spec || !targetSlot) return;
 
-      // 如果玩家把【中心极核】点在了基础环插槽上，自动帮他吸附到该盘最近的【独立最外圈插槽】！
       if (spec.isCenterCore) {
         const slotPos = getSlotWorldPos(targetSlot.ringId, targetSlot.slotIndex);
         let nearestDock = `dock_${targetSlot.discKey}_0`;
@@ -3417,6 +3381,7 @@ function renderPalette() {
       const ringEl = document.getElementById(ring.elId);
       if (ringEl) ringEl.style.transform = `rotate(${ring.currentAngle}deg)`;
       if (audio) audio.playRotate();
+      renderOuterFixedNozzles();
       renderBoardSlots();
       renderFloorBase(true);
       solveStepNetwork();
@@ -3424,15 +3389,17 @@ function renderPalette() {
     }
     window.rotateRing = rotateRing;
 
+    // ★ 根据鼠标坐标自动拾取三大盘当前激活的最贴近环道（包含基础环 + 可旋转独立最外圈！）
     function pickClosestActiveRing(mouseX, mouseY) {
       const counts = getActiveRingCounts();
       for (const [dKey, dMeta] of Object.entries(DISC_CONFIG)) {
         const dist = Math.hypot(mouseX - dMeta.cx, mouseY - dMeta.cy);
         const maxTier = counts[dKey];
-        const maxRadius = dMeta.rings[maxTier - 1].radius + 24;
-        if (dist <= maxRadius && dist >= 20) {
+        const dockR = getOuterDockRadius(dKey);
+        if (dist <= dockR + 28 && dist >= 20) {
           let bestRingId = null;
           let minDiff = 9999;
+          // 1. 检查内部基础环
           for (let t = 1; t <= maxTier; t++) {
             const rDef = dMeta.rings[t - 1];
             const d = Math.abs(dist - rDef.radius);
@@ -3440,6 +3407,12 @@ function renderPalette() {
               minDiff = d;
               bestRingId = rDef.id;
             }
+          }
+          // 2. 检查可旋转独立最外圈 (`${dKey}_dock`)
+          const dockDiff = Math.abs(dist - dockR);
+          if (dockDiff < minDiff) {
+            minDiff = dockDiff;
+            bestRingId = `${dKey}_dock`;
           }
           if (bestRingId) return bestRingId;
         }
@@ -3467,6 +3440,7 @@ function renderPalette() {
           ring.slotOffset = Number((ring.currentAngle / degStep).toFixed(2));
           const ringEl = document.getElementById(ring.elId);
           if (ringEl) ringEl.style.transform = `rotate(${ring.currentAngle}deg)`;
+          renderOuterFixedNozzles();
           renderBoardSlots();
           renderFloorBase(true);
           solveStepNetwork();
@@ -3525,6 +3499,7 @@ function renderPalette() {
           const ringEl = document.getElementById(rObj.elId);
           if (ringEl) ringEl.style.transform = `rotate(${rObj.currentAngle}deg)`;
 
+          renderOuterFixedNozzles();
           renderBoardSlots();
           renderFloorBase(true);
           solveStepNetwork();
@@ -3535,6 +3510,7 @@ function renderPalette() {
           if (isDragging && activeRingKey) {
             const rObj = DISK_RINGS[activeRingKey];
             rObj.currentAngle = Number(rObj.currentAngle.toFixed(1));
+            renderOuterFixedNozzles();
             renderBoardSlots();
             renderFloorBase(true);
             solveStepNetwork();
@@ -3575,7 +3551,7 @@ function renderPalette() {
     }
 
     /* =========================================================================
-       7. 三大主盘光路解算 + 独立最外圈插槽【跨盘导入线】+ 跨三盘星位(+120%效果)
+       7. 三大主盘光路解算 + 可旋转独立外圈插槽【跨盘导入线】+ 跨三盘星位(+120%效果)
        ========================================================================= */
     function solveStepNetwork() {
       const svgBeams = document.getElementById('svgBeamsGroup');
@@ -3605,7 +3581,6 @@ function renderPalette() {
       const counts = getActiveRingCounts();
       const floorDef = FLOOR_SHAPE_DEFS[CURRENT_FLOOR_SHAPE] || FLOOR_SHAPE_DEFS.dipper;
 
-      // 内部子函数：解算单个盘体从指定基础环插槽进入后的光线步进与向心折跃
       function traceDiscOpticalPath(discKey, startRingId, startSlotIdx) {
         let curRingId = startRingId;
         let curSlotIdx = startSlotIdx;
@@ -3629,13 +3604,13 @@ function renderPalette() {
           const curPos = getSlotWorldPos(curRingId, curSlotIdx);
           chainNodes.push({ ring: curRingId, slot: curSlotIdx, chipKey, spec, x: curPos.x, y: curPos.y });
 
-          // ★ 底盘星象重合检测：按照要求，一个节点放上去增加 120% 的效果 (即 ×2.2倍)！
+          // ★ 底盘星象重合检测：一个节点放上去增加 120% 的效果 (即 ×2.2倍)！
           let nodeMult = 1.0;
           if (floorDef && floorDef.nodes) {
             const matchedFloor = floorDef.nodes.find(fn => Math.hypot(curPos.x - fn.x, curPos.y - fn.y) <= 26);
             if (matchedFloor) {
               hitFloorNodesSet.add(matchedFloor.id);
-              nodeMult = 2.2; // 增加 120% 效果 (100% + 120% = 220%)
+              nodeMult = 2.2;
               logSteps.push(`✦ [${spec.name}] 踩中${floorDef.name}星位【${matchedFloor.name}】，效果增加 +120%！`);
             }
           }
@@ -3647,7 +3622,6 @@ function renderPalette() {
             });
           }
 
-          // 三角变轨规：向内层基础环折射，若已在基础1环则直接射入盘体中心！
           if (spec.type === 'shift_in') {
             const curRingObj = DISK_RINGS[curRingId];
             if (curRingObj.tier > 1) {
@@ -3670,24 +3644,16 @@ function renderPalette() {
               curSlotIdx = align.slotIndex;
               continue;
             } else {
-              // 已在基础 1 环：直接射入盘体中心！激活中心极核可取下状态！
+              // 已在基础 1 环：直接射入盘体中心！激活中心极核可取下状态！（不再绘制多余的射出点）
               drawBeamLine(svgBeams, curPos.x, curPos.y, dMeta.cx, dMeta.cy, 'rose', true);
               drawImpactSpark(svgImpacts, dMeta.cx, dMeta.cy, '#fbbf24', 6.5);
               CENTER_CORE_STATE[discKey].charged = true;
               if (discKey === 'combat') crossActivated = true;
 
-              // 同时画出从盘心通往本盘【独立最外圈】固定射出点的盘底暗渠能量线
-              const dockR = getOuterDockRadius(discKey);
-              const emitRad = (dMeta.emitAngleDeg * Math.PI) / 180;
-              const emitX = dMeta.cx + dockR * Math.cos(emitRad);
-              const emitY = dMeta.cy + dockR * Math.sin(emitRad);
-              drawBeamLine(svgBeams, dMeta.cx, dMeta.cy, emitX, emitY, 'gold', false);
-
-              logSteps.push(`👑 【${dMeta.name}中心射入成功！】点一下盘心取下中心节点，拖到其他盘【独立最外圈·外接槽】即可连上导入线！`);
+              logSteps.push(`👑 【${dMeta.name}中心射入成功！】点一下盘心取下中心节点，拖到其他盘【可旋转独立外圈插槽】即可连上导入线！`);
               break;
             }
           } else {
-            // 常规顺时针步进
             const rMeta = DISK_RINGS[curRingId];
             const nextIdx = (curSlotIdx + spec.step) % rMeta.slotCount;
             const nextPos = getSlotWorldPos(curRingId, nextIdx);
@@ -3734,8 +3700,8 @@ function renderPalette() {
       }
 
       // =========================================================================
-      // 第二阶段：检查各盘中心核是否已被取下并放入其他盘【独立最外圈插槽 (OUTER_DOCK_SLOTS)】
-      //           ➔ 激活跨盘【导入线】并向内注入目标盘最外层基础环！
+      // 第二阶段：检查各盘中心核是否已被取下并放入其他盘【可旋转独立外圈插槽】
+      //           ➔ 直接从源盘中心拉出【跨盘导入线】至该独立外圈插槽，并随外圈旋转角度向内射入基础环！
       // =========================================================================
       const triggeredDiscs = new Set(['support']);
       for (let pass = 0; pass < 3; pass++) {
@@ -3750,18 +3716,12 @@ function renderPalette() {
           if (triggeredDiscs.has(dstKey)) continue;
           triggeredDiscs.add(dstKey);
 
-          // 1. 源盘【独立最外圈】固定射出点坐标
           const srcMeta = DISC_CONFIG[srcKey];
-          const srcDockR = getOuterDockRadius(srcKey);
-          const emitRad = (srcMeta.emitAngleDeg * Math.PI) / 180;
-          const emitX = srcMeta.cx + srcDockR * Math.cos(emitRad);
-          const emitY = srcMeta.cy + srcDockR * Math.sin(emitRad);
-
-          // 2. 目标盘【独立最外圈】外接插槽坐标
+          // 目标盘独立外圈外接槽旋转后的当前世界坐标与当前角度
           const dstDockPos = getOuterDockWorldPos(cState.placedAtDock);
 
-          // 绘制高亮跨盘导入线 (源盘独立外圈射出点 ➔ 目标盘独立外圈外接槽)！
-          drawBeamLine(svgBeams, emitX, emitY, dstDockPos.x, dstDockPos.y, 'hyper', true);
+          // 1. 绘制高亮跨盘导入线 (源盘中心 ➔ 目标盘可旋转独立外圈插槽)！
+          drawBeamLine(svgBeams, srcMeta.cx, srcMeta.cy, dstDockPos.x, dstDockPos.y, 'hyper', true);
           drawImpactSpark(svgImpacts, dstDockPos.x, dstDockPos.y, '#fbbf24', 6);
 
           // 累加中心导光核自身的属性加成
@@ -3772,25 +3732,25 @@ function renderPalette() {
             });
           }
 
-          // 3. 从目标盘【独立最外圈外接槽】向内径向注入目标盘最外层【基础环】！
+          // 2. 从目标盘【可旋转独立外圈插槽】按其当前旋转方位向内径向射入目标盘最外层【基础环】！
           const dstMeta = DISC_CONFIG[dstKey];
           const dstOutTier = counts[dstKey];
           const dstOutRingId = `${dstKey}_${dstOutTier}`;
           const dstOutRing = DISK_RINGS[dstOutRingId];
-          const injectRad = (targetDock.angleDeg * Math.PI) / 180;
+          const injectRad = (dstDockPos.angleDeg * Math.PI) / 180;
           const ringEdgeX = dstMeta.cx + dstOutRing.radius * Math.cos(injectRad);
           const ringEdgeY = dstMeta.cy + dstOutRing.radius * Math.sin(injectRad);
 
-          const align = getClosestSlotToAngle(dstOutRingId, targetDock.angleDeg, 22);
+          const align = getClosestSlotToAngle(dstOutRingId, dstDockPos.angleDeg, 22);
           if (!align.isAligned) {
             drawBeamLine(svgBeams, dstDockPos.x, dstDockPos.y, ringEdgeX, ringEdgeY, 'rose', true);
             drawImpactSpark(svgImpacts, ringEdgeX, ringEdgeY, '#f59e0b', 5);
-            logSteps.push(`🚀 [导入线已连上] ${srcMeta.name} ➔ ${dstMeta.name}独立外圈【${targetDock.dirName}外接槽】，请旋转${dstOutRing.name}对齐该外接槽！`);
+            logSteps.push(`🚀 [导入线已连上] ${srcMeta.name} ➔ ${dstMeta.name}【${targetDock.label}】，可旋转独立外圈或基础环使之对齐！`);
           } else {
             const entrySlotPos = getSlotWorldPos(dstOutRingId, align.slotIndex);
             drawBeamLine(svgBeams, dstDockPos.x, dstDockPos.y, entrySlotPos.x, entrySlotPos.y, 'rose', true);
             drawImpactSpark(svgImpacts, entrySlotPos.x, entrySlotPos.y, '#00f0ff', 5.5);
-            logSteps.push(`🚀 【跨盘导入线导通！】${srcMeta.name}射出点 ➔ ${dstMeta.name}独立外圈【${targetDock.dirName}外接槽】➔ 注入${dstOutRing.name}第 ${align.slotIndex + 1} 槽！`);
+            logSteps.push(`🚀 【跨盘导入线导通！】${srcMeta.name}中心 ➔ ${dstMeta.name}【${targetDock.label}】➔ 射入${dstOutRing.name}第 ${align.slotIndex + 1} 槽！`);
             traceDiscOpticalPath(dstKey, dstOutRingId, align.slotIndex);
           }
         }
@@ -3804,7 +3764,6 @@ function renderPalette() {
         logSteps.push(`👑 【${floorDef.name}·七星全满共鸣！】三大盘全部 ${totalConstellationSlots} 处星位点亮！每个星位节点均已享受 +120% 效果增幅！`);
       }
 
-      // 重新渲染底盘星象以点亮命中的星位与跨盘星脉连线
       renderFloorBase(true, hitFloorNodesSet);
       updatePanels(chainNodes, totalBuff, constellationMultiplier, crossActivated, logSteps, hitFloorNodesSet, activeKeystones);
       updateCenterHubsDOM();
@@ -4340,10 +4299,11 @@ function renderPalette() {
         BOARD_SLOTS['industry_1_1'].chip = 't0_mine_2';      // 踩中【Ⅳ 天权】(+120%效果) ➔ 3
         BOARD_SLOTS['industry_1_3'].chip = 'chip_triangle_in'; // 3 ➔ 射入工厂盘中心！
 
-        // 3. 将【工厂盘中心核】插入 ⚔️ 攻击盘【独立最外圈 · 东(右)外接槽 (dock_combat_1)】！
-        OUTER_DOCK_SLOTS['dock_combat_1'].coreChip = 'core_industry';
+        // 3. 将【工厂盘中心核】插入 ⚔️ 攻击盘【可旋转独立外圈 · 外圈槽A (dock_combat_0)】，并将独立外圈旋转 90° 对准正东 0°！
+        DISK_RINGS['combat_dock'].currentAngle = 90;
+        OUTER_DOCK_SLOTS['dock_combat_0'].coreChip = 'core_industry';
         CENTER_CORE_STATE.industry.detached = true;
-        CENTER_CORE_STATE.industry.placedAtDock = 'dock_combat_1';
+        CENTER_CORE_STATE.industry.placedAtDock = 'dock_combat_0';
 
         // 攻击盘 基础2环 (8槽，R=106)：从第3槽(索引2，正东0°)接收入射，点亮北斗第3星(天玑)、第2星(天璇)并向内折射入基础1环！
         BOARD_SLOTS['combat_2_2'].chip = 't0_burn_2';        // 踩中【Ⅲ 天玑】(+120%效果) ➔ 4
