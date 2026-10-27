@@ -1,0 +1,376 @@
+    function loadScenario(type) {
+      initBoardSlots();
+      for (const rKey in DISK_RINGS) {
+        DISK_RINGS[rKey].currentAngle = 0;
+        DISK_RINGS[rKey].slotOffset = 0;
+      }
+      for (const dKey of ['support', 'industry', 'combat']) {
+        CENTER_CORE_STATE[dKey].charged = false;
+        CENTER_CORE_STATE[dKey].detached = false;
+        CENTER_CORE_STATE[dKey].placedAtDock = null;
+      }
+
+      if (type === 'multi_disc_overdrive') {
+        switchFloorShape('dipper');
+        // 预设为练气期（1个大盘：攻击盘2环；2个等大小盘：工厂盘1环、辅助盘1环；每盘最外围均有独立外接圈）
+        CURRENT_REALM = 'qi';
+        SPEC_DISC = 'combat';
+
+        // 1. 🛡️ 辅助盘 基础1环 (6槽，R=66)：旋转 15.2° 对准始发源，点亮北斗第7星(摇光)、第6星(开阳)并射入辅助盘中心！
+        DISK_RINGS['support_1'].currentAngle = 15.2;
+        BOARD_SLOTS['support_1_1'].chip = 't0_speed_1';      // 踩中【Ⅶ 摇光】(+120%效果) ➔ 2
+        BOARD_SLOTS['support_1_2'].chip = 't0_atk_1';        // 踩中【Ⅵ 开阳】(+120%效果) ➔ 3
+        BOARD_SLOTS['support_1_3'].chip = 'chip_triangle_in'; // 3 ➔ 射入辅助盘中心！
+
+        // 2. 将【辅助盘中心核】插入 ⚙️ 工厂盘【独立最外圈 · 北(上)外接槽 (dock_industry_0)】！
+        OUTER_DOCK_SLOTS['dock_industry_0'].coreChip = 'core_support';
+        CENTER_CORE_STATE.support.detached = true;
+        CENTER_CORE_STATE.support.placedAtDock = 'dock_industry_0';
+
+        // 工厂盘 基础1环 (6槽，R=66)：从第1槽(索引0，正北-90°)接收入射，点亮北斗第5星(玉衡)、第4星(天权)并射入工厂盘中心！
+        BOARD_SLOTS['industry_1_0'].chip = 't0_craft_1';     // 踩中【Ⅴ 玉衡】(+120%效果) ➔ 1
+        BOARD_SLOTS['industry_1_1'].chip = 't0_mine_2';      // 踩中【Ⅳ 天权】(+120%效果) ➔ 3
+        BOARD_SLOTS['industry_1_3'].chip = 'chip_triangle_in'; // 3 ➔ 射入工厂盘中心！
+
+        // 3. 将【工厂盘中心核】插入 ⚔️ 攻击盘【可旋转独立外圈 · 外圈射入槽 (dock_combat_0)】，并将独立外圈旋转 108° 对准 2环第4槽(18°)！
+        DISK_RINGS['combat_dock'].currentAngle = 108;
+        OUTER_DOCK_SLOTS['dock_combat_0'].coreChip = 'core_industry';
+        CENTER_CORE_STATE.industry.detached = true;
+        CENTER_CORE_STATE.industry.placedAtDock = 'dock_combat_0';
+
+        // 攻击盘 基础2环 (10槽，R=106)：从第4槽(索引3，18°)接收入射，点亮北斗第3星(天玑)、第2星(天璇)并向内折射入基础1环！
+        BOARD_SLOTS['combat_2_3'].chip = 't0_atspd_2';       // 踩中【Ⅲ 天玑】(+120%效果) ➔ 5
+        BOARD_SLOTS['combat_2_5'].chip = 't2_atk_5';         // 踩中【Ⅱ 天璇】(+120%效果) ➔ 0
+        BOARD_SLOTS['combat_2_0'].chip = 'chip_triangle_in'; // 0 (-90°) ➔ 向心折射入攻击盘基础1环！
+
+        // 4. 攻击盘 基础1环 (6槽，R=66)：第1槽(索引0，-90°)接收入射，点亮北斗第1星(天枢)并射入攻击盘中心！
+        BOARD_SLOTS['combat_1_0'].chip = 't1_crit_3';        // 踩中【Ⅰ 天枢】(+120%效果) ➔ 3
+        BOARD_SLOTS['combat_1_3'].chip = 'chip_triangle_in'; // 3 ➔ 射入攻击盘中心！
+
+      } else if (type === 'act1_qi_pioneer') {
+        // 🎬 第一幕：练气期 · 基建开荒流（主修⚙️工厂2环大盘 + 辅助1环 + 攻击1环，解决跑图慢/采矿卡脖子/小怪骚扰）
+        switchFloorShape('dipper');
+        CURRENT_REALM = 'qi';
+        SPEC_DISC = 'industry';
+
+        // 1. 🛡️ 辅助盘 1环 (6槽)：移速 + 背包踩中北斗星位 (+120%)
+        DISK_RINGS['support_1'].currentAngle = 15.2;
+        BOARD_SLOTS['support_1_1'].chip = 't0_speed_1';      // 踩中【Ⅶ 摇光】移速+11% ➔ 2
+        BOARD_SLOTS['support_1_2'].chip = 't1_inventory_3';  // 踩中【Ⅵ 开阳】背包+9格 ➔ 5
+        BOARD_SLOTS['support_1_5'].chip = 't0_mine_1';       // 采矿+5% ➔ 0
+        BOARD_SLOTS['support_1_0'].chip = 'chip_triangle_in';
+
+        // 2. ⚙️ 工厂盘 2环 + 1环 (主修大盘)：采矿、传送带、制造、燃烧全线提速
+        DISK_RINGS['industry_dock'].currentAngle = 180;
+        OUTER_DOCK_SLOTS['dock_industry_0'].coreChip = 'core_support';
+        CENTER_CORE_STATE.support.detached = true;
+        CENTER_CORE_STATE.support.placedAtDock = 'dock_industry_0';
+
+        BOARD_SLOTS['industry_2_5'].chip = 't1_mine_3';      // 采矿+10% ➔ 8
+        BOARD_SLOTS['industry_2_8'].chip = 't0_belt_2';      // 传送带+8% ➔ 0
+        BOARD_SLOTS['industry_2_0'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['industry_1_0'].chip = 't0_craft_1';     // 踩中【Ⅴ 玉衡】制造+11% ➔ 1
+        BOARD_SLOTS['industry_1_1'].chip = 't0_mine_2';      // 踩中【Ⅳ 天权】采矿+18% ➔ 3
+        BOARD_SLOTS['industry_1_3'].chip = 't0_burn_2';      // 燃烧+8% ➔ 5
+        BOARD_SLOTS['industry_1_5'].chip = 'chip_triangle_in';
+
+        // 3. ⚔️ 攻击盘 1环 (6槽)：天枢星位激活 2 把自动护体浮游飞剑
+        OUTER_DOCK_SLOTS['dock_combat_0'].coreChip = 'core_industry';
+        CENTER_CORE_STATE.industry.detached = true;
+        CENTER_CORE_STATE.industry.placedAtDock = 'dock_combat_0';
+
+        BOARD_SLOTS['combat_1_0'].chip = 't2_sword_funnel_1'; // 踩中【Ⅰ 天枢】浮游飞剑+2把 ➔ 5
+        BOARD_SLOTS['combat_1_5'].chip = 'chip_triangle_in';
+
+      } else if (type === 'act2_foundation_power') {
+        // 🎬 第二幕：筑基期 · 稳电防兽潮救急流（主修⚙️工厂3环大盘 + 辅助2环 + 攻击2环，7/7北斗全亮，暴降能耗与污染）
+        switchFloorShape('dipper');
+        CURRENT_REALM = 'foundation';
+        SPEC_DISC = 'industry';
+
+        // 1. 🛡️ 辅助盘 2环 + 1环：跨图飞行电池 + 摇光/开阳星位
+        DISK_RINGS['support_2'].currentAngle = 3.2;
+        BOARD_SLOTS['support_2_2'].chip = 't2_battery_5';    // 飞行电量+30% ➔ 7
+        BOARD_SLOTS['support_2_7'].chip = 'chip_triangle_in';
+
+        DISK_RINGS['support_1'].currentAngle = 15.2;
+        BOARD_SLOTS['support_1_4'].chip = 't1_battery_3';    // 飞行电量+15% ➔ 1
+        BOARD_SLOTS['support_1_1'].chip = 't0_speed_1';      // 踩中【Ⅶ 摇光】移速+11% ➔ 2
+        BOARD_SLOTS['support_1_2'].chip = 't1_inventory_3';  // 踩中【Ⅵ 开阳】背包+9格 ➔ 5
+        BOARD_SLOTS['support_1_5'].chip = 'chip_triangle_in';
+
+        // 2. ⚙️ 工厂盘 3环 + 2环 + 1环：节能降耗(-30%) + 环保降仇恨(-50%) + 玉衡/天权星位
+        DISK_RINGS['industry_dock'].currentAngle = 45;
+        OUTER_DOCK_SLOTS['dock_industry_0'].coreChip = 'core_support';
+        CENTER_CORE_STATE.support.detached = true;
+        CENTER_CORE_STATE.support.placedAtDock = 'dock_industry_0';
+
+        BOARD_SLOTS['industry_3_2'].chip = 't2_power_5';     // 用电能耗-20% ➔ 7
+        BOARD_SLOTS['industry_3_7'].chip = 't1_power_3';     // 用电能耗-10% ➔ 10
+        BOARD_SLOTS['industry_3_10'].chip = 't1_pollute_3';  // 污染排放-10% ➔ 13
+        BOARD_SLOTS['industry_3_13'].chip = 't1_burn_3';     // 燃烧能效+10% ➔ 0
+        BOARD_SLOTS['industry_3_0'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['industry_2_0'].chip = 't2_pollute_5';   // 污染排放-20% ➔ 5
+        BOARD_SLOTS['industry_2_5'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['industry_1_3'].chip = 't1_craft_3';     // 制造+10% ➔ 0
+        BOARD_SLOTS['industry_1_0'].chip = 't0_craft_1';     // 踩中【Ⅴ 玉衡】制造+11% ➔ 1
+        BOARD_SLOTS['industry_1_1'].chip = 't0_atk_1';       // 踩中【Ⅳ 天权】攻击+11% ➔ 2
+        BOARD_SLOTS['industry_1_2'].chip = 'chip_triangle_in';
+
+        // 3. ⚔️ 攻击盘 2环 + 1环：护山大阵防御与气血踩满斗魁三星
+        DISK_RINGS['combat_dock'].currentAngle = 108;
+        OUTER_DOCK_SLOTS['dock_combat_0'].coreChip = 'core_industry';
+        CENTER_CORE_STATE.industry.detached = true;
+        CENTER_CORE_STATE.industry.placedAtDock = 'dock_combat_0';
+
+        BOARD_SLOTS['combat_2_3'].chip = 't0_def_2';         // 踩中【Ⅲ 天玑】防御+18% ➔ 5
+        BOARD_SLOTS['combat_2_5'].chip = 't2_def_5';         // 踩中【Ⅱ 天璇】防御+44% ➔ 0
+        BOARD_SLOTS['combat_2_0'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['combat_1_0'].chip = 't1_hp_3';          // 踩中【Ⅰ 天枢】气血+22% ➔ 3
+        BOARD_SLOTS['combat_1_3'].chip = 'chip_triangle_in';
+
+      } else if (type === 'act3_core_factory') {
+        // 🎬 第三幕（流派1）：金丹期 · 万倍吞吐暴铺流（主修⚙️工厂4环大盘 + 辅助3环 + 攻击3环，10环全通 + 7/7北斗全亮）
+        switchFloorShape('dipper');
+        CURRENT_REALM = 'core';
+        SPEC_DISC = 'industry';
+
+        // 1. 🛡️ 辅助盘 3环 + 2环 + 1环
+        DISK_RINGS['support_3'].currentAngle = 7.7;
+        BOARD_SLOTS['support_3_3'].chip = 't2_speed_5';      // 移速+20% ➔ 8
+        BOARD_SLOTS['support_3_8'].chip = 'chip_triangle_in';
+
+        DISK_RINGS['support_2'].currentAngle = 3.2;
+        BOARD_SLOTS['support_2_5'].chip = 't0_belt_2';       // 传送带+8% ➔ 7
+        BOARD_SLOTS['support_2_7'].chip = 'chip_triangle_in';
+
+        DISK_RINGS['support_1'].currentAngle = 15.2;
+        BOARD_SLOTS['support_1_4'].chip = 't1_stamina_3';    // 体力+10% ➔ 1
+        BOARD_SLOTS['support_1_1'].chip = 't0_speed_1';      // 踩中【Ⅶ 摇光】移速+11% ➔ 2
+        BOARD_SLOTS['support_1_2'].chip = 't0_mine_1';       // 踩中【Ⅵ 开阳】采矿+11% ➔ 3
+        BOARD_SLOTS['support_1_3'].chip = 'chip_triangle_in';
+
+        // 2. ⚙️ 工厂盘 4环 + 3环 + 2环 + 1环 (主修4环大盘：+8/+5/+3高阶工业芯片满载)
+        DISK_RINGS['industry_dock'].currentAngle = 90;
+        OUTER_DOCK_SLOTS['dock_industry_0'].coreChip = 'core_support';
+        CENTER_CORE_STATE.support.detached = true;
+        CENTER_CORE_STATE.support.placedAtDock = 'dock_industry_0';
+
+        BOARD_SLOTS['industry_4_6'].chip = 't3_craft_8';     // 制造+30% (+8格) ➔ 14
+        BOARD_SLOTS['industry_4_14'].chip = 't3_mine_8';     // 采矿+30% (+8格) ➔ 22
+        BOARD_SLOTS['industry_4_22'].chip = 't0_craft_2';    // 制造+8% (+2格) ➔ 0
+        BOARD_SLOTS['industry_4_0'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['industry_3_0'].chip = 't2_craft_5';     // 制造+20% (+5格) ➔ 5
+        BOARD_SLOTS['industry_3_5'].chip = 't1_mine_3';      // 采矿+10% (+3格) ➔ 8
+        BOARD_SLOTS['industry_3_8'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['industry_2_5'].chip = 't2_mine_5';      // 采矿+20% (+5格) ➔ 0
+        BOARD_SLOTS['industry_2_0'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['industry_1_0'].chip = 't0_craft_1';     // 踩中【Ⅴ 玉衡】制造+11% ➔ 1
+        BOARD_SLOTS['industry_1_1'].chip = 't0_atk_1';       // 踩中【Ⅳ 天权】攻击+11% ➔ 2
+        BOARD_SLOTS['industry_1_2'].chip = 't1_burn_3';      // 燃烧+10% ➔ 5
+        BOARD_SLOTS['industry_1_5'].chip = 'chip_triangle_in';
+
+        // 3. ⚔️ 攻击盘 3环 + 2环 + 1环
+        OUTER_DOCK_SLOTS['dock_combat_0'].coreChip = 'core_industry';
+        CENTER_CORE_STATE.industry.detached = true;
+        CENTER_CORE_STATE.industry.placedAtDock = 'dock_combat_0';
+
+        BOARD_SLOTS['combat_3_0'].chip = 't2_burn_5';        // 燃烧+20% (+5格) ➔ 5
+        BOARD_SLOTS['combat_3_5'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['combat_2_3'].chip = 't0_burn_2';        // 踩中【Ⅲ 天玑】燃烧+18% ➔ 5
+        BOARD_SLOTS['combat_2_5'].chip = 't2_belt_5';        // 踩中【Ⅱ 天璇】传送带+44% ➔ 0
+        BOARD_SLOTS['combat_2_0'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['combat_1_0'].chip = 't1_craft_3';       // 踩中【Ⅰ 天枢】制造+22% ➔ 3
+        BOARD_SLOTS['combat_1_3'].chip = 'chip_triangle_in';
+
+      } else if (type === 'act3_core_swords') {
+        // 🎬 第三幕（流派2）：金丹期 · 一人成军万剑流（主修⚔️攻击4环大盘 + 工厂3环 + 辅助3环，10环全通 + 万剑齐发）
+        switchFloorShape('dipper');
+        CURRENT_REALM = 'core';
+        SPEC_DISC = 'combat';
+
+        // 1. 🛡️ 辅助盘 3环 + 2环 + 1环
+        DISK_RINGS['support_3'].currentAngle = 7.7;
+        BOARD_SLOTS['support_3_3'].chip = 't3_battery_8';    // 飞行电量+50% (+8格) ➔ 11
+        BOARD_SLOTS['support_3_11'].chip = 't2_speed_5';     // 移速+20% (+5格) ➔ 0
+        BOARD_SLOTS['support_3_0'].chip = 'chip_triangle_in';
+
+        DISK_RINGS['support_2'].currentAngle = 3.2;
+        BOARD_SLOTS['support_2_0'].chip = 't2_battery_5';    // 飞行电量+30% ➔ 5
+        BOARD_SLOTS['support_2_5'].chip = 't0_atspd_2';      // 攻速+8% ➔ 7
+        BOARD_SLOTS['support_2_7'].chip = 'chip_triangle_in';
+
+        DISK_RINGS['support_1'].currentAngle = 15.2;
+        BOARD_SLOTS['support_1_4'].chip = 't1_speed_3';      // 移速+10% ➔ 1
+        BOARD_SLOTS['support_1_1'].chip = 't0_speed_1';      // 踩中【Ⅶ 摇光】移速+11% ➔ 2
+        BOARD_SLOTS['support_1_2'].chip = 't0_atk_1';        // 踩中【Ⅵ 开阳】攻击+11% ➔ 3
+        BOARD_SLOTS['support_1_3'].chip = 'chip_triangle_in';
+
+        // 2. ⚙️ 工厂盘 3环 + 2环 + 1环
+        OUTER_DOCK_SLOTS['dock_industry_0'].coreChip = 'core_support';
+        CENTER_CORE_STATE.support.detached = true;
+        CENTER_CORE_STATE.support.placedAtDock = 'dock_industry_0';
+
+        BOARD_SLOTS['industry_3_0'].chip = 't2_craft_5';     // 制造+20% ➔ 5
+        BOARD_SLOTS['industry_3_5'].chip = 't1_belt_3';      // 传送带+10% ➔ 8
+        BOARD_SLOTS['industry_3_8'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['industry_2_5'].chip = 't2_mine_5';      // 采矿+20% ➔ 0
+        BOARD_SLOTS['industry_2_0'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['industry_1_0'].chip = 't0_craft_1';     // 踩中【Ⅴ 玉衡】制造+11% ➔ 1
+        BOARD_SLOTS['industry_1_1'].chip = 't0_mine_2';      // 踩中【Ⅳ 天权】采矿+18% ➔ 3
+        BOARD_SLOTS['industry_1_3'].chip = 'chip_triangle_in';
+
+        // 3. ⚔️ 攻击盘 4环 + 3环 + 2环 + 1环 (主修4环大盘：浮游飞剑+攻击+暴击+攻速满配)
+        DISK_RINGS['combat_dock'].currentAngle = 90;
+        OUTER_DOCK_SLOTS['dock_combat_0'].coreChip = 'core_industry';
+        CENTER_CORE_STATE.industry.detached = true;
+        CENTER_CORE_STATE.industry.placedAtDock = 'dock_combat_0';
+
+        BOARD_SLOTS['combat_4_6'].chip = 't3_sword_funnel_2'; // 浮游飞剑+2把 (+8格) ➔ 14
+        BOARD_SLOTS['combat_4_14'].chip = 't3_atk_8';         // 飞剑攻击+30% (+8格) ➔ 22
+        BOARD_SLOTS['combat_4_22'].chip = 't0_def_2';         // 阵法防御+8% (+2格) ➔ 0
+        BOARD_SLOTS['combat_4_0'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['combat_3_0'].chip = 't2_atspd_5';        // 攻击速度+20% (+5格) ➔ 5
+        BOARD_SLOTS['combat_3_5'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['combat_2_3'].chip = 't1_atk_3';          // 踩中【Ⅲ 天玑】飞剑攻击+22% (+3格) ➔ 6
+        BOARD_SLOTS['combat_2_6'].chip = 't1_atspd_3';        // 攻击速度+10% (+3格) ➔ 9
+        BOARD_SLOTS['combat_2_9'].chip = 't2_atk_5';          // 飞剑攻击+20% (+5格) ➔ 4
+        BOARD_SLOTS['combat_2_4'].chip = 't0_burn_2';         // 燃烧能效+8% (+2格) ➔ 6? 改为 2_3(+2)->2_5
+        BOARD_SLOTS['combat_2_3'].chip = 't0_burn_2';         // 踩中【Ⅲ 天玑】(+120%) ➔ 5
+        BOARD_SLOTS['combat_2_5'].chip = 't2_sword_funnel_1'; // 踩中【Ⅱ 天璇】浮游飞剑+2把 (+5格) ➔ 0
+        BOARD_SLOTS['combat_2_6'].chip = null;
+        BOARD_SLOTS['combat_2_9'].chip = null;
+        BOARD_SLOTS['combat_2_4'].chip = null;
+        BOARD_SLOTS['combat_2_0'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['combat_1_0'].chip = 't1_crit_3';         // 踩中【Ⅰ 天枢】暴击+22% ➔ 3
+        BOARD_SLOTS['combat_1_3'].chip = 'chip_triangle_in';
+
+      } else if (type === 'act3_core_roam') {
+        // 🎬 第三幕（流派3）：金丹期 · 虚空漫游神仙流（主修🛡️辅助4环大盘 + 工厂3环 + 攻击3环，无限续航+零污染挂机）
+        switchFloorShape('dipper');
+        CURRENT_REALM = 'core';
+        SPEC_DISC = 'support';
+
+        // 1. 🛡️ 辅助盘 4环 + 3环 + 2环 + 1环 (主修4环大盘)
+        DISK_RINGS['support_4'].currentAngle = 0.2;
+        BOARD_SLOTS['support_4_5'].chip = 't3_battery_8';     // 飞行电量+50% (+8格) ➔ 13
+        BOARD_SLOTS['support_4_13'].chip = 't2_speed_5';      // 移动速度+20% (+5格) ➔ 18
+        BOARD_SLOTS['support_4_18'].chip = 't2_inventory_5';  // 储物背包+8格 (+5格) ➔ 23
+        BOARD_SLOTS['support_4_23'].chip = 'chip_triangle_in'; // 23 (-105°) ➔ 折入3环15号槽
+
+        DISK_RINGS['support_3'].currentAngle = 7.7;
+        BOARD_SLOTS['support_3_15'].chip = 't2_battery_5';    // 飞行电量+30% (+5格) ➔ 4
+        BOARD_SLOTS['support_3_4'].chip = 't1_stamina_3';     // 御剑体力+10% (+3格) ➔ 7
+        BOARD_SLOTS['support_3_7'].chip = 'chip_triangle_in';
+
+        DISK_RINGS['support_2'].currentAngle = 3.2;
+        BOARD_SLOTS['support_2_4'].chip = 't1_speed_3';       // 移动速度+10% (+3格) ➔ 7
+        BOARD_SLOTS['support_2_7'].chip = 'chip_triangle_in';
+
+        DISK_RINGS['support_1'].currentAngle = 15.2;
+        BOARD_SLOTS['support_1_4'].chip = 't1_battery_3';     // 飞行电量+15% (+3格) ➔ 1
+        BOARD_SLOTS['support_1_1'].chip = 't0_speed_1';       // 踩中【Ⅶ 摇光】移速+11% ➔ 2
+        BOARD_SLOTS['support_1_2'].chip = 't1_inventory_3';   // 踩中【Ⅵ 开阳】背包+9格 ➔ 5
+        BOARD_SLOTS['support_1_5'].chip = 'chip_triangle_in';
+
+        // 2. ⚙️ 工厂盘 3环 + 2环 + 1环 (全自动节能降污染挂机)
+        OUTER_DOCK_SLOTS['dock_industry_0'].coreChip = 'core_support';
+        CENTER_CORE_STATE.support.detached = true;
+        CENTER_CORE_STATE.support.placedAtDock = 'dock_industry_0';
+
+        BOARD_SLOTS['industry_3_0'].chip = 't2_power_5';      // 用电能耗-20% ➔ 5
+        BOARD_SLOTS['industry_3_5'].chip = 't1_power_3';      // 用电能耗-10% ➔ 8
+        BOARD_SLOTS['industry_3_8'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['industry_2_5'].chip = 't2_pollute_5';    // 污染排放-20% ➔ 0
+        BOARD_SLOTS['industry_2_0'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['industry_1_0'].chip = 't0_craft_1';      // 踩中【Ⅴ 玉衡】制造+11% ➔ 1
+        BOARD_SLOTS['industry_1_1'].chip = 't0_mine_2';       // 踩中【Ⅳ 天权】采矿+18% ➔ 3
+        BOARD_SLOTS['industry_1_3'].chip = 'chip_triangle_in';
+
+        // 3. ⚔️ 攻击盘 3环 + 2环 + 1环
+        OUTER_DOCK_SLOTS['dock_combat_0'].coreChip = 'core_industry';
+        CENTER_CORE_STATE.industry.detached = true;
+        CENTER_CORE_STATE.industry.placedAtDock = 'dock_combat_0';
+
+        BOARD_SLOTS['combat_3_0'].chip = 't2_def_5';          // 防御+20% ➔ 5
+        BOARD_SLOTS['combat_3_5'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['combat_2_3'].chip = 't0_def_2';          // 踩中【Ⅲ 天玑】防御+18% ➔ 5
+        BOARD_SLOTS['combat_2_5'].chip = 't2_hp_5';           // 踩中【Ⅱ 天璇】气血+44% ➔ 0
+        BOARD_SLOTS['combat_2_0'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['combat_1_0'].chip = 't2_sword_funnel_1'; // 踩中【Ⅰ 天枢】浮游飞剑+2把 ➔ 5
+        BOARD_SLOTS['combat_1_5'].chip = 'chip_triangle_in';
+      } else if (type === 'outer_chain') {
+        switchFloorShape('dipper');
+        CURRENT_REALM = 'qi';
+        SPEC_DISC = 'combat';
+
+        // 演示待连线工况：三盘内部芯片已就绪，辅助盘已射入中心，等待玩家点一下辅助盘中心取下极核并拖到工厂盘【独立最外圈·外圈射入槽】！
+        DISK_RINGS['support_1'].currentAngle = 15.2;
+        BOARD_SLOTS['support_1_1'].chip = 't0_speed_1';
+        BOARD_SLOTS['support_1_2'].chip = 't0_atk_1';
+        BOARD_SLOTS['support_1_3'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['industry_1_0'].chip = 't0_craft_1';
+        BOARD_SLOTS['industry_1_1'].chip = 't0_mine_2';
+        BOARD_SLOTS['industry_1_3'].chip = 'chip_triangle_in';
+
+        DISK_RINGS['combat_dock'].currentAngle = 108;
+        BOARD_SLOTS['combat_2_3'].chip = 't0_atspd_2';
+        BOARD_SLOTS['combat_2_5'].chip = 't2_atk_5';
+        BOARD_SLOTS['combat_2_0'].chip = 'chip_triangle_in';
+        BOARD_SLOTS['combat_1_0'].chip = 't1_crit_3';
+        BOARD_SLOTS['combat_1_3'].chip = 'chip_triangle_in';
+      }
+
+      ACTIVE_INTERACT_RING = null;
+      setRealm(CURRENT_REALM);
+      setSpecDisc(SPEC_DISC);
+      if (typeof renderPalette === 'function') renderPalette();
+      if (audio) audio.playConnect();
+    }
+    window.loadScenario = loadScenario;
+
+    function toggleScenarioDropdown(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById('scenarioDropdownMenu');
+      if (!menu) return;
+      menu.classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', (e) => {
+      const container = document.getElementById('scenarioDropdownContainer');
+      const menu = document.getElementById('scenarioDropdownMenu');
+      if (container && menu && !container.contains(e.target)) {
+        menu.classList.add('hidden');
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initBoardSlots();
+      renderPalette();
+      initRingDirectDragging();
+      loadScenario('multi_disc_overdrive');
+      fitStageToViewport();
+      setTimeout(fitStageToViewport, 120);
+    });
+  </script>
+</body>
+</html>

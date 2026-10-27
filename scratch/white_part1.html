@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>中央处理器 · 三大主盘系统 (攻击/工厂/辅助)</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+SC:wght@300;400;500;700;900&family=Cinzel:wght@600;900&display=swap');
+
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .font-mono-sci { font-family: 'Share Tech Mono', monospace; }
+    .font-cinzel { font-family: 'Cinzel', serif; }
+
+    /* 纯净浅白工程图纸网格底纹 */
+    .blueprint-canvas {
+      background-color: #f8fafc;
+      background-image: 
+        linear-gradient(to right, rgba(148, 163, 184, 0.15) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.15) 1px, transparent 1px),
+        linear-gradient(to right, rgba(148, 163, 184, 0.3) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.3) 1px, transparent 1px);
+      background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+      background-position: -1px -1px;
+    }
+
+    .ring-trans {
+      transition: transform 0.05s linear;
+      transform-origin: center center;
+    }
+
+    .laser-glow {
+      filter: drop-shadow(0 0 5px #0284c7) drop-shadow(0 0 10px rgba(14, 165, 233, 0.6));
+    }
+
+    .laser-core {
+      stroke-dasharray: 6 3;
+      animation: laserFlow 0.8s linear infinite;
+    }
+
+    @keyframes laserFlow {
+      from { stroke-dashoffset: 18; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    .collapsible-sidebar {
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .collapsible-sidebar.collapsed {
+      width: 0 !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+      padding: 0 !important;
+      border: none !important;
+    }
+
+    /* 绚丽彩色芯片视觉 */
+    .chip-bg-combat {
+      background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+      box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+      border: 1.5px solid #fecaca;
+    }
+    .chip-bg-industry {
+      background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
+      border: 1.5px solid #fef3c7;
+    }
+    .chip-bg-mobility {
+      background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+      box-shadow: 0 2px 6px rgba(14, 165, 233, 0.4);
+      border: 1.5px solid #bae6fd;
+    }
+    .chip-bg-shift {
+      background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+      box-shadow: 0 2px 6px rgba(168, 85, 247, 0.4);
+      border: 1.5px solid #f3e8ff;
+    }
+    .chip-bg-keystone {
+      background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+      box-shadow: 0 3px 8px rgba(16, 185, 129, 0.5);
+      border: 2px solid #a7f3d0;
+    }
+  </style>
+</head>
+<body class="w-screen h-screen flex flex-col antialiased bg-slate-50 text-slate-800">

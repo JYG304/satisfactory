@@ -1,0 +1,3998 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>中央处理器 · 灵枢阵盘工程系统</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome 图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Share+Tech+Mono&family=Space+Grotesk:wght@400;600;700&family=Noto+Sans+SC:wght@400;600;700;900&display=swap');
+
+    * {
+      user-select: none;
+      -webkit-user-select: none;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #f8fafc;
+      color: #020617;
+      font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+    .font-cinzel { font-family: 'Cinzel', serif; }
+    .font-mono-sci { font-family: 'Share Tech Mono', monospace; }
+
+    /* 极简工程滚动条 */
+    .ficsit-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+    .ficsit-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+    .ficsit-scrollbar::-webkit-scrollbar-thumb { background: #0284c7; border-radius: 2px; }
+    .ficsit-scrollbar::-webkit-scrollbar-thumb:hover { background: #0369a1; }
+
+    /* ✦ 白 (50%) + 青 (25%) + 黑 (10%) 浑天制图图纸背景 ✦ */
+    .blueprint-canvas {
+      background-color: #ffffff;
+      background-image: 
+        radial-gradient(circle at 75% 45%, rgba(6, 182, 212, 0.08) 0%, rgba(2, 132, 199, 0.03) 45%, transparent 75%),
+        linear-gradient(to right, rgba(2, 132, 199, 0.07) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(2, 132, 199, 0.07) 1px, transparent 1px);
+      background-size: 100% 100%, 28px 28px, 28px 28px;
+    }
+
+    /* 环旋转平滑过渡 */
+    .ring-trans {
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* 几何节点专属外形 */
+    .shape-circle { border-radius: 9999px !important; }
+    .shape-square { border-radius: 5px !important; }
+    .shape-triangle { clip-path: polygon(50% 6%, 6% 94%, 94% 94%); }
+    .shape-diamond { clip-path: polygon(50% 6%, 94% 50%, 50% 94%, 6% 50%); }
+
+    /* ✦ 青 + 黑 + 白 高能符石节点 ✦ */
+    .token-node {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    /* 1. 战伐/攻击: 墨黑基底 + 炽青高亮边缘 */
+    .token-atk {
+      background: #020617;
+      border: 1.8px solid #0284c7;
+      color: #38bdf8;
+      box-shadow: 0 0 10px rgba(2, 132, 199, 0.35);
+    }
+    /* 2. 防御/玄甲: 纯白冰鉴 + 青色符纹 */
+    .token-def {
+      background: #ffffff;
+      border: 1.8px solid #0891b2;
+      color: #0891b2;
+      box-shadow: 0 2px 8px rgba(8, 145, 178, 0.2);
+    }
+    /* 3. 传送带/工业: 亮青高光 + 墨黑齿圈 */
+    .token-belt {
+      background: #f0fdfa;
+      border: 1.8px solid #0284c7;
+      color: #0284c7;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.2);
+    }
+    /* 4. 浮游飞剑: 纯黑星核 + 耀青光芒 */
+    .token-funnel {
+      background: #020617;
+      border: 2px solid #00f0ff;
+      color: #00f0ff;
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.6);
+      animation: funnelPulse 2s ease-in-out infinite;
+    }
+    @keyframes funnelPulse {
+      0%, 100% { box-shadow: 0 0 8px rgba(0, 240, 255, 0.4); }
+      50% { box-shadow: 0 0 16px rgba(0, 240, 255, 0.8); }
+    }
+    /* 5. 变轨三角: 纯青折射规镜 */
+    .token-shift {
+      background: #0284c7;
+      border: 2px solid #ffffff;
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(2, 132, 199, 0.5);
+    }
+
+    /* 空插槽基准定位孔 */
+    .slot-crosshair-idle {
+      border: 1.5px solid #cbd5e1;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 2px 5px rgba(2, 132, 199, 0.08);
+      transition: all 0.2s ease;
+    }
+    .slot-crosshair-idle:hover {
+      border-color: #0284c7;
+      background: #f0f9ff;
+      box-shadow: 0 0 12px rgba(2, 132, 199, 0.4);
+      transform: scale(1.15);
+    }
+
+    /* 右侧发射源呼吸脉冲 */
+    @keyframes emitterPulseModern {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.5); }
+      50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(2, 132, 199, 0.12); }
+    }
+    .pulse-emitter-modern {
+      animation: emitterPulseModern 2.2s ease-in-out infinite;
+    }
+
+    /* 侧边抽屉面板收放动画与折叠状态 (默认收起) */
+    .collapsible-sidebar {
+      transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+                  min-width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                  max-width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.25s ease,
+                  transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: width, transform, opacity;
+    }
+    .collapsible-sidebar.collapsed {
+      width: 0px !important;
+      min-width: 0px !important;
+      max-width: 0px !important;
+      opacity: 0 !important;
+      overflow: hidden !important;
+      border-left-width: 0px !important;
+      border-right-width: 0px !important;
+      padding-left: 0px !important;
+      padding-right: 0px !important;
+      pointer-events: none !important;
+    }
+    .writing-vertical {
+      writing-mode: vertical-rl;
+    }
+
+    /* 悬浮呼吸高亮边框 */
+    .glow-cyan {
+      box-shadow: 0 0 15px rgba(2, 132, 199, 0.4);
+    }
+  </style>
+</head>
+<body class="flex flex-col h-screen w-screen bg-[#f8fafc] text-slate-900 select-none overflow-hidden">
+
+  <!-- ✦ 浮动抽屉呼出挂钮：左侧阶梯构件库 (默认收起状态下始终悬浮，点击展开/关闭) ✦ -->
+  <button id="btnOpenLeft" onclick="toggleLeftPanel()" class="fixed left-0 top-1/2 -translate-y-1/2 z-50 bg-white/95 backdrop-blur-md border-2 border-l-0 border-slate-900 hover:border-sky-500 text-slate-900 py-4 px-2.5 rounded-r-2xl shadow-2xl flex flex-col items-center space-y-2 text-xs font-mono-sci font-black hover:bg-sky-50 transition cursor-pointer group" title="点击展开/收起阶梯构件库">
+    <i class="fa-solid fa-chevron-right text-sky-600 text-sm mb-1 group-hover:translate-x-1 transition-transform"></i>
+    <span class="writing-vertical text-xs font-black tracking-widest text-slate-900">阶梯构件库</span>
+    <i class="fa-solid fa-cubes text-slate-700 text-sm mt-1"></i>
+  </button>
+
+  <!-- ✦ 浮动抽屉呼出挂钮：右侧动力看板 (默认收起状态下始终悬浮，点击展开/关闭) ✦ -->
+  <button id="btnOpenRight" onclick="toggleRightPanel()" class="fixed right-0 top-1/2 -translate-y-1/2 z-50 bg-white/95 backdrop-blur-md border-2 border-r-0 border-slate-900 hover:border-sky-500 text-slate-900 py-4 px-2.5 rounded-l-2xl shadow-2xl flex flex-col items-center space-y-2 text-xs font-mono-sci font-black hover:bg-sky-50 transition cursor-pointer group" title="点击展开/收起动力看板">
+    <i class="fa-solid fa-chevron-left text-sky-600 text-sm mb-1 group-hover:-translate-x-1 transition-transform"></i>
+    <span class="writing-vertical text-xs font-black tracking-widest text-slate-900">动力看板</span>
+    <i class="fa-solid fa-gauge-high text-slate-700 text-sm mt-1"></i>
+  </button>
+
+  <!-- ======================== 顶栏：极简瑞士制图风 顶栏 ======================== -->
+  <header class="h-16 bg-white/95 border-b border-slate-200 px-6 flex items-center justify-between z-30 shrink-0 shadow-xs backdrop-blur-md">
+    
+    <!-- 左：纯净标题「中央处理器」 -->
+    <div class="flex items-center space-x-3.5">
+      <div class="w-10 h-10 rounded-lg bg-slate-900 flex items-center justify-center text-white shadow-sm border border-slate-700">
+        <i class="fa-solid fa-microchip text-lg text-sky-400"></i>
+      </div>
+      <div class="flex items-center space-x-2.5">
+        <h1 class="text-base font-black tracking-widest text-slate-900 font-cinzel">
+          中央处理器
+        </h1>
+        <span class="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-300 font-mono-sci font-bold">
+          MAIN ARRAY PROCESSOR
+        </span>
+      </div>
+    </div>
+
+    <!-- 中：底板基准星宿切换 -->
+    <div class="flex items-center bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 shadow-xs space-x-3">
+      <span class="text-[11px] font-mono-sci text-slate-600 font-bold uppercase tracking-wider flex items-center">
+        <i class="fa-solid fa-shapes mr-1.5 text-slate-800"></i>底盘星象:
+      </span>
+      <div class="flex items-center space-x-1" id="floorShapeButtonGroup">
+        <button onclick="switchFloorShape('dipper')" id="btn_shape_dipper" class="px-2.5 py-1 rounded bg-slate-900 border border-slate-900 text-white text-[11px] font-bold font-mono-sci shadow-xs" title="北斗七星天衡阵 (2.5x 狂暴星宿)">
+          <i class="fa-solid fa-star mr-1 text-amber-300"></i>北斗七星
+        </button>
+        <button onclick="switchFloorShape('southern_dipper')" id="btn_shape_southern_dipper" class="px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-slate-800 text-slate-700 text-[11px] font-bold font-mono-sci" title="南斗六司延寿阵 (2.4x 生生长生)">
+          <i class="fa-solid fa-leaf mr-1 text-emerald-600"></i>南斗六司
+        </button>
+        <button onclick="switchFloorShape('ziwei')" id="btn_shape_ziwei" class="px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-slate-800 text-slate-700 text-[11px] font-bold font-mono-sci" title="紫微帝垣万剑阵 (3.0x 万剑归宗)">
+          <i class="fa-solid fa-crown mr-1 text-amber-500"></i>紫微万剑
+        </button>
+        <button onclick="switchFloorShape('four_symbols')" id="btn_shape_four_symbols" class="px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-slate-800 text-slate-700 text-[11px] font-bold font-mono-sci" title="二十八宿四象阵 (2.2x 聚灵工厂)">
+          <i class="fa-solid fa-shield-halved mr-1 text-sky-600"></i>四象四极
+        </button>
+        <button onclick="switchFloorShape('nine_luminaries')" id="btn_shape_nine_luminaries" class="px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-slate-800 text-slate-700 text-[11px] font-bold font-mono-sci" title="九曜日月行天阵 (2.6x 阴阳调和)">
+          <i class="fa-solid fa-sun mr-1 text-orange-500"></i>九曜日月
+        </button>
+        <button onclick="switchFloorShape('thunder_matrix')" id="btn_shape_thunder_matrix" class="px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-slate-800 text-slate-700 text-[11px] font-bold font-mono-sci" title="天罡雷劫破虚阵 (2.8x 渡劫爆发)">
+          <i class="fa-solid fa-bolt mr-1 text-purple-600"></i>天罡雷劫
+        </button>
+      </div>
+    </div>
+
+    <!-- 右：模式切换 + 预设工况折叠单按钮 + 清空 -->
+    <div class="flex items-center space-x-2.5 shrink-0">
+      
+      
+
+      <!-- 预设工况折叠单按钮 -->
+      <div class="relative" id="scenarioDropdownContainer">
+        <button id="btnScenarioDropdown" onclick="toggleScenarioDropdown(event)" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-300 text-xs font-bold text-slate-800 transition shadow-xs flex items-center space-x-1.5" title="点击展开工况预设列表">
+          <i class="fa-solid fa-sliders text-sky-600"></i>
+          <span>工况预设 ▾</span>
+        </button>
+        <div id="scenarioDropdownMenu" class="hidden absolute right-0 top-full mt-1.5 w-52 bg-white/95 backdrop-blur-md border border-slate-200 rounded-xl shadow-2xl p-1.5 z-50 text-xs space-y-1">
+          <div class="px-2.5 py-1 text-[10px] font-mono-sci font-bold text-slate-400 uppercase tracking-wider">
+            标准工况预设
+          </div>
+          <button onclick="loadScenario('multi_disc_overdrive'); toggleScenarioDropdown();" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-100 flex items-center space-x-2 font-bold text-slate-800 transition">
+            <i class="fa-solid fa-crown text-amber-500"></i>
+            <span>最优解工况 (全盘通电)</span>
+          </button>
+          <button onclick="loadScenario('outer_chain'); toggleScenarioDropdown();" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-100 flex items-center space-x-2 font-bold text-slate-700 transition">
+            <i class="fa-solid fa-circle-notch text-sky-600"></i>
+            <span>8-5-3 阶梯闭环</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 清空盘面 -->
+      <button onclick="clearBoard()" class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-rose-50 border border-slate-300 hover:border-rose-300 text-xs font-bold text-slate-600 hover:text-rose-600 transition" title="清空盘面所有构件">
+        <i class="fa-solid fa-trash-can"></i>
+      </button>
+
+    </div>
+
+  </header>
+
+  <!-- ======================== 主体验交互区 (三栏布局) ======================== -->
+  <main class="flex-1 flex overflow-hidden relative">
+
+    <!-- ----------------- 左栏：构件库 ----------------- -->
+    <aside id="leftPanel" class="w-80 bg-white border-r border-slate-200 flex flex-col z-20 shrink-0 shadow-sm collapsible-sidebar">
+      <div class="p-3 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+        <span class="text-xs font-bold text-slate-900 tracking-wider flex items-center font-mono-sci">
+          <i class="fa-solid fa-cubes mr-1.5 text-sky-600"></i>芯片与插件构件库
+        </span>
+        <div class="flex items-center space-x-1.5">
+          <span class="text-[10px] text-slate-400 font-mono-sci uppercase">TIER 1/2/3</span>
+          <button onclick="toggleLeftPanel()" class="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-slate-800 hover:bg-slate-200 transition" title="收起构件库">
+            <i class="fa-solid fa-chevron-left text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 构件分类筛选 Tab (全部 / 战伐 / 浮游飞剑 / 工业 / 身法 / 变轨) -->
+      <div class="px-3 py-1.5 border-b border-slate-200 flex items-center space-x-1 text-[10.5px] font-mono-sci bg-slate-50/60 overflow-x-auto ficsit-scrollbar">
+        <button onclick="filterPalette('all')" id="tab_all" class="px-2 py-0.5 rounded bg-slate-900 text-white font-bold shrink-0">全部</button>
+        <button onclick="filterPalette('funnel')" id="tab_funnel" class="px-2 py-0.5 rounded bg-white text-amber-700 border border-amber-300 hover:border-amber-700 shrink-0 font-bold">🗡️ 浮游飞剑</button>
+        <button onclick="filterPalette('combat')" id="tab_combat" class="px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-200 hover:border-slate-800 shrink-0">⚔️ 战伐</button>
+        <button onclick="filterPalette('industry')" id="tab_industry" class="px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-200 hover:border-slate-800 shrink-0">🏭 工业</button>
+        <button onclick="filterPalette('mobility')" id="tab_mobility" class="px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-200 hover:border-slate-800 shrink-0">👟 身法</button>
+        <button onclick="filterPalette('shift')" id="tab_shift" class="px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-200 hover:border-slate-800 shrink-0">🔺 变轨</button>
+        <button onclick="filterPalette('keystone')" id="tab_keystone" class="px-2.5 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-400 hover:bg-amber-100 shrink-0 font-bold shadow-xs">💎 核心插件</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-3 space-y-2.5 ficsit-scrollbar" id="paletteListContainer">
+        <!-- JS 动态渲染各组件卡片 -->
+      </div>
+
+      <!-- 规则提示图例 -->
+      <div class="p-3 border-t border-slate-200 bg-slate-50/90 space-y-2 text-xs">
+        <span class="text-[10px] font-bold text-slate-500 font-mono-sci uppercase tracking-wider flex items-center">
+          <i class="fa-solid fa-circle-info mr-1.5 text-slate-700"></i>阶梯规制与连结说明
+        </span>
+        <ul class="text-[11px] text-slate-600 space-y-1.5 list-disc list-inside">
+          <li><b class="text-slate-900">全盘统一规则</b>：所有 4 个盘体（主盘、卡尺盘、表盘、终端盘）使用完全相同的构件与机制。</li>
+          <li><b class="text-slate-900">步进构件</b>：+1 / +2 / +3 / +5 / +8 格，沿当前圆盘顺时针推进指定格数。</li>
+          <li><b class="text-slate-900">变轨三角</b>：光路导向规，将光线跃迁导入下一环或相邻盘体（外挂跳板）。</li>
+          <li><b class="text-slate-900">底板阵脉</b>：无论光线在哪一个盘，只要经过底板阵脉节点（如北斗七星），统一享受 2.5x 狂暴倍率加成！</li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- ----------------- 中间：极简天文浑天仪工程制图交互舞台 ----------------- -->
+    <section class="flex-1 relative flex flex-col items-center justify-center overflow-hidden blueprint-canvas" id="astrolabeStageSection">
+      
+      <!-- 操作小贴士浮窗 -->
+      <div class="absolute top-4 right-6 z-20 flex items-center space-x-3 bg-white/95 border border-slate-300 px-4 py-1.5 rounded-lg text-xs text-slate-700 font-mono-sci shadow-sm">
+        <span class="flex items-center text-sky-700 font-bold"><i class="fa-solid fa-arrow-left mr-1.5"></i>高能光束自右端射入</span>
+        <span class="text-slate-300">•</span>
+        <span class="flex items-center text-slate-900 font-bold"><i class="fa-solid fa-hand-pointer mr-1.5 text-slate-600"></i>拖拽安装构件</span>
+        <span class="text-slate-300">•</span>
+        <span class="flex items-center text-rose-600"><i class="fa-solid fa-rotate-left mr-1"></i>右键取回</span>
+      </div>
+
+      <!-- 1080px x 640px 宽幅极简多盘联动交互舞台 (主盘 + 右上动力从动子盘 + 右端调相末端副盘 + 梳状卡尺 + 排珠母线) -->
+      <div id="diskStage" class="relative w-[1440px] h-[760px] shrink-0 my-auto scale-95 origin-center">
+
+        <!-- ✦ 精密矢量浑天多盘工程背景图层 (完全契合 CYCLICAL & future engineering 设计语言) ✦ -->
+        <svg id="astrolabeVectorBg" class="absolute inset-0 w-full h-full pointer-events-none z-0" viewBox="0 0 1440 760">
+<defs>
+            <pattern id="blueprintHatch" width="8" height="8" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="0" x2="0" y2="8" stroke="#0f172a" stroke-width="0.8" opacity="0.15" />
+            </pattern>
+            <pattern id="blueprintHatchActive" width="8" height="8" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="0" x2="0" y2="8" stroke="#0284c7" stroke-width="1.2" opacity="0.35" />
+            </pattern>
+          </defs>
+
+          <!-- ==================== 0. 修仙天文星宿玄鉴工程背景图层 ==================== -->
+          <g id="celestialMansionsLayer" opacity="0.45">
+            <!-- 浑天周天大星盘外圈 (R=330, R=310, R=290) -->
+            <circle cx="450" cy="470" r="330" stroke="#64748b" stroke-width="0.8" stroke-dasharray="2 3" fill="none" />
+            <circle cx="450" cy="470" r="310" stroke="#0f172a" stroke-width="1.2" fill="none" opacity="0.6" />
+            <circle cx="450" cy="470" r="290" stroke="#cbd5e1" stroke-width="0.5" stroke-dasharray="4 2" fill="none" />
+
+            <!-- 先天八卦微雕方位 (乾坤震巽坎离艮兑) -->
+            <g font-family="'Noto Serif SC', serif" font-size="11" font-weight="bold" fill="#334155" text-anchor="middle" dominant-baseline="central">
+              <text x="450" y="145">☰ 乾</text>
+              <text x="680" y="240">☱ 兑</text>
+              <text x="775" y="470">☲ 离</text>
+              <text x="680" y="700">☳ 震</text>
+              <text x="450" y="795">☴ 巽</text>
+              <text x="220" y="700">☵ 坎</text>
+              <text x="125" y="470">☶ 艮</text>
+              <text x="220" y="240">☷ 坤</text>
+            </g>
+
+            <!-- 二十八星宿微刻刻度弧与宿名 (角亢氐房心尾箕 斗牛女虚危室壁 奎娄胃昴毕觜参 井鬼柳星张翼轸) -->
+            <g font-family="'Noto Serif SC', serif" font-size="8" fill="#64748b" text-anchor="middle">
+              <!-- 东方青龙七宿 -->
+              <text x="740" y="380">角宿</text><text x="755" y="415">亢宿</text><text x="760" y="450">氐宿</text>
+              <text x="758" y="490">房宿</text><text x="748" y="525">心宿</text><text x="730" y="558">尾宿</text><text x="705" y="590">箕宿</text>
+              <!-- 北方玄武七宿 -->
+              <text x="670" y="625">斗宿</text><text x="630" y="655">牛宿</text><text x="585" y="680">女宿</text>
+              <text x="535" y="695">虚宿</text><text x="485" y="700">危宿</text><text x="435" y="695">室宿</text><text x="385" y="680">壁宿</text>
+              <!-- 西方白虎七宿 -->
+              <text x="340" y="655">奎宿</text><text x="300" y="625">娄宿</text><text x="268" y="590">胃宿</text>
+              <text x="245" y="555">昴宿</text><text x="232" y="515">毕宿</text><text x="230" y="475">觜宿</text><text x="238" y="435">参宿</text>
+              <!-- 南方朱雀七宿 -->
+              <text x="255" y="395">井宿</text><text x="280" y="360">鬼宿</text><text x="315" y="330">柳宿</text>
+              <text x="355" y="305">星宿</text><text x="400" y="290">张宿</text><text x="450" y="285">翼宿</text><text x="500" y="290">轸宿</text>
+            </g>
+
+            <!-- 24节气刻度与周天经纬十字轴线 -->
+            <line x1="120" y1="470" x2="780" y2="470" stroke="#94a3b8" stroke-width="0.6" stroke-dasharray="3 4" opacity="0.6" />
+            <line x1="450" y1="140" x2="450" y2="800" stroke="#94a3b8" stroke-width="0.6" stroke-dasharray="3 4" opacity="0.6" />
+            <line x1="216" y1="236" x2="684" y2="704" stroke="#cbd5e1" stroke-width="0.5" stroke-dasharray="2 3" opacity="0.5" />
+            <line x1="216" y1="704" x2="684" y2="236" stroke="#cbd5e1" stroke-width="0.5" stroke-dasharray="2 3" opacity="0.5" />
+
+            <!-- 周天星度微刻轮齿 -->
+            <circle cx="450" cy="470" r="320" stroke="#0284c7" stroke-width="0.7" stroke-dasharray="1 7" fill="none" opacity="0.4" />
+          </g>
+
+<!-- ==================== 5. 【太虚中元聚光透镜环】(中心 735, 363，R=34) ==================== -->
+          <!-- 悬浮于动力盘 B 与浑天主盘 A 之间，距两盘外沿各有 70px+ 纯净开阔间隙，承担中继准直与中元特质增幅 -->
+          <circle cx="735" cy="363" r="34" stroke="#0f172a" stroke-width="1.8" fill="#ffffff" />
+          <circle cx="735" cy="363" r="28" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="3 3" fill="none" />
+          <circle cx="735" cy="363" r="7" fill="#0f172a" opacity="0.25" />
+          <!-- 中元环入口受光靶心 (θ: 339.75°, x:766.9, y:351.2) -->
+          <circle cx="766.9" cy="351.2" r="4.5" stroke="#0284c7" stroke-width="1.4" fill="#ffffff" />
+          <circle cx="766.9" cy="351.2" r="1.8" fill="#0284c7" />
+          <!-- 中元环出口准直喷嘴 (θ: 159.42°, x:703.2, y:375.0) -->
+          <polygon points="703.2,375.0 697.5,371.0 697.5,379.0" fill="#0284c7" />
+          <!-- 盘内暗渠连线 (受光 ➔ 聚核 ➔ 出射) -->
+          <line x1="766.9" y1="351.2" x2="735" y2="363" stroke="#94a3b8" stroke-width="1" stroke-dasharray="2 2" opacity="0.6" />
+          <line x1="735" y1="363" x2="703.2" y2="375.0" stroke="#94a3b8" stroke-width="1" stroke-dasharray="2 2" opacity="0.6" />
+          <text x="735" y="414" font-family="'Noto Serif SC', serif" font-size="9" fill="#64748b" text-anchor="middle" font-weight="bold">太虚中元透镜</text>
+
+          <!-- ==================== 4. 【终极释能盘 D】(中心 150, 600，R=55) ==================== -->
+          <g stroke="#0f172a" stroke-width="1.2" opacity="0.75">
+            <line x1="20" y1="570" x2="120" y2="570" />
+            <line x1="30" y1="585" x2="130" y2="585" />
+            <line x1="40" y1="600" x2="140" y2="600" />
+            <line x1="50" y1="615" x2="150" y2="615" />
+            <line x1="60" y1="630" x2="160" y2="630" />
+          </g>
+          <circle cx="150" cy="600" r="70" stroke="#0f172a" stroke-width="1.4" fill="none" />
+          <circle cx="150" cy="600" r="55" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="2 2" fill="none" />
+          <!-- 终端受光孔径靶心 (θ: 336.57°, x:200.5, y:578.1) -->
+          <circle cx="200.5" cy="578.1" r="5.5" stroke="#0284c7" stroke-width="1.5" fill="#ffffff" stroke-dasharray="2 2" />
+          <circle cx="200.5" cy="578.1" r="2" fill="#0284c7" />
+          <text x="150" y="688" font-family="'Noto Serif SC', serif" font-size="9.5" fill="#0f172a" font-weight="bold" text-anchor="middle">终端释能盘</text>
+
+          <!-- ==================== 3. 【浑天主大阵 A】(中心 450, 470) ==================== -->
+          <!-- 黄道面刻度椭圆 -->
+          <ellipse cx="450" cy="470" rx="260" ry="92" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="3 4" fill="none" transform="rotate(-21.6 450 470)" opacity="0.75" />
+          <circle cx="450" cy="470" r="260" stroke="#cbd5e1" stroke-width="0.8" fill="none" />
+          <circle cx="450" cy="470" r="250" stroke="#e2e8f0" stroke-width="0.5" fill="none" />
+
+          <!-- 四极正交分度刻度线 -->
+          <g stroke="#0f172a" stroke-width="1.8">
+            <line x1="450" y1="190" x2="450" y2="205" />
+            <line x1="450" y1="735" x2="450" y2="750" />
+            <line x1="170" y1="470" x2="185" y2="470" />
+            <line x1="715" y1="470" x2="730" y2="470" />
+          </g>
+
+          <!-- 浑天三大同心主轨道轮廓 (天 R=200, 地 R=135, 人 R=72) -->
+          <circle cx="450" cy="470" r="200" stroke="#0f172a" stroke-width="1.6" fill="none" />
+          <circle cx="450" cy="470" r="168" stroke="#e2e8f0" stroke-width="0.6" stroke-dasharray="2 3" fill="none" />
+          <circle cx="450" cy="470" r="135" stroke="#0f172a" stroke-width="1.4" fill="none" />
+          <circle cx="450" cy="470" r="102" stroke="#e2e8f0" stroke-width="0.6" stroke-dasharray="2 3" fill="none" />
+          <circle cx="450" cy="470" r="72" stroke="#0f172a" stroke-width="1.4" fill="none" />
+
+          <!-- 主盘固定入口靶心 (θ: 339.42°, x:637.2, y:399.7) -->
+          <circle cx="637.2" cy="399.7" r="6" stroke="#0284c7" stroke-width="1.5" fill="#ffffff" stroke-dasharray="2 2" />
+          <circle cx="637.2" cy="399.7" r="2.2" fill="#0284c7" />
+
+          <!-- 主盘出口准直嘴 1 (通往盘 D 终端, θ: 156.57°, x:266.5, y:549.5) -->
+          <polygon points="266.5,549.5 262.5,542.5 258.5,549.5" fill="#0284c7" transform="rotate(66.57 266.5 549.5)" />
+          <!-- 盘底暗渠 1 (天枢极核 450,470 ➔ 盘外缘出口嘴 266.5,549.5) -->
+          <line x1="450" y1="470" x2="266.5" y2="549.5" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="3 3" opacity="0.7" />
+
+          <!-- 主盘出口准直嘴 2 (通往极轨副盘, θ: 237.99°, x:344.0, y:300.4) -->
+          <polygon points="344.0,300.4 340.0,293.4 336.0,300.4" fill="#0284c7" transform="rotate(147.99 344.0 300.4)" />
+          <!-- 盘底暗渠 2 (天枢极核 450,470 ➔ 极轨出口嘴 344.0,300.4) -->
+          <line x1="450" y1="470" x2="344.0" y2="300.4" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="3 3" opacity="0.7" />
+
+          <!-- 主盘辐射指针辐条 -->
+          <line x1="450" y1="470" x2="450" y2="555" stroke="#0f172a" stroke-width="2" />
+          <circle cx="450" cy="555" r="5" fill="#0f172a" />
+          <circle cx="450" cy="470" r="8" fill="#0f172a" stroke="#ffffff" stroke-width="2" />
+          <text x="450" y="715" font-family="'Noto Serif SC', serif" font-size="10" fill="#0f172a" font-weight="bold" text-anchor="middle">周天天玑主仪</text>
+
+          <!-- ==================== 2. 【动力从动子盘 B】(中心 960, 280) ==================== -->
+          <!-- 45° 精密剖面斜纹底板 -->
+          <rect x="890" y="200" width="140" height="75" fill="url(#blueprintHatch)" stroke="#0f172a" stroke-width="1.2" stroke-dasharray="3 3" />
+          
+          <!-- 90° 梳状精密分度卡尺弧 -->
+          <path d="M 895 390 A 130 130 0 0 1 870 180" fill="none" stroke="#0f172a" stroke-width="1.8" />
+          <path d="M 882 398 A 146 146 0 0 1 854 165" fill="none" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="2 2" />
+          <g stroke="#0f172a" stroke-width="1.2">
+            <line x1="895" y1="390" x2="882" y2="398" stroke-width="2" />
+            <line x1="889" y1="370" x2="876" y2="377" />
+            <line x1="884" y1="350" x2="871" y2="356" />
+            <line x1="880" y1="330" x2="866" y2="335" stroke-width="1.6" />
+            <line x1="877" y1="310" x2="862" y2="314" />
+            <line x1="875" y1="290" x2="859" y2="290" stroke-width="2" />
+            <line x1="876" y1="270" x2="861" y2="266" />
+            <line x1="878" y1="250" x2="863" y2="245" />
+            <line x1="881" y1="230" x2="867" y2="224" stroke-width="1.6" />
+            <line x1="886" y1="210" x2="873" y2="203" />
+            <line x1="870" y1="180" x2="854" y2="165" stroke-width="2" />
+          </g>
+
+          <circle cx="960" cy="280" r="95" stroke="#0f172a" stroke-width="1.4" fill="#ffffff" />
+          <circle cx="960" cy="280" r="80" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="2 2" fill="none" />
+          <circle cx="960" cy="280" r="44" stroke="#0f172a" stroke-width="1" fill="none" />
+
+          <!-- 动力盘入口靶心 (θ: 334.36°, x:1032.1, y:245.4) -->
+          <circle cx="1032.1" cy="245.4" r="5.5" stroke="#0284c7" stroke-width="1.5" fill="#ffffff" stroke-dasharray="2 2" />
+          <circle cx="1032.1" cy="245.4" r="2" fill="#0284c7" />
+
+          <!-- 动力盘出口准直嘴 (θ: 159.75°, x:884.9, y:307.7) -->
+          <polygon points="884.9,307.7 879.5,302.7 880.5,311.7" fill="#0284c7" />
+          <!-- 盘底暗渠 (动力轴心 960,280 ➔ 出射嘴 884.9,307.7) -->
+          <line x1="960" y1="280" x2="884.9" y2="307.7" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="3 3" opacity="0.7" />
+
+          <text x="960" y="398" font-family="'Noto Serif SC', serif" font-size="9.5" fill="#0f172a" font-weight="bold" text-anchor="middle">浑仪动力从动盘</text>
+
+          <!-- ==================== 1. 【手表双环盘 C】(同心双环！中心 1210, 160，外 R=48，内 R=24) ==================== -->
+          <circle cx="1210" cy="160" r="56" stroke="#0f172a" stroke-width="1.5" fill="#ffffff" />
+          <circle cx="1210" cy="160" r="48" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="2 2" fill="none" />
+          <circle cx="1210" cy="160" r="24" stroke="#0f172a" stroke-width="1" fill="none" />
+
+          <!-- 表盘入口靶心 (θ: 345.17°, x:1256.4, y:147.7) -->
+          <g id="c1ApertureTargetGroup">
+            <line x1="1256.4" y1="147.7" x2="1380" y2="115" stroke="#0284c7" stroke-width="1" stroke-dasharray="3 3" opacity="0.35" />
+            <circle cx="1256.4" cy="147.7" r="6" stroke="#0284c7" stroke-width="1.5" fill="none" stroke-dasharray="2 2" />
+            <circle cx="1256.4" cy="147.7" r="2" fill="#0284c7" />
+            <line x1="1251" y1="147.7" x2="1262" y2="147.7" stroke="#0f172a" stroke-width="1" />
+            <line x1="1256.4" y1="142.2" x2="1256.4" y2="153.2" stroke="#0f172a" stroke-width="1" />
+            <text id="c1ApertureStatusBadge" x="1270" y="138" font-family="'Share Tech Mono', monospace" font-size="7.5" fill="#0284c7" font-weight="bold">● 靶心准直孔 (θ: 345.2°)</text>
+          </g>
+
+          <!-- 表盘出口准直嘴 (θ: 154.36°, x:1166.7, y:180.8) -->
+          <polygon points="1166.7,180.8 1162.0,174.5 1160.5,183.5" fill="#0284c7" />
+          <!-- 盘底暗渠 (表盘中心 1210,160 ➔ 出射嘴 1166.7,180.8) -->
+          <line x1="1210" y1="160" x2="1166.7" y2="180.8" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="3 3" opacity="0.7" />
+
+          <text x="1210" y="238" font-family="'Noto Serif SC', serif" font-size="9.5" fill="#0f172a" font-weight="bold" text-anchor="middle">辰光调频双表盘</text>
+
+          <!-- ==================== 0. 【极轨探天副盘】(中心 250, 150，R=30) ==================== -->
+          <path d="M 150 210 A 320 320 0 0 1 570 130" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 4" opacity="0.6" />
+          <!-- 极轨副盘主壳基座与刻度 -->
+          <circle cx="250" cy="150" r="44" stroke="#0f172a" stroke-width="1.6" fill="#ffffff" />
+          <circle cx="250" cy="150" r="30" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="2 2" fill="none" />
+          <!-- 切向天眼透镜节点 (205, 105) -->
+          <line x1="250" y1="150" x2="205" y2="105" stroke="#0f172a" stroke-width="1.4" />
+          <circle cx="205" cy="105" r="14" stroke="#0f172a" stroke-width="1.4" fill="#ffffff" />
+          <circle cx="205" cy="105" r="5" fill="#0284c7" />
+          <text x="205" y="85" font-family="'Share Tech Mono', monospace" font-size="7" fill="#64748b" text-anchor="middle">POLAR EYE LENS</text>
+          <!-- 极轨副盘入口孔径靶心 (θ: 57.99°, x:265.9, y:175.4) -->
+          <circle cx="265.9" cy="175.4" r="4.5" stroke="#0284c7" stroke-width="1.4" fill="#ffffff" stroke-dasharray="2 2" />
+          <circle cx="265.9" cy="175.4" r="1.8" fill="#0284c7" />
+          <!-- 极轨副盘旋转层 -->
+          <g id="ringPolarEl" class="transition-transform duration-300" style="transform-origin: 250px 150px;">
+            <circle cx="250" cy="150" r="30" stroke="#0284c7" stroke-width="1.2" stroke-dasharray="3 2" fill="none" opacity="0.8" />
+            <line x1="250" y1="120" x2="250" y2="150" stroke="#0f172a" stroke-width="1.4" />
+            <circle cx="250" cy="120" r="2.5" fill="#0f172a" />
+          </g>
+          <!-- 极轨中心天眼灵核枢纽 -->
+          <circle cx="250" cy="150" r="8" fill="#0f172a" stroke="#ffffff" stroke-width="1.5" />
+          <circle cx="250" cy="150" r="3" fill="#00f0ff" />
+          <text x="250" y="212" font-family="'Noto Serif SC', serif" font-size="9" fill="#0f172a" font-weight="bold" text-anchor="middle">极轨探天副盘</text>
+
+          <!-- 题注 -->
+          
+          
+          
+        </svg>
+
+        <!-- ✦ 全局贯穿底板阵脉图层 (1080x640，北斗七星/天衡T字/雷劫Z字/四象方环) ✦ -->
+        <div id="floorCrossContainer" class="absolute inset-0 pointer-events-none transition-all duration-300" style="z-index: 1;">
+          <svg id="floorSvgLayer" class="w-full h-full" viewBox="0 0 1440 760">
+            <!-- 动态渲染底板图形 -->
+          </svg>
+        </div>
+
+        <!-- ✦ 右侧始发高能发射规 (位于主斜轴右上端 x:1380, y:115，沿 θ: 345.2° 固定向量射入) ✦ -->
+        <div id="rightEmitter" class="absolute z-30 flex items-center pointer-events-none" style="left: 1380px; top: 115px; transform: translateY(-50%);">
+          <div class="flex flex-col items-end mr-2">
+            <span class="text-[9px] font-mono-sci font-bold text-slate-800 bg-white/95 px-2 py-0.5 rounded border border-slate-300 shadow-xs whitespace-nowrap">
+              <i class="fa-solid fa-crosshairs text-sky-600 mr-1 animate-spin"></i>EMITTER 01 (始发源)
+            </span>
+            <span class="text-[8px] font-mono-sci text-sky-600 font-bold">FIXED VECTOR θ: 345.2° ➔</span>
+          </div>
+          <div class="w-9 h-9 rounded-full bg-slate-900 border-2 border-white shadow-md flex items-center justify-center pulse-emitter-modern">
+            <div class="w-3 h-3 rounded-full bg-sky-400"></div>
+          </div>
+          <div class="w-5 h-0.5 bg-slate-900"></div>
+        </div>
+
+        <!-- ✦ 盘 4（最左端）：虚空终端释能盘 DOM 环体 (中心 150, 600，R=55) ✦ -->
+        <div id="ringSubDEl" class="absolute rounded-full border-2 border-slate-900 ring-trans pointer-events-none" style="width: 110px; height: 110px; left: 95px; top: 545px; z-index: 2;">
+          <div class="absolute inset-0 rounded-full border border-dashed border-sky-400/80"></div>
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-[8px] font-mono-sci text-slate-800 font-bold tracking-wider bg-white px-1.5 rounded border border-slate-300 shadow-xs whitespace-nowrap">
+            TERM 04 · VACUUM 6-CELL
+          </div>
+        </div>
+
+        <!-- ✦ 盘 3（中央偏左）：浑天主大盘 DOM 环体 (中心 450, 470) ✦ -->
+        <!-- 外圈 Tian (R=200) -->
+        <div id="ringTianEl" class="absolute rounded-full border-2 border-slate-800 ring-trans pointer-events-none" style="width: 400px; height: 400px; left: 250px; top: 270px; z-index: 2;">
+          <div class="absolute inset-0 rounded-full border border-dashed border-slate-300/80"></div>
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-[9px] font-mono-sci text-slate-800 font-bold tracking-wider bg-white px-2 rounded border border-slate-300 shadow-xs">天元外环 · 16宿</div>
+        </div>
+        <!-- 中层 Di (R=135) -->
+        <div id="ringDiEl" class="absolute rounded-full border border-slate-600 ring-trans pointer-events-none" style="width: 270px; height: 270px; left: 315px; top: 335px; z-index: 2;">
+          <div class="absolute inset-0 rounded-full border border-dashed border-slate-300/80"></div>
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-[8.5px] font-mono-sci text-slate-700 font-bold tracking-wider bg-white px-1.5 rounded border border-slate-300 shadow-xs">地元中环 · 10宿</div>
+        </div>
+        <!-- 最内 Ren (R=72) -->
+        <div id="ringRenEl" class="absolute rounded-full border border-slate-400 ring-trans pointer-events-none" style="width: 144px; height: 144px; left: 378px; top: 398px; z-index: 2;">
+          <div class="absolute inset-0 rounded-full border border-dashed border-slate-300/80"></div>
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-[8.5px] font-mono-sci text-slate-700 font-bold tracking-wider bg-white px-1.5 rounded border border-slate-300 shadow-xs">人元内环 · 6宿</div>
+        </div>
+
+        <!-- ✦ 盘 2（中央偏右）：动力从动子盘 B DOM 环体 (中心 960, 280，外环 R=80，内环 R=44) ✦ -->
+        <!-- 外环 Sub-B Outer (R=80) -->
+        <div id="ringSubBOuterEl" class="absolute rounded-full border-2 border-slate-900 ring-trans pointer-events-none" style="width: 160px; height: 160px; left: 880px; top: 200px; z-index: 2;">
+          <div class="absolute inset-0 rounded-full border border-dashed border-sky-400/80"></div>
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-[8.5px] font-mono-sci text-sky-900 font-bold tracking-wider bg-white px-2 rounded border border-sky-400 shadow-xs">SUB 02 · OUTER 8-CELL</div>
+        </div>
+        <!-- 内环 Sub-B Inner (R=44) -->
+        <div id="ringSubBInnerEl" class="absolute rounded-full border border-sky-600 ring-trans pointer-events-none" style="width: 88px; height: 88px; left: 916px; top: 236px; z-index: 2;">
+          <div class="absolute inset-0 rounded-full border border-dotted border-slate-400"></div>
+          <div class="absolute -bottom-2.5 left-1/2 -translate-x-1/2 text-[7px] font-mono-sci text-slate-700 font-bold bg-white px-1 rounded border border-slate-300 shadow-xs">动力内环·4槽</div>
+        </div>
+
+        <!-- ✦ 盘 1（最右端）：手表同心双环盘 C DOM 环体 (同心双环！大圈 R=48 6槽，内圈 R=24 4槽，中心 1210, 160) ✦ -->
+        <!-- 手表大表盘 C1 (中心 1210, 160，R=48，6槽) -->
+        <div id="ringSubC1El" class="absolute rounded-full border-2 border-slate-900 ring-trans pointer-events-none" style="width: 96px; height: 96px; left: 1162px; top: 112px; z-index: 2;">
+          <div class="absolute inset-0 rounded-full border border-dashed border-amber-500"></div>
+          <div class="absolute -top-2 left-1/2 -translate-x-1/2 text-[7px] font-mono-sci text-amber-950 font-bold bg-white px-1 rounded border border-amber-400 whitespace-nowrap">C1·调频外圈(6槽)</div>
+        </div>
+        <!-- 手表小微盘 C2 (中心 1210, 160，R=24，4槽) -->
+        <div id="ringSubC2El" class="absolute rounded-full border-2 border-slate-900 ring-trans pointer-events-none" style="width: 48px; height: 48px; left: 1186px; top: 136px; z-index: 2;">
+          <div class="absolute inset-0 rounded-full border border-dashed border-sky-400"></div>
+          <div class="absolute -bottom-2.5 left-1/2 -translate-x-1/2 text-[6.5px] font-mono-sci text-sky-950 font-bold bg-white px-0.5 rounded border border-sky-400 whitespace-nowrap">C2·储能内圈(4槽)</div>
+        </div>
+
+        <!-- ✦ 五大核心特质插槽 (4 盘心极核 + 1 中置悬浮中元环，均可手动自由装配) ✦ -->
+
+        <!-- 1. 手表盘 C 辰光调频核心插槽 (1210, 160) -->
+        <div id="hubSocket_disc_c" onclick="openKeystoneSelector('disc_c')" class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group" style="left: 1210px; top: 160px; transform: translate(-50%, -50%);" title="【手表盘 C · 辰光调频核位】点击手动放置/更换核心特质">
+          <div class="relative w-8 h-8 rounded-full bg-white border border-slate-700 flex items-center justify-center shadow transition-transform group-hover:scale-115" id="crossCenterCore_disc_c">
+            <div class="absolute -inset-1 rounded-full border border-dashed border-sky-400/80 animate-spin" style="animation-duration: 15s;"></div>
+            <i id="crossCoreIcon_disc_c" class="fa-solid fa-plus text-slate-400 text-[10px] relative z-10"></i>
+          </div>
+          <div class="mt-0.5 px-1 py-0.2 rounded bg-white text-[7px] font-mono-sci font-bold text-slate-700 border border-slate-300 whitespace-nowrap shadow-xs flex items-center space-x-0.5" id="crossCoreBadge_disc_c">
+            <span id="crossCoreNameText_disc_c">空置插槽</span>
+          </div>
+        </div>
+
+        <!-- 2. 动力盘 B 浑仪动力核心插槽 (960, 280) -->
+        <div id="hubSocket_disc_b" onclick="openKeystoneSelector('disc_b')" class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group" style="left: 960px; top: 280px; transform: translate(-50%, -50%);" title="【动力盘 B · 浑仪动力核位】点击手动放置/更换核心特质">
+          <div class="relative w-9 h-9 rounded-full bg-white border border-slate-700 flex items-center justify-center shadow transition-transform group-hover:scale-115" id="crossCenterCore_disc_b">
+            <div class="absolute -inset-1 rounded-full border border-dashed border-amber-400/80 animate-spin" style="animation-duration: 18s;"></div>
+            <i id="crossCoreIcon_disc_b" class="fa-solid fa-plus text-slate-400 text-xs relative z-10"></i>
+          </div>
+          <div class="mt-0.5 px-1 py-0.2 rounded bg-white text-[7px] font-mono-sci font-bold text-slate-700 border border-slate-300 whitespace-nowrap shadow-xs flex items-center space-x-0.5" id="crossCoreBadge_disc_b">
+            <span id="crossCoreNameText_disc_b">空置插槽</span>
+          </div>
+        </div>
+
+        <!-- 3. 太虚中元 · 悬浮特殊共鸣插槽 (735, 363) -->
+        <div id="hubSocket_disc_e" onclick="openKeystoneSelector('disc_e')" class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group" style="left: 735px; top: 363px; transform: translate(-50%, -50%);" title="【太虚中元 · 悬浮中继共鸣透镜】
+位于动力盘 B 与主盘 A 之间，点击手动放置/更换专属特质！">
+          <div class="relative w-10 h-10 rounded-full bg-white border-2 border-emerald-600 flex items-center justify-center shadow transition-transform group-hover:scale-115" id="crossCenterCore_disc_e">
+            <div class="absolute -inset-1.5 rounded-full border border-dashed border-emerald-500/80 animate-spin" style="animation-duration: 22s;"></div>
+            <i id="crossCoreIcon_disc_e" class="fa-solid fa-plus text-emerald-600 text-xs relative z-10"></i>
+          </div>
+          <div class="mt-0.5 px-1.5 py-0.2 rounded bg-white text-[7px] font-mono-sci font-bold text-emerald-800 border border-emerald-400 whitespace-nowrap shadow-xs flex items-center space-x-0.5" id="crossCoreBadge_disc_e">
+            <span id="crossCoreNameText_disc_e">空置·中元环</span>
+          </div>
+        </div>
+
+        <!-- 4. 主浑天盘 A 天枢主极插槽 (450, 470) -->
+        <div id="centralCrossSocket" onclick="openKeystoneSelector('disc_a')" class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group" style="left: 450px; top: 470px; transform: translate(-50%, -50%);" title="【浑天主盘 A · 天枢主极核位】点击手动放置/更换核心特质">
+          <div class="relative w-12 h-12 rounded-full bg-white border-2 border-amber-500 flex items-center justify-center shadow-lg transition-transform group-hover:scale-115" id="crossCenterCore">
+            <div class="absolute -inset-1.5 rounded-full border border-dashed border-amber-400/80 animate-spin" style="animation-duration: 20s;"></div>
+            <div class="absolute -inset-0.5 rounded-full bg-amber-400/10 blur-xs"></div>
+            <i id="crossCoreIcon" class="fa-solid fa-plus text-amber-600 text-sm relative z-10 transition-transform group-hover:rotate-12"></i>
+          </div>
+          <div class="mt-1 px-1.5 py-0.5 rounded bg-white text-[8px] font-mono-sci font-bold text-amber-900 border border-amber-400 whitespace-nowrap shadow-xs flex items-center space-x-1" id="crossCoreBadge">
+            <i class="fa-solid fa-gem text-[7px] text-amber-500"></i>
+            <span id="crossCoreNameText">空置插槽</span>
+          </div>
+        </div>
+
+        <!-- 5. 终端释能盘 D 虚空释能核心插槽 (150, 600) -->
+        <div id="hubSocket_disc_d" onclick="openKeystoneSelector('disc_d')" class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group" style="left: 150px; top: 600px; transform: translate(-50%, -50%);" title="【终端盘 D · 虚空释能核位】点击手动放置/更换核心特质">
+          <div class="relative w-8 h-8 rounded-full bg-white border border-slate-700 flex items-center justify-center shadow transition-transform group-hover:scale-115" id="crossCenterCore_disc_d">
+            <div class="absolute -inset-1 rounded-full border border-dashed border-purple-400/80 animate-spin" style="animation-duration: 12s;"></div>
+            <i id="crossCoreIcon_disc_d" class="fa-solid fa-plus text-slate-400 text-[10px] relative z-10"></i>
+          </div>
+          <div class="mt-0.5 px-1 py-0.2 rounded bg-white text-[7px] font-mono-sci font-bold text-slate-700 border border-slate-300 whitespace-nowrap shadow-xs flex items-center space-x-0.5" id="crossCoreBadge_disc_d">
+            <span id="crossCoreNameText_disc_d">空置插槽</span>
+          </div>
+        </div>
+
+        <!-- 全局插槽 DOM 交互层 (包含所有主盘与从动副盘真实可点击/拖拽安装插槽) -->
+        <div id="slotsLayer" class="absolute inset-0 w-full h-full z-20 pointer-events-auto"></div>
+
+        <!-- ✦ 全局多盘高能激光与跳格光束绘制层 (置于 slotsLayer 之上，清晰可见，带高亮碧青流光与步数气泡) ✦ -->
+        <svg id="opticalSvgLayer" class="absolute inset-0 w-full h-full pointer-events-none overflow-visible" style="z-index: 25;" viewBox="0 0 1440 760">
+          <defs>
+            <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <polygon points="0 0, 6 3, 0 6" fill="#0284c7" />
+            </marker>
+            <marker id="arrowhead-blue" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <polygon points="0 0, 6 3, 0 6" fill="#00f0ff" />
+            </marker>
+            <marker id="arrowhead-gold" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <polygon points="0 0, 6 3, 0 6" fill="#0284c7" />
+            </marker>
+          </defs>
+          <g id="svgBeamsGroup"></g>
+          <g id="svgImpactsGroup"></g>
+        </svg>
+
+      </div>
+
+      
+      <!-- ✦ 响应玩家反馈：已彻底移除底部快捷构件盘，彻底还原本体纯净开阔视野 ✦ -->
+      </section>
+
+    <!-- ----------------- 右栏：增益统计与工厂面板 ----------------- -->
+    <aside id="rightPanel" class="w-80 bg-white border-l border-slate-200 flex flex-col z-20 shrink-0 shadow-sm collapsible-sidebar collapsed">
+      
+      <!-- 运转工况标题 -->
+      <div class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50/90">
+        <span class="text-xs font-bold text-slate-900 tracking-wider flex items-center font-mono-sci">
+          <i class="fa-solid fa-gauge-high mr-1.5 text-sky-600"></i>动力网络输出看板
+        </span>
+        <div class="flex items-center space-x-1.5">
+          <span class="text-[9.5px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 font-mono-sci font-bold" id="rightChainStatusTag">
+            等待连线
+          </span>
+          <button onclick="toggleRightPanel()" class="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-slate-800 hover:bg-slate-200 transition" title="收起看板">
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 space-y-3.5 ficsit-scrollbar">
+        
+        <!-- 模块 1：底盘星象全满倍增 (满足北斗七星所有插槽，x1.2倍属性，其他以此类推) -->
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-800 flex items-center font-mono-sci">
+              <i class="fa-solid fa-star text-amber-500 mr-1.5"></i>底盘星象全满加成
+            </span>
+            <span id="constellationBadge" class="text-[10px] px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200 font-mono-sci font-bold">
+              北斗七星天衡阵
+            </span>
+          </div>
+
+          <!-- 状态提示条 -->
+          <div id="constellationStatusBox" class="p-2.5 rounded-lg bg-white border border-slate-200 text-xs font-mono-sci flex items-center justify-between transition-all">
+            <div class="flex items-center space-x-2">
+              <span id="constellationIcon" class="text-base">○</span>
+              <div>
+                <div class="font-bold text-slate-900" id="constellationTitle">星象插槽：0 / 7</div>
+                <div class="text-[10px] text-slate-500" id="constellationHint">全部满足后激活 ×1.2 倍全属性</div>
+              </div>
+            </div>
+            <div id="constellationMultPill" class="text-xs font-black font-mono-sci px-2 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">
+              x1.0
+            </div>
+          </div>
+        </div>
+
+        <!-- 模块 2：阵盘总共加成了多少 (总加成明细清单，直白纯粹) -->
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-800 flex items-center font-mono-sci">
+              <i class="fa-solid fa-chart-pie text-slate-700 mr-1.5"></i>总属性加成清单
+            </span>
+            <span id="statActiveCountPill" class="text-[10px] px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200 font-mono-sci font-bold">
+              0 个构件生效
+            </span>
+          </div>
+
+          <!-- 直白属性清单 -->
+          <div class="space-y-2 font-mono-sci text-xs">
+            
+            <!-- 宗门工业 -->
+            <div class="p-2.5 rounded-lg bg-white border border-slate-200 space-y-1.5">
+              <span class="text-[10px] font-bold text-slate-500 block uppercase tracking-wide">
+                <i class="fa-solid fa-industry text-slate-600 mr-1"></i>工厂生产效率
+              </span>
+              <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
+                <div class="flex justify-between text-slate-600"><span>采矿速度:</span><b id="statMineVal" class="text-slate-900 font-bold">+0%</b></div>
+                <div class="flex justify-between text-slate-600"><span>炼造速度:</span><b id="statCraftVal" class="text-slate-900 font-bold">+0%</b></div>
+                <div class="flex justify-between text-slate-600"><span>传送带运力:</span><b id="statBeltVal" class="text-slate-900 font-bold">+0%</b></div>
+                <div class="flex justify-between text-slate-600"><span>能耗减免:</span><b id="statPowerVal" class="text-emerald-600 font-bold">-0%</b></div>
+              </div>
+            </div>
+
+            <!-- 战伐输出 -->
+            <div class="p-2.5 rounded-lg bg-white border border-slate-200 space-y-1.5">
+              <span class="text-[10px] font-bold text-slate-500 block uppercase tracking-wide">
+                <i class="fa-solid fa-khanda text-slate-600 mr-1"></i>飞剑战伐输出
+              </span>
+              <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
+                <div class="flex justify-between text-slate-600"><span>飞剑攻击:</span><b id="statAtkVal" class="text-slate-900 font-bold">+0%</b></div>
+                <div class="flex justify-between text-slate-600"><span>攻击速度:</span><b id="statAtspdVal" class="text-slate-900 font-bold">+0%</b></div>
+                <div class="flex justify-between text-slate-600"><span>暴击几率:</span><b id="statCritVal" class="text-slate-900 font-bold">+0%</b></div>
+                <div class="flex justify-between text-slate-600"><span>浮游飞剑:</span><b id="statSwordFunnelVal" class="text-sky-700 font-bold">0 把</b></div>
+              </div>
+            </div>
+
+            <!-- 防御与身法 -->
+            <div class="p-2.5 rounded-lg bg-white border border-slate-200 space-y-1.5">
+              <span class="text-[10px] font-bold text-slate-500 block uppercase tracking-wide">
+                <i class="fa-solid fa-shield-halved text-slate-600 mr-1"></i>防御与身法
+              </span>
+              <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
+                <div class="flex justify-between text-slate-600"><span>阵法防御:</span><b id="statDefVal" class="text-slate-900 font-bold">+0%</b></div>
+                <div class="flex justify-between text-slate-600"><span>灵脉气血:</span><b id="statHpVal" class="text-slate-900 font-bold">+0%</b></div>
+                <div class="flex justify-between text-slate-600"><span>移动身法:</span><b id="statSpeedVal" class="text-slate-900 font-bold">+0%</b></div>
+                <div class="flex justify-between text-slate-600"><span>储物背包:</span><b id="statInventoryVal" class="text-slate-900 font-bold">+0 格</b></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 模块 3：光路流转流水 (直白清晰) -->
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-700 flex items-center font-mono-sci">
+              <i class="fa-solid fa-route mr-1.5 text-slate-600"></i>光路流转流水
+            </span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-white border border-slate-200 font-mono-sci text-[11px] text-slate-600 max-h-48 overflow-y-auto ficsit-scrollbar space-y-1" id="stepLogList">
+            <p class="text-slate-400 italic">尚未连接，请转动圆盘对齐始发激光。</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 底部音效开关 -->
+      <div class="p-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+        <span class="flex items-center"><i class="fa-solid fa-volume-xmark mr-1 text-slate-400"></i>系统音效</span>
+        <button onclick="toggleAudio()" id="audioBtn" class="px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-300 text-[10px] font-mono-sci">
+          已静音 (OFF)
+        </button>
+      </div>
+
+    </aside>
+
+  </main><!-- ======================== 核心系统逻辑脚本 ======================== -->
+  <script>
+    /* =========================================================================
+       0. 侧边抽屉面板收放控制器 (支持点击收进/展开、浮动挂钮唤出)
+       ========================================================================= */
+    let isLeftPanelOpen = false;
+    let isRightPanelOpen = false;
+
+    function toggleLeftPanel() {
+      isLeftPanelOpen = !isLeftPanelOpen;
+      const panel = document.getElementById('leftPanel');
+      const openBtn = document.getElementById('btnOpenLeft');
+      const navText = document.getElementById('navLeftText');
+      if (panel) {
+        if (isLeftPanelOpen) {
+          panel.classList.remove('collapsed');
+          if (openBtn) openBtn.classList.add('hidden');
+          if (navText) navText.textContent = '收起构件库';
+        } else {
+          panel.classList.add('collapsed');
+          if (openBtn) openBtn.classList.remove('hidden');
+          if (navText) navText.textContent = '展开构件库';
+        }
+      }
+      audio.playRotate();
+    }
+
+    function toggleRightPanel() {
+      isRightPanelOpen = !isRightPanelOpen;
+      const panel = document.getElementById('rightPanel');
+      const openBtn = document.getElementById('btnOpenRight');
+      const navText = document.getElementById('navRightText');
+      if (panel) {
+        if (isRightPanelOpen) {
+          panel.classList.remove('collapsed');
+          if (openBtn) openBtn.classList.add('hidden');
+          if (navText) navText.textContent = '收起看板';
+        } else {
+          panel.classList.add('collapsed');
+          if (openBtn) openBtn.classList.remove('hidden');
+          if (navText) navText.textContent = '展开看板';
+        }
+      }
+      audio.playRotate();
+    }
+
+    /* =========================================================================
+       1. Web Audio 原生音效合成器
+       ========================================================================= */
+    class AudioSynthesizer {
+      constructor() {
+        this.ctx = null;
+        this.enabled = false; // 默认静音
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      beep(freq, type = 'sine', duration = 0.1, vol = 0.1) {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch(e) {}
+      }
+      playRotate() { this.beep(520, 'triangle', 0.06, 0.06); }
+      playSelect() { this.beep(659, 'sine', 0.05, 0.05); }
+      playEscapement() {
+        this.beep(880, 'sine', 0.08, 0.1);
+        setTimeout(() => this.beep(1320, 'triangle', 0.12, 0.12), 60);
+        setTimeout(() => this.beep(1760, 'sine', 0.18, 0.15), 130);
+      }
+      playSlingshot() {
+        this.beep(440, 'sine', 0.1, 0.1);
+        setTimeout(() => this.beep(660, 'sine', 0.12, 0.12), 80);
+        setTimeout(() => this.beep(990, 'triangle', 0.16, 0.15), 160);
+        setTimeout(() => this.beep(1480, 'sine', 0.22, 0.18), 240);
+      }
+      playPlace() {
+        this.beep(440, 'sine', 0.08, 0.08);
+        setTimeout(() => this.beep(880, 'sine', 0.09, 0.07), 40);
+      }
+      playRemove() { this.beep(280, 'sawtooth', 0.08, 0.06); }
+      playConnect() {
+        this.beep(587, 'sine', 0.08, 0.08);
+        setTimeout(() => this.beep(880, 'sine', 0.12, 0.08), 50);
+      }
+      playCrossOverdrive() {
+        [523, 659, 784, 1046, 1318].forEach((f, i) => {
+          setTimeout(() => this.beep(f, 'sine', 0.35, 0.12), i * 70);
+        });
+      }
+    }
+    const audio = new AudioSynthesizer();
+    function toggleAudio() {
+      audio.enabled = !audio.enabled;
+      const btn = document.getElementById('audioBtn');
+      if (audio.enabled) {
+        btn.textContent = '已开启 (ON)';
+        btn.className = 'px-2 py-0.5 rounded bg-slate-900 text-white border border-slate-900 text-[10px] font-mono-sci';
+      } else {
+        btn.textContent = '已静音 (OFF)';
+        btn.className = 'px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-300 text-[10px] font-mono-sci';
+      }
+    }
+
+    /* =========================================================================
+       2. 芯片构件元数据字典 (极简工程制图规范：ATK / DEF / BELT / HERB / SHIFT)
+       ========================================================================= */
+    const CHIP_SPECS = {
+  "t0_atk_1": {
+    "id": "t0_atk_1",
+    "step": 1,
+    "tier": 0,
+    "category": "combat",
+    "name": "攻击芯片 · 初级",
+    "tag": "攻击 · 1格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-atk border-amber-400",
+    "buff": {
+      "atk": 5
+    },
+    "buffDesc": "飞剑攻击 +5%",
+    "stepDesc": "顺步 +1 格",
+    "icon": "fa-khanda",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-50 text-amber-900 border-amber-400"
+  },
+  "t0_mine_1": {
+    "id": "t0_mine_1",
+    "step": 1,
+    "tier": 0,
+    "category": "industry",
+    "name": "采矿芯片 · 初级",
+    "tag": "采矿 · 1格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-amber-400",
+    "buff": {
+      "mining_speed": 5
+    },
+    "buffDesc": "采矿速度 +5%",
+    "stepDesc": "顺步 +1 格",
+    "icon": "fa-trowel-bricks",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-50 text-amber-900 border-amber-400"
+  },
+  "t0_speed_1": {
+    "id": "t0_speed_1",
+    "step": 1,
+    "tier": 0,
+    "category": "mobility",
+    "name": "移速芯片 · 初级",
+    "tag": "移速 · 1格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-amber-400",
+    "buff": {
+      "speed": 5
+    },
+    "buffDesc": "移动速度 +5%",
+    "stepDesc": "顺步 +1 格",
+    "icon": "fa-wind",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-50 text-amber-900 border-amber-400"
+  },
+  "t0_craft_1": {
+    "id": "t0_craft_1",
+    "step": 1,
+    "tier": 0,
+    "category": "industry",
+    "name": "制造芯片 · 初级",
+    "tag": "制造 · 1格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-amber-400",
+    "buff": {
+      "craft_speed": 5
+    },
+    "buffDesc": "制造速度 +5%",
+    "stepDesc": "顺步 +1 格",
+    "icon": "fa-gears",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-50 text-amber-900 border-amber-400"
+  },
+  "t0_atspd_2": {
+    "id": "t0_atspd_2",
+    "step": 2,
+    "tier": 0,
+    "category": "combat",
+    "name": "攻速芯片 · 初级",
+    "tag": "攻速 · 2格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-atk border-sky-400",
+    "buff": {
+      "atspd": 8
+    },
+    "buffDesc": "攻击速度 +8%",
+    "stepDesc": "顺步 +2 格",
+    "icon": "fa-bolt-lightning",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-900 border-sky-400"
+  },
+  "t0_def_2": {
+    "id": "t0_def_2",
+    "step": 2,
+    "tier": 0,
+    "category": "combat",
+    "name": "防御芯片 · 初级",
+    "tag": "防御 · 2格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-sky-400",
+    "buff": {
+      "def": 8
+    },
+    "buffDesc": "阵法防御 +8%",
+    "stepDesc": "顺步 +2 格",
+    "icon": "fa-shield-halved",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-900 border-sky-400"
+  },
+  "t0_belt_2": {
+    "id": "t0_belt_2",
+    "step": 2,
+    "tier": 0,
+    "category": "industry",
+    "name": "传送带芯片 · 初级",
+    "tag": "传送 · 2格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-sky-400",
+    "buff": {
+      "belt_speed": 8
+    },
+    "buffDesc": "传送速度 +8%",
+    "stepDesc": "顺步 +2 格",
+    "icon": "fa-dolly",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-900 border-sky-400"
+  },
+  "t0_burn_2": {
+    "id": "t0_burn_2",
+    "step": 2,
+    "tier": 0,
+    "category": "industry",
+    "name": "燃烧芯片 · 初级",
+    "tag": "燃烧 · 2格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-sky-400",
+    "buff": {
+      "burn_speed": 8
+    },
+    "buffDesc": "燃烧能效 +8%",
+    "stepDesc": "顺步 +2 格",
+    "icon": "fa-fire",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-900 border-sky-400"
+  },
+  "t0_mine_2": {
+    "id": "t0_mine_2",
+    "step": 2,
+    "tier": 0,
+    "category": "industry",
+    "name": "采矿芯片 · 初级",
+    "tag": "采矿 · 2格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-sky-400",
+    "buff": {
+      "mining_speed": 8
+    },
+    "buffDesc": "采矿速度 +8%",
+    "stepDesc": "顺步 +2 格",
+    "icon": "fa-trowel-bricks",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-900 border-sky-400"
+  },
+  "t0_craft_2": {
+    "id": "t0_craft_2",
+    "step": 2,
+    "tier": 0,
+    "category": "industry",
+    "name": "制造芯片 · 初级",
+    "tag": "制造 · 2格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-sky-400",
+    "buff": {
+      "craft_speed": 8
+    },
+    "buffDesc": "制造速度 +8%",
+    "stepDesc": "顺步 +2 格",
+    "icon": "fa-gears",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-900 border-sky-400"
+  },
+  "t1_atk_3": {
+    "id": "t1_atk_3",
+    "step": 3,
+    "tier": 1,
+    "category": "combat",
+    "name": "攻击芯片 · 中级",
+    "tag": "攻击 · 3格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-atk border-slate-700",
+    "buff": {
+      "atk": 10
+    },
+    "buffDesc": "飞剑攻击 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-khanda",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_atspd_3": {
+    "id": "t1_atspd_3",
+    "step": 3,
+    "tier": 1,
+    "category": "combat",
+    "name": "攻速芯片 · 中级",
+    "tag": "攻速 · 3格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-atk border-slate-700",
+    "buff": {
+      "atspd": 10
+    },
+    "buffDesc": "攻击速度 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-bolt-lightning",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_def_3": {
+    "id": "t1_def_3",
+    "step": 3,
+    "tier": 1,
+    "category": "combat",
+    "name": "防御芯片 · 中级",
+    "tag": "防御 · 3格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-slate-700",
+    "buff": {
+      "def": 10
+    },
+    "buffDesc": "阵法防御 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-shield-halved",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_hp_3": {
+    "id": "t1_hp_3",
+    "step": 3,
+    "tier": 1,
+    "category": "combat",
+    "name": "生命芯片 · 中级",
+    "tag": "生命 · 3格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-slate-700",
+    "buff": {
+      "hp": 10
+    },
+    "buffDesc": "灵脉气血 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-heart-pulse",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_crit_3": {
+    "id": "t1_crit_3",
+    "step": 3,
+    "tier": 1,
+    "category": "combat",
+    "name": "暴击芯片 · 中级",
+    "tag": "暴击 · 3格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-slate-700",
+    "buff": {
+      "crit": 10
+    },
+    "buffDesc": "暴击几率 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-crosshairs",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_speed_3": {
+    "id": "t1_speed_3",
+    "step": 3,
+    "tier": 1,
+    "category": "mobility",
+    "name": "移速芯片 · 中级",
+    "tag": "移速 · 3格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-slate-700",
+    "buff": {
+      "speed": 10
+    },
+    "buffDesc": "移动速度 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-wind",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_stamina_3": {
+    "id": "t1_stamina_3",
+    "step": 3,
+    "tier": 1,
+    "category": "mobility",
+    "name": "体力芯片 · 中级",
+    "tag": "体力 · 3格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-slate-700",
+    "buff": {
+      "stamina": 10
+    },
+    "buffDesc": "御剑体力 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-person-running",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_battery_3": {
+    "id": "t1_battery_3",
+    "step": 3,
+    "tier": 1,
+    "category": "mobility",
+    "name": "电量芯片 · 初级",
+    "tag": "电量 · 3格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-belt border-slate-700",
+    "buff": {
+      "flight_battery": 15
+    },
+    "buffDesc": "飞行电池 +15%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-battery-half",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_inventory_3": {
+    "id": "t1_inventory_3",
+    "step": 3,
+    "tier": 1,
+    "category": "mobility",
+    "name": "背包芯片 · 中级",
+    "tag": "背包 · 3格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-def border-slate-700",
+    "buff": {
+      "inventory": 4
+    },
+    "buffDesc": "储物背包 +4格",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-box-open",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_craft_3": {
+    "id": "t1_craft_3",
+    "step": 3,
+    "tier": 1,
+    "category": "industry",
+    "name": "制造芯片 · 中级",
+    "tag": "制造 · 3格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-slate-700",
+    "buff": {
+      "craft_speed": 10
+    },
+    "buffDesc": "制造速度 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-gears",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_mine_3": {
+    "id": "t1_mine_3",
+    "step": 3,
+    "tier": 1,
+    "category": "industry",
+    "name": "采矿芯片 · 中级",
+    "tag": "采矿 · 3格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-slate-700",
+    "buff": {
+      "mining_speed": 10
+    },
+    "buffDesc": "采矿速度 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-trowel-bricks",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_burn_3": {
+    "id": "t1_burn_3",
+    "step": 3,
+    "tier": 1,
+    "category": "industry",
+    "name": "燃烧芯片 · 中级",
+    "tag": "燃烧 · 3格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-slate-700",
+    "buff": {
+      "burn_speed": 10
+    },
+    "buffDesc": "燃烧能效 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-fire",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_belt_3": {
+    "id": "t1_belt_3",
+    "step": 3,
+    "tier": 1,
+    "category": "industry",
+    "name": "传送带芯片 · 中级",
+    "tag": "传送 · 3格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-slate-700",
+    "buff": {
+      "belt_speed": 10
+    },
+    "buffDesc": "传送速度 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-dolly",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_power_3": {
+    "id": "t1_power_3",
+    "step": 3,
+    "tier": 1,
+    "category": "industry",
+    "name": "节能芯片 · 中级",
+    "tag": "节能 · 3格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-slate-700",
+    "buff": {
+      "power_cut": 10
+    },
+    "buffDesc": "用电能耗 -10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-bolt",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_pollute_3": {
+    "id": "t1_pollute_3",
+    "step": 3,
+    "tier": 1,
+    "category": "industry",
+    "name": "环保芯片 · 中级",
+    "tag": "环保 · 3格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-slate-700",
+    "buff": {
+      "pollute_cut": 10
+    },
+    "buffDesc": "污染排放 -10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-leaf",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t2_atk_5": {
+    "id": "t2_atk_5",
+    "step": 5,
+    "tier": 2,
+    "category": "combat",
+    "name": "攻击芯片 · 中级",
+    "tag": "攻击 · 5格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-atk border-sky-400",
+    "buff": {
+      "atk": 20
+    },
+    "buffDesc": "飞剑攻击 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-khanda",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_atspd_5": {
+    "id": "t2_atspd_5",
+    "step": 5,
+    "tier": 2,
+    "category": "combat",
+    "name": "攻速芯片 · 高级",
+    "tag": "攻速 · 5格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-atk border-sky-400",
+    "buff": {
+      "atspd": 20
+    },
+    "buffDesc": "攻击速度 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-bolt-lightning",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_def_5": {
+    "id": "t2_def_5",
+    "step": 5,
+    "tier": 2,
+    "category": "combat",
+    "name": "防御芯片 · 高级",
+    "tag": "防御 · 5格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-sky-400",
+    "buff": {
+      "def": 20
+    },
+    "buffDesc": "阵法防御 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-shield-halved",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_hp_5": {
+    "id": "t2_hp_5",
+    "step": 5,
+    "tier": 2,
+    "category": "combat",
+    "name": "生命芯片 · 高级",
+    "tag": "生命 · 5格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-sky-400",
+    "buff": {
+      "hp": 20
+    },
+    "buffDesc": "灵脉气血 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-heart-pulse",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_crit_5": {
+    "id": "t2_crit_5",
+    "step": 5,
+    "tier": 2,
+    "category": "combat",
+    "name": "暴击芯片 · 高级",
+    "tag": "暴击 · 5格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-sky-400",
+    "buff": {
+      "crit": 20
+    },
+    "buffDesc": "暴击几率 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-crosshairs",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_sword_funnel_1": {
+    "id": "t2_sword_funnel_1",
+    "step": 5,
+    "tier": 2,
+    "category": "combat",
+    "name": "飞剑芯片 · 中级",
+    "tag": "飞剑 · 5格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-funnel border-sky-400",
+    "buff": {
+      "sword_funnel": 1
+    },
+    "buffDesc": "浮游飞剑 +1把",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-jet-fighter-up",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_speed_5": {
+    "id": "t2_speed_5",
+    "step": 5,
+    "tier": 2,
+    "category": "mobility",
+    "name": "移速芯片 · 高级",
+    "tag": "移速 · 5格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-sky-400",
+    "buff": {
+      "speed": 20
+    },
+    "buffDesc": "移动速度 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-wind",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_battery_5": {
+    "id": "t2_battery_5",
+    "step": 5,
+    "tier": 2,
+    "category": "mobility",
+    "name": "电量芯片 · 中级",
+    "tag": "电量 · 5格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-belt border-sky-400",
+    "buff": {
+      "flight_battery": 30
+    },
+    "buffDesc": "飞行电量 +30%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-battery-three-quarters",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_inventory_5": {
+    "id": "t2_inventory_5",
+    "step": 5,
+    "tier": 2,
+    "category": "mobility",
+    "name": "背包芯片 · 高级",
+    "tag": "背包 · 5格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-def border-sky-400",
+    "buff": {
+      "inventory": 8
+    },
+    "buffDesc": "储物背包 +8格",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-box-open",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_craft_5": {
+    "id": "t2_craft_5",
+    "step": 5,
+    "tier": 2,
+    "category": "industry",
+    "name": "制造芯片 · 中级",
+    "tag": "制造 · 5格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-sky-400",
+    "buff": {
+      "craft_speed": 20
+    },
+    "buffDesc": "制造速度 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-gears",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_mine_5": {
+    "id": "t2_mine_5",
+    "step": 5,
+    "tier": 2,
+    "category": "industry",
+    "name": "采矿芯片 · 中级",
+    "tag": "采矿 · 5格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-sky-400",
+    "buff": {
+      "mining_speed": 20
+    },
+    "buffDesc": "采矿速度 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-trowel-bricks",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_burn_5": {
+    "id": "t2_burn_5",
+    "step": 5,
+    "tier": 2,
+    "category": "industry",
+    "name": "燃烧芯片 · 高级",
+    "tag": "燃烧 · 5格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-sky-400",
+    "buff": {
+      "burn_speed": 20
+    },
+    "buffDesc": "燃烧能效 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-fire",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_belt_5": {
+    "id": "t2_belt_5",
+    "step": 5,
+    "tier": 2,
+    "category": "industry",
+    "name": "传送带芯片 · 高级",
+    "tag": "传送 · 5格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-sky-400",
+    "buff": {
+      "belt_speed": 20
+    },
+    "buffDesc": "传送速度 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-dolly",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_power_5": {
+    "id": "t2_power_5",
+    "step": 5,
+    "tier": 2,
+    "category": "industry",
+    "name": "节能芯片 · 高级",
+    "tag": "节能 · 5格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-sky-400",
+    "buff": {
+      "power_cut": 20
+    },
+    "buffDesc": "用电能耗 -20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-bolt",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_pollute_5": {
+    "id": "t2_pollute_5",
+    "step": 5,
+    "tier": 2,
+    "category": "industry",
+    "name": "环保芯片 · 高级",
+    "tag": "环保 · 5格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-sky-400",
+    "buff": {
+      "pollute_cut": 20
+    },
+    "buffDesc": "污染排放 -20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-leaf",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t3_atk_8": {
+    "id": "t3_atk_8",
+    "step": 8,
+    "tier": 3,
+    "category": "combat",
+    "name": "攻击芯片 · 高级",
+    "tag": "攻击 · 8格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-atk border-amber-400",
+    "buff": {
+      "atk": 30
+    },
+    "buffDesc": "飞剑攻击 +30%",
+    "stepDesc": "顺步 +8 格",
+    "icon": "fa-khanda",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-100 text-amber-900 border-amber-400 font-black"
+  },
+  "t3_sword_funnel_2": {
+    "id": "t3_sword_funnel_2",
+    "step": 8,
+    "tier": 3,
+    "category": "combat",
+    "name": "飞剑芯片 · 高级",
+    "tag": "飞剑 · 8格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-funnel border-amber-400",
+    "buff": {
+      "sword_funnel": 2
+    },
+    "buffDesc": "浮游飞剑 +2把",
+    "stepDesc": "顺步 +8 格",
+    "icon": "fa-jet-fighter-up",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-100 text-amber-900 border-amber-400 font-black"
+  },
+  "t3_battery_8": {
+    "id": "t3_battery_8",
+    "step": 8,
+    "tier": 3,
+    "category": "mobility",
+    "name": "电量芯片 · 高级",
+    "tag": "电量 · 8格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-belt border-amber-400",
+    "buff": {
+      "flight_battery": 50
+    },
+    "buffDesc": "飞行电量 +50%",
+    "stepDesc": "顺步 +8 格",
+    "icon": "fa-battery-full",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-100 text-amber-900 border-amber-400 font-black"
+  },
+  "t3_craft_8": {
+    "id": "t3_craft_8",
+    "step": 8,
+    "tier": 3,
+    "category": "industry",
+    "name": "制造芯片 · 高级",
+    "tag": "制造 · 8格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-amber-400",
+    "buff": {
+      "craft_speed": 30
+    },
+    "buffDesc": "制造速度 +30%",
+    "stepDesc": "顺步 +8 格",
+    "icon": "fa-gears",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-100 text-amber-900 border-amber-400 font-black"
+  },
+  "t3_mine_8": {
+    "id": "t3_mine_8",
+    "step": 8,
+    "tier": 3,
+    "category": "industry",
+    "name": "采矿芯片 · 高级",
+    "tag": "采矿 · 8格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-amber-400",
+    "buff": {
+      "mining_speed": 30
+    },
+    "buffDesc": "采矿速度 +30%",
+    "stepDesc": "顺步 +8 格",
+    "icon": "fa-trowel-bricks",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-100 text-amber-900 border-amber-400 font-black"
+  },
+  "chip_triangle_in": {
+    "id": "chip_triangle_in",
+    "step": 0,
+    "tier": 1,
+    "category": "utility",
+    "name": "向心变轨镜 · 初级",
+    "tag": "变轨 · 向心",
+    "type": "shift_in",
+    "shape": "shape-triangle",
+    "matClass": "token-shift border-sky-400",
+    "buff": {},
+    "buffDesc": "导向内环 / 跨盘外挂",
+    "stepDesc": "折射光流至相邻内圈",
+    "icon": "fa-play",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-100 text-sky-900 border-sky-400"
+  }
+};
+
+    const KEYSTONE_TRAITS = {
+  "keystone_furnace": {
+    "id": "keystone_furnace",
+    "name": "熔铸核心插件 · 高级",
+    "category": "industry",
+    "tag": "工业 · 熔铸",
+    "icon": "fa-fire-burner",
+    "color": "amber",
+    "badgeClass": "bg-amber-100 text-amber-900 border-amber-400",
+    "buffDesc": "熔炼能耗 -30% · 制造速度 +25%",
+    "traitDesc": "全阵工业芯片≥4时触发无损淬火，废料产出减少 100%",
+    "buff": {
+      "power_cut": 30,
+      "craft_speed": 25
+    },
+    "beamColor": "gold"
+  },
+  "keystone_logistics": {
+    "id": "keystone_logistics",
+    "name": "物流核心插件 · 高级",
+    "category": "industry",
+    "tag": "工业 · 物流",
+    "icon": "fa-dolly",
+    "color": "sky",
+    "badgeClass": "bg-sky-100 text-sky-900 border-sky-400",
+    "buffDesc": "传送速度 +50% · 储物背包 +8格",
+    "traitDesc": "光束贯通全盘时，货运飞剑解锁空间折跃",
+    "buff": {
+      "belt_speed": 50,
+      "inventory": 8
+    },
+    "beamColor": "cyan"
+  },
+  "keystone_assembly": {
+    "id": "keystone_assembly",
+    "name": "量产核心插件 · 高级",
+    "category": "industry",
+    "tag": "工业 · 量产",
+    "icon": "fa-cubes-stacked",
+    "color": "emerald",
+    "badgeClass": "bg-emerald-100 text-emerald-900 border-emerald-400",
+    "buffDesc": "装配与制造基础产出 +30%",
+    "traitDesc": "全盘闭环时，每次生产有 15% 概率获得双倍成品暴击",
+    "buff": {
+      "craft_speed": 30
+    },
+    "beamColor": "emerald"
+  },
+  "keystone_leyline": {
+    "id": "keystone_leyline",
+    "name": "聚灵核心插件 · 高级",
+    "category": "industry",
+    "tag": "能源 · 聚灵",
+    "icon": "fa-bolt",
+    "color": "sky",
+    "badgeClass": "bg-sky-100 text-sky-900 border-sky-400",
+    "buffDesc": "全厂供能 +40% · 污染排放 -25%",
+    "traitDesc": "传输损耗清零，全阵星宿倍率额外 +0.3x",
+    "buff": {
+      "power_cut": 25,
+      "pollute_cut": 25
+    },
+    "beamColor": "cyan"
+  },
+  "keystone_void_reap": {
+    "id": "keystone_void_reap",
+    "name": "裂解核心插件 · 高级",
+    "category": "industry",
+    "tag": "环保 · 裂解",
+    "icon": "fa-atom",
+    "color": "purple",
+    "badgeClass": "bg-purple-100 text-purple-900 border-purple-400",
+    "buffDesc": "废料清零 · 宗门灵石产出 +35%",
+    "traitDesc": "废料与残渣直接转化为纯净灵精，产线永不故障",
+    "buff": {
+      "burn_speed": 35,
+      "pollute_cut": 30
+    },
+    "beamColor": "purple"
+  },
+  "keystone_sword_array": {
+    "id": "keystone_sword_array",
+    "name": "飞剑核心插件 · 高级",
+    "category": "combat",
+    "tag": "战伐 · 飞剑",
+    "icon": "fa-shield-virus",
+    "color": "purple",
+    "badgeClass": "bg-purple-100 text-purple-900 border-purple-400",
+    "buffDesc": "浮游飞剑 +2把 · 飞剑攻击 +40%",
+    "traitDesc": "每次步进从核位射出一道贯穿引雷剑气",
+    "buff": {
+      "sword_funnel": 2,
+      "atk": 40
+    },
+    "beamColor": "purple"
+  },
+  "keystone_aegis": {
+    "id": "keystone_aegis",
+    "name": "防御核心插件 · 高级",
+    "category": "combat",
+    "tag": "防卫 · 护盾",
+    "icon": "fa-shield-halved",
+    "color": "rose",
+    "badgeClass": "bg-rose-100 text-rose-900 border-rose-400",
+    "buffDesc": "阵法防御 +50% · 最大气血 +50%",
+    "traitDesc": "受到致命伤免疫死亡；全阵防御的 50% 转化为反震真伤",
+    "buff": {
+      "def": 50,
+      "hp": 50
+    },
+    "beamColor": "rose"
+  },
+  "keystone_alchemy": {
+    "id": "keystone_alchemy",
+    "name": "炼丹核心插件 · 高级",
+    "category": "living",
+    "tag": "生产 · 炼丹",
+    "icon": "fa-flask-round-potion",
+    "color": "amber",
+    "badgeClass": "bg-amber-100 text-amber-900 border-amber-400",
+    "buffDesc": "采矿产出 +25% · 御剑体力 +30%",
+    "traitDesc": "炼制高阶丹药耗材减半，全宗弟子修炼速度 +35%",
+    "buff": {
+      "mining_speed": 25,
+      "stamina": 30
+    },
+    "beamColor": "gold"
+  },
+  "keystone_pocket": {
+    "id": "keystone_pocket",
+    "name": "储物核心插件 · 高级",
+    "category": "mobility",
+    "tag": "身法 · 储物",
+    "icon": "fa-box-open",
+    "color": "indigo",
+    "badgeClass": "bg-indigo-100 text-indigo-900 border-indigo-400",
+    "buffDesc": "储物背包 +24格 · 采矿速度 +40%",
+    "traitDesc": "全图掉落物自动磁吸拾取，御剑体力消耗减半",
+    "buff": {
+      "inventory": 24,
+      "mining_speed": 40,
+      "stamina": 20
+    },
+    "beamColor": "cyan"
+  },
+  "keystone_divination": {
+    "id": "keystone_divination",
+    "name": "神机核心插件 · 高级",
+    "category": "mobility",
+    "tag": "探测 · 暴击",
+    "icon": "fa-eye",
+    "color": "amber",
+    "badgeClass": "bg-amber-100 text-amber-900 border-amber-400",
+    "buffDesc": "暴击几率 +25% · 飞行电池 +30%",
+    "traitDesc": "全图地脉高纯度矿点与远古秘境直接透视高亮",
+    "buff": {
+      "crit": 25,
+      "flight_battery": 30
+    },
+    "beamColor": "gold"
+  }
+};
+
+    const DISC_KEYSTONE_META = {
+      disc_c: {
+        id: 'disc_c',
+        name: '手表盘 C · 辰光调频核位',
+        shortName: '盘C 辰光',
+        cx: 1210,
+        cy: 160,
+        color: 'sky',
+        defaultKs: 'keystone_logistics'
+      },
+      disc_b: {
+        id: 'disc_b',
+        name: '动力盘 B · 浑仪动力核位',
+        shortName: '盘B 动力',
+        cx: 960,
+        cy: 280,
+        color: 'amber',
+        defaultKs: 'keystone_assembly'
+      },
+      disc_e: {
+        id: 'disc_e',
+        name: '太虚中元 · 悬浮特殊共鸣插槽',
+        shortName: '中元 悬浮',
+        cx: 735,
+        cy: 363,
+        color: 'emerald'
+      },
+      disc_a: {
+        id: 'disc_a',
+        name: '浑天主盘 A · 天枢主极核位',
+        shortName: '盘A 天枢',
+        cx: 450,
+        cy: 470,
+        color: 'amber',
+        defaultKs: 'keystone_furnace'
+      },
+      disc_d: {
+        id: 'disc_d',
+        name: '终端盘 D · 虚空释能核位',
+        shortName: '盘D 释能',
+        cx: 150,
+        cy: 600,
+        color: 'purple',
+        defaultKs: 'keystone_leyline'
+      }
+    };
+
+    const KEYSTONE_SLOTS = {
+      disc_c: null,
+      disc_b: null,
+      disc_e: null,
+      disc_a: null,
+      disc_d: null
+    };
+
+    let SELECTED_KEYSTONE_DISC = 'disc_a';
+    let CURRENT_KEYSTONE_ID = null; // 默认空置，由玩家手动放置
+
+    function selectDiscSocket(discId) {
+      if (DISC_KEYSTONE_META[discId]) {
+        SELECTED_KEYSTONE_DISC = discId;
+        renderPalette();
+      }
+    }
+
+    function unequipKeystone(targetDisc) {
+      const disc = targetDisc || SELECTED_KEYSTONE_DISC || 'disc_a';
+      if (KEYSTONE_SLOTS[disc] !== undefined && KEYSTONE_SLOTS[disc] !== null) {
+        KEYSTONE_SLOTS[disc] = null;
+        if (disc === 'disc_a') CURRENT_KEYSTONE_ID = null;
+        updateAllKeystoneSocketsDOM();
+        if (audio) audio.playRemove();
+        renderPalette();
+        solveStepNetwork();
+      }
+    }
+
+    function setKeystone(ksId, targetDisc) {
+      const disc = targetDisc || SELECTED_KEYSTONE_DISC || 'disc_a';
+      if (!KEYSTONE_TRAITS[ksId] || !DISC_KEYSTONE_META[disc]) return;
+
+      for (const [dKey, curKs] of Object.entries(KEYSTONE_SLOTS)) {
+        if (curKs === ksId && dKey !== disc) {
+          KEYSTONE_SLOTS[dKey] = null;
+        }
+      }
+
+      KEYSTONE_SLOTS[disc] = ksId;
+      if (disc === 'disc_a') CURRENT_KEYSTONE_ID = ksId;
+      updateAllKeystoneSocketsDOM();
+      if (audio) audio.playPlace();
+      renderPalette();
+      solveStepNetwork();
+    }
+
+    // ✦ 核心装配方式与正常插槽完全一致：支持从左侧构件库直接拖拽任意特质或构件装配至核心 ✦
+    function installIntoCoreSocket(discKey, typeId) {
+      if (KEYSTONE_TRAITS[typeId]) {
+        setKeystone(typeId, discKey);
+        return;
+      }
+      if (CHIP_SPECS[typeId]) {
+        const spec = CHIP_SPECS[typeId];
+        const customKsId = 'core_boost_' + typeId;
+        KEYSTONE_TRAITS[customKsId] = {
+          id: customKsId,
+          name: '极核过载 · ' + spec.name.split('(')[0].trim(),
+          category: spec.category || 'combat',
+          tag: 'OVERDRIVE // 极核过载',
+          icon: spec.icon,
+          color: 'amber',
+          badgeClass: 'bg-amber-100 text-amber-900 border-amber-400',
+          buffDesc: '核心过载加成：' + spec.buffDesc + ' (×3倍极核共振)',
+          traitDesc: '将标准构件置于盘心极核，激发 300% 狂暴极核共振加成！',
+          buff: Object.fromEntries(Object.entries(spec.buff || {}).map(([k, v]) => [k, v * 3])),
+          beamColor: 'gold'
+        };
+        setKeystone(customKsId, discKey);
+      }
+    }
+
+    function updateAllKeystoneSocketsDOM() {
+      // 五大核心插槽统一 DOM 与悬浮/右键提示同步
+      for (const [discKey, meta] of Object.entries(DISC_KEYSTONE_META)) {
+        const ksId = KEYSTONE_SLOTS[discKey];
+        const ks = KEYSTONE_TRAITS[ksId];
+        const socketEl = document.getElementById(discKey === 'disc_a' ? 'centralCrossSocket' : 'hubSocket_' + discKey);
+        const iconEl = document.getElementById(discKey === 'disc_a' ? 'crossCoreIcon' : 'crossCoreIcon_' + discKey);
+        const nameEl = document.getElementById(discKey === 'disc_a' ? 'crossCoreNameText' : 'crossCoreNameText_' + discKey);
+        const badgeEl = document.getElementById(discKey === 'disc_a' ? 'crossCoreBadge' : 'crossCoreBadge_' + discKey);
+
+        if (socketEl) {
+          if (ks) {
+            socketEl.setAttribute('title', `【${meta.name}】\n已装配：${ks.name} (${ks.tag})\n${ks.buffDesc}\n${ks.traitDesc}\n【右键】取回特质`);
+          } else {
+            socketEl.setAttribute('title', `【${meta.name}】\n当前空置\n【拖拽】构件或核心特质至此装配\n【右键】取回`);
+          }
+        }
+
+        if (ks) {
+          if (iconEl) iconEl.className = `fa-solid ${ks.icon} text-${ks.color}-300 ${discKey === 'disc_a' ? 'text-sm' : 'text-[11px]'} relative z-10`;
+          if (nameEl) nameEl.textContent = ks.name.split('·')[0].trim();
+          if (badgeEl) badgeEl.className = `mt-0.5 px-1 py-0.2 rounded bg-slate-900 text-[7px] font-mono-sci font-bold text-${ks.color}-300 border border-${ks.color}-400 whitespace-nowrap shadow-xs flex items-center space-x-0.5`;
+        } else {
+          if (iconEl) iconEl.className = 'fa-solid fa-plus text-slate-500 text-[10px] relative z-10';
+          if (nameEl) nameEl.textContent = '空置插槽';
+          if (badgeEl) badgeEl.className = 'mt-0.5 px-1 py-0.2 rounded bg-slate-800 text-[7px] font-mono-sci font-bold text-slate-400 border border-slate-600 whitespace-nowrap shadow-xs flex items-center space-x-0.5';
+        }
+      }
+    }
+
+    function initKeystoneSocketsEvents() {
+      const sockets = [
+        { elId: 'hubSocket_disc_c', discKey: 'disc_c' },
+        { elId: 'hubSocket_disc_b', discKey: 'disc_b' },
+        { elId: 'hubSocket_disc_e', discKey: 'disc_e' },
+        { elId: 'centralCrossSocket', discKey: 'disc_a' },
+        { elId: 'hubSocket_disc_d', discKey: 'disc_d' }
+      ];
+
+      sockets.forEach(({ elId, discKey }) => {
+        const el = document.getElementById(elId);
+        if (!el) return;
+
+        el.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          el.classList.add('scale-125');
+        });
+
+        el.addEventListener('dragleave', () => {
+          el.classList.remove('scale-125');
+        });
+
+        el.addEventListener('drop', (e) => {
+          e.preventDefault();
+          el.classList.remove('scale-125');
+          const typeId = e.dataTransfer.getData('text/plain');
+          if (typeId) {
+            installIntoCoreSocket(discKey, typeId);
+          }
+        });
+
+        el.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          unequipKeystone(discKey);
+        });
+      });
+    }
+    function openKeystoneSelector(discId) {
+      if (discId && DISC_KEYSTONE_META[discId]) {
+        SELECTED_KEYSTONE_DISC = discId;
+      }
+      const leftPanel = document.getElementById('leftPanel');
+      if (leftPanel && leftPanel.classList.contains('collapsed')) {
+        toggleLeftPanel();
+      }
+      filterPalette('keystone');
+    }
+
+
+    /* =========================================================================
+       3. 盘体结构定义 (经典三环：外圈 16 槽 R=220, 中层 10 槽 R=150, 最内 6 槽 R=85)
+       ========================================================================= */
+    const DISK_RINGS = {
+      // ✦ 盘 4（最左端）：虚空终端释能盘 (中心 150, 600，6 槽，R=55，终端大闭环) ✦
+      sub_d:       { name: '终端盘D(虚空释能)', cx: 150,  cy: 600, radius: 55,  slotCount: 6,  currentAngle: 0, slotOffset: 0, elId: 'ringSubDEl', degId: 'deg_sub_d', discType: 'terminal' },
+
+      // ✦ 盘 0（左上极轨）：极轨探天副盘 (中心 250, 150，R=30，3 槽，提供全景灵视与飞剑巡航增益) ✦
+      polar:       { name: '极轨探天副盘',     cx: 250,  cy: 150, radius: 30,  slotCount: 3,  currentAngle: 0, slotOffset: 0, elId: 'ringPolarEl', degId: 'deg_polar', discType: 'satellite' },
+
+      // ✦ 盘 3（中央偏左）：浑天主大阵 (中心 450, 470，天16/地10/人6 核心极核) ✦
+      tian:        { name: '天盘(外圈16槽)',  cx: 450,  cy: 470, radius: 200, slotCount: 16, currentAngle: 0, slotOffset: 0, elId: 'ringTianEl', degId: 'deg_tian', discType: 'main' },
+      di:          { name: '地盘(中层10槽)',  cx: 450,  cy: 470, radius: 135, slotCount: 10, currentAngle: 0, slotOffset: 0, elId: 'ringDiEl',   degId: 'deg_di',   discType: 'main' },
+      ren:         { name: '人盘(最内6槽)',   cx: 450,  cy: 470, radius: 72,  slotCount: 6,  currentAngle: 0, slotOffset: 0, elId: 'ringRenEl',  degId: 'deg_ren',  discType: 'main' },
+
+      // ✦ 盘 2（中央偏右）：动力卡尺双环盘 (中心 960, 280，外环8槽 R=80 + 内环4槽 R=44) ✦
+      sub_b_outer: { name: '子盘B(外环8槽)',  cx: 960,  cy: 280, radius: 80,  slotCount: 8,  currentAngle: 0, slotOffset: 0, elId: 'ringSubBOuterEl', degId: 'deg_sub_b', discType: 'sub' },
+      sub_b_inner: { name: '子盘B(内环4槽)',  cx: 960,  cy: 280, radius: 44,  slotCount: 4,  currentAngle: 0, slotOffset: 0, elId: 'ringSubBInnerEl', degId: 'deg_sub_b_inner', discType: 'sub' },
+
+      // ✦ 盘 1（最右端）：腕表同心双表盘 (同心双环！C1大圈 R=48 6槽，C2小圈 R=24 4槽，中心 1210, 160) ✦
+      sub_c1:      { name: '手表外盘C1(调频6槽)', cx: 1210, cy: 160, radius: 48,  slotCount: 6,  currentAngle: 0, slotOffset: 0, elId: 'ringSubC1El', degId: 'deg_sub_c', discType: 'watch' },
+      sub_c2:      { name: '手表内盘C2(储能4槽)', cx: 1210, cy: 160, radius: 24,  slotCount: 4,  currentAngle: 0, slotOffset: 0, elId: 'ringSubC2El', degId: 'deg_sub_c2', discType: 'watch' }
+    };
+    DISK_RINGS.sub_b = DISK_RINGS.sub_b_outer;
+    DISK_RINGS.sub_c = DISK_RINGS.sub_c1;
+    let BOARD_SLOTS = {};
+
+    function initBoardSlots() {
+      BOARD_SLOTS = {};
+      for (const [ringKey, ringMeta] of Object.entries(DISK_RINGS)) {
+        for (let i = 0; i < ringMeta.slotCount; i++) {
+          BOARD_SLOTS[`${ringKey}_${i}`] = {
+            ringId: ringKey,
+            slotIndex: i,
+            chip: null
+          };
+        }
+      }
+    }
+
+    /* =========================================================================
+       4. 左侧芯片调色板渲染 (极简现代工程制图风格)
+       ========================================================================= */
+    let FOCUSED_DISC_GROUP = 'all'; // 'none' (纯净观赏模式，隐藏所有空插槽，不挡光路), 'main', 'sub_b', 'sub_c', 'sub_d', 'all'
+
+    function setFocusedDisc(group) {
+      FOCUSED_DISC_GROUP = group;
+      ['none', 'main', 'sub_b', 'sub_c', 'sub_d', 'all'].forEach(k => {
+        const btn = document.getElementById('btn_focus_' + k);
+        if (!btn) return;
+        if (k === group) {
+          btn.className = 'px-2 py-0.5 rounded bg-slate-900 text-sky-300 font-bold border border-sky-400 shadow-xs';
+        } else {
+          btn.className = 'px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-200 hover:border-slate-800';
+        }
+      });
+      renderBoardSlots();
+      audio.playSelect();
+    }
+
+    function isSlotVisibleInCurrentFocus(ringId, hasChip) {
+      // 永远可见所有插槽，使玩家随时可以自由放置构件与观察拓扑
+      return true;
+    }
+
+    let CURRENT_PALETTE_FILTER = 'all';
+
+    function filterPalette(filterKey) {
+      CURRENT_PALETTE_FILTER = filterKey;
+      ['all', 's1', 's2', 's3', 's5', 's8', 'shift', 'keystone', 'funnel', 'combat', 'industry', 'mobility'].forEach(key => {
+        const tab = document.getElementById(`tab_${key}`);
+        if (!tab) return;
+        if (key === filterKey) {
+          tab.className = 'px-1.5 py-0.5 rounded bg-slate-900 text-white font-bold shrink-0 shadow-xs';
+        } else {
+          tab.className = 'px-1.5 py-0.5 rounded bg-white text-slate-700 border border-slate-200 hover:border-slate-800 shrink-0';
+        }
+      });
+      renderPalette();
+    }
+
+    function renderPalette() {
+      const container = document.getElementById('paletteListContainer');
+      if (!container) return;
+
+      // 如果当前筛选为【极核心法】，渲染专属核心特质选择卡片
+      if (CURRENT_PALETTE_FILTER === 'keystone') {
+        const curMeta = DISC_KEYSTONE_META[SELECTED_KEYSTONE_DISC] || DISC_KEYSTONE_META.disc_a;
+        const curEquippedKs = KEYSTONE_TRAITS[KEYSTONE_SLOTS[SELECTED_KEYSTONE_DISC]];
+
+        let ksHtml = `
+          <div class="p-2.5 rounded-lg bg-amber-500/10 border border-amber-300 text-xs text-amber-950 mb-2.5 font-mono-sci">
+            <div class="font-bold flex items-center justify-between mb-1">
+              <span class="flex items-center"><i class="fa-solid fa-gem mr-1.5 text-amber-600"></i>核心插槽插件库</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 font-bold font-mono-sci">支持直接拖拽至盘心</span>
+            </div>
+            <p class="text-[9.5px] text-slate-600 leading-relaxed mb-1.5">
+              装配方式与普通构件完全一致：可<b>直接拖拽特质卡片放入盘面任意核心槽</b>，或点击快速装配；<b>【右键】点击盘心即可直接取回</b>。
+            </p>
+            <div class="grid grid-cols-5 gap-1 text-[8.5px] font-bold">
+              ${Object.entries(DISC_KEYSTONE_META).map(([dKey, dMeta]) => {
+                const isSelected = (SELECTED_KEYSTONE_DISC === dKey);
+                const hasKs = !!KEYSTONE_SLOTS[dKey];
+                return `
+                  <button onclick="selectDiscSocket('${dKey}')" class="px-0.5 py-1 rounded text-center border transition ${
+                    isSelected
+                      ? 'bg-slate-900 text-amber-300 border-amber-400 shadow-xs'
+                      : 'bg-white text-slate-700 border-slate-200 hover:border-slate-800'
+                  }">
+                    <div class="truncate text-[7.5px]">${hasKs ? '●' : '○'} ${dMeta.shortName}</div>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+            <div class="mt-2 pt-1.5 border-t border-amber-300/50 flex items-center justify-between text-[10px]">
+              <div class="truncate">
+                <span class="text-slate-600">当前槽位: </span>
+                <b class="text-slate-900 font-bold">${curMeta.name.split('·')[0].trim()}</b>
+              </div>
+              <div class="flex items-center space-x-1.5 shrink-0">
+                <span class="font-bold text-amber-700">${curEquippedKs ? curEquippedKs.name.split('·')[0].trim() : '空置'}</span>
+                ${curEquippedKs ? '<button onclick="unequipKeystone()" class="px-1.5 py-0.2 rounded bg-rose-50 border border-rose-300 text-rose-700 hover:bg-rose-100 text-[8px] font-mono-sci">右键或点击卸下</button>' : ''}
+              </div>
+            </div>
+          </div>
+        `;
+
+        Object.entries(KEYSTONE_TRAITS).forEach(([ksId, ks]) => {
+          let equippedInDisc = null;
+          for (const [dKey, curKs] of Object.entries(KEYSTONE_SLOTS)) {
+            if (curKs === ksId) {
+              equippedInDisc = dKey;
+              break;
+            }
+          }
+          const isEquippedHere = (equippedInDisc === SELECTED_KEYSTONE_DISC);
+          const isEquippedOther = (equippedInDisc && equippedInDisc !== SELECTED_KEYSTONE_DISC);
+
+          ksHtml += `
+            <div class="p-2.5 rounded-xl bg-white border ${
+              isEquippedHere
+                ? 'border-amber-500 shadow-md ring-2 ring-amber-400/30'
+                : 'border-slate-200 hover:border-slate-800'
+            } transition cursor-grab active:cursor-grabbing space-y-1.5 group shadow-xs hover:shadow-sm"
+                 draggable="true"
+                 ondragstart="onPaletteDragStart(event, '${ksId}')"
+                 onclick="setKeystone('${ksId}')"
+                 title="${ks.name}\n${ks.buffDesc}\n${ks.traitDesc}\n【按住拖拽】放入盘心或任意核心槽\n【右键核心】取回">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2 min-w-0">
+                  <div class="w-8 h-8 rounded-lg bg-slate-900 border border-amber-400 flex items-center justify-center text-amber-300 shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                    <i class="fa-solid ${ks.icon} text-xs"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <div class="text-[11.5px] font-bold text-slate-900 truncate">${ks.name}</div>
+                    <div class="text-[8px] font-mono-sci text-amber-700 font-bold">${ks.tag}</div>
+                  </div>
+                </div>
+                <div>
+                  ${
+                    isEquippedHere
+                      ? '<span class="px-2 py-0.5 rounded bg-slate-900 text-amber-300 text-[8.5px] font-mono-sci font-bold border border-amber-400 shadow-xs">● 已装配</span>'
+                      : isEquippedOther
+                      ? `<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[7.5px] font-mono-sci group-hover:bg-amber-600 group-hover:text-white transition">拖至此位(原${DISC_KEYSTONE_META[equippedInDisc].shortName})</span>`
+                      : '<span class="px-2 py-0.5 rounded bg-slate-100 group-hover:bg-slate-900 group-hover:text-white text-slate-700 text-[8.5px] font-mono-sci font-bold transition">可直接拖拽装配</span>'
+                  }
+                </div>
+              </div>
+              <div class="text-[10px] font-bold text-slate-800 bg-amber-50/60 p-1.5 rounded border border-amber-200/50">
+                ${ks.buffDesc}
+              </div>
+              <div class="text-[9px] text-slate-500 leading-tight">
+                ${ks.traitDesc}
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = ksHtml;
+        return;
+      }
+
+      const keys = Object.keys(CHIP_SPECS).filter(k => !k.startsWith('chip_atk_') && !k.startsWith('chip_def_') && !k.startsWith('chip_belt_') && !k.startsWith('chip_herb_'));
+
+      let filteredKeys = keys;
+      if (CURRENT_PALETTE_FILTER === 's1') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].step === 1 && CHIP_SPECS[k].type === 'step');
+      } else if (CURRENT_PALETTE_FILTER === 's2') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].step === 2 && CHIP_SPECS[k].type === 'step');
+      } else if (CURRENT_PALETTE_FILTER === 's3') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].step === 3 && CHIP_SPECS[k].type === 'step');
+      } else if (CURRENT_PALETTE_FILTER === 's5') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].step === 5 && CHIP_SPECS[k].type === 'step');
+      } else if (CURRENT_PALETTE_FILTER === 's8') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].step === 8 && CHIP_SPECS[k].type === 'step');
+      } else if (CURRENT_PALETTE_FILTER === 'shift') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].type === 'shift_in');
+      } else if (CURRENT_PALETTE_FILTER === 'funnel') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].category === 'funnel');
+      } else if (CURRENT_PALETTE_FILTER === 'combat') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].category === 'combat');
+      } else if (CURRENT_PALETTE_FILTER === 'industry') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].category === 'industry');
+      } else if (CURRENT_PALETTE_FILTER === 'mobility') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].category === 'mobility');
+      }
+
+      let html = '';
+      filteredKeys.forEach(typeId => {
+        const spec = CHIP_SPECS[typeId];
+        const stepBadge = spec.type === 'step' ? `+${spec.step}格` : '变轨规';
+        html += `
+          <div class="p-2.5 rounded-lg bg-white border border-slate-200 hover:border-slate-800 transition cursor-grab active:cursor-grabbing flex items-center space-x-3 group shadow-xs hover:shadow-sm"
+               draggable="true"
+               ondragstart="onPaletteDragStart(event, '${typeId}')">
+            
+            <div class="w-9 h-9 ${spec.shape} ${spec.matClass} flex items-center justify-center relative shrink-0">
+              <i class="fa-solid ${spec.icon} text-sm"></i>
+            </div>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold ${spec.textColor} truncate">${spec.name}</span>
+                <span class="text-[9px] font-mono-sci px-1.5 py-0.2 rounded font-bold ${spec.badgeColor}">
+                  ${stepBadge}
+                </span>
+              </div>
+              <div class="flex items-center justify-between text-[10px] text-slate-500 mt-1">
+                <span>${spec.buffDesc}</span>
+                <span class="text-slate-400 font-mono-sci">${spec.stepDesc}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function onPaletteDragStart(e, typeId) {
+      audio.init();
+      e.dataTransfer.setData('text/plain', typeId);
+    }
+
+    /* =========================================================================
+       5. 渲染星盘插槽
+       ========================================================================= */
+    let SLOTS_DOM_INITIALIZED = false;
+
+    // 约定：每个环的 0 号位正处于 12点钟正上方 (-90°)，顺时针递增
+    function getSlotWorldPos(ringId, slotIndex) {
+      const ring = DISK_RINGS[ringId];
+      if (!ring) return { x: 340, y: 320, angleDeg: 0, cx: 340, cy: 320 };
+      const cx = ring.cx || 340;
+      const cy = ring.cy || 320;
+      // 0号位在正上方 (-90°)，顺时针加上环当前旋转的角度
+      const baseDeg = -90 + (slotIndex * (360 / ring.slotCount));
+      const effectiveDeg = (baseDeg + ring.currentAngle + 360) % 360;
+      const rad = (effectiveDeg * Math.PI) / 180;
+      return {
+        x: cx + ring.radius * Math.cos(rad),
+        y: cy + ring.radius * Math.sin(rad),
+        angleDeg: effectiveDeg,
+        cx,
+        cy
+      };
+    }
+
+    // 槽位索引赋予编号或八卦爻符
+    const BAGUA_NAMES = ['01·乾', '02·兑', '03·离', '04·震', '05·巽', '06·坎', '07·艮', '08·坤'];
+    const TIANGAN_NAMES = ['甲木', '乙木', '丙火', '丁火', '戊土', '己土', '庚金', '辛金', '壬水', '癸水'];
+    const YAO_NAMES = ['初九', '九二', '九三', '九四', '九五', '上九'];
+
+    function renderBoardSlots() {
+      const container = document.getElementById('slotsLayer');
+      if (!container) return;
+
+      if (!SLOTS_DOM_INITIALIZED) {
+        container.innerHTML = '';
+        for (const [slotKey, slotData] of Object.entries(BOARD_SLOTS)) {
+          const slotEl = document.createElement('div');
+          slotEl.id = `slot_${slotKey}`;
+          slotEl.setAttribute('data-has-chip', 'false');
+          slotEl.className = 'absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-200';
+          slotEl.style.width = '36px';
+          slotEl.style.height = '36px';
+
+          slotEl.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            slotEl.classList.add('scale-125');
+          });
+          slotEl.addEventListener('dragleave', () => {
+            slotEl.classList.remove('scale-125');
+          });
+          slotEl.addEventListener('drop', (e) => {
+            e.preventDefault();
+            slotEl.classList.remove('scale-125');
+            const typeId = e.dataTransfer.getData('text/plain');
+            placeChip(slotKey, typeId);
+          });
+
+          slotEl.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            removeChip(slotKey);
+          });
+
+          container.appendChild(slotEl);
+        }
+        SLOTS_DOM_INITIALIZED = true;
+      }
+
+      // 更新每个插槽的位置、可见性与视觉展现
+      for (const [slotKey, slotData] of Object.entries(BOARD_SLOTS)) {
+        const slotEl = document.getElementById(`slot_${slotKey}`);
+        if (!slotEl) continue;
+
+        const pos = getSlotWorldPos(slotData.ringId, slotData.slotIndex);
+        slotEl.style.left = `${pos.x}px`;
+        slotEl.style.top = `${pos.y}px`;
+
+        const hasChip = !!slotData.chip;
+        const isVisible = isSlotVisibleInCurrentFocus(slotData.ringId, hasChip);
+
+        let runeTag = '';
+        if (slotData.ringId === 'polar') runeTag = '探天' + (slotData.slotIndex + 1);
+        else if (slotData.ringId === 'tian') runeTag = BAGUA_NAMES[slotData.slotIndex % 8];
+        else if (slotData.ringId === 'di') runeTag = TIANGAN_NAMES[slotData.slotIndex % 10];
+        else if (slotData.ringId === 'ren') runeTag = YAO_NAMES[slotData.slotIndex % 6];
+        else if (slotData.ringId === 'sub_b_outer') runeTag = `B·外${slotData.slotIndex + 1}`;
+        else if (slotData.ringId === 'sub_b_inner') runeTag = `B·内${slotData.slotIndex + 1}`;
+        else if (slotData.ringId === 'sub_c1') runeTag = `C1·${slotData.slotIndex + 1}`;
+        else if (slotData.ringId === 'sub_c2') runeTag = `C2·${slotData.slotIndex + 1}`;
+        else if (slotData.ringId === 'sub_d') runeTag = `D·${slotData.slotIndex + 1}`;
+
+        if (hasChip) {
+          // 有芯片时：绝对清晰立体的芯片，不遮挡光束，带右键取回提示
+          const spec = CHIP_SPECS[slotData.chip];
+          slotEl.style.display = 'block';
+          slotEl.style.opacity = '1';
+          slotEl.style.pointerEvents = 'auto';
+          slotEl.setAttribute('data-has-chip', 'true');
+          slotEl.innerHTML = `
+            <div class="relative w-full h-full flex items-center justify-center cursor-pointer group scale-105" title="${spec.name} (${spec.tag})\n${spec.buffDesc}\n${spec.stepDesc}\n【右键】取回">
+              <div class="absolute -inset-1 rounded-full border border-sky-400/50 pointer-events-none"></div>
+              <div class="w-8 h-8 ${spec.shape} ${spec.matClass} flex items-center justify-center relative z-10 transition-transform group-hover:scale-110 shadow-md">
+                <i class="fa-solid ${spec.icon} text-xs pointer-events-none"></i>
+              </div>
+              <div class="absolute -bottom-2 -right-2 px-1 rounded bg-slate-900 text-[7px] font-mono-sci text-white font-bold border border-sky-400 shadow-xs z-20">
+                ${runeTag}
+              </div>
+            </div>
+          `;
+        } else {
+          // 空插槽：永远保持显示与可放置状态！
+          slotEl.setAttribute('data-has-chip', 'false');
+          if (isVisible) {
+            // 当前选中的盘体：显示完整的插槽基准孔，方便玩家拖拽放置
+            slotEl.style.display = 'block';
+            slotEl.style.opacity = '1';
+            slotEl.style.pointerEvents = 'auto';
+            slotEl.innerHTML = `
+              <div class="relative w-full h-full flex items-center justify-center group cursor-pointer" title="${slotData.ringId} ${slotData.slotIndex}号插槽 (${runeTag})">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center transition-all bg-white/80 border border-dashed border-sky-400 hover:border-sky-600 hover:bg-sky-50 shadow-xs hover:scale-110">
+                  <div class="w-1.5 h-1.5 rounded-full bg-sky-400"></div>
+                </div>
+                </div>
+                <span class="absolute -bottom-2 px-0.5 rounded bg-white text-[6.5px] font-mono-sci text-slate-600 font-bold border border-slate-300 shadow-xs">${slotData.slotIndex}</span>
+              </div>
+            `;
+          } else {
+            // 未选中的盘体：彻底隐藏空插槽，完全不遮挡光线与步数弧线！
+            slotEl.style.display = 'none';
+            slotEl.style.opacity = '0';
+            slotEl.style.pointerEvents = 'none';
+            slotEl.innerHTML = '';
+          }
+        }
+      }
+    }
+    
+    function placeChip(slotKey, typeId) {
+      if (!CHIP_SPECS[typeId]) return;
+      BOARD_SLOTS[slotKey].chip = typeId;
+      audio.playPlace();
+      renderBoardSlots();
+      solveStepNetwork();
+    }
+
+    function removeChip(slotKey) {
+      if (!BOARD_SLOTS[slotKey].chip) return;
+      BOARD_SLOTS[slotKey].chip = null;
+      audio.playRemove();
+      renderBoardSlots();
+      solveStepNetwork();
+    }
+
+    function updateSubDiscRotation() {
+      const tianAngle = DISK_RINGS.tian ? DISK_RINGS.tian.currentAngle : 0;
+      
+      // 盘 2 (子盘 B，齿比 -1.6x 逆转，以 710, 275 为实际旋转中心)
+      const g2 = document.getElementById('disc2GearGroup');
+      if (g2) {
+        const subBAngle = DISK_RINGS.sub_b_outer ? DISK_RINGS.sub_b_outer.currentAngle : 0;
+        g2.setAttribute('transform', `rotate(${(-tianAngle * 1.6 + subBAngle) % 360} 710 275)`);
+      }
+
+      // 盘 3 (手表表盘 C，以 940, 174 为外壳旋转中心)
+      const g3 = document.getElementById('disc3GearGroup');
+      if (g3) {
+        const subCAngle = DISK_RINGS.sub_c1 ? DISK_RINGS.sub_c1.currentAngle : 0;
+        g3.setAttribute('transform', `rotate(${(tianAngle * 2.4 + subCAngle) % 360} 940 174)`);
+      }
+    }
+
+    function rotateRing(ringId, stepDelta) {
+      const ring = DISK_RINGS[ringId];
+      if (!ring) return;
+
+      const fineStep = (ring.slotCount === 10 || ring.slotCount === 6 || ring.slotCount === 4) ? 0.2 : 0.5;
+      ring.slotOffset = (ring.slotOffset + stepDelta * fineStep + ring.slotCount) % ring.slotCount;
+      const degStep = 360 / ring.slotCount;
+      ring.currentAngle = Number(((ring.slotOffset * degStep) % 360).toFixed(1));
+
+      const degText = document.getElementById(ring.degId);
+      if (degText) degText.textContent = `${ring.currentAngle.toFixed(1)}°`;
+
+      const ringEl = document.getElementById(ring.elId);
+      if (ringEl) ringEl.style.transform = `rotate(${ring.currentAngle}deg)`;
+
+      audio.playRotate();
+      renderBoardSlots();
+      renderFloorBase(true);
+      updateSubDiscRotation();
+      solveStepNetwork();
+    }
+
+    /* =========================================================================
+       6.1 鼠标直接拖拽圆盘旋转 (彻底修复旋转BUG：完全动态拾取实际中心与半径)
+       ========================================================================= */
+    function initRingDirectDragging() {
+      const stage = document.getElementById('diskStage');
+      if (!stage) return;
+      // 滚轮旋转支持：鼠标悬浮在哪个盘上，滚动滚轮即可顺滑旋转该盘！
+      stage.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const rect = stage.getBoundingClientRect();
+        const scale = rect.width / 1440;
+        const mouseX = (e.clientX - rect.left) / scale;
+        const mouseY = (e.clientY - rect.top) / scale;
+
+        let targetRing = null;
+        if (Math.hypot(mouseX - 250, mouseY - 150) <= 45) targetRing = 'polar';
+        else if (Math.hypot(mouseX - 150, mouseY - 600) <= 65) targetRing = 'sub_d';
+        else if (Math.hypot(mouseX - 1210, mouseY - 160) <= 56) {
+          targetRing = Math.hypot(mouseX - 1210, mouseY - 160) <= 32 ? 'sub_c2' : 'sub_c1';
+        } else if (Math.hypot(mouseX - 960, mouseY - 280) <= 95) {
+          targetRing = Math.hypot(mouseX - 960, mouseY - 280) <= 55 ? 'sub_b_inner' : 'sub_b_outer';
+        } else {
+          const distMain = Math.hypot(mouseX - 450, mouseY - 470);
+          if (distMain >= 160 && distMain <= 240) targetRing = 'tian';
+          else if (distMain >= 95 && distMain < 160) targetRing = 'di';
+          else if (distMain >= 35 && distMain < 95) targetRing = 'ren';
+        }
+
+        if (targetRing && DISK_RINGS[targetRing]) {
+          const dir = e.deltaY > 0 ? 1 : -1;
+          const ring = DISK_RINGS[targetRing];
+          const degStep = 360 / ring.slotCount;
+          ring.currentAngle = (ring.currentAngle + dir * (degStep / 2) + 360) % 360;
+          ring.currentAngle = Number(ring.currentAngle.toFixed(1));
+          ring.slotOffset = Number((ring.currentAngle / degStep).toFixed(2));
+          const ringEl = document.getElementById(ring.elId);
+          if (ringEl) ringEl.style.transform = `rotate(${ring.currentAngle}deg)`;
+          renderBoardSlots();
+          renderFloorBase(true);
+          solveStepNetwork();
+          updateSubDiscRotation();
+          if (typeof audio !== 'undefined' && audio.playRotate) audio.playRotate();
+        }
+      }, { passive: false });
+
+
+      let isDragging = false;
+      let activeRingKey = null;
+      let centerDragX = 450;
+      let centerDragY = 470;
+      let startAngle = 0;
+      let ringStartAngle = 0;
+      let hasMoved = false;
+
+      stage.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        if (e.target.closest('.keystone-hub-socket')) return;
+        const clickedSlot = e.target.closest('#slotsLayer > div');
+        // 只有插了芯片的槽位才阻止圆盘拖拽，未插芯片的空槽位点击拖拽同样能平滑旋转圆盘！
+        if (clickedSlot && clickedSlot.getAttribute('data-has-chip') === 'true') return;
+
+        const rect = stage.getBoundingClientRect();
+        const scale = rect.width / 1440;
+        const mouseX = (e.clientX - rect.left) / scale;
+        const mouseY = (e.clientY - rect.top) / scale;
+
+        let focusGroup = 'none';
+
+        // 0. 极轨探天副盘 (中心 250, 150，R=30)
+        if (Math.hypot(mouseX - 250, mouseY - 150) <= 45) {
+          activeRingKey = 'polar';
+          centerDragX = 250;
+          centerDragY = 150;
+          focusGroup = 'none';
+        }
+        // 1. 检查是否点击在盘 4（最左端终端释能盘，中心 150, 600，R=55）
+        else if (Math.hypot(mouseX - 150, mouseY - 600) <= 65) {
+          activeRingKey = 'sub_d';
+          centerDragX = 150;
+          centerDragY = 600;
+          focusGroup = 'sub_d';
+        }
+        // 2. 检查是否点击在手表同心双盘 C (中心 1210, 160，外环 R=48, 内环 R=24)
+        else if (Math.hypot(mouseX - 1210, mouseY - 160) <= 56) {
+          const distC = Math.hypot(mouseX - 1210, mouseY - 160);
+          centerDragX = 1210;
+          centerDragY = 160;
+          activeRingKey = (distC <= 32) ? 'sub_c2' : 'sub_c1';
+          focusGroup = 'sub_c';
+        }
+        // 3. 检查是否点击在动力子盘 B (中心 960, 280，外环 R=80, 内环 R=44)
+        else if (Math.hypot(mouseX - 960, mouseY - 280) <= 95) {
+          const distB = Math.hypot(mouseX - 960, mouseY - 280);
+          centerDragX = 960;
+          centerDragY = 280;
+          activeRingKey = (distB <= 55) ? 'sub_b_inner' : 'sub_b_outer';
+          focusGroup = 'sub_b';
+        }
+        // 4. 检查是否点击在主浑天大盘 A (中心 450, 470)
+        else {
+          const distMain = Math.hypot(mouseX - 450, mouseY - 470);
+          centerDragX = 450;
+          centerDragY = 470;
+          if (distMain >= 160 && distMain <= 240) {
+            activeRingKey = 'tian'; // 天盘 (R=200)
+            focusGroup = 'main';
+          } else if (distMain >= 95 && distMain < 160) {
+            activeRingKey = 'di';   // 地盘 (R=135)
+            focusGroup = 'main';
+          } else if (distMain >= 35 && distMain < 95) {
+            activeRingKey = 'ren';  // 人盘 (R=72)
+            focusGroup = 'main';
+          } else {
+            setFocusedDisc('none');
+            return;
+          }
+        }
+
+        setFocusedDisc(focusGroup);
+
+        isDragging = true;
+        hasMoved = false;
+        startAngle = Math.atan2(mouseY - centerDragY, mouseX - centerDragX) * 180 / Math.PI;
+        ringStartAngle = DISK_RINGS[activeRingKey].currentAngle;
+
+        const onMouseMove = (me) => {
+          if (!isDragging || !activeRingKey) return;
+          hasMoved = true;
+          const curMouseX = (me.clientX - rect.left) / scale;
+          const curMouseY = (me.clientY - rect.top) / scale;
+          const curAngle = Math.atan2(curMouseY - centerDragY, curMouseX - centerDragX) * 180 / Math.PI;
+          let delta = curAngle - startAngle;
+
+          if (delta > 180) delta -= 360;
+          if (delta < -180) delta += 360;
+
+          const ring = DISK_RINGS[activeRingKey];
+          ring.currentAngle = (ringStartAngle + delta + 360) % 360;
+
+          const degStep = 360 / ring.slotCount;
+          ring.slotOffset = Number((ring.currentAngle / degStep).toFixed(2));
+          const degText = document.getElementById(ring.degId);
+          if (degText) degText.textContent = `${ring.currentAngle.toFixed(1)}°`;
+
+          const ringEl = document.getElementById(ring.elId);
+          if (ringEl) ringEl.style.transform = `rotate(${ring.currentAngle}deg)`;
+
+          renderBoardSlots();
+          renderFloorBase(true);
+          solveStepNetwork();
+          updateSubDiscRotation();
+        };
+
+        const onMouseUp = () => {
+          if (isDragging && activeRingKey) {
+            const ring = DISK_RINGS[activeRingKey];
+            const degStep = 360 / ring.slotCount;
+
+            ring.currentAngle = Number(ring.currentAngle.toFixed(1));
+            ring.slotOffset = Number((ring.currentAngle / degStep).toFixed(2));
+
+            const degText = document.getElementById(ring.degId);
+            if (degText) degText.textContent = `${ring.currentAngle.toFixed(1)}°`;
+            const ringEl = document.getElementById(ring.elId);
+            if (ringEl) ringEl.style.transform = `rotate(${ring.currentAngle}deg)`;
+
+            renderBoardSlots();
+            renderFloorBase(true);
+            solveStepNetwork();
+            if (hasMoved) { audio.playRotate();  }
+          }
+          isDragging = false;
+          activeRingKey = null;
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('mouseup', onMouseUp);
+        };
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+      });
+
+      stage.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const rect = stage.getBoundingClientRect();
+        const scale = rect.width / 1440;
+        const mouseX = (e.clientX - rect.left) / scale;
+        const mouseY = (e.clientY - rect.top) / scale;
+        let hoverGroup = null;
+        if (Math.hypot(mouseX - 150, mouseY - 600) <= 75) hoverGroup = 'sub_d';
+        else if (Math.hypot(mouseX - 1210, mouseY - 160) <= 60) hoverGroup = 'sub_c';
+        else if (Math.hypot(mouseX - 960, mouseY - 280) <= 100) hoverGroup = 'sub_b';
+        else if (Math.hypot(mouseX - 450, mouseY - 470) <= 240) hoverGroup = 'main';
+
+        if (hoverGroup && hoverGroup !== FOCUSED_DISC_GROUP) {
+          setFocusedDisc(hoverGroup);
+        }
+      });
+    }
+
+    // 辅助物理函数：自动寻找当前与固定射入方向最贴近的插槽（实现自动找平公差窗口）
+    function getClosestSlotToAngle(ringId, targetWorldAngle, toleranceDeg = 16) {
+      const ring = DISK_RINGS[ringId];
+      if (!ring) return { slotIndex: 0, diff: 999, isAligned: false };
+      let bestSlot = 0;
+      let minDiff = 999;
+      for (let i = 0; i < ring.slotCount; i++) {
+        const baseDeg = -90 + (i * (360 / ring.slotCount));
+        const effDeg = (baseDeg + ring.currentAngle + 720) % 360;
+        let diff = Math.abs(effDeg - targetWorldAngle);
+        if (diff > 180) diff = 360 - diff;
+        if (diff < minDiff) {
+          minDiff = diff;
+          bestSlot = i;
+        }
+      }
+      return {
+        slotIndex: bestSlot,
+        diff: minDiff,
+        isAligned: minDiff <= toleranceDeg
+      };
+    }
+
+    /* =========================================================================
+       7. 核心连线解算系统 (顶层入射 ➔ 阶梯步进 ➔ 三角变轨 ➔ 北斗七星/底板阵脉)
+       ========================================================================= */
+    function solveStepNetwork() {
+      const svgBeams = document.getElementById('svgBeamsGroup');
+      const svgImpacts = document.getElementById('svgImpactsGroup');
+      if (!svgBeams || !svgImpacts) return;
+
+      svgBeams.innerHTML = '';
+      svgImpacts.innerHTML = '';
+
+      const rightEmitterPos = { x: 1380, y: 115 };
+      const centerPosA = { x: 450, y: 470 };
+
+      let totalBuff = {
+        atk: 0, atspd: 0, def: 0, hp: 0, crit: 0,
+        sword_funnel: 0,
+        speed: 0, stamina: 0, flight_battery: 0, inventory: 0,
+        craft_speed: 0, mining_speed: 0, burn_speed: 0, belt_speed: 0,
+        power_cut: 0, pollute_cut: 0
+      };
+
+      const chainNodes = [];
+      const logSteps = [];
+      let crossActivated = false;
+      let hitFloorNodesSet = new Set();
+      let activeKeystones = [];
+
+      // =========================================================================
+      // 1. 始发激光射入：固定物理准直方向 (θ: 345.17°, 射达固定孔径 1256.4, 147.7)
+      // 射入线严格固定于空间几何，由表盘旋转自动找平公差窗口 (±18°)，绝不跟随移动节点拉伸
+      // =========================================================================
+      const C1_PORT_POS = { x: 1256.4, y: 147.7 };
+      drawBeamLine(svgBeams, rightEmitterPos.x, rightEmitterPos.y, C1_PORT_POS.x, C1_PORT_POS.y, 'cyan', true);
+
+      const c1Align = getClosestSlotToAngle('sub_c1', 345.17, 18);
+      const apertureStatusEl = document.getElementById('c1ApertureStatusBadge');
+
+      if (!c1Align.isAligned) {
+        drawImpactSpark(svgImpacts, C1_PORT_POS.x, C1_PORT_POS.y, '#f59e0b', 5);
+        if (apertureStatusEl) {
+          apertureStatusEl.setAttribute('fill', '#f59e0b');
+          apertureStatusEl.textContent = `▲ 待找平 (偏离 ${c1Align.diff.toFixed(1)}°)`;
+        }
+        logSteps.push(`⚡ [始发待找平] 激光沿固定 345.2° 射至表盘 C1 入射孔径，当前偏离 ${c1Align.diff.toFixed(1)}°（未在找平范围 ±18° 内，请转动表盘找平）`);
+        updatePanels([], totalBuff, 0, false, logSteps, hitFloorNodesSet, activeKeystones);
+        return;
+      }
+
+      if (apertureStatusEl) {
+        apertureStatusEl.setAttribute('fill', '#00f0ff');
+        apertureStatusEl.textContent = `● 准直导通 (C1·${c1Align.slotIndex + 1}槽)`;
+      }
+
+      const startSlotPos = getSlotWorldPos('sub_c1', c1Align.slotIndex);
+      drawBeamLine(svgBeams, rightEmitterPos.x, rightEmitterPos.y, startSlotPos.x, startSlotPos.y, 'cyan', true);
+      drawImpactSpark(svgImpacts, startSlotPos.x, startSlotPos.y, '#00f0ff', 5);
+
+      const startSlotKey = `sub_c1_${c1Align.slotIndex}`;
+      const startChipKey = BOARD_SLOTS[startSlotKey] ? BOARD_SLOTS[startSlotKey].chip : null;
+
+      if (!startChipKey) {
+        logSteps.push(`⚡ [始发靶心对齐] 激光对齐手表大盘 C1 第 ${c1Align.slotIndex + 1} 槽（当前为空槽，请安放芯片启动回路）`);
+        updatePanels([], totalBuff, 0, false, logSteps, hitFloorNodesSet, activeKeystones);
+        return;
+      }
+
+      logSteps.push(`⚡ [始发靶心对齐] 激光注入手表外盘 C1 第 ${c1Align.slotIndex + 1} 槽！全阵电路通电！`);
+
+      // =========================================================================
+      // 2. 六大星盘统一拓扑游走引擎
+      // 规则：环内步进 ➔ 三角向心折跃 ➔ 汇聚盘心 ➔ 盘底暗渠 ➔ 外缘准直嘴射向下盘
+      // =========================================================================
+      let currentRing = 'sub_c1';
+      let currentSlotIndex = c1Align.slotIndex;
+      const visitedSteps = new Set();
+      const floorDef = FLOOR_SHAPE_DEFS[CURRENT_FLOOR_SHAPE] || FLOOR_SHAPE_DEFS.dipper;
+
+      for (let stepCount = 0; stepCount < 40; stepCount++) {
+        const slotKey = `${currentRing}_${currentSlotIndex}`;
+        const stepStateKey = `${slotKey}@${stepCount}`;
+        if (visitedSteps.has(stepStateKey)) {
+          logSteps.push(`🌀 回路自激共振：重返节点 [${slotKey}]，触发周天闭环共振！`);
+          crossActivated = true;
+          break;
+        }
+        visitedSteps.add(stepStateKey);
+
+        const currentSlotData = BOARD_SLOTS[slotKey];
+        const chipKey = currentSlotData ? currentSlotData.chip : null;
+        if (!chipKey) {
+          logSteps.push(`🛑 [电路阻断] 信号到达【${DISK_RINGS[currentRing].name}】第 ${currentSlotIndex + 1} 槽（空置），光流自然消散。`);
+          break;
+        }
+
+        const chipSpec = CHIP_SPECS[chipKey];
+        if (!chipSpec) break;
+
+        const currentPos = getSlotWorldPos(currentRing, currentSlotIndex);
+        chainNodes.push({ ring: currentRing, slot: currentSlotIndex, chipKey, spec: chipSpec, x: currentPos.x, y: currentPos.y });
+
+        // 检查当前插槽物理坐标是否对齐底盘固定印记 (公差 <= 24px)
+        let nodeMult = 1.0;
+        if (floorDef && floorDef.nodes) {
+          const matchedFloorNode = floorDef.nodes.find(fn => Math.hypot(currentPos.x - fn.x, currentPos.y - fn.y) <= 24);
+          if (matchedFloorNode) {
+            hitFloorNodesSet.add(matchedFloorNode.id);
+            nodeMult = floorDef.mult || 2.5;
+            logSteps.push(`✦ [${chipSpec.name}] 物理对齐底盘固定阵眼【${matchedFloorNode.name}】享 ${nodeMult.toFixed(1)}x 加成！`);
+          }
+        }
+
+        // 累加构件基础增益
+        if (chipSpec.buff) {
+          Object.entries(chipSpec.buff).forEach(([prop, val]) => {
+            const added = (prop === 'sword_funnel' || prop === 'inventory') ? val : Math.round(val * nodeMult);
+            totalBuff[prop] = (totalBuff[prop] || 0) + added;
+          });
+        }
+
+        // -------------------------------------------------------------------------
+        // 分支 A: 三角向心变轨 (严格向心折射，绝不跨角拉折线)
+        // -------------------------------------------------------------------------
+        if (chipSpec.type === 'shift_in') {
+          const curRingMeta = DISK_RINGS[currentRing];
+          const cx = curRingMeta.cx;
+          const cy = curRingMeta.cy;
+          const radAngle = (currentPos.angleDeg * Math.PI) / 180;
+          const cosA = Math.cos(radAngle);
+          const sinA = Math.sin(radAngle);
+
+          // ---------------------------------------------------------------------
+          // 情形 1：手表盘 C1 ➔ 径向向心折射 ➔ 穿入手表内圈 C2 (R=24)
+          // ---------------------------------------------------------------------
+          if (currentRing === 'sub_c1') {
+            const innerR = DISK_RINGS.sub_c2 ? DISK_RINGS.sub_c2.radius : 24;
+            const targetX = cx + innerR * cosA;
+            const targetY = cy + innerR * sinA;
+
+            drawBeamLine(svgBeams, currentPos.x, currentPos.y, targetX, targetY, 'rose', true);
+
+            const c2Align = getClosestSlotToAngle('sub_c2', currentPos.angleDeg, 18);
+            if (!c2Align.isAligned) {
+              drawImpactSpark(svgImpacts, targetX, targetY, '#f59e0b', 5);
+              logSteps.push(`⚡ [表盘向心待找平] 表盘 C1 三角折射沿径向朝内发射，射达内盘 C2，但插槽偏离 ${c2Align.diff.toFixed(1)}°（请转动内盘对齐）`);
+              break;
+            }
+
+            drawImpactSpark(svgImpacts, targetX, targetY, '#00f0ff', 5);
+            logSteps.push(`▲ [向心内折对齐] 表盘 C1 三角折射 ➔ 准直注入【手表内盘 C2】第 ${c2Align.slotIndex + 1} 槽！`);
+            currentRing = 'sub_c2';
+            currentSlotIndex = c2Align.slotIndex;
+            continue;
+          }
+          // ---------------------------------------------------------------------
+          // 情形 2：手表小盘 C2 ➔ 向心射入【表盘 C 辰光调频核 (1210, 160)】➔ 盘底暗渠 ➔ 准直出射嘴 (1166.7, 180.8) ➔ 动力盘 B
+          // ---------------------------------------------------------------------
+          else if (currentRing === 'sub_c2') {
+            const hubC = { x: 1210, y: 160 };
+            drawBeamLine(svgBeams, currentPos.x, currentPos.y, hubC.x, hubC.y, 'rose', true);
+            drawImpactSpark(svgImpacts, hubC.x, hubC.y, '#0284c7', 5);
+
+            const ksC = KEYSTONE_TRAITS[KEYSTONE_SLOTS.disc_c];
+            if (ksC) {
+              activeKeystones.push({ disc: 'disc_c', meta: DISC_KEYSTONE_META.disc_c, ks: ksC });
+              logSteps.push(`👑 [辰光核位激发] 表盘光流向心折入中心核！激活元印【${ksC.name}】！`);
+              if (ksC.buff) Object.entries(ksC.buff).forEach(([p, v]) => { totalBuff[p] = (totalBuff[p] || 0) + v; });
+            } else {
+              logSteps.push('⚡ [辰光轴心导通] 光束汇聚于调频轴核（空置插槽），导向盘外缘准直出射嘴！');
+            }
+
+            // 盘底暗渠：从中心到外缘准直嘴 (1166.7, 180.8)
+            const C_EXIT_NOZZLE = { x: 1166.7, y: 180.8 };
+            drawBeamLine(svgBeams, hubC.x, hubC.y, C_EXIT_NOZZLE.x, C_EXIT_NOZZLE.y, 'gold', false);
+
+            // 外部纯净激光：从 C 出射嘴发射跨越空隙 ➔ 动力盘 B 入口靶心 (1032.1, 245.4)
+            const B_ENTRY_APT = { x: 1032.1, y: 245.4 };
+            drawBeamLine(svgBeams, C_EXIT_NOZZLE.x, C_EXIT_NOZZLE.y, B_ENTRY_APT.x, B_ENTRY_APT.y, 'cyan', true);
+
+            const bAlign = getClosestSlotToAngle('sub_b_outer', 334.36, 18);
+            if (!bAlign.isAligned) {
+              drawImpactSpark(svgImpacts, B_ENTRY_APT.x, B_ENTRY_APT.y, '#f59e0b', 5);
+              logSteps.push(`⚡ [动力盘待找平] 准直光束射达动力盘 B 入口孔径 (334.4°)，当前偏离 ${bAlign.diff.toFixed(1)}°（未在找平范围 ±18° 内，请转动动力盘找平）`);
+              break;
+            }
+
+            drawImpactSpark(svgImpacts, B_ENTRY_APT.x, B_ENTRY_APT.y, '#0284c7', 5);
+            logSteps.push(`⚡ [准直跨盘注入] 表盘出射嘴 ➔ 注入【动力子盘 B 外环】第 ${bAlign.slotIndex + 1} 槽！`);
+            currentRing = 'sub_b_outer';
+            currentSlotIndex = bAlign.slotIndex;
+            continue;
+          }
+          // ---------------------------------------------------------------------
+          // 情形 3：动力盘 B 外环 ➔ 径向向心发射 ➔ 穿入动力盘 B 内环 (R=44)
+          // ---------------------------------------------------------------------
+          else if (currentRing === 'sub_b_outer') {
+            const innerR = DISK_RINGS.sub_b_inner ? DISK_RINGS.sub_b_inner.radius : 44;
+            const targetX = cx + innerR * cosA;
+            const targetY = cy + innerR * sinA;
+
+            drawBeamLine(svgBeams, currentPos.x, currentPos.y, targetX, targetY, 'rose', true);
+
+            const bInnerAlign = getClosestSlotToAngle('sub_b_inner', currentPos.angleDeg, 18);
+            if (!bInnerAlign.isAligned) {
+              drawImpactSpark(svgImpacts, targetX, targetY, '#f59e0b', 5);
+              logSteps.push(`⚡ [动力内环待找平] 子盘 B 外环三角变轨朝内发射射线，射达内环，但插槽偏离 ${bInnerAlign.diff.toFixed(1)}°（请转动动力内盘对齐）`);
+              break;
+            }
+
+            drawImpactSpark(svgImpacts, targetX, targetY, '#00f0ff', 5);
+            logSteps.push(`▲ [向心内折对齐] 子盘 B 外环三角变轨 ➔ 准直注入【子盘 B 内环】第 ${bInnerAlign.slotIndex + 1} 槽！`);
+            currentRing = 'sub_b_inner';
+            currentSlotIndex = bInnerAlign.slotIndex;
+            continue;
+          }
+          // ---------------------------------------------------------------------
+          // 情形 4：动力盘 B 内环 ➔ 向心汇聚【动力核 (960, 280)】➔ 盘底暗渠 ➔ 出射嘴 (884.9, 307.7) ➔ 中元聚光透镜 (735, 363) ➔ 主盘 A
+          // ---------------------------------------------------------------------
+          else if (currentRing === 'sub_b_inner') {
+            const hubB = { x: 960, y: 280 };
+            drawBeamLine(svgBeams, currentPos.x, currentPos.y, hubB.x, hubB.y, 'rose', true);
+            drawImpactSpark(svgImpacts, hubB.x, hubB.y, '#0284c7', 5);
+
+            const ksB = KEYSTONE_TRAITS[KEYSTONE_SLOTS.disc_b];
+            if (ksB) {
+              activeKeystones.push({ disc: 'disc_b', meta: DISC_KEYSTONE_META.disc_b, ks: ksB });
+              logSteps.push(`👑 [动力核位激发] 机械动力向心汇入轴心！激活元印【${ksB.name}】！`);
+              if (ksB.buff) Object.entries(ksB.buff).forEach(([p, v]) => { totalBuff[p] = (totalBuff[p] || 0) + v; });
+            } else {
+              logSteps.push('▲ [向心汇聚] 子盘 B 光流向心汇聚于机械轴心动力核（空置插槽）');
+            }
+
+            // 动力盘暗渠：轴心到外缘准直出射嘴 (884.9, 307.7)
+            const B_EXIT_NOZZLE = { x: 884.9, y: 307.7 };
+            drawBeamLine(svgBeams, hubB.x, hubB.y, B_EXIT_NOZZLE.x, B_EXIT_NOZZLE.y, 'gold', false);
+
+            // 外部纯净激光：从动力盘出射嘴跨越 125px 开阔间隙 ➔ 射向太虚中元透镜入口靶心 (766.9, 351.2)
+            const NEXUS_ENTRY = { x: 766.9, y: 351.2 };
+            const NEXUS_CORE = { x: 735, y: 363 };
+            const NEXUS_EXIT = { x: 703.2, y: 375.0 };
+
+            drawBeamLine(svgBeams, B_EXIT_NOZZLE.x, B_EXIT_NOZZLE.y, NEXUS_ENTRY.x, NEXUS_ENTRY.y, 'cyan', true);
+            drawImpactSpark(svgImpacts, NEXUS_ENTRY.x, NEXUS_ENTRY.y, '#10b981', 4);
+
+            // 穿透中元透镜内部 (受光 ➔ 晶核 ➔ 出射嘴)
+            drawBeamLine(svgBeams, NEXUS_ENTRY.x, NEXUS_ENTRY.y, NEXUS_CORE.x, NEXUS_CORE.y, 'cyan', true);
+            drawBeamLine(svgBeams, NEXUS_CORE.x, NEXUS_CORE.y, NEXUS_EXIT.x, NEXUS_EXIT.y, 'cyan', true);
+            drawImpactSpark(svgImpacts, NEXUS_CORE.x, NEXUS_CORE.y, '#10b981', 6);
+
+            const ksE = KEYSTONE_TRAITS[KEYSTONE_SLOTS.disc_e];
+            if (ksE) {
+              activeKeystones.push({ disc: 'disc_e', meta: DISC_KEYSTONE_META.disc_e, ks: ksE });
+              logSteps.push(`👑 [太虚中元激发] 光流贯通中置悬浮特质透镜！激活核心元印【${ksE.name}】！`);
+              if (ksE.buff) Object.entries(ksE.buff).forEach(([p, v]) => { totalBuff[p] = (totalBuff[p] || 0) + v; });
+            } else {
+              logSteps.push('✨ [中元透镜聚光] 光流穿透中元悬浮透镜，光斑凝聚准直！');
+            }
+
+            // 从中元透镜出射嘴跨越 70px 开阔空隙 ➔ 射向主浑天盘固定孔径 (637.2, 399.7)
+            const TIAN_ENTRY_APT = { x: 637.2, y: 399.7 };
+            drawBeamLine(svgBeams, NEXUS_EXIT.x, NEXUS_EXIT.y, TIAN_ENTRY_APT.x, TIAN_ENTRY_APT.y, 'cyan', true);
+
+            const tianAlign = getClosestSlotToAngle('tian', 339.42, 18);
+            if (!tianAlign.isAligned) {
+              drawImpactSpark(svgImpacts, TIAN_ENTRY_APT.x, TIAN_ENTRY_APT.y, '#f59e0b', 5);
+              logSteps.push(`⚡ [主天盘待找平] 准直光束射达主天环入口 (339.4°)，当前偏离 ${tianAlign.diff.toFixed(1)}°（未在找平范围 ±18° 内，请转动天盘找平）`);
+              break;
+            }
+
+            drawImpactSpark(svgImpacts, TIAN_ENTRY_APT.x, TIAN_ENTRY_APT.y, '#e11d48', 5);
+            logSteps.push(`⚡ [准直跨盘注入] 穿透悬浮环对准入口 ➔ 注入【主浑天天盘】第 ${tianAlign.slotIndex + 1} 槽！`);
+            currentRing = 'tian';
+            currentSlotIndex = tianAlign.slotIndex;
+            continue;
+          }
+          // ---------------------------------------------------------------------
+          // 情形 5：主浑天天盘 ➔ 径向向心发射 ➔ 穿入地盘 (R=135)
+          // ---------------------------------------------------------------------
+          else if (currentRing === 'tian') {
+            const innerR = DISK_RINGS.di ? DISK_RINGS.di.radius : 135;
+            const targetX = cx + innerR * cosA;
+            const targetY = cy + innerR * sinA;
+
+            drawBeamLine(svgBeams, currentPos.x, currentPos.y, targetX, targetY, 'rose', true);
+
+            const diAlign = getClosestSlotToAngle('di', currentPos.angleDeg, 18);
+            if (!diAlign.isAligned) {
+              drawImpactSpark(svgImpacts, targetX, targetY, '#f59e0b', 5);
+              logSteps.push(`⚡ [主地盘待找平] 天盘三角折射沿径向朝内发射，射达地盘内沿，但插槽偏离 ${diAlign.diff.toFixed(1)}°（请旋转地盘对齐）`);
+              break;
+            }
+
+            drawImpactSpark(svgImpacts, targetX, targetY, '#00f0ff', 5);
+            logSteps.push(`▲ [向心内折对齐] 天盘三角折射 ➔ 准直注入【主盘地盘】第 ${diAlign.slotIndex + 1} 槽！`);
+            currentRing = 'di';
+            currentSlotIndex = diAlign.slotIndex;
+            continue;
+          }
+          // ---------------------------------------------------------------------
+          // 情形 6：主浑天地盘 ➔ 径向向心发射 ➔ 穿入人盘 (R=72)
+          // ---------------------------------------------------------------------
+          else if (currentRing === 'di') {
+            const innerR = DISK_RINGS.ren ? DISK_RINGS.ren.radius : 72;
+            const targetX = cx + innerR * cosA;
+            const targetY = cy + innerR * sinA;
+
+            drawBeamLine(svgBeams, currentPos.x, currentPos.y, targetX, targetY, 'rose', true);
+
+            const renAlign = getClosestSlotToAngle('ren', currentPos.angleDeg, 18);
+            if (!renAlign.isAligned) {
+              drawImpactSpark(svgImpacts, targetX, targetY, '#f59e0b', 5);
+              logSteps.push(`⚡ [主人盘待找平] 地盘三角折射沿径向朝内发射，射达人盘内沿，但插槽偏离 ${renAlign.diff.toFixed(1)}°（请旋转人盘对齐）`);
+              break;
+            }
+
+            drawImpactSpark(svgImpacts, targetX, targetY, '#00f0ff', 5);
+            logSteps.push(`▲ [向心内折对齐] 地盘三角折射 ➔ 准直注入【主盘人盘】第 ${renAlign.slotIndex + 1} 槽！`);
+            currentRing = 'ren';
+            currentSlotIndex = renAlign.slotIndex;
+            continue;
+          }
+          // ---------------------------------------------------------------------
+          // 情形 7：主浑天人盘 ➔ 向心汇聚入【天枢主极核 (450, 470)】➔ 双路分支：
+          //         支路 1: 盘底暗渠 ➔ 出射嘴 (266.5, 549.5) ➔ 终端盘 D (150, 600)
+          //         支路 2: 盘底暗渠 ➔ 极轨出射嘴 (344.0, 300.4) ➔ 极轨探天副盘 (250, 150)
+          // ---------------------------------------------------------------------
+          else if (currentRing === 'ren') {
+            drawBeamLine(svgBeams, currentPos.x, currentPos.y, centerPosA.x, centerPosA.y, 'gold', true);
+            drawImpactSpark(svgImpacts, centerPosA.x, centerPosA.y, '#fbbf24', 7);
+
+            const ksA = KEYSTONE_TRAITS[KEYSTONE_SLOTS.disc_a];
+            if (ksA) {
+              activeKeystones.push({ disc: 'disc_a', meta: DISC_KEYSTONE_META.disc_a, ks: ksA });
+              logSteps.push(`👑 [天枢主极激发] 人盘光束向心直贯天枢极核！激活元印【${ksA.name}】！`);
+              if (ksA.buff) Object.entries(ksA.buff).forEach(([p, v]) => { totalBuff[p] = (totalBuff[p] || 0) + v; });
+            } else {
+              logSteps.push('⚡ [天枢主极导通] 人盘光流穿透天枢极核（空置插槽），极核分路高能喷薄！');
+            }
+
+            // ================= 支路 2：极轨探天副盘上行光束 =================
+            const A_POLAR_NOZZLE = { x: 344.0, y: 300.4 };
+            const POLAR_ENTRY_APT = { x: 265.9, y: 175.4 };
+            // 主盘底暗渠至极轨嘴
+            drawBeamLine(svgBeams, centerPosA.x, centerPosA.y, A_POLAR_NOZZLE.x, A_POLAR_NOZZLE.y, 'gold', false);
+            // 外部纯净上行激光
+            drawBeamLine(svgBeams, A_POLAR_NOZZLE.x, A_POLAR_NOZZLE.y, POLAR_ENTRY_APT.x, POLAR_ENTRY_APT.y, 'cyan', true);
+
+            const polarAlign = getClosestSlotToAngle('polar', 57.99, 18);
+            if (polarAlign.isAligned) {
+              drawImpactSpark(svgImpacts, POLAR_ENTRY_APT.x, POLAR_ENTRY_APT.y, '#00f0ff', 4.5);
+              logSteps.push(`🛰️ [极轨天眼导通] 极核分路高能注入【极轨探天副盘】第 ${polarAlign.slotIndex + 1} 槽！`);
+              
+              // 解算极轨副盘内部 3 槽游走
+              let pSlot = polarAlign.slotIndex;
+              for (let pStep = 0; pStep < 6; pStep++) {
+                const pSlotKey = `polar_${pSlot}`;
+                const pSlotData = BOARD_SLOTS[pSlotKey];
+                if (!pSlotData || !pSlotData.chip) break;
+                const pSpec = CHIP_SPECS[pSlotData.chip];
+                if (!pSpec) break;
+
+                const pPos = getSlotWorldPos('polar', pSlot);
+                chainNodes.push({ ring: 'polar', slot: pSlot, chipKey: pSlotData.chip, spec: pSpec, x: pPos.x, y: pPos.y });
+                if (pSpec.buff) {
+                  Object.entries(pSpec.buff).forEach(([prop, val]) => {
+                    const added = (prop === 'sword_funnel' || prop === 'inventory') ? val : Math.round(val * nodeMult);
+                    totalBuff[prop] = (totalBuff[prop] || 0) + added;
+                  });
+                }
+
+                if (pSpec.type === 'shift_in') {
+                  // 向心射入极轨灵瞳中心 (250, 150) ➔ 射向天眼透镜 (205, 105)
+                  drawBeamLine(svgBeams, pPos.x, pPos.y, 250, 150, 'rose', true);
+                  drawBeamLine(svgBeams, 250, 150, 205, 105, 'hyper', true);
+                  drawImpactSpark(svgImpacts, 205, 105, '#00f0ff', 6);
+                  totalBuff.sword_funnel = (totalBuff.sword_funnel || 0) + 1;
+                  totalBuff.crit = (totalBuff.crit || 0) + 20;
+                  logSteps.push('👁️ 【极轨天眼灵瞳全开】探天副盘回路闭环！激活【极轨天眼】+1 飞剑巡航与全图灵视透视！');
+                  break;
+                } else {
+                  const pNext = (pSlot + pSpec.step) % 3;
+                  drawRingArc(svgBeams, 'polar', pSlot, pNext, 'gold');
+                  pSlot = pNext;
+                }
+              }
+            } else {
+              drawImpactSpark(svgImpacts, POLAR_ENTRY_APT.x, POLAR_ENTRY_APT.y, '#f59e0b', 4);
+              logSteps.push(`⚡ [极轨待找平] 上行光束射达极轨副盘入口，偏离 ${polarAlign.diff.toFixed(1)}°（转动极轨盘即可接通天眼回路）`);
+            }
+
+            // ================= 支路 1：终极释能盘 D 主出射光束 =================
+            const A_EXIT_NOZZLE = { x: 266.5, y: 549.5 };
+            const D_ENTRY_APT = { x: 200.5, y: 578.1 };
+            // 主盘底暗渠至出射嘴
+            drawBeamLine(svgBeams, centerPosA.x, centerPosA.y, A_EXIT_NOZZLE.x, A_EXIT_NOZZLE.y, 'gold', false);
+            // 外部纯净高能主激光
+            drawBeamLine(svgBeams, A_EXIT_NOZZLE.x, A_EXIT_NOZZLE.y, D_ENTRY_APT.x, D_ENTRY_APT.y, 'cyan', true);
+
+            const dAlign = getClosestSlotToAngle('sub_d', 336.57, 18);
+            if (!dAlign.isAligned) {
+              drawImpactSpark(svgImpacts, D_ENTRY_APT.x, D_ENTRY_APT.y, '#f59e0b', 5);
+              logSteps.push(`⚡ [终端盘待找平] 极核主光束射达终端盘 D 入口孔径 (336.6°)，当前偏离 ${dAlign.diff.toFixed(1)}°（未在找平范围 ±18° 内，请转动终端盘）`);
+              break;
+            }
+
+            drawImpactSpark(svgImpacts, D_ENTRY_APT.x, D_ENTRY_APT.y, '#0284c7', 5);
+            logSteps.push(`🌌 [极核高能喷薄] 天枢极核对准入口 ➔ 注入【盘 D 释能终端】第 ${dAlign.slotIndex + 1} 槽！`);
+            currentRing = 'sub_d';
+            currentSlotIndex = dAlign.slotIndex;
+            continue;
+          }
+          // ---------------------------------------------------------------------
+          // 情形 8：终端释能盘 D ➔ 向心汇聚入【盘 D 虚空释能核 (150, 600)】完成终极大闭环！
+          // ---------------------------------------------------------------------
+          else if (currentRing === 'sub_d') {
+            const hubD = { x: 150, y: 600 };
+            drawBeamLine(svgBeams, currentPos.x, currentPos.y, hubD.x, hubD.y, 'gold', true);
+            drawImpactSpark(svgImpacts, hubD.x, hubD.y, '#00f0ff', 6);
+
+            const ksD = KEYSTONE_TRAITS[KEYSTONE_SLOTS.disc_d];
+            if (ksD) {
+              activeKeystones.push({ disc: 'disc_d', meta: DISC_KEYSTONE_META.disc_d, ks: ksD });
+              logSteps.push(`👑 [终末释能激发] 终端盘光流向心汇入释能核！激活元印【${ksD.name}】！`);
+              if (ksD.buff) Object.entries(ksD.buff).forEach(([p, v]) => { totalBuff[p] = (totalBuff[p] || 0) + v; });
+            } else {
+              logSteps.push('🏁 【虚空释能大圆满】能量汇聚入盘 D 虚空释能核（空置插槽）！');
+            }
+            crossActivated = true;
+            break;
+          } else {
+            break;
+          }
+        }
+        // -------------------------------------------------------------------------
+        // 分支 B: 阶梯步进构件 (同圈顺延)
+        // -------------------------------------------------------------------------
+        else {
+          const ringMeta = DISK_RINGS[currentRing];
+          const nextSlotIndex = (currentSlotIndex + chipSpec.step) % ringMeta.slotCount;
+          const targetPos = getSlotWorldPos(currentRing, nextSlotIndex);
+
+          drawRingArc(svgBeams, currentRing, currentSlotIndex, nextSlotIndex, 'gold');
+          drawImpactSpark(svgImpacts, targetPos.x, targetPos.y, '#0f172a', 4.5);
+          logSteps.push(`➔ [${chipSpec.name}] 在【${ringMeta.name}】步进 +${chipSpec.step} ➔ 第 ${nextSlotIndex + 1} 槽`);
+          currentSlotIndex = nextSlotIndex;
+        }
+      }
+
+      // -------------------------------------------------------------------------
+      // 星象全满足倍率计算：满足当前底盘星象的所有插槽（如北斗七星7槽全满），全属性 ×1.2
+      // -------------------------------------------------------------------------
+      const totalConstellationSlots = (floorDef && floorDef.nodes) ? floorDef.nodes.length : 7;
+      const isConstellationAllSatisfied = hitFloorNodesSet.size >= totalConstellationSlots;
+      const constellationMultiplier = isConstellationAllSatisfied ? 1.2 : 1.0;
+
+      if (isConstellationAllSatisfied) {
+        logSteps.push(`👑 【星象全满】满足${floorDef.name}全部 ${totalConstellationSlots} 处星象插槽！触发全属性 ×1.2 倍加成！`);
+        Object.keys(totalBuff).forEach(k => {
+          if (k !== 'sword_funnel' && k !== 'inventory') {
+            totalBuff[k] = Math.round(totalBuff[k] * 1.2);
+          }
+        });
+      }
+
+      updatePanels(chainNodes, totalBuff, constellationMultiplier, crossActivated, logSteps, hitFloorNodesSet, activeKeystones);
+
+    }
+    function findClosestInnerSlot(fromRing, fromSlot, toRing) {
+      const fromPos = getSlotWorldPos(fromRing, fromSlot);
+      const toRingMeta = DISK_RINGS[toRing];
+      let bestSlot = -1;
+      let minAngleDiff = 999999;
+
+      for (let i = 0; i < toRingMeta.slotCount; i++) {
+        const toPos = getSlotWorldPos(toRing, i);
+        let diff = Math.abs(toPos.angleDeg - fromPos.angleDeg);
+        if (diff > 180) diff = 360 - diff;
+        if (diff < minAngleDiff) {
+          minAngleDiff = diff;
+          bestSlot = i;
+        }
+      }
+
+      if (minAngleDiff > 7.5) {
+        return { slotIndex: bestSlot, aligned: false, angleDiff: minAngleDiff };
+      }
+      return { slotIndex: bestSlot, aligned: true, angleDiff: minAngleDiff };
+    }
+
+    function getCrossSide(x, y) {
+      const dx = x - 340;
+      const dy = y - 320;
+      if (Math.abs(dx) > Math.abs(dy)) {
+        return dx > 0 ? 'right' : 'left';
+      } else {
+        return dy > 0 ? 'bottom' : 'top';
+      }
+    }
+
+    /* =========================================================================
+       8. SVG 精密工程绘制辅助
+       ========================================================================= */
+    function drawBeamLine(svgGroup, x1, y1, x2, y2, colorType = 'cyan', showArrow = true) {
+      // 底层细光晕
+      const bloomLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      bloomLine.setAttribute('x1', x1);
+      bloomLine.setAttribute('y1', y1);
+      bloomLine.setAttribute('x2', x2);
+      bloomLine.setAttribute('y2', y2);
+      bloomLine.setAttribute('stroke-width', '3');
+      bloomLine.setAttribute('opacity', '0.25');
+
+      // 顶层实体工程墨线
+      const coreLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      coreLine.setAttribute('x1', x1);
+      coreLine.setAttribute('y1', y1);
+      coreLine.setAttribute('x2', x2);
+      coreLine.setAttribute('y2', y2);
+      coreLine.setAttribute('stroke-width', '1.6');
+
+      if (colorType === 'hyper') {
+        bloomLine.setAttribute('stroke', '#00f0ff');
+        bloomLine.setAttribute('stroke-width', '6');
+        bloomLine.setAttribute('opacity', '0.6');
+        bloomLine.setAttribute('filter', 'url(#beamGlow)');
+        coreLine.setAttribute('stroke', '#0284c7');
+        coreLine.setAttribute('stroke-width', '2.8');
+        coreLine.setAttribute('stroke-dasharray', '8 4');
+        if (showArrow) coreLine.setAttribute('marker-end', 'url(#arrowhead-blue)');
+      } else if (colorType === 'slingshot') {
+        bloomLine.setAttribute('stroke', '#f59e0b');
+        bloomLine.setAttribute('stroke-width', '5');
+        bloomLine.setAttribute('opacity', '0.5');
+        coreLine.setAttribute('stroke', '#d97706');
+        coreLine.setAttribute('stroke-width', '2.5');
+        coreLine.setAttribute('stroke-dasharray', '6 3');
+        if (showArrow) coreLine.setAttribute('marker-end', 'url(#arrowhead)');
+      } else if (colorType === 'gold') {
+        bloomLine.setAttribute('stroke', '#0f172a');
+        coreLine.setAttribute('stroke', '#0f172a');
+        if (showArrow) coreLine.setAttribute('marker-end', 'url(#arrowhead)');
+      } else if (colorType === 'rose') {
+        bloomLine.setAttribute('stroke', '#e11d48');
+        coreLine.setAttribute('stroke', '#be123c');
+        if (showArrow) coreLine.setAttribute('marker-end', 'url(#arrowhead-blue)');
+      } else {
+        bloomLine.setAttribute('stroke', '#0284c7');
+        coreLine.setAttribute('stroke', '#0284c7');
+        if (showArrow) coreLine.setAttribute('marker-end', 'url(#arrowhead-blue)');
+      }
+
+      svgGroup.appendChild(bloomLine);
+      svgGroup.appendChild(coreLine);
+    }
+
+    function drawRingArc(svgGroup, ringId, fromSlot, toSlot, colorType = 'cyan') {
+      const ring = DISK_RINGS[ringId];
+      if (!ring) return;
+      const startPos = getSlotWorldPos(ringId, fromSlot);
+      const endPos = getSlotWorldPos(ringId, toSlot);
+
+      const slotStep = (toSlot - fromSlot + ring.slotCount) % ring.slotCount;
+      const arcDeg = slotStep * (360 / ring.slotCount);
+      const largeArc = arcDeg > 180 ? 1 : 0;
+
+      const pathData = `M ${startPos.x} ${startPos.y} A ${ring.radius} ${ring.radius} 0 ${largeArc} 1 ${endPos.x} ${endPos.y}`;
+
+      // ✦ 1. 高亮外层耀目碧青光晕 (极强辨识度，彻底消除发黑清淡感) ✦
+      const glowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      glowPath.setAttribute('d', pathData);
+      glowPath.setAttribute('fill', 'none');
+      glowPath.setAttribute('stroke', '#00f0ff');
+      glowPath.setAttribute('stroke-width', '4.5');
+      glowPath.setAttribute('stroke-linecap', 'round');
+      glowPath.setAttribute('opacity', '0.85');
+      glowPath.setAttribute('style', 'filter: drop-shadow(0 0 6px #00f0ff);');
+      svgGroup.appendChild(glowPath);
+
+      // ✦ 2. 内层高能量核心光束 (炽青能量动效) ✦
+      const corePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      corePath.setAttribute('d', pathData);
+      corePath.setAttribute('fill', 'none');
+      corePath.setAttribute('stroke', '#0284c7');
+      corePath.setAttribute('stroke-width', '2.2');
+      corePath.setAttribute('stroke-linecap', 'round');
+      corePath.setAttribute('stroke-dasharray', '8 4');
+      corePath.setAttribute('marker-end', 'url(#arrowhead-blue)');
+      svgGroup.appendChild(corePath);
+
+      // ✦ 3. 步数轨迹浮动气泡 (+N 步数醒目标识，让玩家一眼看懂跳了几格) ✦
+      const startDeg = ((-90 + fromSlot * (360 / ring.slotCount) + ring.currentAngle + 360) % 360);
+      const midDeg = (startDeg + arcDeg / 2) * Math.PI / 180;
+      const midX = ring.cx + ring.radius * Math.cos(midDeg);
+      const midY = ring.cy + ring.radius * Math.sin(midDeg);
+
+      const badgeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      badgeGroup.innerHTML = `
+        <circle cx="${midX}" cy="${midY}" r="7.5" fill="#020617" stroke="#00f0ff" stroke-width="1.5" />
+        <text x="${midX}" y="${midY + 3}" font-family="'Share Tech Mono', monospace" font-size="8" font-weight="black" fill="#00f0ff" text-anchor="middle">+${slotStep}</text>
+      `;
+      svgGroup.appendChild(badgeGroup);
+    }
+    
+    function drawImpactSpark(svgGroup, x, y, color = '#0f172a', r = 4.5) {
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', x);
+      circle.setAttribute('cy', y);
+      circle.setAttribute('r', r);
+      circle.setAttribute('fill', '#0f172a');
+      circle.setAttribute('stroke', '#ffffff');
+      circle.setAttribute('stroke-width', '1.8');
+      svgGroup.appendChild(circle);
+    }
+
+    /* =========================================================================
+       8.9 底板基准系统 (北斗七星阵 / 天衡T字 / 雷劫Z字 / 四象方环)
+       ========================================================================= */
+    let CURRENT_FLOOR_SHAPE = 'dipper';
+
+    // ✦ 真正有意义的底板：所有底板全部由实际盘面插槽节点网络连线构成 (类似北斗七星连线) ✦
+    const FLOOR_SHAPE_DEFS = {
+      // 1. 【北斗七星天衡阵】(7星道门至尊法身：天枢贪狼、天璇巨门、天玑禄存、天权文曲、玉衡廉贞、开阳武曲、摇光破军)
+      dipper: {
+        name: '北斗七星天衡阵',
+        desc: '道门七星君真符印刻：7 大星宿各具专属图腾、色系与神道法则。全阵芯片对准即享 2.5x 狂暴星宿加成！',
+        mult: 2.5,
+        nodes: [
+          { id: 'dipper_1', num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe', x: 367, y: 652, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram', title: '斗魁首将 / 暴击攻速', desc: '暴击+30%, 攻速+25%' },
+          { id: 'dipper_2', num: 'Ⅱ', name: '天璇·巨门', en: 'Merak', x: 587, y: 616, color: '#0284c7', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress', title: '天阙重门 / 金汤防御', desc: '防御+400, 气血+800' },
+          { id: 'dipper_3', num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda', x: 506, y: 347, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '司禄司财 / 天工宝鼎', desc: '采矿+50%, 冶炼+40%' },
+          { id: 'dipper_4', num: 'Ⅳ', name: '天权·文曲', en: 'Megrez', x: 637, y: 400, bx: 642, by: 412, color: '#6366f1', bg: '#eef2ff', border: '#4f46e5', shape: 'hexagram', title: '文曲星主 / 灵枢天卷', desc: '制造速度+60%, 能耗-30%' },
+          { id: 'dipper_5', num: 'Ⅴ', name: '玉衡·廉贞', en: 'Alioth', x: 885, y: 254, color: '#a855f7', bg: '#faf5ff', border: '#9333ea', shape: 'diamond', title: '司衡折转 / 极光紫霓', desc: '跨盘折射折跃倍率+50%' },
+          { id: 'dipper_6', num: 'Ⅵ', name: '开阳·武曲', en: 'Mizar', x: 1032, y: 245, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'sunburst', title: '战神司命 / 烈阳金戈', desc: '全局攻击+35%, 破甲+20%' },
+          { id: 'dipper_7', num: 'Ⅶ', name: '摇光·破军', en: 'Alkaid', x: 1256, y: 148, color: '#0891b2', bg: '#ecfeff', border: '#0e7490', shape: 'trident', title: '斗柄天梢 / 万剑极北', desc: '巡航飞剑+2把, 飞剑穿透+40%' }
+        ]
+      },
+
+      // 2. 【南斗六司延寿阵】(南斗主生：司命天府、司禄天梁、延寿天机、益算天同、度厄天相、上生七杀)
+      southern_dipper: {
+        name: '南斗六司延寿阵',
+        desc: '道书云“南斗注生，北斗注死”：南斗六司执掌宗门寿元气血与渡劫金身。芯片覆盖享 2.4x 生生不息气血长生加成！',
+        mult: 2.4,
+        nodes: [
+          { id: 'sd_1', num: '南Ⅰ', name: '司命·天府', en: 'Life Sovereign', x: 450, y: 670, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'lotus', title: '第一天府司命星君', desc: '气血+1200, 移速+20%' },
+          { id: 'sd_2', num: '南Ⅱ', name: '司禄·天梁', en: 'Wealth Beam', x: 367, y: 652, color: '#0ea5e9', bg: '#f0f9ff', border: '#0284c7', shape: 'triquetra', title: '第二天梁司禄星君', desc: '宗门灵石产出+80%' },
+          { id: 'sd_3', num: '南Ⅲ', name: '延寿·天机', en: 'Longevity Pivot', x: 315, y: 470, color: '#06b6d4', bg: '#ecfeff', border: '#0891b2', shape: 'diamond', title: '第三天机延寿星君', desc: '飞剑电池上限+150%' },
+          { id: 'sd_4', num: '南Ⅳ', name: '益算·天同', en: 'Calculation Core', x: 492, y: 529, color: '#8b5cf6', bg: '#faf5ff', border: '#7c3aed', shape: 'hexagram', title: '第四天同益算星君', desc: '工厂研发与制造速度+70%' },
+          { id: 'sd_5', num: '南Ⅴ', name: '度厄·天相', en: 'Calamity Warden', x: 201, y: 578, color: '#f59e0b', bg: '#fffbeb', border: '#d97706', shape: 'fortress', title: '第五天相度厄星君', desc: '渡劫免死护盾+1层, 防御+500' },
+          { id: 'sd_6', num: '南Ⅵ', name: '上生·七杀', en: 'Ascension Killer', x: 100, y: 622, color: '#ef4444', bg: '#fef2f2', border: '#b91c1c', shape: 'octagram', title: '第六七杀上生星君', desc: '飞剑巡航+2把, 飞剑攻击+60%' }
+        ]
+      },
+
+      // 3. 【紫微帝垣万剑阵】(三垣之首紫微帝座：紫微帝星、勾陈大帝、太乙太微、北极四辅、探天灵瞳)
+      ziwei: {
+        name: '紫微帝垣万剑阵',
+        desc: '天阙至尊紫微大帝本命星垣：统御周天万象。围绕天枢极核与极轨探天副盘形成至尊法域，享 3.0x 万剑归宗帝王倍率！',
+        mult: 3.0,
+        nodes: [
+          { id: 'zw_1', num: '帝垣', name: '紫微·帝星', en: 'Polaris Emperor', x: 450, y: 470, color: '#fbbf24', bg: '#fffbeb', border: '#b45309', shape: 'sunburst', title: '中天紫微北极大帝', desc: '万剑归宗！巡航飞剑+3把' },
+          { id: 'zw_2', num: '勾陈', name: '勾陈·上宫', en: 'Gouchen Sovereign', x: 480, y: 404, color: '#a855f7', bg: '#faf5ff', border: '#7e22ce', shape: 'diamond', title: '勾陈上宫天皇大帝', desc: '全局破甲穿透+50%' },
+          { id: 'zw_3', num: '天乙', name: '天乙·神皇', en: 'Tianyi Minister', x: 506, y: 347, color: '#38bdf8', bg: '#f0f9ff', border: '#0284c7', shape: 'hexagram', title: '紫微左辅天乙星官', desc: '制造速度+80%' },
+          { id: 'zw_4', num: '太乙', name: '太乙·玄机', en: 'Taiyi Mystery', x: 492, y: 529, color: '#34d399', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '紫微右弼太乙星官', desc: '传送带速度+50%' },
+          { id: 'zw_5', num: '东辅', name: '北极·青极', en: 'Azure Flank', x: 637, y: 400, color: '#06b6d4', bg: '#ecfeff', border: '#0891b2', shape: 'fortress', title: '天垣东四辅正极', desc: '采矿速度+60%' },
+          { id: 'zw_6', num: '西辅', name: '北极·白极', en: 'White Flank', x: 266, y: 550, color: '#94a3b8', bg: '#f8fafc', border: '#475569', shape: 'fortress', title: '天垣西四辅正极', desc: '全阵防御+600' },
+          { id: 'zw_7', num: '探天', name: '灵瞳·天眼', en: 'Polar Eye Star', x: 250, y: 150, color: '#38bdf8', bg: '#f0f9ff', border: '#0284c7', shape: 'octagram', title: '极轨探天副盘灵瞳', desc: '全图灵视开雾, 暴击+30%' },
+          { id: 'zw_8', num: '辰光', name: '辰光·司晨', en: 'Chrono Nexus', x: 1210, y: 160, color: '#f59e0b', bg: '#fffbeb', border: '#d97706', shape: 'sunburst', title: '手表双盘调频总纲', desc: '周天循环加速+40%' }
+        ]
+      },
+
+      // 4. 【二十八宿四象天灵阵】(青龙、白虎、朱雀、玄武四大守护星神)
+      four_symbols: {
+        name: '二十八宿四象阵',
+        desc: '苍龙、白虎、朱雀、玄武四象灵穴锁住四方天机。重合四极享 2.2x 四象相生聚灵工厂加速！',
+        mult: 2.2,
+        nodes: [
+          { id: 'fs_1', num: '东方', name: '青龙·角亢', en: 'Azure Dragon', x: 650, y: 470, color: '#10b981', bg: '#ecfdf5', border: '#047857', shape: 'dragon', title: '东方七宿青龙首', desc: '生机勃发：采矿速度+80%' },
+          { id: 'fs_2', num: '南方', name: '朱雀·井鬼', en: 'Vermilion Bird', x: 450, y: 670, color: '#ef4444', bg: '#fef2f2', border: '#b91c1c', shape: 'flame', title: '南方七宿朱雀首', desc: '离火熔炉：冶炼制造+80%' },
+          { id: 'fs_3', num: '西方', name: '白虎·奎娄', en: 'White Tiger', x: 250, y: 470, color: '#0ea5e9', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress', title: '西方七宿白虎首', desc: '庚金剑气：攻击力+50%' },
+          { id: 'fs_4', num: '北方', name: '玄武·斗牛', en: 'Black Tortoise', x: 450, y: 270, color: '#0f172a', bg: '#f8fafc', border: '#334155', shape: 'turtle', title: '北方七宿玄武首', desc: '玄冥重甲：防御+800' },
+          { id: 'fs_5', num: '动力', name: '苍龙·翼宿', en: 'Dragon Wing', x: 1032, y: 245, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '动力盘龙翼灵穴', desc: '传送带速度+60%' },
+          { id: 'fs_6', num: '探天', name: '白虎·觜宿', en: 'Tiger Fang', x: 250, y: 150, color: '#38bdf8', bg: '#f0f9ff', border: '#0284c7', shape: 'octagram', title: '极轨探天虎灵穴', desc: '全图探测, 飞剑+1把' },
+          { id: 'fs_7', num: '终末', name: '玄武·危宿', en: 'Tortoise Shell', x: 150, y: 600, color: '#8b5cf6', bg: '#faf5ff', border: '#7c3aed', shape: 'diamond', title: '释能终端玄武壳', desc: '虚空地线污染-80%' }
+        ]
+      },
+
+      // 5. 【九曜行天日月轮】(日宫太阳、月宫太阴、金木水火土五星曜)
+      nine_luminaries: {
+        name: '九曜行天日月轮',
+        desc: '太阳太阴与五星经天纬地：阴阳交泰、五行轮转。重合九曜享 2.6x 阴阳调和与五行灵液激增！',
+        mult: 2.6,
+        nodes: [
+          { id: 'nl_1', num: '大阳', name: '日宫·太阳', en: 'Solar Luminary', x: 960, y: 280, color: '#f59e0b', bg: '#fffbeb', border: '#d97706', shape: 'sunburst', title: '动力轴心大日光辉', desc: '灵能超频, 飞剑攻击+40%' },
+          { id: 'nl_2', num: '太阴', name: '月宫·太阴', en: 'Lunar Luminary', x: 1210, y: 160, color: '#38bdf8', bg: '#f0f9ff', border: '#0284c7', shape: 'diamond', title: '手表盘心清辉皓月', desc: '能耗降低-40%' },
+          { id: 'nl_3', num: '岁星', name: '岁星·木德', en: 'Jupiter Wood', x: 587, y: 616, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '东方岁星灵植生发', desc: '采矿速度+50%' },
+          { id: 'nl_4', num: '荧惑', name: '荧惑·火德', en: 'Mars Fire', x: 492, y: 529, color: '#ef4444', bg: '#fef2f2', border: '#b91c1c', shape: 'flame', title: '南方荧惑战煞三昧', desc: '暴击+35%, 攻速+25%' },
+          { id: 'nl_5', num: '镇星', name: '镇星·土德', en: 'Saturn Earth', x: 450, y: 470, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'fortress', title: '中宫镇星固若金汤', desc: '气血+1000, 防御+500' },
+          { id: 'nl_6', num: '太白', name: '太白·金德', en: 'Venus Metal', x: 266, y: 550, color: '#64748b', bg: '#f8fafc', border: '#334155', shape: 'octagram', title: '西方太白主杀万剑', desc: '巡航飞剑+2把' },
+          { id: 'nl_7', num: '辰星', name: '辰星·水德', en: 'Mercury Water', x: 450, y: 335, color: '#06b6d4', bg: '#ecfeff', border: '#0891b2', shape: 'hexagram', title: '北方辰星智深通玄', desc: '制造速度+50%' }
+        ]
+      },
+
+      // 6. 【天罡三十六雷劫阵】(九天应元雷声普化天尊雷劫矩阵)
+      thunder_matrix: {
+        name: '天罡雷劫破虚阵',
+        desc: '引九天紫霄神雷淬体炼器：渡劫飞升、过载爆发。重合雷印享 2.8x 狂暴过载与致命斩杀！',
+        mult: 2.8,
+        nodes: [
+          { id: 'tm_1', num: '天雷', name: '初阳·破天雷', en: 'Lightning 1', x: 1256, y: 148, color: '#38bdf8', bg: '#f0f9ff', border: '#0284c7', shape: 'lightning', title: '始发初引青雷', desc: '攻速+30%' },
+          { id: 'tm_2', num: '神雷', name: '玉枢·轰电劫', en: 'Lightning 2', x: 1032, y: 245, color: '#818cf8', bg: '#eef2ff', border: '#4f46e5', shape: 'lightning', title: '动力盘玉枢雷印', desc: '能量爆发+50%' },
+          { id: 'tm_3', num: '劫心', name: '中元·渡劫枢', en: 'Lightning Nexus', x: 735, y: 363, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'lotus', title: '中元悬浮透镜雷劫眼', desc: '渡劫免死护盾+1' },
+          { id: 'tm_4', num: '紫霄', name: '紫霄·九霄雷', en: 'Lightning 3', x: 637, y: 400, color: '#c084fc', bg: '#faf5ff', border: '#9333ea', shape: 'lightning', title: '浑天主天环紫霄极雷', desc: '全阵暴击+40%' },
+          { id: 'tm_5', num: '破虚', name: '天枢·诛仙劫', en: 'Lightning Core', x: 450, y: 470, color: '#f43f5e', bg: '#fff1f2', border: '#e11d48', shape: 'sunburst', title: '主极核诛仙大天劫', desc: '攻击力+80%, 破甲+40%' },
+          { id: 'tm_6', num: '归墟', name: '归墟·散雷霆', en: 'Lightning End', x: 201, y: 578, color: '#a855f7', bg: '#faf5ff', border: '#7e22ce', shape: 'trident', title: '终端释能地线雷池', desc: '全盘电耗-60%' }
+        ]
+      }
+    };
+    function renderFloorBase(isActive = false, hitSet = null) {
+      const svg = document.getElementById('floorSvgLayer');
+      if (!svg) return;
+
+      const shapeDef = FLOOR_SHAPE_DEFS[CURRENT_FLOOR_SHAPE] || FLOOR_SHAPE_DEFS.dipper;
+
+      // 辅助函数：根据每个星宿的专属形制渲染专属 SVG 图腾印记
+      function renderStarGlyph(node, isAligned) {
+        const c = isAligned ? node.color : '#475569';
+        const fill = isAligned ? node.color : 'none';
+        const fillOpacity = isAligned ? '0.2' : '0';
+        const strokeW = isAligned ? '2' : '1.3';
+        const x = node.x;
+        const y = node.y;
+
+        switch (node.shape) {
+          // 8. 混沌青莲印 (Lotus)
+          case 'lotus': {
+            return `
+              <circle cx="${x}" cy="${y}" r="12" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+              <path d="M ${x} ${y-12} Q ${x-7} ${y-2} ${x} ${y+8} Q ${x+7} ${y-2} ${x} ${y-12} Z" fill="${c}" fill-opacity="0.3" stroke="${c}" stroke-width="1.2" />
+              <circle cx="${x}" cy="${y}" r="3.5" fill="${isAligned ? node.color : '#ffffff'}" />
+            `;
+          }
+          // 9. 青龙真元印 (Dragon)
+          case 'dragon': {
+            return `
+              <circle cx="${x}" cy="${y}" r="13" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" stroke-dasharray="3 2" />
+              <path d="M ${x-9} ${y+5} C ${x-5} ${y-10}, ${x+5} ${y+10}, ${x+9} ${y-5}" fill="none" stroke="${c}" stroke-width="1.8" />
+              <circle cx="${x}" cy="${y}" r="3.5" fill="${isAligned ? node.color : '#ffffff'}" />
+            `;
+          }
+          // 10. 朱雀神火印 (Flame)
+          case 'flame': {
+            return `
+              <circle cx="${x}" cy="${y}" r="12" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+              <path d="M ${x} ${y-14} Q ${x+8} ${y-3} ${x+5} ${y+8} Q ${x} ${y+12} ${x-5} ${y+8} Q ${x-8} ${y-3} ${x} ${y-14} Z" fill="${fill}" fill-opacity="0.4" stroke="${c}" stroke-width="1.4" />
+              <circle cx="${x}" cy="${y+3}" r="3" fill="${isAligned ? node.color : '#ffffff'}" />
+            `;
+          }
+          // 11. 玄武金甲印 (Turtle)
+          case 'turtle': {
+            return `
+              <rect x="${x-12}" y="${y-12}" width="24" height="24" rx="6" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+              <polygon points="${x},${y-8} ${x+7},${y-4} ${x+7},${y+4} ${x},${y+8} ${x-7},${y+4} ${x-7},${y-4}" fill="none" stroke="${c}" stroke-width="1.2" stroke-dasharray="2 1" />
+              <circle cx="${x}" cy="${y}" r="3" fill="${isAligned ? node.color : '#ffffff'}" />
+            `;
+          }
+          // 12. 紫霄雷印 (Lightning)
+          case 'lightning': {
+            return `
+              <circle cx="${x}" cy="${y}" r="12" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+              <polygon points="${x-2},${y-12} ${x+4},${y-3} ${x},${y-3} ${x+2},${y+12} ${x-4},${y+2} ${x},${y+2}" fill="${c}" />
+            `;
+          }
+          // 1. 天枢·贪狼：八角战星轮 (Octagram)
+          case 'octagram': {
+            return `
+              <rect x="${x - 12}" y="${y - 12}" width="24" height="24" rx="2" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+              <rect x="${x - 12}" y="${y - 12}" width="24" height="24" rx="2" fill="none" stroke="${c}" stroke-width="${strokeW}" transform="rotate(45 ${x} ${y})" />
+              <circle cx="${x}" cy="${y}" r="4" fill="${isAligned ? node.color : '#ffffff'}" stroke="${c}" stroke-width="1.5" />
+            `;
+          }
+          // 2. 天璇·巨门：四极金阙重门印 (Quad Fortress Gate)
+          case 'fortress': {
+            return `
+              <rect x="${x - 13}" y="${y - 13}" width="26" height="26" rx="1" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+              <rect x="${x - 8}" y="${y - 8}" width="16" height="16" fill="none" stroke="${c}" stroke-width="1.2" stroke-dasharray="2 2" />
+              <line x1="${x - 13}" y1="${y}" x2="${x + 13}" y2="${y}" stroke="${c}" stroke-width="1.2" />
+              <line x1="${x}" y1="${y - 13}" x2="${x}" y2="${y + 13}" stroke="${c}" stroke-width="1.2" />
+              <circle cx="${x}" cy="${y}" r="3" fill="${isAligned ? node.color : '#ffffff'}" />
+            `;
+          }
+          // 3. 天玑·禄存：三足生机宝鼎印 (Triquetra Trefoil)
+          case 'triquetra': {
+            return `
+              <circle cx="${x}" cy="${y - 7}" r="9" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+              <circle cx="${x - 6}" cy="${y + 4}" r="9" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+              <circle cx="${x + 6}" cy="${y + 4}" r="9" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+              <circle cx="${x}" cy="${y}" r="3.5" fill="${isAligned ? node.color : '#ffffff'}" stroke="${c}" stroke-width="1.4" />
+            `;
+          }
+          // 4. 天权·文曲：六芒灵枢天符印 (Hexagram Star)
+          case 'hexagram': {
+            return `
+              <polygon points="${x},${y-13} ${x+11},${y+7} ${x-11},${y+7}" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+              <polygon points="${x},${y+13} ${x+11},${y-7} ${x-11},${y-7}" fill="none" stroke="${c}" stroke-width="${strokeW}" />
+              <circle cx="${x}" cy="${y}" r="4" fill="${isAligned ? node.color : '#ffffff'}" stroke="${c}" stroke-width="1.4" />
+            `;
+          }
+          // 5. 玉衡·廉贞：司天准衡双菱印 (Diamond Rhombus Balance)
+          case 'diamond': {
+            return `
+              <polygon points="${x},${y-15} ${x+13},${y} ${x},${y+15} ${x-13},${y}" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+              <polygon points="${x},${y-9} ${x+8},${y} ${x},${y+9} ${x-8},${y}" fill="none" stroke="${c}" stroke-width="1" stroke-dasharray="2 2" />
+              <line x1="${x - 17}" y1="${y}" x2="${x + 17}" y2="${y}" stroke="${c}" stroke-width="1.4" />
+              <circle cx="${x}" cy="${y}" r="3.5" fill="${isAligned ? node.color : '#ffffff'}" />
+            `;
+          }
+          // 6. 开阳·武曲：日轮金戈齿轮印 (Sunburst Gear)
+          case 'sunburst': {
+            return `
+              <circle cx="${x}" cy="${y}" r="13" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" stroke-dasharray="4 2" />
+              <line x1="${x-16}" y1="${y}" x2="${x+16}" y2="${y}" stroke="${c}" stroke-width="1.6" />
+              <line x1="${x}" y1="${y-16}" x2="${x}" y2="${y+16}" stroke="${c}" stroke-width="1.6" />
+              <line x1="${x-11}" y1="${y-11}" x2="${x+11}" y2="${y+11}" stroke="${c}" stroke-width="1.2" />
+              <line x1="${x+11}" y1="${y-11}" x2="${x-11}" y2="${y+11}" stroke="${c}" stroke-width="1.2" />
+              <circle cx="${x}" cy="${y}" r="5" fill="${isAligned ? node.color : '#ffffff'}" stroke="${c}" stroke-width="1.5" />
+            `;
+          }
+          // 7. 摇光·破军：三尖破军战矛印 (Trident Comet Spear)
+          case 'trident': {
+            return `
+              <line x1="${x}" y1="${y - 17}" x2="${x}" y2="${y + 14}" stroke="${c}" stroke-width="2" />
+              <line x1="${x - 12}" y1="${y - 8}" x2="${x}" y2="${y + 10}" stroke="${c}" stroke-width="1.4" />
+              <line x1="${x + 12}" y1="${y - 8}" x2="${x}" y2="${y + 10}" stroke="${c}" stroke-width="1.4" />
+              <polygon points="${x},${y-18} ${x-4},${y-10} ${x+4},${y-10}" fill="${c}" />
+              <circle cx="${x}" cy="${y}" r="4" fill="${isAligned ? node.color : '#ffffff'}" stroke="${c}" stroke-width="1.5" />
+            `;
+          }
+          default: {
+            return `
+              <circle cx="${x}" cy="${y}" r="12" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+              <circle cx="${x}" cy="${y}" r="4" fill="${isAligned ? '#00f0ff' : '#ffffff'}" stroke="${c}" stroke-width="1.5" />
+            `;
+          }
+        }
+      }
+
+      let nodesHtml = '';
+      if (shapeDef.nodes) {
+        shapeDef.nodes.forEach(node => {
+          let isAligned = (hitSet && hitSet.has(node.id));
+
+          if (!isAligned) {
+            const allRings = ['sub_c1', 'sub_c2', 'sub_b_outer', 'sub_b_inner', 'tian', 'di', 'ren', 'sub_d', 'polar'];
+            for (const rId of allRings) {
+              const rMeta = DISK_RINGS[rId];
+              if (!rMeta) continue;
+              for (let sIdx = 0; sIdx < rMeta.slotCount; sIdx++) {
+                const p = getSlotWorldPos(rId, sIdx);
+                const dist = Math.hypot(p.x - node.x, p.y - node.y);
+                if (dist <= 22) {
+                  const sKey = `${rId}_${sIdx}`;
+                  if (BOARD_SLOTS[sKey] && BOARD_SLOTS[sKey].chip) {
+                    isAligned = true;
+                    break;
+                  }
+                }
+              }
+              if (isAligned) break;
+            }
+          }
+
+          const nodeColor = node.color || (isAligned ? '#00f0ff' : '#0f172a');
+          const badgeBg = isAligned ? '#0f172a' : (node.bg || '#ffffff');
+          const borderCol = isAligned ? nodeColor : (node.border || '#cbd5e1');
+          const textCol = isAligned ? nodeColor : '#1e293b';
+          const auraClass = isAligned ? 'animate-pulse' : '';
+
+          const badgeX = node.bx !== undefined ? node.bx : node.x + 15;
+          const badgeY = node.by !== undefined ? node.by : node.y - 15;
+
+          nodesHtml += `
+            <g class="${auraClass}">
+              <!-- 阵宿专属图腾轮廓 -->
+              ${renderStarGlyph(node, isAligned)}
+              
+              <!-- 醒目星宿身份铭牌 (包含罗马数码序号、真名、道门司命法则) -->
+              <rect x="${badgeX}" y="${badgeY}" width="${node.name.length * 9 + 36}" height="17" rx="3" 
+                    fill="${badgeBg}" stroke="${borderCol}" stroke-width="${isAligned ? '1.5' : '0.9'}" opacity="0.96" />
+              <text x="${badgeX + 4}" y="${badgeY + 12}" font-family="'Noto Sans SC', sans-serif" font-weight="900" font-size="8.5" fill="${textCol}">
+                ${node.num ? node.num + ' ' : ''}${node.name}
+              </text>
+              ${isAligned 
+                ? `<text x="${badgeX + 1}" y="${badgeY + 29}" font-family="'Share Tech Mono', monospace" font-size="7.5" fill="${nodeColor}" font-weight="bold">● ALIGNED (${node.desc || 'ACTIVE'})</text>`
+                : `<text x="${badgeX + 1}" y="${badgeY + 27}" font-family="'Share Tech Mono', monospace" font-size="6.5" fill="#64748b">${node.title || node.en}</text>`
+              }
+            </g>
+          `;
+        });
+      }
+
+      svg.innerHTML = `
+        <!-- 底盘固定印记徽章群 (纯固定矩阵，无连线) -->
+        <g id="floorActiveNodesGroup">${nodesHtml}</g>
+        <!-- 底板名称与加成倍率水印 -->
+        
+      `;
+    }
+
+    function switchFloorShape(shapeKey) {
+      if (!FLOOR_SHAPE_DEFS[shapeKey]) return;
+      CURRENT_FLOOR_SHAPE = shapeKey;
+      ['dipper', 'southern_dipper', 'ziwei', 'four_symbols', 'nine_luminaries', 'thunder_matrix'].forEach(key => {
+        const btn = document.getElementById(`btn_shape_${key}`);
+        if (!btn) return;
+        if (key === shapeKey) {
+          btn.className = 'px-2 py-1 rounded bg-slate-900 border border-slate-900 text-white text-[11px] font-bold font-mono-sci shadow-xs';
+        } else {
+          btn.className = 'px-2 py-1 rounded bg-white border border-slate-300 hover:border-slate-800 text-slate-700 text-[11px] font-bold font-mono-sci';
+        }
+      });
+      renderFloorBase(true);
+      solveStepNetwork();
+    }
+    
+    function updatePanels(chainNodes, totalBuff, constellationMultiplier, isCrossActive, logSteps, hitStarsSet = new Set(), activeKeystones = []) {
+      const rightTag = document.getElementById('rightChainStatusTag');
+      const countPill = document.getElementById('statActiveCountPill');
+
+      if (countPill) countPill.textContent = `${chainNodes.length} 个构件生效`;
+
+      const floorDef = FLOOR_SHAPE_DEFS[CURRENT_FLOOR_SHAPE] || FLOOR_SHAPE_DEFS.dipper;
+      const totalConstellationSlots = (floorDef && floorDef.nodes) ? floorDef.nodes.length : 7;
+      const isAllSatisfied = hitStarsSet.size >= totalConstellationSlots;
+
+      // 更新星象加成卡片
+      const badgeEl = document.getElementById('constellationBadge');
+      const titleEl = document.getElementById('constellationTitle');
+      const hintEl = document.getElementById('constellationHint');
+      const iconEl = document.getElementById('constellationIcon');
+      const boxEl = document.getElementById('constellationStatusBox');
+      const pillEl = document.getElementById('constellationMultPill');
+
+      if (badgeEl) badgeEl.textContent = floorDef.name;
+      if (titleEl) titleEl.textContent = `星象插槽：${hitStarsSet.size} / ${totalConstellationSlots}`;
+
+      if (isAllSatisfied) {
+        if (iconEl) iconEl.textContent = '👑';
+        if (hintEl) {
+          hintEl.textContent = '已满足全部星象插槽！全属性生效 ×1.2';
+          hintEl.className = 'text-[10px] text-emerald-600 font-bold';
+        }
+        if (boxEl) boxEl.className = 'p-2.5 rounded-lg bg-emerald-50 border border-emerald-300 text-xs font-mono-sci flex items-center justify-between';
+        if (pillEl) {
+          pillEl.textContent = 'x1.2';
+          pillEl.className = 'text-xs font-black font-mono-sci px-2 py-1 rounded bg-emerald-600 text-white shadow-xs';
+        }
+        if (rightTag) {
+          rightTag.textContent = '星象圆满 (x1.2)';
+          rightTag.className = 'text-[9.5px] px-2 py-0.5 rounded bg-emerald-600 text-white font-mono-sci font-bold';
+        }
+      } else {
+        if (iconEl) iconEl.textContent = '○';
+        if (hintEl) {
+          const remain = totalConstellationSlots - hitStarsSet.size;
+          hintEl.textContent = `还差 ${remain} 处，全部满足后触发全属性 ×1.2`;
+          hintEl.className = 'text-[10px] text-slate-500';
+        }
+        if (boxEl) boxEl.className = 'p-2.5 rounded-lg bg-white border border-slate-200 text-xs font-mono-sci flex items-center justify-between';
+        if (pillEl) {
+          pillEl.textContent = 'x1.0';
+          pillEl.className = 'text-xs font-black font-mono-sci px-2 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200';
+        }
+        if (rightTag) {
+          rightTag.textContent = chainNodes.length > 0 ? '流转中' : '等待连线';
+          rightTag.className = 'text-[9.5px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 font-mono-sci font-bold';
+        }
+      }
+
+      // 更新盘面 4 个核位的激活光晕
+      Object.keys(DISC_KEYSTONE_META).forEach(dKey => {
+        const isAct = activeKeystones.some(item => item.disc === dKey);
+        const coreEl = document.getElementById(dKey === 'disc_a' ? 'crossCenterCore' : `crossCenterCore_${dKey}`);
+        if (coreEl) {
+          if (isAct) {
+            coreEl.classList.add('ring-4', 'ring-amber-400/50', 'shadow-amber-500/50');
+          } else {
+            coreEl.classList.remove('ring-4', 'ring-amber-400/50', 'shadow-amber-500/50');
+          }
+        }
+      });
+
+      // 更新直白的 12 种属性数值
+      const setVal = (id, val, prefix = '+', suffix = '%') => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val > 0 ? `${prefix}${val}${suffix}` : `0${suffix}`;
+      };
+
+      // 工业生产
+      setVal('statMineVal', totalBuff.mining_speed);
+      setVal('statCraftVal', totalBuff.craft_speed);
+      setVal('statBeltVal', totalBuff.belt_speed);
+      setVal('statPowerVal', totalBuff.power_cut, '-');
+
+      // 飞剑战伐
+      setVal('statAtkVal', totalBuff.atk);
+      setVal('statAtspdVal', totalBuff.atspd);
+      setVal('statCritVal', totalBuff.crit);
+      const funnelEl = document.getElementById('statSwordFunnelVal');
+      if (funnelEl) funnelEl.textContent = totalBuff.sword_funnel > 0 ? `+${totalBuff.sword_funnel} 把` : '0 把';
+
+      // 防御身法
+      setVal('statDefVal', totalBuff.def);
+      setVal('statHpVal', totalBuff.hp);
+      setVal('statSpeedVal', totalBuff.speed);
+      setVal('statInventoryVal', totalBuff.inventory, '+', ' 格');
+
+      // 详细执行流
+      const logBox = document.getElementById('stepLogList');
+      if (logBox) {
+        logBox.innerHTML = logSteps.length > 0
+          ? logSteps.map(s => `<p class="border-b border-slate-100 pb-1">${s}</p>`).join('')
+          : '<p class="text-slate-400 italic">尚未连接，请转动圆盘对齐始发激光。</p>';
+      }
+    }
+
+    function loadScenario(type) {
+      initBoardSlots();
+
+      DISK_RINGS.tian.slotOffset = 0;
+      DISK_RINGS.tian.currentAngle = 0;
+      DISK_RINGS.di.slotOffset = 0;
+      DISK_RINGS.di.currentAngle = 0;
+      DISK_RINGS.ren.slotOffset = 0;
+      DISK_RINGS.ren.currentAngle = 0;
+      if (DISK_RINGS.sub_b_outer) { DISK_RINGS.sub_b_outer.slotOffset = 0; DISK_RINGS.sub_b_outer.currentAngle = 0; }
+      if (DISK_RINGS.sub_b_inner) { DISK_RINGS.sub_b_inner.slotOffset = 0; DISK_RINGS.sub_b_inner.currentAngle = 0; }
+      if (DISK_RINGS.sub_c1) { DISK_RINGS.sub_c1.slotOffset = 0; DISK_RINGS.sub_c1.currentAngle = 0; }
+      if (DISK_RINGS.sub_c2) { DISK_RINGS.sub_c2.slotOffset = 0; DISK_RINGS.sub_c2.currentAngle = 0; }
+      if (DISK_RINGS.sub_d) { DISK_RINGS.sub_d.slotOffset = 0; DISK_RINGS.sub_d.currentAngle = 0; }
+      if (DISK_RINGS.polar) { DISK_RINGS.polar.slotOffset = 0; DISK_RINGS.polar.currentAngle = 0; }
+
+      if (type === 'multi_disc_overdrive') {
+        switchFloorShape('dipper');
+
+        // 各盘转角初始置于精确准直孔径找平角度
+        DISK_RINGS.polar.currentAngle = 28.0;
+        DISK_RINGS.sub_c1.currentAngle = 15.2;
+        DISK_RINGS.sub_c2.currentAngle = 45.2;
+        DISK_RINGS.sub_b_outer.currentAngle = 19.4;
+        DISK_RINGS.sub_b_inner.currentAngle = 19.4;
+        DISK_RINGS.tian.currentAngle = 24.4;
+        DISK_RINGS.di.currentAngle = 24.4;
+        DISK_RINGS.ren.currentAngle = 24.4;
+        DISK_RINGS.sub_d.currentAngle = 6.6;
+
+        if (document.getElementById('deg_polar')) document.getElementById('deg_polar').textContent = '28.0°';
+        if (document.getElementById('deg_sub_c')) document.getElementById('deg_sub_c').textContent = '15.2°';
+        if (document.getElementById('deg_sub_b')) document.getElementById('deg_sub_b').textContent = '19.4°';
+        if (document.getElementById('deg_tian')) document.getElementById('deg_tian').textContent = '24.4°';
+        if (document.getElementById('deg_di')) document.getElementById('deg_di').textContent = '24.4°';
+        if (document.getElementById('deg_ren')) document.getElementById('deg_ren').textContent = '24.4°';
+        if (document.getElementById('deg_sub_d')) document.getElementById('deg_sub_d').textContent = '6.6°';
+
+        if (document.getElementById('ringPolarEl')) document.getElementById('ringPolarEl').style.transform = 'rotate(28deg)';
+        if (document.getElementById('ringSubC1El')) document.getElementById('ringSubC1El').style.transform = 'rotate(15.2deg)';
+        if (document.getElementById('ringSubC2El')) document.getElementById('ringSubC2El').style.transform = 'rotate(45.2deg)';
+        if (document.getElementById('ringSubBOuterEl')) document.getElementById('ringSubBOuterEl').style.transform = 'rotate(19.4deg)';
+        if (document.getElementById('ringSubBInnerEl')) document.getElementById('ringSubBInnerEl').style.transform = 'rotate(19.4deg)';
+        if (document.getElementById('ringTianEl')) document.getElementById('ringTianEl').style.transform = 'rotate(24.4deg)';
+        if (document.getElementById('ringDiEl')) document.getElementById('ringDiEl').style.transform = 'rotate(24.4deg)';
+        if (document.getElementById('ringRenEl')) document.getElementById('ringRenEl').style.transform = 'rotate(24.4deg)';
+        if (document.getElementById('ringSubDEl')) document.getElementById('ringSubDEl').style.transform = 'rotate(6.6deg)';
+
+        // 👑 严谨物理光路全域闭环工况：
+        // 0. 【极轨探天副盘 (POLAR)】(slot 1 接收入射光)：微步御剑规 (+5%攻击，1 ➔ 2 槽) ➔ 微步天工规 (+5%制造，2 ➔ 0 槽) ➔ 变轨规向心贯通天眼透镜！
+        if (BOARD_SLOTS['polar_1']) BOARD_SLOTS['polar_1'].chip = 't0_atk_1';
+        if (BOARD_SLOTS['polar_2']) BOARD_SLOTS['polar_2'].chip = 't0_craft_1';
+        if (BOARD_SLOTS['polar_0']) BOARD_SLOTS['polar_0'].chip = 'chip_triangle_in';
+
+        // 1. 【手表外盘 C1】(slot 1 接收入射光，重合摇光星！)：采矿规 进2 (+8%采矿，1 ➔ 3 槽)
+        if (BOARD_SLOTS['sub_c1_1']) BOARD_SLOTS['sub_c1_1'].chip = 't0_mine_2';
+        // 2. 【手表外盘 C1】(slot 3)：疾风攻速规 进2 (+8%攻速，3 ➔ 5 槽)
+        if (BOARD_SLOTS['sub_c1_3']) BOARD_SLOTS['sub_c1_3'].chip = 't0_atspd_2';
+        // 3. 【手表外盘 C1】(slot 5)：变轨规 ➔ 向心内折入【手表内圈 C2】3 槽
+        if (BOARD_SLOTS['sub_c1_5']) BOARD_SLOTS['sub_c1_5'].chip = 'chip_triangle_in';
+        // 4. 【手表内盘 C2】(slot 3 接收入射)：神工制造规 进2 (+8%制造，3 ➔ 1 槽)
+        if (BOARD_SLOTS['sub_c2_3']) BOARD_SLOTS['sub_c2_3'].chip = 't0_craft_2';
+        // 5. 【手表内盘 C2】(slot 1)：变轨规 ➔ 向心汇聚表盘中心 ➔ 盘底暗渠 ➔ 外缘准直嘴发射 ➔ 注入【动力盘 B 外环】1 槽！
+        if (BOARD_SLOTS['sub_c2_1']) BOARD_SLOTS['sub_c2_1'].chip = 'chip_triangle_in';
+
+        // 6. 【动力盘 B 外环】(slot 1 接收入射，重合开阳星！)：浮游飞剑巡天规 (+1把悬浮巡航！步进 5 格: 1 + 5 = 6 槽)
+        if (BOARD_SLOTS['sub_b_outer_1']) BOARD_SLOTS['sub_b_outer_1'].chip = 't2_sword_funnel_1';
+        // 7. 【动力盘 B 外环】(slot 6，重合玉衡星！)：变轨规 ➔ 向心内折入【动力盘 B 内环】3 槽！
+        if (BOARD_SLOTS['sub_b_outer_6']) BOARD_SLOTS['sub_b_outer_6'].chip = 'chip_triangle_in';
+        // 8. 【动力盘 B 内环】(slot 3 接收入射)：传送带动力规 (+8%速度，步进 2 格: 3 + 2 = 1 槽)
+        if (BOARD_SLOTS['sub_b_inner_3']) BOARD_SLOTS['sub_b_inner_3'].chip = 't0_belt_2';
+        // 9. 【动力盘 B 内环】(slot 1)：变轨规 ➔ 向心汇聚机械轴心 ➔ 盘底暗渠 ➔ 外缘出射嘴 ➔ 穿透太虚中元悬浮透镜 ➔ 注入【主浑天天盘】2 号槽！
+        if (BOARD_SLOTS['sub_b_inner_1']) BOARD_SLOTS['sub_b_inner_1'].chip = 'chip_triangle_in';
+
+        // 10. 【主盘天盘】(slot 2 接收入射，重合文曲星！)：高级诛仙规 (+30%攻击！步进 3 格: 2 + 3 = 5 槽)
+        if (BOARD_SLOTS['tian_2']) BOARD_SLOTS['tian_2'].chip = 't1_atk_3';
+        // 11. 【主盘天盘】(slot 5，重合天璇星！)：初级破绽规 (+10%暴击，步进 3 格: 5 + 3 = 8 槽)
+        if (BOARD_SLOTS['tian_5']) BOARD_SLOTS['tian_5'].chip = 't1_crit_3';
+        // 12. 【主盘天盘】(slot 8，重合天枢星！)：变轨规 ➔ 向心径向折入【主盘地盘】5 号槽！
+        if (BOARD_SLOTS['tian_8']) BOARD_SLOTS['tian_8'].chip = 'chip_triangle_in';
+
+        // 13. 【主盘地盘】(slot 5 接收入射)：中级斩仙规 (+20%攻击，步进 5 格: 5 + 5 = 0 槽)
+        if (BOARD_SLOTS['di_5']) BOARD_SLOTS['di_5'].chip = 't2_atk_5';
+        // 14. 【主盘地盘】(slot 0，重合天玑星！)：变轨规 ➔ 向心径向折入最内【人盘】0 号槽！
+        if (BOARD_SLOTS['di_0']) BOARD_SLOTS['di_0'].chip = 'chip_triangle_in';
+
+        // 15. 【主盘人盘】(slot 0 接收入射)：固甲短行规 (+8%防御，步进 2 格: 0 + 2 = 2 槽)
+        if (BOARD_SLOTS['ren_0']) BOARD_SLOTS['ren_0'].chip = 't0_def_2';
+        // 16. 【主盘人盘】(slot 2)：变轨规 ➔ 向心直贯【天枢主极核】！激发主极元印！极核分路发射至终端盘 D 与极轨副盘！
+        if (BOARD_SLOTS['ren_2']) BOARD_SLOTS['ren_2'].chip = 'chip_triangle_in';
+
+        // 17. 【终端释能盘 D】(slot 1 接收入射)：初级省灵规 (-10%能耗，步进 3 格: 1 + 3 = 4 槽)
+        if (BOARD_SLOTS['sub_d_1']) BOARD_SLOTS['sub_d_1'].chip = 't1_power_3';
+        // 18. 【终端释能盘 D】(slot 4)：变轨规 ➔ 向心直贯【虚空释能核】！周天大圆满闭环！
+        if (BOARD_SLOTS['sub_d_4']) BOARD_SLOTS['sub_d_4'].chip = 'chip_triangle_in';
+
+        // 核心特质插槽保持空置（由玩家自由手动装配，绝不强制配平）
+        KEYSTONE_SLOTS.disc_c = null;
+        KEYSTONE_SLOTS.disc_b = null;
+        KEYSTONE_SLOTS.disc_e = null;
+        KEYSTONE_SLOTS.disc_a = null;
+        KEYSTONE_SLOTS.disc_d = null;
+        CURRENT_KEYSTONE_ID = null;
+        updateAllKeystoneSocketsDOM();
+      }
+
+      renderBoardSlots();
+      renderFloorBase(true);
+      solveStepNetwork();
+      audio.playConnect();
+    }
+    /* =========================================================================
+       12. 页面启动初始化
+       ========================================================================= */
+    
+    // 工况预设下拉交互
+    function toggleScenarioDropdown(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById('scenarioDropdownMenu');
+      if (!menu) return;
+      menu.classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', (e) => {
+      const container = document.getElementById('scenarioDropdownContainer');
+      const menu = document.getElementById('scenarioDropdownMenu');
+      if (container && menu && !container.contains(e.target)) {
+        menu.classList.add('hidden');
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initKeystoneSocketsEvents();
+      initBoardSlots();
+      renderPalette();
+      renderBoardSlots();
+      renderFloorBase(false);
+      initRingDirectDragging();
+      // 默认载入北斗七星大圆满工况
+      loadScenario('multi_disc_overdrive');
+    });
+  </script>
+</body>
+</html>

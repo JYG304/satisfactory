@@ -1,0 +1,666 @@
+    function renderBoardSlots() {
+      const container = document.getElementById("slotsLayer");
+      if (!container) return;
+
+      const counts = getActiveRingCounts();
+
+      if (!SLOTS_DOM_INITIALIZED) {
+        container.innerHTML = "";
+        for (const [slotKey, slotData] of Object.entries(BOARD_SLOTS)) {
+          const slotEl = document.createElement("div");
+          slotEl.id = `slot_${slotKey}`;
+          slotEl.setAttribute("data-has-chip", "false");
+          slotEl.className = "absolute -translate-x-1/2 -translate-y-1/2 rounded-full transition-transform duration-150";
+
+          slotEl.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            slotEl.classList.add("scale-125");
+          });
+          slotEl.addEventListener("dragleave", () => {
+            slotEl.classList.remove("scale-125");
+          });
+          slotEl.addEventListener("drop", (e) => {
+            e.preventDefault();
+            slotEl.classList.remove("scale-125");
+            const typeId = e.dataTransfer.getData("text/plain");
+            placeChip(slotKey, typeId);
+          });
+
+          slotEl.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (Date.now() - LAST_CORE_DRAG_TIMESTAMP < 250) return;
+            if (ACTIVE_SELECTED_CHIP) {
+              placeChip(slotKey, ACTIVE_SELECTED_CHIP);
+            } else if (BOARD_SLOTS[slotKey] && BOARD_SLOTS[slotKey].chip) {
+              removeChip(slotKey);
+            }
+          });
+
+          slotEl.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            removeChip(slotKey);
+          });
+
+          container.appendChild(slotEl);
+        }
+        SLOTS_DOM_INITIALIZED = true;
+      }
+
+      for (const [slotKey, slotData] of Object.entries(BOARD_SLOTS)) {
+        const slotEl = document.getElementById(`slot_${slotKey}`);
+        if (!slotEl) continue;
+
+        const maxTier = counts[slotData.discKey] || 1;
+        if (slotData.tier > maxTier) {
+          slotEl.style.display = "none";
+          slotEl.style.opacity = "0";
+          slotEl.style.pointerEvents = "none";
+          continue;
+        }
+
+        const pos = getSlotWorldPos(slotData.ringId, slotData.slotIndex);
+        slotEl.style.left = `${pos.x}px`;
+        slotEl.style.top = `${pos.y}px`;
+
+        const discMeta = DISC_CONFIG[slotData.discKey];
+        const runeTag = `${discMeta.shortTag}${slotData.tier}·${slotData.slotIndex + 1}`;
+        const hasChip = !!(slotData.chip && CHIP_SPECS[slotData.chip]);
+
+        if (hasChip) {
+          const spec = CHIP_SPECS[slotData.chip];
+          slotEl.style.display = "block";
+          slotEl.style.opacity = "1";
+          slotEl.style.pointerEvents = "auto";
+          slotEl.style.zIndex = "35";
+          slotEl.style.width = "32px";
+          slotEl.style.height = "32px";
+          slotEl.setAttribute("data-has-chip", "true");
+          slotEl.innerHTML = `
+            <div class="relative w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing group"
+                 draggable="true"
+                 ondragstart="if(window.audio)audio.init(); event.dataTransfer.setData('text/plain', '${slotData.chip}');"
+                 title="${spec.name} (${spec.tag})\n${spec.buffDesc}\n${spec.stepDesc}\n【按住拖拽】换槽\n【点击或右键】取回芯片栏">
+              <div class="absolute -inset-1 rounded-full border-2 ${discMeta.nodeBorder} pointer-events-none"></div>
+              <div class="w-7 h-7 ${spec.shape} ${spec.matClass} flex items-center justify-center relative z-10 transition-transform group-hover:scale-110 shadow-md">
+                <i class="fa-solid ${spec.icon} text-xs pointer-events-none" style="${getChipCenterIconStyle(spec)}"></i>
+              </div>
+              <div class="pointer-events-none absolute -bottom-2 -right-2 px-1 rounded text-[7px] font-mono-sci font-bold border shadow-xs z-20 ${discMeta.nodeBadge}">
+                ${runeTag}
+              </div>
+              <button onclick="removeChip('${slotKey}'); event.stopPropagation();" class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[9px] font-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-xs z-30" title="移除芯片">×</button>
+            </div>
+          `;
+        } else {
+          slotEl.setAttribute("data-has-chip", "false");
+          // ★ 玩家选哪一环（或拖拽芯片靠近哪一环），才显示哪一环上的空插槽，绝不把一个盘子全部显示出来！
+          if (ACTIVE_INTERACT_RING !== slotData.ringId) {
+            slotEl.style.display = "none";
+            slotEl.style.opacity = "0";
+            slotEl.style.pointerEvents = "none";
+            continue;
+          }
+          slotEl.style.display = "block";
+          slotEl.style.opacity = "1";
+          slotEl.style.pointerEvents = "auto";
+          slotEl.style.zIndex = "10";
+          slotEl.style.width = "25px";
+          slotEl.style.height = "25px";
+          slotEl.innerHTML = `
+            <div class="relative w-full h-full flex items-center justify-center group cursor-pointer" title="${discMeta.name} 基础${slotData.tier}环 第${slotData.slotIndex + 1}号芯片槽 (${runeTag})\n【点击/拖拽】装配步进芯片或变轨三角">
+              <div class="w-full h-full rounded-full flex items-center justify-center transition-all border-2 border-dashed ${discMeta.nodeBorder} shadow-xs hover:scale-115">
+                <div class="w-2 h-2 rounded-full ${discMeta.nodeDot} pointer-events-none"></div>
+              </div>
+              <span class="pointer-events-none absolute -bottom-2 px-0.5 rounded text-[6.5px] font-mono-sci font-bold border shadow-xs ${discMeta.nodeBadge}">${slotData.slotIndex + 1}</span>
+            </div>
+          `;
+        }
+      }
+    }
+
+    function placeChip(slotKey, typeId) {
+      const spec = CHIP_SPECS[typeId];
+      const targetSlot = BOARD_SLOTS[slotKey];
+      if (!spec || !targetSlot) return;
+
+      if (spec.isCenterCore) {
+        const slotPos = getSlotWorldPos(targetSlot.ringId, targetSlot.slotIndex);
+        let nearestDock = `dock_${targetSlot.discKey}_0`;
+        let minD = 9999;
+        for (const [dKey, dObj] of Object.entries(OUTER_DOCK_SLOTS)) {
+          if (dObj.discKey !== targetSlot.discKey) continue;
+          const dp = getOuterDockWorldPos(dKey);
+          const dist = Math.hypot(slotPos.x - dp.x, slotPos.y - dp.y);
+          if (dist < minD) {
+            minD = dist;
+            nearestDock = dKey;
+          }
+        }
+        placeCoreInOuterDock(nearestDock, typeId);
+        return;
+      }
+
+      // ★ 一个属性芯片只能用一次！如果该芯片已插在其他槽位，自动从原槽位拔下并移至当前新槽位；插完后从左侧芯片栏直接消失！
+      if (spec.type !== 'shift_in') {
+        for (const [otherKey, otherSlot] of Object.entries(BOARD_SLOTS)) {
+          if (otherKey !== slotKey && otherSlot.chip === typeId) {
+            otherSlot.chip = null;
+          }
+        }
+        if (ACTIVE_SELECTED_CHIP === typeId) {
+          ACTIVE_SELECTED_CHIP = null;
+          updateSelectedChipIndicator();
+        }
+      }
+
+      ACTIVE_INTERACT_RING = targetSlot.ringId;
+      targetSlot.chip = typeId;
+      if (audio) audio.playPlace();
+      if (typeof renderPalette === 'function') renderPalette();
+      refreshDiscRingsAndSlots();
+    }
+
+    function removeChip(slotKey) {
+      const slotData = BOARD_SLOTS[slotKey];
+      if (!slotData || !slotData.chip) return;
+      ACTIVE_INTERACT_RING = slotData.ringId;
+      slotData.chip = null;
+      if (audio) audio.playRemove();
+      if (typeof renderPalette === 'function') renderPalette();
+      refreshDiscRingsAndSlots();
+    }
+
+    function clearBoard() {
+      for (const k in BOARD_SLOTS) {
+        BOARD_SLOTS[k].chip = null;
+      }
+      for (const k in OUTER_DOCK_SLOTS) {
+        OUTER_DOCK_SLOTS[k].coreChip = null;
+      }
+      for (const dKey of ['support', 'industry', 'combat']) {
+        CENTER_CORE_STATE[dKey].charged = false;
+        CENTER_CORE_STATE[dKey].detached = false;
+        CENTER_CORE_STATE[dKey].placedAtDock = null;
+      }
+      ACTIVE_SELECTED_CHIP = null;
+      renderPalette();
+      updateSelectedChipIndicator();
+      if (audio) audio.playRemove();
+      refreshDiscRingsAndSlots();
+    }
+    window.clearBoard = clearBoard;
+
+    function updateSubDiscRotation() {}
+
+    function rotateRing(ringId, stepDelta) {
+      const ring = DISK_RINGS[ringId];
+      if (!ring) return;
+      const fineStep = 0.5;
+      ring.slotOffset = (ring.slotOffset + stepDelta * fineStep + ring.slotCount) % ring.slotCount;
+      const degStep = 360 / ring.slotCount;
+      ring.currentAngle = Number(((ring.slotOffset * degStep) % 360).toFixed(1));
+      const ringEl = document.getElementById(ring.elId);
+      if (ringEl) ringEl.style.transform = `rotate(${ring.currentAngle}deg)`;
+      if (audio) audio.playRotate();
+      renderOuterFixedNozzles();
+      renderBoardSlots();
+      renderFloorBase(true);
+      solveStepNetwork();
+      updateCenterHubsDOM();
+    }
+    window.rotateRing = rotateRing;
+
+    // ★ 根据鼠标坐标自动拾取三大盘当前激活的最贴近环道（包含基础环 + 可旋转独立最外圈！）
+    function pickClosestActiveRing(mouseX, mouseY) {
+      const counts = getActiveRingCounts();
+      for (const [dKey, dMeta] of Object.entries(DISC_CONFIG)) {
+        const dist = Math.hypot(mouseX - dMeta.cx, mouseY - dMeta.cy);
+        const maxTier = counts[dKey];
+        const dockR = getOuterDockRadius(dKey);
+        if (dist <= dockR + 28 && dist >= 20) {
+          let bestRingId = null;
+          let minDiff = 9999;
+          // 1. 检查内部基础环
+          for (let t = 1; t <= maxTier; t++) {
+            const rDef = dMeta.rings[t - 1];
+            const d = Math.abs(dist - rDef.radius);
+            if (d < minDiff) {
+              minDiff = d;
+              bestRingId = rDef.id;
+            }
+          }
+          // 2. 检查可旋转独立最外圈 (`${dKey}_dock`)
+          const dockDiff = Math.abs(dist - dockR);
+          if (dockDiff < minDiff) {
+            minDiff = dockDiff;
+            bestRingId = `${dKey}_dock`;
+          }
+          if (bestRingId) return bestRingId;
+        }
+      }
+      return null;
+    }
+
+    function initRingDirectDragging() {
+      const stage = document.getElementById('diskStage');
+      const section = document.getElementById('astrolabeStageSection') || stage;
+      if (!stage) return;
+
+      let isSpacePressed = false;
+      window.addEventListener('keydown', (ke) => {
+        if (ke.code === 'Space') isSpacePressed = true;
+      });
+      window.addEventListener('keyup', (ke) => {
+        if (ke.code === 'Space') isSpacePressed = false;
+      });
+
+      section.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const rect = stage.getBoundingClientRect();
+        const scale = rect.width / STAGE_LOGICAL_W;
+        const mouseX = (e.clientX - rect.left) / scale;
+        const mouseY = (e.clientY - rect.top) / scale;
+
+        const targetRing = (!e.ctrlKey && !isSpacePressed) ? pickClosestActiveRing(mouseX, mouseY) : null;
+        if (targetRing && DISK_RINGS[targetRing]) {
+          const dir = e.deltaY > 0 ? 1 : -1;
+          const ring = DISK_RINGS[targetRing];
+          setActiveInteractRing(targetRing);
+          const degStep = 360 / ring.slotCount;
+          ring.currentAngle = Number(((ring.currentAngle + dir * (degStep / 2) + 360) % 360).toFixed(1));
+          ring.slotOffset = Number((ring.currentAngle / degStep).toFixed(2));
+          const ringEl = document.getElementById(ring.elId);
+          if (ringEl) ringEl.style.transform = `rotate(${ring.currentAngle}deg)`;
+          renderOuterFixedNozzles();
+          renderBoardSlots();
+          renderFloorBase(true);
+          solveStepNetwork();
+          updateCenterHubsDOM();
+          if (audio) audio.playRotate();
+        } else {
+          // 在画布空白处滚动滚轮（或按住Ctrl/空格滚轮）➔ 直接缩放画布！
+          const zoomDelta = e.deltaY < 0 ? 0.1 : -0.1;
+          adjustUserZoom(zoomDelta);
+        }
+      }, { passive: false });
+
+      let isDragging = false;
+      let activeRingKey = null;
+      let centerDragX = 0;
+      let centerDragY = 0;
+      let startAngle = 0;
+      let ringStartAngle = 0;
+      let hasMoved = false;
+
+      // 当拖拽芯片经过某环或选中左侧芯片移动鼠标时，自动只唤出当前贴近的那一环的空插槽
+      section.addEventListener('dragover', (de) => {
+        const rect = stage.getBoundingClientRect();
+        const scale = rect.width / STAGE_LOGICAL_W;
+        const mx = (de.clientX - rect.left) / scale;
+        const my = (de.clientY - rect.top) / scale;
+        const rKey = pickClosestActiveRing(mx, my);
+        if (rKey) setActiveInteractRing(rKey);
+      });
+
+      section.addEventListener('mousemove', (me) => {
+        if (!ACTIVE_SELECTED_CHIP) return;
+        const rect = stage.getBoundingClientRect();
+        const scale = rect.width / STAGE_LOGICAL_W;
+        const mx = (me.clientX - rect.left) / scale;
+        const my = (me.clientY - rect.top) / scale;
+        const rKey = pickClosestActiveRing(mx, my);
+        if (rKey) setActiveInteractRing(rKey);
+      });
+
+      section.addEventListener('mousedown', (e) => {
+        if (IS_DRAGGING_CORE) return;
+        // 忽略顶部悬浮按钮栏
+        if (e.target.closest('button')) return;
+
+        const isMiddleOrSpace = (e.button === 1 || (e.button === 0 && isSpacePressed));
+        if (e.button !== 0 && e.button !== 1) return;
+
+        const rect = stage.getBoundingClientRect();
+        const scale = rect.width / STAGE_LOGICAL_W;
+        const mouseX = (e.clientX - rect.left) / scale;
+        const mouseY = (e.clientY - rect.top) / scale;
+        const picked = isMiddleOrSpace ? null : pickClosestActiveRing(mouseX, mouseY);
+
+        if (!isMiddleOrSpace) {
+          if (e.target.closest('.keystone-hub-socket')) return;
+          if (e.target.closest('#detachedCoresLayer')) return;
+          if (e.target.closest('#outerFixedNozzlesLayer')) return;
+          if (e.target.closest('#slotsLayer > div')) {
+            if (picked) setActiveInteractRing(picked);
+            return;
+          }
+        }
+
+        // ★ 如果点击在画布空白处（或按住中键/空格键拖拽）➔ 自由拖拽平移整张画布；若是单纯点击空白处则收起空槽位！
+        if (!picked) {
+          e.preventDefault();
+          const startPanClientX = e.clientX;
+          const startPanClientY = e.clientY;
+          const initialPanX = STAGE_PAN_X;
+          const initialPanY = STAGE_PAN_Y;
+          let panMoved = false;
+          section.style.cursor = 'grabbing';
+
+          const onPanMove = (me) => {
+            if (Math.hypot(me.clientX - startPanClientX, me.clientY - startPanClientY) > 4) {
+              panMoved = true;
+            }
+            STAGE_PAN_X = initialPanX + (me.clientX - startPanClientX);
+            STAGE_PAN_Y = initialPanY + (me.clientY - startPanClientY);
+            fitStageToViewport(true);
+          };
+          const onPanUp = () => {
+            section.style.cursor = '';
+            fitStageToViewport(false);
+            if (!panMoved && !isMiddleOrSpace) {
+              setActiveInteractRing(null);
+            }
+            window.removeEventListener('mousemove', onPanMove);
+            window.removeEventListener('mouseup', onPanUp);
+          };
+          window.addEventListener('mousemove', onPanMove);
+          window.addEventListener('mouseup', onPanUp);
+          return;
+        }
+
+        activeRingKey = picked;
+        const ring = DISK_RINGS[activeRingKey];
+        setActiveInteractRing(activeRingKey);
+        centerDragX = ring.cx;
+        centerDragY = ring.cy;
+        isDragging = true;
+        hasMoved = false;
+        startAngle = Math.atan2(mouseY - centerDragY, mouseX - centerDragX) * 180 / Math.PI;
+        ringStartAngle = ring.currentAngle;
+
+        const onMouseMove = (me) => {
+          if (!isDragging || !activeRingKey || IS_DRAGGING_CORE) return;
+          hasMoved = true;
+          const curMouseX = (me.clientX - rect.left) / scale;
+          const curMouseY = (me.clientY - rect.top) / scale;
+          const curAngle = Math.atan2(curMouseY - centerDragY, curMouseX - centerDragX) * 180 / Math.PI;
+          let delta = curAngle - startAngle;
+          if (delta > 180) delta -= 360;
+          if (delta < -180) delta += 360;
+
+          const rObj = DISK_RINGS[activeRingKey];
+          rObj.currentAngle = (ringStartAngle + delta + 360) % 360;
+          const degStep = 360 / rObj.slotCount;
+          rObj.slotOffset = Number((rObj.currentAngle / degStep).toFixed(2));
+          const ringEl = document.getElementById(rObj.elId);
+          if (ringEl) ringEl.style.transform = `rotate(${rObj.currentAngle}deg)`;
+
+          renderOuterFixedNozzles();
+          renderBoardSlots();
+          renderFloorBase(true);
+          solveStepNetwork();
+          updateCenterHubsDOM();
+        };
+
+        const onMouseUp = () => {
+          if (isDragging && activeRingKey) {
+            const rObj = DISK_RINGS[activeRingKey];
+            rObj.currentAngle = Number(rObj.currentAngle.toFixed(1));
+            renderOuterFixedNozzles();
+            renderBoardSlots();
+            renderFloorBase(true);
+            solveStepNetwork();
+            updateCenterHubsDOM();
+            if (hasMoved && audio) audio.playRotate();
+          }
+          isDragging = false;
+          activeRingKey = null;
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('mouseup', onMouseUp);
+        };
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+      });
+    }
+
+    function getClosestSlotToAngle(ringId, targetWorldAngle, toleranceDeg = 22) {
+      const ring = DISK_RINGS[ringId];
+      if (!ring) return { slotIndex: 0, diff: 999, isAligned: false };
+      let bestSlot = 0;
+      let minDiff = 999;
+      for (let i = 0; i < ring.slotCount; i++) {
+        const baseDeg = -90 + (i * (360 / ring.slotCount));
+        const effDeg = (baseDeg + ring.currentAngle + 720) % 360;
+        let diff = Math.abs(effDeg - targetWorldAngle);
+        if (diff > 180) diff = 360 - diff;
+        if (diff < minDiff) {
+          minDiff = diff;
+          bestSlot = i;
+        }
+      }
+      return {
+        slotIndex: bestSlot,
+        diff: minDiff,
+        isAligned: minDiff <= toleranceDeg
+      };
+    }
+
+    /* =========================================================================
+       7. 三大主盘光路解算 + 可旋转独立外圈插槽【跨盘导入线】+ 跨三盘星位(+120%效果)
+       ========================================================================= */
+    function solveStepNetwork() {
+      const svgBeams = document.getElementById('svgBeamsGroup');
+      const svgImpacts = document.getElementById('svgImpactsGroup');
+      if (!svgBeams || !svgImpacts) return;
+
+      svgBeams.innerHTML = '';
+      svgImpacts.innerHTML = '';
+
+      CENTER_CORE_STATE.support.charged = false;
+      CENTER_CORE_STATE.industry.charged = false;
+      CENTER_CORE_STATE.combat.charged = false;
+
+      let totalBuff = {
+        atk: 0, atspd: 0, def: 0, hp: 0, crit: 0,
+        sword_funnel: 0,
+        speed: 0, stamina: 0, flight_battery: 0, inventory: 0,
+        craft_speed: 0, mining_speed: 0, burn_speed: 0, belt_speed: 0,
+        power_cut: 0, pollute_cut: 0
+      };
+
+      const chainNodes = [];
+      const logSteps = [];
+      let crossActivated = false;
+      let hitFloorNodesSet = new Set();
+      let activeKeystones = [];
+      const counts = getActiveRingCounts();
+      const floorDef = FLOOR_SHAPE_DEFS[CURRENT_FLOOR_SHAPE] || FLOOR_SHAPE_DEFS.dipper;
+
+      function traceDiscOpticalPath(discKey, startRingId, startSlotIdx) {
+        let curRingId = startRingId;
+        let curSlotIdx = startSlotIdx;
+        const visited = new Set();
+        const dMeta = DISC_CONFIG[discKey];
+
+        for (let step = 0; step < 64; step++) {
+          const sKey = `${curRingId}_${curSlotIdx}`;
+          const stateKey = `${sKey}@${step}`;
+          if (visited.has(stateKey)) break;
+          visited.add(stateKey);
+
+          const sData = BOARD_SLOTS[sKey];
+          const chipKey = sData ? sData.chip : null;
+          if (!chipKey || !CHIP_SPECS[chipKey]) {
+            logSteps.push(`🛑 [${dMeta.name}] 光信号到达 ${DISK_RINGS[curRingId].name} 第 ${curSlotIdx + 1} 槽（空槽），待安装芯片。`);
+            break;
+          }
+
+          const spec = CHIP_SPECS[chipKey];
+          const curPos = getSlotWorldPos(curRingId, curSlotIdx);
+          chainNodes.push({ ring: curRingId, slot: curSlotIdx, chipKey, spec, x: curPos.x, y: curPos.y });
+
+          // ★ 底盘星象重合检测：一个节点放上去增加 120% 的效果 (即 ×2.2倍)！
+          let nodeMult = 1.0;
+          if (floorDef && floorDef.nodes) {
+            const matchedFloor = floorDef.nodes.find(fn => Math.hypot(curPos.x - fn.x, curPos.y - fn.y) <= 26);
+            if (matchedFloor) {
+              hitFloorNodesSet.add(matchedFloor.id);
+              nodeMult = 2.2;
+              logSteps.push(`✦ [${spec.name}] 踩中${floorDef.name}星位【${matchedFloor.name}】，效果增加 +120%！`);
+            }
+          }
+
+          if (spec.buff) {
+            Object.entries(spec.buff).forEach(([prop, val]) => {
+              const added = Math.round(val * nodeMult);
+              totalBuff[prop] = (totalBuff[prop] || 0) + added;
+            });
+          }
+
+          if (spec.type === 'shift_in') {
+            const curRingObj = DISK_RINGS[curRingId];
+            if (curRingObj.tier > 1) {
+              const innerRingId = `${discKey}_${curRingObj.tier - 1}`;
+              const innerRingObj = DISK_RINGS[innerRingId];
+              const rad = (curPos.angleDeg * Math.PI) / 180;
+              const tx = dMeta.cx + innerRingObj.radius * Math.cos(rad);
+              const ty = dMeta.cy + innerRingObj.radius * Math.sin(rad);
+
+              drawBeamLine(svgBeams, curPos.x, curPos.y, tx, ty, 'rose', true);
+              const align = getClosestSlotToAngle(innerRingId, curPos.angleDeg, 22);
+              if (!align.isAligned) {
+                drawImpactSpark(svgImpacts, tx, ty, '#f59e0b', 5);
+                logSteps.push(`⚡ [${dMeta.name}内环待对齐] 变轨三角向内折射，偏离 ${innerRingObj.name} 插槽 ${align.diff.toFixed(1)}°（请旋转内环对齐）`);
+                break;
+              }
+              drawImpactSpark(svgImpacts, tx, ty, '#00f0ff', 5);
+              logSteps.push(`▲ [${dMeta.name}向心折射] 进入 ${innerRingObj.name} 第 ${align.slotIndex + 1} 槽！`);
+              curRingId = innerRingId;
+              curSlotIdx = align.slotIndex;
+              continue;
+            } else {
+              // 已在基础 1 环：直接射入盘体中心！激活中心极核可取下状态！（不再绘制多余的射出点）
+              drawBeamLine(svgBeams, curPos.x, curPos.y, dMeta.cx, dMeta.cy, 'rose', true);
+              drawImpactSpark(svgImpacts, dMeta.cx, dMeta.cy, '#fbbf24', 6.5);
+              CENTER_CORE_STATE[discKey].charged = true;
+              if (discKey === 'combat') crossActivated = true;
+
+              logSteps.push(`👑 【${dMeta.name}中心射入成功！】点一下盘心取下中心节点，拖到其他盘【可旋转独立外圈插槽】即可连上导入线！`);
+              break;
+            }
+          } else {
+            const rMeta = DISK_RINGS[curRingId];
+            const nextIdx = (curSlotIdx + spec.step) % rMeta.slotCount;
+            const nextPos = getSlotWorldPos(curRingId, nextIdx);
+            drawRingArc(svgBeams, curRingId, curSlotIdx, nextIdx, 'cyan');
+            drawImpactSpark(svgImpacts, nextPos.x, nextPos.y, '#0f172a', 4.5);
+            logSteps.push(`➔ [${spec.name}] 在 ${rMeta.name} 步进 +${spec.step} ➔ 第 ${nextIdx + 1} 槽`);
+            curSlotIdx = nextIdx;
+          }
+        }
+      }
+
+      // =========================================================================
+      // 第一阶段：右侧始发源 (1542, 188) 射入 🛡️ 辅助盘 最外层基础环
+      // =========================================================================
+      const rightEmitterPos = { x: 1542, y: 188 };
+      const supOutTier = counts.support;
+      const supOutRingId = `support_${supOutTier}`;
+      const supOutRing = DISK_RINGS[supOutRingId];
+      const entryRad = (345.17 * Math.PI) / 180;
+      const supEntryX = DISC_CONFIG.support.cx + supOutRing.radius * Math.cos(entryRad);
+      const supEntryY = DISC_CONFIG.support.cy + supOutRing.radius * Math.sin(entryRad);
+
+      const supAlign = getClosestSlotToAngle(supOutRingId, 345.17, 22);
+      const apertureStatusEl = document.getElementById('c1ApertureStatusBadge');
+
+      if (!supAlign.isAligned) {
+        drawBeamLine(svgBeams, rightEmitterPos.x, rightEmitterPos.y, supEntryX, supEntryY, 'cyan', true);
+        drawImpactSpark(svgImpacts, supEntryX, supEntryY, '#f59e0b', 5);
+        if (apertureStatusEl) {
+          apertureStatusEl.setAttribute('fill', '#f59e0b');
+          apertureStatusEl.textContent = `▲ 待找平 (偏离 ${supAlign.diff.toFixed(1)}°)`;
+        }
+        logSteps.push(`⚡ [始发待找平] 激光射至辅助盘 (${supOutRing.name})，偏离插槽 ${supAlign.diff.toFixed(1)}°（请旋转辅助盘对齐）`);
+      } else {
+        const startSlotPos = getSlotWorldPos(supOutRingId, supAlign.slotIndex);
+        drawBeamLine(svgBeams, rightEmitterPos.x, rightEmitterPos.y, startSlotPos.x, startSlotPos.y, 'cyan', true);
+        drawImpactSpark(svgImpacts, startSlotPos.x, startSlotPos.y, '#00f0ff', 5);
+        if (apertureStatusEl) {
+          apertureStatusEl.setAttribute('fill', '#00f0ff');
+          apertureStatusEl.textContent = `● 准直导通 (辅${supOutTier}·${supAlign.slotIndex + 1}槽)`;
+        }
+        logSteps.push(`⚡ [始发激光接入] 注入【🛡️ 辅助盘】(${supOutRing.name}) 第 ${supAlign.slotIndex + 1} 槽！`);
+        traceDiscOpticalPath('support', supOutRingId, supAlign.slotIndex);
+      }
+
+      // =========================================================================
+      // 第二阶段：检查各盘中心核是否已被取下并放入其他盘【可旋转独立外圈插槽】
+      //           ➔ 直接从源盘中心拉出【跨盘导入线】至该独立外圈插槽，并随外圈旋转角度向内射入基础环！
+      // =========================================================================
+      const triggeredDiscs = new Set(['support']);
+      for (let pass = 0; pass < 3; pass++) {
+        for (const srcKey of ['support', 'industry', 'combat']) {
+          const cState = CENTER_CORE_STATE[srcKey];
+          if (!cState.charged || !cState.placedAtDock) continue;
+
+          const targetDock = OUTER_DOCK_SLOTS[cState.placedAtDock];
+          if (!targetDock || targetDock.coreChip !== 'core_' + srcKey) continue;
+
+          const dstKey = targetDock.discKey;
+          if (triggeredDiscs.has(dstKey)) continue;
+          triggeredDiscs.add(dstKey);
+
+          const srcMeta = DISC_CONFIG[srcKey];
+          // 目标盘独立外圈外接槽旋转后的当前世界坐标与当前角度
+          const dstDockPos = getOuterDockWorldPos(cState.placedAtDock);
+
+          // 1. 绘制高亮跨盘导入线 (源盘中心 ➔ 目标盘可旋转独立外圈插槽)！
+          drawBeamLine(svgBeams, srcMeta.cx, srcMeta.cy, dstDockPos.x, dstDockPos.y, 'hyper', true);
+          drawImpactSpark(svgImpacts, dstDockPos.x, dstDockPos.y, '#fbbf24', 6);
+
+          // 累加中心导光核自身的属性加成
+          const coreSpec = CHIP_SPECS['core_' + srcKey];
+          if (coreSpec && coreSpec.buff) {
+            Object.entries(coreSpec.buff).forEach(([prop, val]) => {
+              totalBuff[prop] = (totalBuff[prop] || 0) + val;
+            });
+          }
+
+          // 2. 从目标盘【可旋转独立外圈插槽】按其当前旋转方位向内径向射入目标盘最外层【基础环】！
+          const dstMeta = DISC_CONFIG[dstKey];
+          const dstOutTier = counts[dstKey];
+          const dstOutRingId = `${dstKey}_${dstOutTier}`;
+          const dstOutRing = DISK_RINGS[dstOutRingId];
+          const injectRad = (dstDockPos.angleDeg * Math.PI) / 180;
+          const ringEdgeX = dstMeta.cx + dstOutRing.radius * Math.cos(injectRad);
+          const ringEdgeY = dstMeta.cy + dstOutRing.radius * Math.sin(injectRad);
+
+          const align = getClosestSlotToAngle(dstOutRingId, dstDockPos.angleDeg, 22);
+          if (!align.isAligned) {
+            drawBeamLine(svgBeams, dstDockPos.x, dstDockPos.y, ringEdgeX, ringEdgeY, 'rose', true);
+            drawImpactSpark(svgImpacts, ringEdgeX, ringEdgeY, '#f59e0b', 5);
+            logSteps.push(`🚀 [导入线已连上] ${srcMeta.name} ➔ ${dstMeta.name}【${targetDock.label}】，可旋转独立外圈或基础环使之对齐！`);
+          } else {
+            const entrySlotPos = getSlotWorldPos(dstOutRingId, align.slotIndex);
+            drawBeamLine(svgBeams, dstDockPos.x, dstDockPos.y, entrySlotPos.x, entrySlotPos.y, 'rose', true);
+            drawImpactSpark(svgImpacts, entrySlotPos.x, entrySlotPos.y, '#00f0ff', 5.5);
+            logSteps.push(`🚀 【跨盘导入线导通！】${srcMeta.name}中心 ➔ ${dstMeta.name}【${targetDock.label}】➔ 射入${dstOutRing.name}第 ${align.slotIndex + 1} 槽！`);
+            traceDiscOpticalPath(dstKey, dstOutRingId, align.slotIndex);
+          }
+        }
+      }
+
+      const totalConstellationSlots = (floorDef && floorDef.nodes) ? floorDef.nodes.length : 7;
+      const isConstellationAllSatisfied = hitFloorNodesSet.size >= totalConstellationSlots;
+      const constellationMultiplier = isConstellationAllSatisfied ? 2.2 : 1.0;
+
+      if (isConstellationAllSatisfied) {
+        logSteps.push(`👑 【${floorDef.name}·七星全满共鸣！】三大盘全部 ${totalConstellationSlots} 处星位点亮！每个星位节点均已享受 +120% 效果增幅！`);
+      }
+
+      renderFloorBase(true, hitFloorNodesSet);
+      updatePanels(chainNodes, totalBuff, constellationMultiplier, crossActivated, logSteps, hitFloorNodesSet, activeKeystones);
+      updateCenterHubsDOM();
+    }

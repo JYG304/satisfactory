@@ -1,0 +1,2539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>中央处理器 · 三大主盘系统 (攻击/工厂/辅助)</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+SC:wght@300;400;500;700;900&family=Cinzel:wght@600;900&display=swap');
+
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .font-mono-sci { font-family: 'Share Tech Mono', monospace; }
+    .font-cinzel { font-family: 'Cinzel', serif; }
+
+    /* 纯净浅白工程图纸网格底纹 */
+    .blueprint-canvas {
+      background-color: #f8fafc;
+      background-image: 
+        linear-gradient(to right, rgba(148, 163, 184, 0.15) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.15) 1px, transparent 1px),
+        linear-gradient(to right, rgba(148, 163, 184, 0.3) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.3) 1px, transparent 1px);
+      background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+      background-position: -1px -1px;
+    }
+
+    .ring-trans {
+      transition: transform 0.05s linear;
+      transform-origin: center center;
+    }
+
+    .laser-glow {
+      filter: drop-shadow(0 0 5px #0284c7) drop-shadow(0 0 10px rgba(14, 165, 233, 0.6));
+    }
+
+    .laser-core {
+      stroke-dasharray: 6 3;
+      animation: laserFlow 0.8s linear infinite;
+    }
+
+    @keyframes laserFlow {
+      from { stroke-dashoffset: 18; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    .collapsible-sidebar {
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .collapsible-sidebar.collapsed {
+      width: 0 !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+      padding: 0 !important;
+      border: none !important;
+    }
+
+    /* 绚丽彩色芯片视觉 */
+    .chip-bg-combat {
+      background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+      box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+      border: 1.5px solid #fecaca;
+    }
+    .chip-bg-industry {
+      background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
+      border: 1.5px solid #fef3c7;
+    }
+    .chip-bg-mobility {
+      background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+      box-shadow: 0 2px 6px rgba(14, 165, 233, 0.4);
+      border: 1.5px solid #bae6fd;
+    }
+    .chip-bg-shift {
+      background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+      box-shadow: 0 2px 6px rgba(168, 85, 247, 0.4);
+      border: 1.5px solid #f3e8ff;
+    }
+    .chip-bg-keystone {
+      background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+      box-shadow: 0 3px 8px rgba(16, 185, 129, 0.5);
+      border: 2px solid #a7f3d0;
+    }
+  </style>
+</head>
+<body class="w-screen h-screen flex flex-col antialiased bg-slate-50 text-slate-800">
+
+  <!-- 侧边栏折叠浮动按键 -->
+  <button id="btnOpenLeft" onclick="toggleLeftPanel()" class="fixed left-0 top-1/2 -translate-y-1/2 z-50 bg-white border border-slate-300 hover:border-sky-500 text-slate-800 py-4 px-2.5 rounded-r-2xl shadow-xl flex flex-col items-center space-y-2 text-xs font-mono-sci font-bold transition group" title="展开/收起芯片库">
+    <i class="fa-solid fa-microchip text-sky-600 group-hover:scale-125 transition-transform"></i>
+    <span class="text-[10px] tracking-widest text-slate-700" style="writing-mode: vertical-rl;">芯片库</span>
+    <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+  </button>
+
+  <button id="btnOpenRight" onclick="toggleRightPanel()" class="fixed right-0 top-1/2 -translate-y-1/2 z-50 bg-white border border-slate-300 hover:border-amber-500 text-slate-800 py-4 px-2.5 rounded-l-2xl shadow-xl flex flex-col items-center space-y-2 text-xs font-mono-sci font-bold transition group" title="展开/收起动力看板">
+    <i class="fa-solid fa-bolt text-amber-500 group-hover:scale-125 transition-transform"></i>
+    <span class="text-[10px] tracking-widest text-slate-700" style="writing-mode: vertical-rl;">动力看板</span>
+    <i class="fa-solid fa-chevron-left text-[10px] text-slate-400"></i>
+  </button>
+
+  <!-- 顶部导航栏 (清爽工程白色) -->
+  <header class="h-16 bg-white/95 border-b border-slate-200 px-6 flex items-center justify-between z-30 shrink-0 shadow-xs backdrop-blur-md">
+    
+    <!-- 左：纯净标题 -->
+    <div class="flex items-center space-x-3.5">
+      <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm border border-slate-700">
+        <i class="fa-solid fa-circle-nodes text-lg text-sky-400"></i>
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <h1 class="text-base font-black tracking-widest text-slate-900 font-cinzel">
+            中央处理器
+          </h1>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-300 font-mono-sci font-bold">
+            三大主盘系统
+          </span>
+        </div>
+        <p class="text-[10px] text-slate-500 font-mono-sci">攻击盘 · 工厂盘 · 辅助盘</p>
+      </div>
+    </div>
+
+    <!-- 中：境界选择 & 主特化盘单选 -->
+    <div class="flex items-center space-x-4">
+      <!-- 境界切换 -->
+      <div class="flex items-center bg-slate-100 border border-slate-200 rounded-xl p-1 space-x-1 text-xs font-bold shadow-inner">
+        <span class="text-[10px] text-slate-500 px-2 font-mono-sci">境界:</span>
+        <button onclick="setRealm('qi')" id="btn_realm_qi" class="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-mono-sci shadow-xs transition" title="练气期：最大1个2环，其余2个1环">
+          练气期 <span class="text-[10px] text-sky-300 font-normal">(主2环/次1环)</span>
+        </button>
+        <button onclick="setRealm('foundation')" id="btn_realm_foundation" class="px-2.5 py-1 rounded-lg bg-white text-slate-700 hover:text-slate-900 font-mono-sci transition border border-slate-200" title="筑基期：最大1个3环，其余2个2环">
+          筑基期 <span class="text-[10px] text-amber-600 font-normal">(主3环/次2环)</span>
+        </button>
+        <button onclick="setRealm('core')" id="btn_realm_core" class="px-2.5 py-1 rounded-lg bg-white text-slate-700 hover:text-slate-900 font-mono-sci transition border border-slate-200" title="金丹期：最大1个4环，其余2个3环">
+          金丹期 <span class="text-[10px] text-purple-600 font-normal">(主4环/次3环)</span>
+        </button>
+      </div>
+
+      <!-- 主特化盘单选 -->
+      <div class="flex items-center bg-slate-100 border border-slate-200 rounded-xl p-1 space-x-1 text-xs font-bold shadow-inner">
+        <span class="text-[10px] text-slate-500 px-2 font-mono-sci">主修特化:</span>
+        <button onclick="setSpecialization('combat')" id="btn_spec_combat" class="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-mono-sci shadow-xs transition flex items-center space-x-1.5" title="主修攻击盘：攻击盘享有当前境界最大环数">
+          <i class="fa-solid fa-swords text-xs"></i>
+          <span>主修攻击盘</span>
+        </button>
+        <button onclick="setSpecialization('industry')" id="btn_spec_industry" class="px-2.5 py-1 rounded-lg bg-white text-slate-700 hover:text-amber-700 font-mono-sci transition border border-slate-200 flex items-center space-x-1.5" title="主修工厂盘：工厂盘享有当前境界最大环数">
+          <i class="fa-solid fa-industry text-xs"></i>
+          <span>主修工厂盘</span>
+        </button>
+        <button onclick="setSpecialization('support')" id="btn_spec_support" class="px-2.5 py-1 rounded-lg bg-white text-slate-700 hover:text-sky-700 font-mono-sci transition border border-slate-200 flex items-center space-x-1.5" title="主修辅助盘：辅助盘享有当前境界最大环数">
+          <i class="fa-solid fa-shield-halved text-xs"></i>
+          <span>主修辅助盘</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 右：重置角度 + 清空 -->
+    <div class="flex items-center space-x-2 shrink-0">
+      <button onclick="resetAllRotations()" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-300 text-xs font-bold text-slate-700 transition shadow-xs flex items-center space-x-1.5" title="重置各环旋转角度为 0°">
+        <i class="fa-solid fa-compass text-slate-500"></i>
+        <span>重置角度</span>
+      </button>
+
+      <button onclick="clearBoard()" class="px-3 py-1.5 rounded-lg bg-white hover:bg-rose-50 border border-slate-300 hover:border-rose-400 text-xs font-bold text-slate-700 hover:text-rose-600 transition shadow-xs flex items-center space-x-1.5" title="清空盘面所有芯片">
+        <i class="fa-solid fa-trash-can"></i>
+        <span>清空</span>
+      </button>
+    </div>
+
+  </header>
+
+  <!-- 主体区域 -->
+  <main class="flex-1 flex overflow-hidden relative">
+    
+    <!-- 左侧构件库 (纯白工程风) -->
+    <aside id="leftPanel" class="w-80 bg-white border-r border-slate-200 flex flex-col z-20 shrink-0 shadow-lg collapsible-sidebar collapsed">
+      <div class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-shapes text-sky-600 text-sm"></i>
+          <span class="text-xs font-bold text-slate-800 tracking-wider font-mono-sci uppercase">芯片与构件库</span>
+        </div>
+        <button onclick="toggleLeftPanel()" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition">
+          <i class="fa-solid fa-chevron-left text-xs"></i>
+        </button>
+      </div>
+
+      <!-- 分类标签 -->
+      <div class="p-2 border-b border-slate-200 flex items-center space-x-1 overflow-x-auto text-[11px] font-mono-sci no-scrollbar">
+        <button onclick="filterPalette('all')" id="tab_all" class="px-2 py-0.5 rounded bg-slate-900 text-white font-bold shrink-0">全部</button>
+        <button onclick="filterPalette('combat')" id="tab_combat" class="px-2 py-0.5 rounded bg-white text-rose-700 border border-rose-200 hover:border-rose-500 shrink-0 font-bold">⚔️ 战斗</button>
+        <button onclick="filterPalette('industry')" id="tab_industry" class="px-2 py-0.5 rounded bg-white text-amber-700 border border-amber-200 hover:border-amber-500 shrink-0 font-bold">⚙️ 工业</button>
+        <button onclick="filterPalette('mobility')" id="tab_mobility" class="px-2 py-0.5 rounded bg-white text-sky-700 border border-sky-200 hover:border-sky-500 shrink-0 font-bold">🛡️ 辅助</button>
+        <button onclick="filterPalette('shift')" id="tab_shift" class="px-2 py-0.5 rounded bg-white text-purple-700 border border-purple-200 hover:border-purple-500 shrink-0 font-bold">🪞 变轨</button>
+        <button onclick="filterPalette('keystone')" id="tab_keystone" class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 shrink-0 font-bold">💎 核心</button>
+      </div>
+
+      <!-- 芯片列表容器 -->
+      <div class="flex-1 overflow-y-auto p-3 space-y-2" id="paletteListContainer"></div>
+    </aside>
+
+    <!-- 中间：交互舞台 (白色工程制图底纹) -->
+    <section class="flex-1 relative flex flex-col items-center justify-center overflow-hidden blueprint-canvas" id="astrolabeStageSection">
+      
+      <!-- 点选装配状态悬浮条 -->
+      <div id="quickPlacementBanner" class="hidden absolute top-4 left-6 z-30 flex items-center space-x-3 bg-slate-900/95 text-white px-4 py-1.5 rounded-xl text-xs font-mono-sci shadow-xl border border-sky-400 backdrop-blur-md">
+        <span class="text-sky-300 font-bold flex items-center"><i class="fa-solid fa-crosshairs mr-1.5 text-sky-400 animate-spin"></i>已选构件：</span>
+        <span id="quickPlacementChipName" class="font-bold text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30"></span>
+        <span class="text-slate-300 text-[11px]">👉 点击任意插槽即可秒速放置</span>
+        <button onclick="cancelPaletteSelection()" class="ml-2 px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] text-slate-300 hover:text-white border border-slate-600 transition">取消 (Esc)</button>
+      </div>
+
+      <!-- 操作小贴士 -->
+      <div class="absolute top-4 right-6 z-20 flex items-center space-x-3 bg-white/95 border border-slate-300 px-4 py-1.5 rounded-xl text-xs text-slate-700 font-mono-sci shadow-sm backdrop-blur">
+        <span class="flex items-center text-sky-700 font-bold"><i class="fa-solid fa-arrow-left mr-1.5"></i>激光始发自右侧辅助盘</span>
+        <span class="text-slate-300">•</span>
+        <span class="flex items-center text-slate-900 font-bold"><i class="fa-solid fa-hand-pointer mr-1.5 text-sky-600"></i>点击/拖拽安装</span>
+        <span class="text-slate-300">•</span>
+        <span class="flex items-center text-slate-600"><i class="fa-solid fa-rotate-left mr-1"></i>按住圆盘直接旋转</span>
+      </div>
+
+      <!-- 1440x760 交互舞台 -->
+      <div id="diskStage" class="relative w-[1440px] h-[760px] shrink-0 my-auto scale-95 origin-center">
+        
+        <!-- 背景矢量绘图层 (三盘工程轮廓) -->
+        <svg id="astrolabeVectorBg" class="absolute inset-0 w-full h-full pointer-events-none z-0" viewBox="0 0 1440 760">
+          <!-- 静态导轨连接线 (辅助盘 ➔ 工厂盘 ➔ 攻击盘) -->
+          <line x1="880" y1="520" x2="560" y2="520" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4" />
+          <line x1="510" y1="410" x2="610" y2="330" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4" />
+
+          <!-- 动态三大盘激活外轮廓底晕层 -->
+          <g id="dynamicDiscBgGroup"></g>
+        </svg>
+
+        <!-- 三大盘醒目状态卡片 (点击可直接设为主修盘) -->
+        <!-- 攻击盘标牌 (720, 35) -->
+        <div class="absolute z-20 flex flex-col items-center cursor-pointer pointer-events-auto" style="left: 720px; top: 32px; transform: translateX(-50%);" onclick="setSpecialization('combat')" title="点击将攻击盘设为主修盘">
+          <div class="flex items-center space-x-2 bg-white px-3 py-1 rounded-full border border-rose-300 shadow-sm hover:shadow transition">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+            <span class="text-xs font-black text-rose-700">⚔️ 攻击盘</span>
+            <span id="badge_combat_status" class="text-[9px] font-mono-sci font-bold px-1.5 py-0.2 rounded bg-rose-100 text-rose-800">2环 · 主修</span>
+          </div>
+        </div>
+
+        <!-- 工厂盘标牌 (400, 700) -->
+        <div class="absolute z-20 flex flex-col items-center cursor-pointer pointer-events-auto" style="left: 400px; top: 698px; transform: translateX(-50%);" onclick="setSpecialization('industry')" title="点击将工厂盘设为主修盘">
+          <div class="flex items-center space-x-2 bg-white px-3 py-1 rounded-full border border-amber-300 shadow-sm hover:shadow transition">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+            <span class="text-xs font-black text-amber-700">⚙️ 工厂盘</span>
+            <span id="badge_industry_status" class="text-[9px] font-mono-sci font-bold px-1.5 py-0.2 rounded bg-slate-100 text-slate-600">1环 · 次级</span>
+          </div>
+        </div>
+
+        <!-- 辅助盘标牌 (1040, 700) -->
+        <div class="absolute z-20 flex flex-col items-center cursor-pointer pointer-events-auto" style="left: 1040px; top: 698px; transform: translateX(-50%);" onclick="setSpecialization('support')" title="点击将辅助盘设为主修盘">
+          <div class="flex items-center space-x-2 bg-white px-3 py-1 rounded-full border border-sky-300 shadow-sm hover:shadow transition">
+            <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+            <span class="text-xs font-black text-sky-700">🛡️ 辅助盘</span>
+            <span id="badge_support_status" class="text-[9px] font-mono-sci font-bold px-1.5 py-0.2 rounded bg-slate-100 text-slate-600">1环 · 次级</span>
+          </div>
+        </div>
+
+        <!-- 始发激光源 (右侧 x: 1380, y: 520) -->
+        <div id="rightEmitter" class="absolute z-30 flex items-center pointer-events-none" style="left: 1380px; top: 520px; transform: translateY(-50%);">
+          <div class="flex flex-col items-end mr-2">
+            <span class="text-[9px] font-mono-sci font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-300 shadow-sm whitespace-nowrap">
+              <i class="fa-solid fa-crosshairs text-sky-600 mr-1 animate-spin"></i>EMITTER 01 (始发源)
+            </span>
+            <span class="text-[8px] font-mono-sci text-sky-600 font-bold">180° WEST ➔</span>
+          </div>
+          <div class="w-9 h-9 rounded-full bg-slate-900 border-2 border-white shadow-md flex items-center justify-center pulse-emitter-modern">
+            <div class="w-3 h-3 rounded-full bg-sky-400"></div>
+          </div>
+          <div class="w-6 h-0.5 bg-slate-900 shadow"></div>
+        </div>
+
+        <!-- ✦ 核心极核插槽 (三大盘心) ✦ -->
+        <!-- 攻击盘极核 (720, 220) -->
+        <div id="hubSocket_combat" onclick="openKeystoneSelector('combat')" class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group" style="left: 720px; top: 220px; transform: translate(-50%, -50%);" title="【攻击极核插槽】点击配置核心特质插件">
+          <div class="relative w-11 h-11 rounded-full bg-white border-2 border-rose-500 flex items-center justify-center shadow-md transition-transform group-hover:scale-115">
+            <div class="absolute -inset-1 rounded-full border border-dashed border-rose-400/80 animate-spin" style="animation-duration: 18s;"></div>
+            <i id="crossCoreIcon_combat" class="fa-solid fa-swords text-rose-600 text-sm relative z-10"></i>
+          </div>
+          <div class="mt-1 px-1.5 py-0.5 rounded bg-white text-[8px] font-mono-sci font-bold text-rose-900 border border-rose-400 shadow-xs flex items-center space-x-1" id="crossCoreBadge_combat">
+            <i class="fa-solid fa-plus text-[7px] text-rose-500"></i>
+            <span id="crossCoreNameText_combat">攻击极核</span>
+          </div>
+        </div>
+
+        <!-- 工厂盘极核 (400, 520) -->
+        <div id="hubSocket_industry" onclick="openKeystoneSelector('industry')" class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group" style="left: 400px; top: 520px; transform: translate(-50%, -50%);" title="【工厂极核插槽】点击配置核心特质插件">
+          <div class="relative w-11 h-11 rounded-full bg-white border-2 border-amber-500 flex items-center justify-center shadow-md transition-transform group-hover:scale-115">
+            <div class="absolute -inset-1 rounded-full border border-dashed border-amber-400/80 animate-spin" style="animation-duration: 20s;"></div>
+            <i id="crossCoreIcon_industry" class="fa-solid fa-industry text-amber-600 text-sm relative z-10"></i>
+          </div>
+          <div class="mt-1 px-1.5 py-0.5 rounded bg-white text-[8px] font-mono-sci font-bold text-amber-900 border border-amber-400 shadow-xs flex items-center space-x-1" id="crossCoreBadge_industry">
+            <i class="fa-solid fa-plus text-[7px] text-amber-500"></i>
+            <span id="crossCoreNameText_industry">工厂极核</span>
+          </div>
+        </div>
+
+        <!-- 辅助盘极核 (1040, 520) -->
+        <div id="hubSocket_support" onclick="openKeystoneSelector('support')" class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group" style="left: 1040px; top: 520px; transform: translate(-50%, -50%);" title="【辅助极核插槽】点击配置核心特质插件">
+          <div class="relative w-11 h-11 rounded-full bg-white border-2 border-sky-500 flex items-center justify-center shadow-md transition-transform group-hover:scale-115">
+            <div class="absolute -inset-1 rounded-full border border-dashed border-sky-400/80 animate-spin" style="animation-duration: 22s;"></div>
+            <i id="crossCoreIcon_support" class="fa-solid fa-shield-halved text-sky-600 text-sm relative z-10"></i>
+          </div>
+          <div class="mt-1 px-1.5 py-0.5 rounded bg-white text-[8px] font-mono-sci font-bold text-sky-900 border border-sky-400 shadow-xs flex items-center space-x-1" id="crossCoreBadge_support">
+            <i class="fa-solid fa-plus text-[7px] text-sky-500"></i>
+            <span id="crossCoreNameText_support">辅助极核</span>
+          </div>
+        </div>
+
+        <!-- ✦ 最外围固定方位射出点组件层 ✦ -->
+        <div id="fixedEmissionPortsLayer" class="absolute inset-0 pointer-events-none z-25"></div>
+
+        <!-- 动态圆盘 DOM 环体 -->
+        <div id="ringsDomLayer" class="absolute inset-0 pointer-events-none z-10"></div>
+
+        <!-- 全局插槽 DOM 交互层 -->
+        <div id="slotsLayer" class="absolute inset-0 w-full h-full z-20 pointer-events-auto"></div>
+
+        <!-- 全局高能光束与跳格弧线 SVG 绘制层 -->
+        <svg id="opticalSvgLayer" class="absolute inset-0 w-full h-full pointer-events-none overflow-visible" style="z-index: 25;" viewBox="0 0 1440 760">
+          <g id="svgBeamsGroup"></g>
+          <g id="svgImpactsGroup"></g>
+          <g id="svgBridgeGroup"></g>
+        </svg>
+
+      </div>
+
+    </section>
+
+    <!-- 右侧：动力加成看板 (清爽白卡) -->
+    <aside id="rightPanel" class="w-80 bg-white border-l border-slate-200 flex flex-col z-20 shrink-0 shadow-lg collapsible-sidebar collapsed">
+      <div class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-chart-line text-amber-500 text-sm"></i>
+          <span class="text-xs font-bold text-slate-800 tracking-wider font-mono-sci uppercase">三大阵盘 · 动力看板</span>
+        </div>
+        <button onclick="toggleRightPanel()" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition">
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 space-y-4">
+        
+        <!-- 三盘联动贯通状态卡 -->
+        <div class="p-3.5 rounded-xl border transition-all" id="triResonanceCard">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold flex items-center text-slate-800">
+              <i class="fa-solid fa-circle-nodes mr-1.5 text-sky-600"></i>三盘贯通联动状态
+            </span>
+            <span id="triResonanceBadge" class="text-[9px] px-2 py-0.5 rounded font-mono-sci font-bold bg-slate-100 text-slate-600">
+              待导通
+            </span>
+          </div>
+          <p id="triResonanceDesc" class="text-[10px] text-slate-500 leading-relaxed">
+            激光自辅助盘射入，经外圈固定射出点贯通工厂盘与攻击盘，全盘属性享 <b>×1.5倍</b> 终极加成。
+          </p>
+        </div>
+
+        <!-- 1. 攻击盘属性统计 -->
+        <div class="p-3 rounded-xl bg-rose-50/50 border border-rose-200/80 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-rose-950 flex items-center">
+              <i class="fa-solid fa-swords text-rose-600 mr-1.5"></i>攻击盘总加成
+            </span>
+            <span id="combatActiveSlotCount" class="text-[9px] font-mono-sci bg-rose-100 text-rose-800 px-1.5 py-0.2 rounded font-bold">
+              0 槽激活
+            </span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-[11px] font-mono-sci">
+            <div class="p-2 bg-white rounded-lg border border-rose-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">攻击加成</div>
+              <div id="stat_atk" class="text-rose-600 font-bold text-sm">+0%</div>
+            </div>
+            <div class="p-2 bg-white rounded-lg border border-rose-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">暴击率</div>
+              <div id="stat_crit" class="text-rose-600 font-bold text-sm">+0%</div>
+            </div>
+            <div class="p-2 bg-white rounded-lg border border-rose-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">穿透破甲</div>
+              <div id="stat_penetration" class="text-rose-600 font-bold text-sm">+0%</div>
+            </div>
+            <div class="p-2 bg-white rounded-lg border border-rose-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">巡航飞剑</div>
+              <div id="stat_sword_funnel" class="text-rose-600 font-bold text-sm">+0把</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. 工厂盘属性统计 -->
+        <div class="p-3 rounded-xl bg-amber-50/50 border border-amber-200/80 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-950 flex items-center">
+              <i class="fa-solid fa-industry text-amber-600 mr-1.5"></i>工厂盘总加成
+            </span>
+            <span id="industryActiveSlotCount" class="text-[9px] font-mono-sci bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold">
+              0 槽激活
+            </span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-[11px] font-mono-sci">
+            <div class="p-2 bg-white rounded-lg border border-amber-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">制造速度</div>
+              <div id="stat_craft_speed" class="text-amber-600 font-bold text-sm">+0%</div>
+            </div>
+            <div class="p-2 bg-white rounded-lg border border-amber-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">开采增效</div>
+              <div id="stat_mining_speed" class="text-amber-600 font-bold text-sm">+0%</div>
+            </div>
+            <div class="p-2 bg-white rounded-lg border border-amber-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">能耗减免</div>
+              <div id="stat_power_cut" class="text-amber-600 font-bold text-sm">-0%</div>
+            </div>
+            <div class="p-2 bg-white rounded-lg border border-amber-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">传送带速</div>
+              <div id="stat_belt_speed" class="text-amber-600 font-bold text-sm">+0%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. 辅助盘属性统计 -->
+        <div class="p-3 rounded-xl bg-sky-50/50 border border-sky-200/80 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-sky-950 flex items-center">
+              <i class="fa-solid fa-shield-halved text-sky-600 mr-1.5"></i>辅助盘总加成
+            </span>
+            <span id="supportActiveSlotCount" class="text-[9px] font-mono-sci bg-sky-100 text-sky-800 px-1.5 py-0.2 rounded font-bold">
+              0 槽激活
+            </span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-[11px] font-mono-sci">
+            <div class="p-2 bg-white rounded-lg border border-sky-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">防御提升</div>
+              <div id="stat_def" class="text-sky-600 font-bold text-sm">+0%</div>
+            </div>
+            <div class="p-2 bg-white rounded-lg border border-sky-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">移动速度</div>
+              <div id="stat_speed" class="text-sky-600 font-bold text-sm">+0%</div>
+            </div>
+            <div class="p-2 bg-white rounded-lg border border-sky-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">气血生命</div>
+              <div id="stat_hp" class="text-sky-600 font-bold text-sm">+0</div>
+            </div>
+            <div class="p-2 bg-white rounded-lg border border-sky-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">飞行电池</div>
+              <div id="stat_flight_battery" class="text-sky-600 font-bold text-sm">+0%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 导通日志 -->
+        <div class="p-3 rounded-xl bg-slate-900 text-slate-100 text-[10px] font-mono-sci space-y-1">
+          <div class="text-slate-400 font-bold mb-1 border-b border-slate-700 pb-1 flex items-center justify-between">
+            <span>● 光路导通状态</span>
+            <span id="logStepCount">0 节点</span>
+          </div>
+          <div id="beamLogList" class="space-y-1 max-h-40 overflow-y-auto pr-1"></div>
+        </div>
+
+      </div>
+    </aside>
+
+  </main>
+
+  <script>
+    /* =========================================================================
+       1. 音频合成引擎
+       ========================================================================= */
+    const audio = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+      },
+      play(freq, type, duration, vol = 0.08) {
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch(e) {}
+      },
+      playRotate() { this.play(520, 'sine', 0.04, 0.04); },
+      playPlace() { this.play(880, 'triangle', 0.08, 0.07); },
+      playRemove() { this.play(330, 'sine', 0.08, 0.07); },
+      playSelect() { this.play(1040, 'sine', 0.05, 0.05); }
+    };
+
+    /* =========================================================================
+       2. 芯片与插件数据库 (规范化命名)
+       ========================================================================= */
+    const CHIP_SPECS = {
+  "t0_atk_1": {
+    "id": "t0_atk_1",
+    "step": 1,
+    "tier": 0,
+    "category": "combat",
+    "name": "攻击芯片 · 初级",
+    "tag": "攻击 · 1格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-atk border-amber-400",
+    "buff": {
+      "atk": 5
+    },
+    "buffDesc": "飞剑攻击 +5%",
+    "stepDesc": "顺步 +1 格",
+    "icon": "fa-khanda",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-50 text-amber-900 border-amber-400"
+  },
+  "t0_mine_1": {
+    "id": "t0_mine_1",
+    "step": 1,
+    "tier": 0,
+    "category": "industry",
+    "name": "采矿芯片 · 初级",
+    "tag": "采矿 · 1格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-amber-400",
+    "buff": {
+      "mining_speed": 5
+    },
+    "buffDesc": "采矿速度 +5%",
+    "stepDesc": "顺步 +1 格",
+    "icon": "fa-trowel-bricks",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-50 text-amber-900 border-amber-400"
+  },
+  "t0_speed_1": {
+    "id": "t0_speed_1",
+    "step": 1,
+    "tier": 0,
+    "category": "mobility",
+    "name": "移速芯片 · 初级",
+    "tag": "移速 · 1格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-amber-400",
+    "buff": {
+      "speed": 5
+    },
+    "buffDesc": "移动速度 +5%",
+    "stepDesc": "顺步 +1 格",
+    "icon": "fa-wind",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-50 text-amber-900 border-amber-400"
+  },
+  "t0_craft_1": {
+    "id": "t0_craft_1",
+    "step": 1,
+    "tier": 0,
+    "category": "industry",
+    "name": "制造芯片 · 初级",
+    "tag": "制造 · 1格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-amber-400",
+    "buff": {
+      "craft_speed": 5
+    },
+    "buffDesc": "制造速度 +5%",
+    "stepDesc": "顺步 +1 格",
+    "icon": "fa-gears",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-50 text-amber-900 border-amber-400"
+  },
+  "t0_atspd_2": {
+    "id": "t0_atspd_2",
+    "step": 2,
+    "tier": 0,
+    "category": "combat",
+    "name": "攻速芯片 · 初级",
+    "tag": "攻速 · 2格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-atk border-sky-400",
+    "buff": {
+      "atspd": 8
+    },
+    "buffDesc": "攻击速度 +8%",
+    "stepDesc": "顺步 +2 格",
+    "icon": "fa-bolt-lightning",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-900 border-sky-400"
+  },
+  "t0_def_2": {
+    "id": "t0_def_2",
+    "step": 2,
+    "tier": 0,
+    "category": "combat",
+    "name": "防御芯片 · 初级",
+    "tag": "防御 · 2格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-sky-400",
+    "buff": {
+      "def": 8
+    },
+    "buffDesc": "阵法防御 +8%",
+    "stepDesc": "顺步 +2 格",
+    "icon": "fa-shield-halved",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-900 border-sky-400"
+  },
+  "t0_belt_2": {
+    "id": "t0_belt_2",
+    "step": 2,
+    "tier": 0,
+    "category": "industry",
+    "name": "传送带芯片 · 初级",
+    "tag": "传送 · 2格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-sky-400",
+    "buff": {
+      "belt_speed": 8
+    },
+    "buffDesc": "传送速度 +8%",
+    "stepDesc": "顺步 +2 格",
+    "icon": "fa-dolly",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-900 border-sky-400"
+  },
+  "t0_burn_2": {
+    "id": "t0_burn_2",
+    "step": 2,
+    "tier": 0,
+    "category": "industry",
+    "name": "燃烧芯片 · 初级",
+    "tag": "燃烧 · 2格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-sky-400",
+    "buff": {
+      "burn_speed": 8
+    },
+    "buffDesc": "燃烧能效 +8%",
+    "stepDesc": "顺步 +2 格",
+    "icon": "fa-fire",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-900 border-sky-400"
+  },
+  "t0_mine_2": {
+    "id": "t0_mine_2",
+    "step": 2,
+    "tier": 0,
+    "category": "industry",
+    "name": "采矿芯片 · 初级",
+    "tag": "采矿 · 2格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-sky-400",
+    "buff": {
+      "mining_speed": 8
+    },
+    "buffDesc": "采矿速度 +8%",
+    "stepDesc": "顺步 +2 格",
+    "icon": "fa-trowel-bricks",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-900 border-sky-400"
+  },
+  "t0_craft_2": {
+    "id": "t0_craft_2",
+    "step": 2,
+    "tier": 0,
+    "category": "industry",
+    "name": "制造芯片 · 初级",
+    "tag": "制造 · 2格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-sky-400",
+    "buff": {
+      "craft_speed": 8
+    },
+    "buffDesc": "制造速度 +8%",
+    "stepDesc": "顺步 +2 格",
+    "icon": "fa-gears",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-900 border-sky-400"
+  },
+  "t1_atk_3": {
+    "id": "t1_atk_3",
+    "step": 3,
+    "tier": 1,
+    "category": "combat",
+    "name": "攻击芯片 · 中级",
+    "tag": "攻击 · 3格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-atk border-slate-700",
+    "buff": {
+      "atk": 10
+    },
+    "buffDesc": "飞剑攻击 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-khanda",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_atspd_3": {
+    "id": "t1_atspd_3",
+    "step": 3,
+    "tier": 1,
+    "category": "combat",
+    "name": "攻速芯片 · 中级",
+    "tag": "攻速 · 3格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-atk border-slate-700",
+    "buff": {
+      "atspd": 10
+    },
+    "buffDesc": "攻击速度 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-bolt-lightning",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_def_3": {
+    "id": "t1_def_3",
+    "step": 3,
+    "tier": 1,
+    "category": "combat",
+    "name": "防御芯片 · 中级",
+    "tag": "防御 · 3格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-slate-700",
+    "buff": {
+      "def": 10
+    },
+    "buffDesc": "阵法防御 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-shield-halved",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_hp_3": {
+    "id": "t1_hp_3",
+    "step": 3,
+    "tier": 1,
+    "category": "combat",
+    "name": "生命芯片 · 中级",
+    "tag": "生命 · 3格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-slate-700",
+    "buff": {
+      "hp": 10
+    },
+    "buffDesc": "灵脉气血 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-heart-pulse",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_crit_3": {
+    "id": "t1_crit_3",
+    "step": 3,
+    "tier": 1,
+    "category": "combat",
+    "name": "暴击芯片 · 中级",
+    "tag": "暴击 · 3格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-slate-700",
+    "buff": {
+      "crit": 10
+    },
+    "buffDesc": "暴击几率 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-crosshairs",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_speed_3": {
+    "id": "t1_speed_3",
+    "step": 3,
+    "tier": 1,
+    "category": "mobility",
+    "name": "移速芯片 · 中级",
+    "tag": "移速 · 3格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-slate-700",
+    "buff": {
+      "speed": 10
+    },
+    "buffDesc": "移动速度 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-wind",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_stamina_3": {
+    "id": "t1_stamina_3",
+    "step": 3,
+    "tier": 1,
+    "category": "mobility",
+    "name": "体力芯片 · 中级",
+    "tag": "体力 · 3格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-slate-700",
+    "buff": {
+      "stamina": 10
+    },
+    "buffDesc": "御剑体力 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-person-running",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_battery_3": {
+    "id": "t1_battery_3",
+    "step": 3,
+    "tier": 1,
+    "category": "mobility",
+    "name": "电量芯片 · 初级",
+    "tag": "电量 · 3格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-belt border-slate-700",
+    "buff": {
+      "flight_battery": 15
+    },
+    "buffDesc": "飞行电池 +15%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-battery-half",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_inventory_3": {
+    "id": "t1_inventory_3",
+    "step": 3,
+    "tier": 1,
+    "category": "mobility",
+    "name": "背包芯片 · 中级",
+    "tag": "背包 · 3格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-def border-slate-700",
+    "buff": {
+      "inventory": 4
+    },
+    "buffDesc": "储物背包 +4格",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-box-open",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_craft_3": {
+    "id": "t1_craft_3",
+    "step": 3,
+    "tier": 1,
+    "category": "industry",
+    "name": "制造芯片 · 中级",
+    "tag": "制造 · 3格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-slate-700",
+    "buff": {
+      "craft_speed": 10
+    },
+    "buffDesc": "制造速度 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-gears",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_mine_3": {
+    "id": "t1_mine_3",
+    "step": 3,
+    "tier": 1,
+    "category": "industry",
+    "name": "采矿芯片 · 中级",
+    "tag": "采矿 · 3格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-slate-700",
+    "buff": {
+      "mining_speed": 10
+    },
+    "buffDesc": "采矿速度 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-trowel-bricks",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_burn_3": {
+    "id": "t1_burn_3",
+    "step": 3,
+    "tier": 1,
+    "category": "industry",
+    "name": "燃烧芯片 · 中级",
+    "tag": "燃烧 · 3格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-slate-700",
+    "buff": {
+      "burn_speed": 10
+    },
+    "buffDesc": "燃烧能效 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-fire",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_belt_3": {
+    "id": "t1_belt_3",
+    "step": 3,
+    "tier": 1,
+    "category": "industry",
+    "name": "传送带芯片 · 中级",
+    "tag": "传送 · 3格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-slate-700",
+    "buff": {
+      "belt_speed": 10
+    },
+    "buffDesc": "传送速度 +10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-dolly",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_power_3": {
+    "id": "t1_power_3",
+    "step": 3,
+    "tier": 1,
+    "category": "industry",
+    "name": "节能芯片 · 中级",
+    "tag": "节能 · 3格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-slate-700",
+    "buff": {
+      "power_cut": 10
+    },
+    "buffDesc": "用电能耗 -10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-bolt",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t1_pollute_3": {
+    "id": "t1_pollute_3",
+    "step": 3,
+    "tier": 1,
+    "category": "industry",
+    "name": "环保芯片 · 中级",
+    "tag": "环保 · 3格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-slate-700",
+    "buff": {
+      "pollute_cut": 10
+    },
+    "buffDesc": "污染排放 -10%",
+    "stepDesc": "顺步 +3 格",
+    "icon": "fa-leaf",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-slate-100 text-slate-800 border-slate-300"
+  },
+  "t2_atk_5": {
+    "id": "t2_atk_5",
+    "step": 5,
+    "tier": 2,
+    "category": "combat",
+    "name": "攻击芯片 · 中级",
+    "tag": "攻击 · 5格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-atk border-sky-400",
+    "buff": {
+      "atk": 20
+    },
+    "buffDesc": "飞剑攻击 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-khanda",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_atspd_5": {
+    "id": "t2_atspd_5",
+    "step": 5,
+    "tier": 2,
+    "category": "combat",
+    "name": "攻速芯片 · 高级",
+    "tag": "攻速 · 5格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-atk border-sky-400",
+    "buff": {
+      "atspd": 20
+    },
+    "buffDesc": "攻击速度 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-bolt-lightning",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_def_5": {
+    "id": "t2_def_5",
+    "step": 5,
+    "tier": 2,
+    "category": "combat",
+    "name": "防御芯片 · 高级",
+    "tag": "防御 · 5格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-sky-400",
+    "buff": {
+      "def": 20
+    },
+    "buffDesc": "阵法防御 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-shield-halved",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_hp_5": {
+    "id": "t2_hp_5",
+    "step": 5,
+    "tier": 2,
+    "category": "combat",
+    "name": "生命芯片 · 高级",
+    "tag": "生命 · 5格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-sky-400",
+    "buff": {
+      "hp": 20
+    },
+    "buffDesc": "灵脉气血 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-heart-pulse",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_crit_5": {
+    "id": "t2_crit_5",
+    "step": 5,
+    "tier": 2,
+    "category": "combat",
+    "name": "暴击芯片 · 高级",
+    "tag": "暴击 · 5格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-sky-400",
+    "buff": {
+      "crit": 20
+    },
+    "buffDesc": "暴击几率 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-crosshairs",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_sword_funnel_1": {
+    "id": "t2_sword_funnel_1",
+    "step": 5,
+    "tier": 2,
+    "category": "combat",
+    "name": "飞剑芯片 · 中级",
+    "tag": "飞剑 · 5格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-funnel border-sky-400",
+    "buff": {
+      "sword_funnel": 1
+    },
+    "buffDesc": "浮游飞剑 +1把",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-jet-fighter-up",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_speed_5": {
+    "id": "t2_speed_5",
+    "step": 5,
+    "tier": 2,
+    "category": "mobility",
+    "name": "移速芯片 · 高级",
+    "tag": "移速 · 5格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-sky-400",
+    "buff": {
+      "speed": 20
+    },
+    "buffDesc": "移动速度 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-wind",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_battery_5": {
+    "id": "t2_battery_5",
+    "step": 5,
+    "tier": 2,
+    "category": "mobility",
+    "name": "电量芯片 · 中级",
+    "tag": "电量 · 5格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-belt border-sky-400",
+    "buff": {
+      "flight_battery": 30
+    },
+    "buffDesc": "飞行电量 +30%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-battery-three-quarters",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_inventory_5": {
+    "id": "t2_inventory_5",
+    "step": 5,
+    "tier": 2,
+    "category": "mobility",
+    "name": "背包芯片 · 高级",
+    "tag": "背包 · 5格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-def border-sky-400",
+    "buff": {
+      "inventory": 8
+    },
+    "buffDesc": "储物背包 +8格",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-box-open",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_craft_5": {
+    "id": "t2_craft_5",
+    "step": 5,
+    "tier": 2,
+    "category": "industry",
+    "name": "制造芯片 · 中级",
+    "tag": "制造 · 5格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-sky-400",
+    "buff": {
+      "craft_speed": 20
+    },
+    "buffDesc": "制造速度 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-gears",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_mine_5": {
+    "id": "t2_mine_5",
+    "step": 5,
+    "tier": 2,
+    "category": "industry",
+    "name": "采矿芯片 · 中级",
+    "tag": "采矿 · 5格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-sky-400",
+    "buff": {
+      "mining_speed": 20
+    },
+    "buffDesc": "采矿速度 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-trowel-bricks",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_burn_5": {
+    "id": "t2_burn_5",
+    "step": 5,
+    "tier": 2,
+    "category": "industry",
+    "name": "燃烧芯片 · 高级",
+    "tag": "燃烧 · 5格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-sky-400",
+    "buff": {
+      "burn_speed": 20
+    },
+    "buffDesc": "燃烧能效 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-fire",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_belt_5": {
+    "id": "t2_belt_5",
+    "step": 5,
+    "tier": 2,
+    "category": "industry",
+    "name": "传送带芯片 · 高级",
+    "tag": "传送 · 5格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-sky-400",
+    "buff": {
+      "belt_speed": 20
+    },
+    "buffDesc": "传送速度 +20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-dolly",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_power_5": {
+    "id": "t2_power_5",
+    "step": 5,
+    "tier": 2,
+    "category": "industry",
+    "name": "节能芯片 · 高级",
+    "tag": "节能 · 5格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-sky-400",
+    "buff": {
+      "power_cut": 20
+    },
+    "buffDesc": "用电能耗 -20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-bolt",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t2_pollute_5": {
+    "id": "t2_pollute_5",
+    "step": 5,
+    "tier": 2,
+    "category": "industry",
+    "name": "环保芯片 · 高级",
+    "tag": "环保 · 5格",
+    "type": "step",
+    "shape": "shape-circle",
+    "matClass": "token-def border-sky-400",
+    "buff": {
+      "pollute_cut": 20
+    },
+    "buffDesc": "污染排放 -20%",
+    "stepDesc": "顺步 +5 格",
+    "icon": "fa-leaf",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-50 text-sky-800 border-sky-300"
+  },
+  "t3_atk_8": {
+    "id": "t3_atk_8",
+    "step": 8,
+    "tier": 3,
+    "category": "combat",
+    "name": "攻击芯片 · 高级",
+    "tag": "攻击 · 8格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-atk border-amber-400",
+    "buff": {
+      "atk": 30
+    },
+    "buffDesc": "飞剑攻击 +30%",
+    "stepDesc": "顺步 +8 格",
+    "icon": "fa-khanda",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-100 text-amber-900 border-amber-400 font-black"
+  },
+  "t3_sword_funnel_2": {
+    "id": "t3_sword_funnel_2",
+    "step": 8,
+    "tier": 3,
+    "category": "combat",
+    "name": "飞剑芯片 · 高级",
+    "tag": "飞剑 · 8格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-funnel border-amber-400",
+    "buff": {
+      "sword_funnel": 2
+    },
+    "buffDesc": "浮游飞剑 +2把",
+    "stepDesc": "顺步 +8 格",
+    "icon": "fa-jet-fighter-up",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-100 text-amber-900 border-amber-400 font-black"
+  },
+  "t3_battery_8": {
+    "id": "t3_battery_8",
+    "step": 8,
+    "tier": 3,
+    "category": "mobility",
+    "name": "电量芯片 · 高级",
+    "tag": "电量 · 8格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-belt border-amber-400",
+    "buff": {
+      "flight_battery": 50
+    },
+    "buffDesc": "飞行电量 +50%",
+    "stepDesc": "顺步 +8 格",
+    "icon": "fa-battery-full",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-100 text-amber-900 border-amber-400 font-black"
+  },
+  "t3_craft_8": {
+    "id": "t3_craft_8",
+    "step": 8,
+    "tier": 3,
+    "category": "industry",
+    "name": "制造芯片 · 高级",
+    "tag": "制造 · 8格",
+    "type": "step",
+    "shape": "shape-square",
+    "matClass": "token-belt border-amber-400",
+    "buff": {
+      "craft_speed": 30
+    },
+    "buffDesc": "制造速度 +30%",
+    "stepDesc": "顺步 +8 格",
+    "icon": "fa-gears",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-100 text-amber-900 border-amber-400 font-black"
+  },
+  "t3_mine_8": {
+    "id": "t3_mine_8",
+    "step": 8,
+    "tier": 3,
+    "category": "industry",
+    "name": "采矿芯片 · 高级",
+    "tag": "采矿 · 8格",
+    "type": "step",
+    "shape": "shape-diamond",
+    "matClass": "token-atk border-amber-400",
+    "buff": {
+      "mining_speed": 30
+    },
+    "buffDesc": "采矿速度 +30%",
+    "stepDesc": "顺步 +8 格",
+    "icon": "fa-trowel-bricks",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-amber-100 text-amber-900 border-amber-400 font-black"
+  },
+  "chip_triangle_in": {
+    "id": "chip_triangle_in",
+    "step": 0,
+    "tier": 1,
+    "category": "utility",
+    "name": "向心变轨镜 · 初级",
+    "tag": "变轨 · 向心",
+    "type": "shift_in",
+    "shape": "shape-triangle",
+    "matClass": "token-shift border-sky-400",
+    "buff": {},
+    "buffDesc": "导向内环 / 跨盘外挂",
+    "stepDesc": "折射光流至相邻内圈",
+    "icon": "fa-play",
+    "textColor": "text-slate-900",
+    "badgeColor": "bg-sky-100 text-sky-900 border-sky-400"
+  }
+};
+
+const KEYSTONE_TRAITS = {
+  "keystone_furnace": {
+    "id": "keystone_furnace",
+    "name": "熔铸核心插件 · 高级",
+    "category": "industry",
+    "tag": "工业 · 熔铸",
+    "icon": "fa-fire-burner",
+    "color": "amber",
+    "badgeClass": "bg-amber-100 text-amber-900 border-amber-400",
+    "buffDesc": "熔炼能耗 -30% · 制造速度 +25%",
+    "traitDesc": "全阵工业芯片≥4时触发无损淬火，废料产出减少 100%",
+    "buff": {
+      "power_cut": 30,
+      "craft_speed": 25
+    },
+    "beamColor": "gold"
+  },
+  "keystone_logistics": {
+    "id": "keystone_logistics",
+    "name": "物流核心插件 · 高级",
+    "category": "industry",
+    "tag": "工业 · 物流",
+    "icon": "fa-dolly",
+    "color": "sky",
+    "badgeClass": "bg-sky-100 text-sky-900 border-sky-400",
+    "buffDesc": "传送速度 +50% · 储物背包 +8格",
+    "traitDesc": "光束贯通全盘时，货运飞剑解锁空间折跃",
+    "buff": {
+      "belt_speed": 50,
+      "inventory": 8
+    },
+    "beamColor": "cyan"
+  },
+  "keystone_assembly": {
+    "id": "keystone_assembly",
+    "name": "量产核心插件 · 高级",
+    "category": "industry",
+    "tag": "工业 · 量产",
+    "icon": "fa-cubes-stacked",
+    "color": "emerald",
+    "badgeClass": "bg-emerald-100 text-emerald-900 border-emerald-400",
+    "buffDesc": "装配与制造基础产出 +30%",
+    "traitDesc": "全盘闭环时，每次生产有 15% 概率获得双倍成品暴击",
+    "buff": {
+      "craft_speed": 30
+    },
+    "beamColor": "emerald"
+  },
+  "keystone_leyline": {
+    "id": "keystone_leyline",
+    "name": "聚灵核心插件 · 高级",
+    "category": "industry",
+    "tag": "能源 · 聚灵",
+    "icon": "fa-bolt",
+    "color": "sky",
+    "badgeClass": "bg-sky-100 text-sky-900 border-sky-400",
+    "buffDesc": "全厂供能 +40% · 污染排放 -25%",
+    "traitDesc": "传输损耗清零，全阵星宿倍率额外 +0.3x",
+    "buff": {
+      "power_cut": 25,
+      "pollute_cut": 25
+    },
+    "beamColor": "cyan"
+  },
+  "keystone_void_reap": {
+    "id": "keystone_void_reap",
+    "name": "裂解核心插件 · 高级",
+    "category": "industry",
+    "tag": "环保 · 裂解",
+    "icon": "fa-atom",
+    "color": "purple",
+    "badgeClass": "bg-purple-100 text-purple-900 border-purple-400",
+    "buffDesc": "废料清零 · 宗门灵石产出 +35%",
+    "traitDesc": "废料与残渣直接转化为纯净灵精，产线永不故障",
+    "buff": {
+      "burn_speed": 35,
+      "pollute_cut": 30
+    },
+    "beamColor": "purple"
+  },
+  "keystone_sword_array": {
+    "id": "keystone_sword_array",
+    "name": "飞剑核心插件 · 高级",
+    "category": "combat",
+    "tag": "战伐 · 飞剑",
+    "icon": "fa-shield-virus",
+    "color": "purple",
+    "badgeClass": "bg-purple-100 text-purple-900 border-purple-400",
+    "buffDesc": "浮游飞剑 +2把 · 飞剑攻击 +40%",
+    "traitDesc": "每次步进从核位射出一道贯穿引雷剑气",
+    "buff": {
+      "sword_funnel": 2,
+      "atk": 40
+    },
+    "beamColor": "purple"
+  },
+  "keystone_aegis": {
+    "id": "keystone_aegis",
+    "name": "防御核心插件 · 高级",
+    "category": "combat",
+    "tag": "防卫 · 护盾",
+    "icon": "fa-shield-halved",
+    "color": "rose",
+    "badgeClass": "bg-rose-100 text-rose-900 border-rose-400",
+    "buffDesc": "阵法防御 +50% · 最大气血 +50%",
+    "traitDesc": "受到致命伤免疫死亡；全阵防御的 50% 转化为反震真伤",
+    "buff": {
+      "def": 50,
+      "hp": 50
+    },
+    "beamColor": "rose"
+  },
+  "keystone_alchemy": {
+    "id": "keystone_alchemy",
+    "name": "炼丹核心插件 · 高级",
+    "category": "living",
+    "tag": "生产 · 炼丹",
+    "icon": "fa-flask-round-potion",
+    "color": "amber",
+    "badgeClass": "bg-amber-100 text-amber-900 border-amber-400",
+    "buffDesc": "采矿产出 +25% · 御剑体力 +30%",
+    "traitDesc": "炼制高阶丹药耗材减半，全宗弟子修炼速度 +35%",
+    "buff": {
+      "mining_speed": 25,
+      "stamina": 30
+    },
+    "beamColor": "gold"
+  },
+  "keystone_pocket": {
+    "id": "keystone_pocket",
+    "name": "储物核心插件 · 高级",
+    "category": "mobility",
+    "tag": "身法 · 储物",
+    "icon": "fa-box-open",
+    "color": "indigo",
+    "badgeClass": "bg-indigo-100 text-indigo-900 border-indigo-400",
+    "buffDesc": "储物背包 +24格 · 采矿速度 +40%",
+    "traitDesc": "全图掉落物自动磁吸拾取，御剑体力消耗减半",
+    "buff": {
+      "inventory": 24,
+      "mining_speed": 40,
+      "stamina": 20
+    },
+    "beamColor": "cyan"
+  },
+  "keystone_divination": {
+    "id": "keystone_divination",
+    "name": "神机核心插件 · 高级",
+    "category": "mobility",
+    "tag": "探测 · 暴击",
+    "icon": "fa-eye",
+    "color": "amber",
+    "badgeClass": "bg-amber-100 text-amber-900 border-amber-400",
+    "buffDesc": "暴击几率 +25% · 飞行电池 +30%",
+    "traitDesc": "全图地脉高纯度矿点与远古秘境直接透视高亮",
+    "buff": {
+      "crit": 25,
+      "flight_battery": 30
+    },
+    "beamColor": "gold"
+  }
+};
+
+    /* =========================================================================
+       3. 三大主盘空间几何 (攻击盘·顶 / 工厂盘·左下 / 辅助盘·右下)
+       ========================================================================= */
+    const DISC_META = {
+      combat: {
+        id: 'combat',
+        name: '攻击盘',
+        cx: 720,
+        cy: 220,
+        color: '#e11d48',
+        theme: 'rose',
+        outAngleRad: Math.PI * 0.25 // 固定射出方位 (南东 45°)
+      },
+      industry: {
+        id: 'industry',
+        name: '工厂盘',
+        cx: 400,
+        cy: 520,
+        color: '#d97706',
+        theme: 'amber',
+        outAngleRad: -Math.PI * 0.25 // 固定射出方位 (北东 -45° 射向攻击盘)
+      },
+      support: {
+        id: 'support',
+        name: '辅助盘',
+        cx: 1040,
+        cy: 520,
+        color: '#0284c7',
+        theme: 'sky',
+        outAngleRad: Math.PI // 固定射出方位 (西向 180° 直射工厂盘)
+      }
+    };
+
+    const RING_TIER_DEFS = [
+      { tier: 1, radius: 48,  slotCount: 6,  label: '1环' },
+      { tier: 2, radius: 84,  slotCount: 8,  label: '2环' },
+      { tier: 3, radius: 120, slotCount: 12, label: '3环' },
+      { tier: 4, radius: 156, slotCount: 16, label: '4环' }
+    ];
+
+    /* =========================================================================
+       4. 境界规则与单选特化配置 (练气: 1主2环/2次1环; 筑基: 1主3环/2次2环; 金丹: 1主4环/2次3环)
+       ========================================================================= */
+    let CURRENT_REALM = 'qi'; // 'qi' | 'foundation' | 'core'
+    let SPECIALIZED_DISC = 'industry'; // 'combat' | 'industry' | 'support' (单选)
+
+    function getDiscRingCounts() {
+      const realmConfig = {
+        qi:         { primary: 2, secondary: 1 },
+        foundation: { primary: 3, secondary: 2 },
+        core:       { primary: 4, secondary: 3 }
+      }[CURRENT_REALM] || { primary: 2, secondary: 1 };
+
+      return {
+        combat:   (SPECIALIZED_DISC === 'combat')   ? realmConfig.primary : realmConfig.secondary,
+        industry: (SPECIALIZED_DISC === 'industry') ? realmConfig.primary : realmConfig.secondary,
+        support:  (SPECIALIZED_DISC === 'support')  ? realmConfig.primary : realmConfig.secondary
+      };
+    }
+
+    function setRealm(realmKey) {
+      if (['qi', 'foundation', 'core'].includes(realmKey)) {
+        CURRENT_REALM = realmKey;
+        ['qi', 'foundation', 'core'].forEach(k => {
+          const btn = document.getElementById('btn_realm_' + k);
+          if (!btn) return;
+          if (k === realmKey) {
+            btn.className = 'px-2.5 py-1 rounded-lg bg-slate-900 text-white font-mono-sci shadow-xs transition';
+          } else {
+            btn.className = 'px-2.5 py-1 rounded-lg bg-white text-slate-700 hover:text-slate-900 font-mono-sci transition border border-slate-200';
+          }
+        });
+        audio.playSelect();
+        applyDiscRingConfiguration();
+      }
+    }
+
+    function setSpecialization(discKey) {
+      if (['combat', 'industry', 'support'].includes(discKey)) {
+        SPECIALIZED_DISC = discKey;
+        const colorMap = {
+          combat: 'bg-rose-600 text-white',
+          industry: 'bg-amber-600 text-white',
+          support: 'bg-sky-600 text-white'
+        };
+        ['combat', 'industry', 'support'].forEach(k => {
+          const btn = document.getElementById('btn_spec_' + k);
+          if (!btn) return;
+          if (k === discKey) {
+            btn.className = `px-2.5 py-1 rounded-lg ${colorMap[k]} font-mono-sci shadow-xs transition flex items-center space-x-1.5`;
+          } else {
+            btn.className = 'px-2.5 py-1 rounded-lg bg-white text-slate-700 hover:text-slate-900 font-mono-sci transition border border-slate-200 flex items-center space-x-1.5';
+          }
+        });
+        audio.playSelect();
+        applyDiscRingConfiguration();
+      }
+    }
+
+    let DISK_RINGS = {};
+    let BOARD_SLOTS = {};
+
+    function initDiscRings() {
+      DISK_RINGS = {};
+      const counts = getDiscRingCounts();
+
+      for (const [discKey, discMeta] of Object.entries(DISC_META)) {
+        const activeCount = counts[discKey];
+        for (let t = 1; t <= 4; t++) {
+          const tierDef = RING_TIER_DEFS[t - 1];
+          const ringKey = `${discKey}_${t}`;
+          DISK_RINGS[ringKey] = {
+            key: ringKey,
+            discKey: discKey,
+            tier: t,
+            isActive: (t <= activeCount),
+            name: `${discMeta.name} · 第${t}环`,
+            cx: discMeta.cx,
+            cy: discMeta.cy,
+            radius: tierDef.radius,
+            slotCount: tierDef.slotCount,
+            currentAngle: 0,
+            slotOffset: 0
+          };
+        }
+      }
+    }
+
+    function initBoardSlots() {
+      const oldSlots = Object.assign({}, BOARD_SLOTS);
+      BOARD_SLOTS = {};
+
+      for (const [ringKey, ringMeta] of Object.entries(DISK_RINGS)) {
+        for (let i = 0; i < ringMeta.slotCount; i++) {
+          const slotKey = `${ringKey}_${i}`;
+          BOARD_SLOTS[slotKey] = {
+            slotKey: slotKey,
+            ringKey: ringKey,
+            discKey: ringMeta.discKey,
+            tier: ringMeta.tier,
+            slotIndex: i,
+            chip: (oldSlots[slotKey] ? oldSlots[slotKey].chip : null)
+          };
+        }
+      }
+    }
+
+    // 切换主修盘或境界后：动态更新活跃环与插槽
+    const TIER_SLOT_TOTALS = { 1: 6, 2: 14, 3: 26, 4: 42 };
+
+    function renderDynamicDiscBackgrounds() {
+      const g = document.getElementById('dynamicDiscBgGroup');
+      if (!g) return;
+      const counts = getDiscRingCounts();
+      let svgHtml = '';
+
+      for (const [discKey, meta] of Object.entries(DISC_META)) {
+        const activeTiers = counts[discKey];
+        const tierDef = RING_TIER_DEFS[activeTiers - 1];
+        const rBg = tierDef.radius + 18;
+        const isSpec = (SPECIALIZED_DISC === discKey);
+
+        svgHtml += `
+          <!-- ${meta.name} 动态激活范围底晕 (随活跃环半径自适应扩展) -->
+          <circle cx="${meta.cx}" cy="${meta.cy}" r="${rBg}" 
+                  stroke="${meta.color}" stroke-width="${isSpec ? '2' : '1.5'}" 
+                  stroke-dasharray="${isSpec ? 'none' : '4 3'}" 
+                  fill="${meta.bgFill}" fill-opacity="${isSpec ? '0.45' : '0.2'}" 
+                  class="transition-all duration-300" />
+        `;
+      }
+      g.innerHTML = svgHtml;
+    }
+
+    function applyDiscRingConfiguration() {
+      const counts = getDiscRingCounts();
+
+      for (const [ringKey, ring] of Object.entries(DISK_RINGS)) {
+        ring.isActive = (ring.tier <= counts[ring.discKey]);
+      }
+
+      // 实时更新三大盘状态角标与插槽总数
+      const updateBadge = (id, count, isSpec, color) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const totalSlots = TIER_SLOT_TOTALS[count] || 6;
+        if (isSpec) {
+          el.className = `text-[9px] font-mono-sci font-bold px-2 py-0.5 rounded-full bg-${color}-100 text-${color}-800 border border-${color}-300 shadow-xs`;
+          el.textContent = `${count}环 · ${totalSlots}插槽 (主修特化)`;
+        } else {
+          el.className = 'text-[9px] font-mono-sci font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200';
+          el.textContent = `${count}环 · ${totalSlots}插槽 (次级协同)`;
+        }
+      };
+
+      updateBadge('badge_combat_status', counts.combat, SPECIALIZED_DISC === 'combat', 'rose');
+      updateBadge('badge_industry_status', counts.industry, SPECIALIZED_DISC === 'industry', 'amber');
+      updateBadge('badge_support_status', counts.support, SPECIALIZED_DISC === 'support', 'sky');
+
+      renderDynamicDiscBackgrounds();
+      renderRingsDOM();
+      renderFixedEmissionPorts();
+      renderBoardSlots();
+      solveStepNetwork();
+    }
+
+    function getSlotWorldPos(ringKey, slotIndex) {
+      const ring = DISK_RINGS[ringKey];
+      if (!ring) return { x: 0, y: 0, angleDeg: 0 };
+      const baseDeg = -90 + (slotIndex * (360 / ring.slotCount));
+      const effectiveDeg = (baseDeg + ring.currentAngle + 360) % 360;
+      const rad = (effectiveDeg * Math.PI) / 180;
+      return {
+        x: ring.cx + ring.radius * Math.cos(rad),
+        y: ring.cy + ring.radius * Math.sin(rad),
+        angleDeg: effectiveDeg,
+        cx: ring.cx,
+        cy: ring.cy
+      };
+    }
+
+    /* =========================================================================
+       5. 动态圆盘 DOM 渲染与固定外围射出点
+       ========================================================================= */
+    function renderRingsDOM() {
+      const container = document.getElementById('ringsDomLayer');
+      if (!container) return;
+
+      const counts = getDiscRingCounts();
+      let html = '';
+
+      for (const [discKey, meta] of Object.entries(DISC_META)) {
+        const activeTiers = counts[discKey];
+
+        for (let t = 1; t <= 4; t++) {
+          const tierDef = RING_TIER_DEFS[t - 1];
+          const ringKey = `${discKey}_${t}`;
+          const ring = DISK_RINGS[ringKey];
+          const isActive = (t <= activeTiers);
+          const isOutermost = (t === activeTiers);
+          const size = tierDef.radius * 2;
+          const left = meta.cx - tierDef.radius;
+          const top = meta.cy - tierDef.radius;
+          const curDeg = ring ? ring.currentAngle : 0;
+
+          html += `
+            <div id="ringEl_${ringKey}" class="absolute rounded-full ring-trans transition-all duration-300 ${isActive ? 'pointer-events-auto' : 'pointer-events-none'}" 
+                 style="width: ${size}px; height: ${size}px; left: ${left}px; top: ${top}px; transform: rotate(${curDeg}deg); opacity: ${isActive ? '1' : '0'}; display: ${isActive ? 'block' : 'none'};">
+              
+              <!-- 纯净可靠的环道边界线 (外环实线，内环细实线/虚线) -->
+              <div class="absolute inset-0 rounded-full pointer-events-none" 
+                   style="border: ${isOutermost ? '2px solid ' + meta.color : '1.5px dashed ' + meta.faintColor};"></div>
+
+              <!-- 环名与旋转微调 [◀ R ▶] 按键 -->
+              <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center bg-white border border-slate-300 rounded-full px-1.5 py-0.2 text-[8px] font-mono-sci font-bold text-slate-700 shadow-sm pointer-events-auto z-15">
+                <button onclick="rotateRing('${ringKey}', -1); event.stopPropagation();" class="hover:text-sky-600 px-0.5" title="逆时针旋转5°">◀</button>
+                <span class="mx-0.5 font-bold" style="color: ${meta.color}">R${t}</span>
+                <button onclick="rotateRing('${ringKey}', 1); event.stopPropagation();" class="hover:text-sky-600 px-0.5" title="顺时针旋转5°">▶</button>
+              </div>
+
+            </div>
+          `;
+        }
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ✦ 核心实现：射出点在最外围的那个固定方位射出 ✦
+    function renderFixedEmissionPorts() {
+      const container = document.getElementById('fixedEmissionPortsLayer');
+      if (!container) return;
+
+      const counts = getDiscRingCounts();
+      let html = '';
+
+      for (const [discKey, meta] of Object.entries(DISC_META)) {
+        const outTier = counts[discKey];
+        const outTierDef = RING_TIER_DEFS[outTier - 1];
+        const r = outTierDef.radius;
+        const rad = meta.outAngleRad;
+
+        // 固定空间坐标点 (随最外环半径变化，但方位角严格固定)
+        const portX = meta.cx + r * Math.cos(rad);
+        const portY = meta.cy + r * Math.sin(rad);
+
+        html += `
+          <div class="absolute z-25 flex items-center pointer-events-none" 
+               style="left: ${portX}px; top: ${portY}px; transform: translate(-50%, -50%);"
+               title="【${meta.name} · 最外圈固定方位射出端口】">
+            <div class="w-6 h-6 rounded-full bg-slate-900 border-2 border-white shadow-md flex items-center justify-center">
+              <div class="w-2.5 h-2.5 rounded-full bg-sky-400 animate-ping"></div>
+            </div>
+            <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-1 rounded bg-slate-900 text-white text-[7px] font-mono-sci font-bold whitespace-nowrap border border-sky-400 shadow">
+              固定射出点
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    }
+
+    /* =========================================================================
+       6. 绚丽芯片与插槽层级渲染 (彻底消除遮挡，插槽随主修盘即刻响应)
+       ========================================================================= */
+    function renderBoardSlots() {
+      const container = document.getElementById('slotsLayer');
+      if (!container) return;
+
+      // 每次直接清空重绘以保证完全响应活跃环变化
+      container.innerHTML = '';
+      const counts = getDiscRingCounts();
+
+      for (const [slotKey, slotData] of Object.entries(BOARD_SLOTS)) {
+        const activeTiers = counts[slotData.discKey];
+        if (slotData.tier > activeTiers) {
+          // 当前环未激活，彻底不渲染
+          continue;
+        }
+
+        const ring = DISK_RINGS[slotData.ringKey];
+        if (!ring) continue;
+
+        const pos = getSlotWorldPos(slotData.ringKey, slotData.slotIndex);
+        let hasChip = !!slotData.chip;
+        if (hasChip && !CHIP_SPECS[slotData.chip]) {
+          slotData.chip = null;
+          hasChip = false;
+        }
+
+        const slotEl = document.createElement('div');
+        slotEl.id = `slot_${slotKey}`;
+        slotEl.className = 'absolute -translate-x-1/2 -translate-y-1/2 rounded-full transition-transform duration-150';
+        slotEl.style.left = `${pos.x}px`;
+        slotEl.style.top = `${pos.y}px`;
+
+        // 拖拽
+        slotEl.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          slotEl.classList.add('scale-125');
+        });
+        slotEl.addEventListener('dragleave', () => {
+          slotEl.classList.remove('scale-125');
+        });
+        slotEl.addEventListener('drop', (e) => {
+          e.preventDefault();
+          slotEl.classList.remove('scale-125');
+          const typeId = e.dataTransfer.getData('text/plain');
+          placeChip(slotKey, typeId);
+        });
+
+        // 点击
+        slotEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (ACTIVE_SELECTED_CHIP) {
+            placeChip(slotKey, ACTIVE_SELECTED_CHIP);
+          } else if (BOARD_SLOTS[slotKey] && BOARD_SLOTS[slotKey].chip) {
+            removeChip(slotKey);
+          }
+        });
+
+        slotEl.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          removeChip(slotKey);
+        });
+
+        if (hasChip) {
+          // 芯片处于最高层级 (z-index: 35)
+          const spec = CHIP_SPECS[slotData.chip];
+          
+          let bgClass = 'chip-bg-combat';
+          if (spec.category === 'industry') bgClass = 'chip-bg-industry';
+          else if (spec.category === 'mobility') bgClass = 'chip-bg-mobility';
+          else if (spec.type === 'direction' || spec.type === 'split') bgClass = 'chip-bg-shift';
+          else if (spec.type === 'keystone') bgClass = 'chip-bg-keystone';
+
+          slotEl.style.zIndex = '35';
+          slotEl.style.width = '32px';
+          slotEl.style.height = '32px';
+          slotEl.setAttribute('data-has-chip', 'true');
+          slotEl.innerHTML = `
+            <div class="relative w-full h-full flex items-center justify-center cursor-pointer group" title="${spec.name}\n${spec.buffDesc}\n${spec.stepDesc}\n【点击/右键】取回">
+              <div class="w-7 h-7 ${bgClass} rounded-lg flex items-center justify-center relative z-10 transition-transform group-hover:scale-115 text-white">
+                <i class="fa-solid ${spec.icon} text-xs pointer-events-none drop-shadow"></i>
+              </div>
+              <div class="pointer-events-none absolute -bottom-2 -right-2 px-1 rounded bg-slate-900 text-[7px] font-mono-sci text-white font-bold border border-sky-400 shadow z-20">
+                ${slotData.slotIndex + 1}
+              </div>
+              <button onclick="removeChip('${slotKey}'); event.stopPropagation();" class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-[9px] font-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow z-30" title="移除芯片">×</button>
+            </div>
+          `;
+        } else {
+          // 空插槽微孔 (z-index: 10，尺寸26px，清晰明了，且颜色严格与盘体主题一致)
+          const discMeta = DISC_META[slotData.discKey] || DISC_META.combat;
+          slotEl.setAttribute('data-has-chip', 'false');
+          slotEl.style.zIndex = '10';
+          slotEl.style.width = '26px';
+          slotEl.style.height = '26px';
+          slotEl.innerHTML = `
+            <div class="relative w-full h-full flex items-center justify-center group cursor-pointer" title="${ring.name} 第 ${slotData.slotIndex + 1} 槽\n【点击/拖拽】装配芯片">
+              <div class="w-full h-full rounded-full flex items-center justify-center transition-all bg-white border-2 border-dashed ${discMeta.slotBorder} shadow-xs group-hover:scale-115">
+                <div class="w-2 h-2 rounded-full ${discMeta.slotDot} pointer-events-none"></div>
+              </div>
+              <span class="pointer-events-none absolute -bottom-2.5 px-1 rounded bg-white text-[7px] font-mono-sci text-slate-700 font-bold border border-slate-300 shadow-xs">${slotData.slotIndex + 1}</span>
+            </div>
+          `;
+        }
+
+        container.appendChild(slotEl);
+      }
+    }
+
+    function placeChip(slotKey, typeId) {
+      if (!CHIP_SPECS[typeId] || !BOARD_SLOTS[slotKey]) return;
+      BOARD_SLOTS[slotKey].chip = typeId;
+      audio.playPlace();
+      renderBoardSlots();
+      solveStepNetwork();
+    }
+
+    function removeChip(slotKey) {
+      if (!BOARD_SLOTS[slotKey] || !BOARD_SLOTS[slotKey].chip) return;
+      BOARD_SLOTS[slotKey].chip = null;
+      audio.playRemove();
+      renderBoardSlots();
+      solveStepNetwork();
+    }
+
+    function clearBoard() {
+      for (const k in BOARD_SLOTS) {
+        BOARD_SLOTS[k].chip = null;
+      }
+      ACTIVE_SELECTED_CHIP = null;
+      renderPalette();
+      updateSelectedChipIndicator();
+      audio.playRemove();
+      renderBoardSlots();
+      solveStepNetwork();
+    }
+    window.clearBoard = clearBoard;
+
+    /* =========================================================================
+       7. 鼠标拖拽平滑旋转 + 滚轮旋转
+       ========================================================================= */
+    function rotateRing(ringKey, deltaStep) {
+      const ring = DISK_RINGS[ringKey];
+      if (!ring) return;
+
+      const fineStep = 0.5;
+      ring.slotOffset = (ring.slotOffset + deltaStep * fineStep + ring.slotCount) % ring.slotCount;
+      const degStep = 360 / ring.slotCount;
+      ring.currentAngle = Number(((ring.slotOffset * degStep) % 360).toFixed(1));
+
+      const ringEl = document.getElementById(`ringEl_${ringKey}`);
+      if (ringEl) {
+        ringEl.style.transform = `rotate(${ring.currentAngle}deg)`;
+      }
+
+      audio.playRotate();
+      renderBoardSlots();
+      solveStepNetwork();
+    }
+
+    function resetAllRotations() {
+      for (const k in DISK_RINGS) {
+        DISK_RINGS[k].slotOffset = 0;
+        DISK_RINGS[k].currentAngle = 0;
+        const ringEl = document.getElementById(`ringEl_${k}`);
+        if (ringEl) ringEl.style.transform = 'rotate(0deg)';
+      }
+      audio.playRotate();
+      renderBoardSlots();
+      solveStepNetwork();
+    }
+
+    function initRingDirectDragging() {
+      const stage = document.getElementById('diskStage');
+      if (!stage) return;
+
+      // 滚轮旋转
+      stage.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const rect = stage.getBoundingClientRect();
+        const scale = rect.width / 1440;
+        const mouseX = (e.clientX - rect.left) / scale;
+        const mouseY = (e.clientY - rect.top) / scale;
+
+        for (const [discKey, meta] of Object.entries(DISC_META)) {
+          const dist = Math.hypot(mouseX - meta.cx, mouseY - meta.cy);
+          if (dist <= 180) {
+            const counts = getDiscRingCounts();
+            const activeCount = counts[discKey];
+            let bestRingKey = null;
+            let minDist = 9999;
+            for (let t = 1; t <= activeCount; t++) {
+              const rDef = RING_TIER_DEFS[t - 1];
+              const d = Math.abs(dist - rDef.radius);
+              if (d < minDist) {
+                minDist = d;
+                bestRingKey = `${discKey}_${t}`;
+              }
+            }
+            if (bestRingKey) {
+              rotateRing(bestRingKey, e.deltaY < 0 ? 1 : -1);
+            }
+            break;
+          }
+        }
+      }, { passive: false });
+
+      // 鼠标按下拖拽圆盘平滑旋转
+      let isDragging = false;
+      let activeRingKey = null;
+      let centerDragX = 0;
+      let centerDragY = 0;
+      let startAngle = 0;
+      let ringStartAngle = 0;
+
+      stage.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        if (e.target.closest('.keystone-hub-socket')) return;
+        const clickedSlot = e.target.closest('#slotsLayer > div');
+        if (clickedSlot) return; // 点击插槽不触发拖拽
+
+        const rect = stage.getBoundingClientRect();
+        const scale = rect.width / 1440;
+        const mouseX = (e.clientX - rect.left) / scale;
+        const mouseY = (e.clientY - rect.top) / scale;
+
+        for (const [discKey, meta] of Object.entries(DISC_META)) {
+          const dist = Math.hypot(mouseX - meta.cx, mouseY - meta.cy);
+          if (dist <= 180) {
+            const counts = getDiscRingCounts();
+            const activeCount = counts[discKey];
+            let bestRingKey = null;
+            let minDist = 9999;
+            for (let t = 1; t <= activeCount; t++) {
+              const rDef = RING_TIER_DEFS[t - 1];
+              const d = Math.abs(dist - rDef.radius);
+              if (d < minDist) {
+                minDist = d;
+                bestRingKey = `${discKey}_${t}`;
+              }
+            }
+            if (bestRingKey) {
+              activeRingKey = bestRingKey;
+              centerDragX = meta.cx;
+              centerDragY = meta.cy;
+              isDragging = true;
+              startAngle = Math.atan2(mouseY - centerDragY, mouseX - centerDragX) * 180 / Math.PI;
+              ringStartAngle = DISK_RINGS[bestRingKey].currentAngle;
+            }
+            break;
+          }
+        }
+
+        const onMouseMove = (me) => {
+          if (!isDragging || !activeRingKey) return;
+          const curMouseX = (me.clientX - rect.left) / scale;
+          const curMouseY = (me.clientY - rect.top) / scale;
+          const curAngle = Math.atan2(curMouseY - centerDragY, curMouseX - centerDragX) * 180 / Math.PI;
+          let delta = curAngle - startAngle;
+
+          if (delta > 180) delta -= 360;
+          if (delta < -180) delta += 360;
+
+          const ring = DISK_RINGS[activeRingKey];
+          ring.currentAngle = (ringStartAngle + delta + 360) % 360;
+          const degStep = 360 / ring.slotCount;
+          ring.slotOffset = Number((ring.currentAngle / degStep).toFixed(2));
+
+          const ringEl = document.getElementById(`ringEl_${activeRingKey}`);
+          if (ringEl) ringEl.style.transform = `rotate(${ring.currentAngle}deg)`;
+
+          renderBoardSlots();
+          solveStepNetwork();
+        };
+
+        const onMouseUp = () => {
+          isDragging = false;
+          activeRingKey = null;
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('mouseup', onMouseUp);
+        };
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+      });
+    }
+
+    /* =========================================================================
+       8. 芯片列表与点选装配
+       ========================================================================= */
+    let CURRENT_PALETTE_FILTER = 'all';
+    let ACTIVE_SELECTED_CHIP = null;
+
+    function filterPalette(filterKey) {
+      CURRENT_PALETTE_FILTER = filterKey;
+      ['all', 'combat', 'industry', 'mobility', 'shift', 'keystone'].forEach(k => {
+        const tab = document.getElementById('tab_' + k);
+        if (!tab) return;
+        if (k === filterKey) {
+          tab.className = 'px-2 py-0.5 rounded bg-slate-900 text-white font-bold shrink-0';
+        } else {
+          tab.className = 'px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200 hover:border-slate-800 shrink-0 font-bold';
+        }
+      });
+      renderPalette();
+    }
+
+    function selectPaletteChip(typeId) {
+      if (ACTIVE_SELECTED_CHIP === typeId) {
+        ACTIVE_SELECTED_CHIP = null;
+      } else {
+        ACTIVE_SELECTED_CHIP = typeId;
+        audio.playSelect();
+      }
+      renderPalette();
+      updateSelectedChipIndicator();
+    }
+
+    function cancelPaletteSelection() {
+      ACTIVE_SELECTED_CHIP = null;
+      renderPalette();
+      updateSelectedChipIndicator();
+    }
+
+    function updateSelectedChipIndicator() {
+      const banner = document.getElementById('quickPlacementBanner');
+      const nameEl = document.getElementById('quickPlacementChipName');
+      if (!banner || !nameEl) return;
+      if (ACTIVE_SELECTED_CHIP && CHIP_SPECS[ACTIVE_SELECTED_CHIP]) {
+        nameEl.textContent = CHIP_SPECS[ACTIVE_SELECTED_CHIP].name;
+        banner.classList.remove('hidden');
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && ACTIVE_SELECTED_CHIP) {
+        cancelPaletteSelection();
+      }
+    });
+
+    function renderPalette() {
+      const container = document.getElementById('paletteListContainer');
+      if (!container) return;
+
+      const keys = Object.keys(CHIP_SPECS);
+      let filteredKeys = keys;
+
+      if (CURRENT_PALETTE_FILTER === 'combat') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].category === 'combat');
+      } else if (CURRENT_PALETTE_FILTER === 'industry') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].category === 'industry');
+      } else if (CURRENT_PALETTE_FILTER === 'mobility') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].category === 'mobility');
+      } else if (CURRENT_PALETTE_FILTER === 'shift') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].type === 'direction' || CHIP_SPECS[k].type === 'split');
+      }
+
+      let html = '';
+      filteredKeys.forEach(typeId => {
+        const spec = CHIP_SPECS[typeId];
+        const stepBadge = spec.type === 'step' ? `+${spec.step}格` : '变轨规';
+        const isSelected = (ACTIVE_SELECTED_CHIP === typeId);
+
+        let bgClass = 'chip-bg-combat';
+        if (spec.category === 'industry') bgClass = 'chip-bg-industry';
+        else if (spec.category === 'mobility') bgClass = 'chip-bg-mobility';
+        else if (spec.type === 'direction' || spec.type === 'split') bgClass = 'chip-bg-shift';
+
+        html += `
+          <div class="p-2.5 rounded-xl transition cursor-pointer flex items-center space-x-3 group shadow-xs hover:shadow-sm ${
+            isSelected
+              ? 'bg-sky-50 border-2 border-sky-500 ring-2 ring-sky-300/50 shadow-md'
+              : 'bg-white border border-slate-200 hover:border-slate-800'
+          }"
+               draggable="true"
+               ondragstart="onPaletteDragStart(event, '${typeId}')"
+               onclick="selectPaletteChip('${typeId}')"
+               title="${spec.name}\n${spec.buffDesc}\n${spec.stepDesc}\n【点击】选中快速放置\n【拖拽】直接放入插槽">
+            
+            <div class="w-9 h-9 ${bgClass} rounded-lg flex items-center justify-center relative shrink-0 shadow text-white">
+              <i class="fa-solid ${spec.icon} text-sm drop-shadow"></i>
+            </div>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-800 truncate">${spec.name}</span>
+                <span class="text-[9px] font-mono-sci px-1.5 py-0.2 rounded font-bold ${spec.badgeColor}">
+                  ${stepBadge}
+                </span>
+                ${isSelected ? '<span class="text-[8.5px] font-mono-sci px-1.5 py-0.2 rounded font-bold bg-sky-500 text-white ml-1">待放置</span>' : ''}
+              </div>
+              <div class="flex items-center justify-between text-[10px] text-slate-500 mt-1">
+                <span>${spec.buffDesc}</span>
+                <span class="text-slate-400 font-mono-sci">${spec.stepDesc}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function onPaletteDragStart(e, typeId) {
+      audio.init();
+      e.dataTransfer.setData('text/plain', typeId);
+    }
+
+    /* =========================================================================
+       9. 极核特质配置
+       ========================================================================= */
+    const KEYSTONE_SLOTS = {
+      combat: 'keystone_sword_array',
+      industry: 'keystone_assembly',
+      support: 'keystone_logistics'
+    };
+
+    function updateAllKeystoneSocketsDOM() {
+      for (const discKey of ['combat', 'industry', 'support']) {
+        const ksId = KEYSTONE_SLOTS[discKey];
+        const ks = KEYSTONE_TRAITS[ksId];
+        const nameEl = document.getElementById('crossCoreNameText_' + discKey);
+        const iconEl = document.getElementById('crossCoreIcon_' + discKey);
+        if (ks) {
+          if (nameEl) nameEl.textContent = ks.name.split('·')[0].trim();
+          if (iconEl) iconEl.className = `fa-solid ${ks.icon} text-sm relative z-10`;
+        }
+      }
+    }
+
+    function openKeystoneSelector(discKey) {
+      filterPalette('keystone');
+      toggleLeftPanel(true);
+    }
+
+    /* =========================================================================
+       10. 激光光路求解与三盘贯通
+       ========================================================================= */
+    function solveStepNetwork() {
+      const svgBeams = document.getElementById('svgBeamsGroup');
+      const svgImpacts = document.getElementById('svgImpactsGroup');
+      const svgBridge = document.getElementById('svgBridgeGroup');
+      if (!svgBeams || !svgImpacts || !svgBridge) return;
+
+      svgBeams.innerHTML = '';
+      svgImpacts.innerHTML = '';
+      svgBridge.innerHTML = '';
+
+      const logList = document.getElementById('beamLogList');
+      if (logList) logList.innerHTML = '';
+
+      const logSteps = [];
+      let totalBuff = {
+        atk: 0, def: 0, hp: 0, crit: 0, speed: 0,
+        sword_funnel: 0, craft_speed: 0, mining_speed: 0, power_cut: 0, belt_speed: 0,
+        penetration: 0, flight_battery: 0
+      };
+
+      const counts = getDiscRingCounts();
+
+      // 1. 始发激光射向辅助盘 (1040, 520) 最外活跃环
+      const sTier = counts.support;
+      const sRing = DISK_RINGS[`support_${sTier}`];
+      const sEntryX = DISC_META.support.cx + sRing.radius;
+      const sEntryY = DISC_META.support.cy;
+
+      drawLaserLine(svgBridge, 1380, 520, sEntryX, sEntryY, '#0284c7', true);
+      drawImpactPoint(svgImpacts, sEntryX, sEntryY, '#0284c7');
+      logSteps.push(`⚡ 始发激光射入辅助盘最外环 (R${sTier}) 入瞳`);
+
+      let sActiveCount = 0;
+      for (let t = 1; t <= counts.support; t++) {
+        for (let s = 0; s < RING_TIER_DEFS[t - 1].slotCount; s++) {
+          const slot = BOARD_SLOTS[`support_${t}_${s}`];
+          if (slot && slot.chip) {
+            sActiveCount++;
+            accumulateBuff(totalBuff, CHIP_SPECS[slot.chip].buff);
+            const p1 = getSlotWorldPos(`support_${t}`, s);
+            const nextSlotIdx = (s + 1) % RING_TIER_DEFS[t - 1].slotCount;
+            const p2 = getSlotWorldPos(`support_${t}`, nextSlotIdx);
+            drawLaserLine(svgBeams, p1.x, p1.y, p2.x, p2.y, '#0ea5e9', false);
+          }
+        }
+      }
+      const supportConductive = (sActiveCount > 0);
+
+      // 2. 辅助盘固定外圈射出点 (西向 180°) ➔ 工厂盘 (400, 520)
+      const sEmitX = DISC_META.support.cx - sRing.radius;
+      const sEmitY = DISC_META.support.cy;
+
+      const iTier = counts.industry;
+      const iRing = DISK_RINGS[`industry_${iTier}`];
+      const iEntryX = DISC_META.industry.cx + iRing.radius;
+      const iEntryY = DISC_META.industry.cy;
+
+      let iActiveCount = 0;
+      let industryConductive = false;
+
+      if (supportConductive) {
+        drawLaserLine(svgBridge, sEmitX, sEmitY, iEntryX, iEntryY, '#0284c7', true);
+        drawImpactPoint(svgImpacts, iEntryX, iEntryY, '#d97706');
+        logSteps.push('✨ 辅助盘固定射出点导通 ➔ 激光注入工厂盘！');
+
+        for (let t = 1; t <= counts.industry; t++) {
+          for (let s = 0; s < RING_TIER_DEFS[t - 1].slotCount; s++) {
+            const slot = BOARD_SLOTS[`industry_${t}_${s}`];
+            if (slot && slot.chip) {
+              iActiveCount++;
+              accumulateBuff(totalBuff, CHIP_SPECS[slot.chip].buff);
+              const p1 = getSlotWorldPos(`industry_${t}`, s);
+              const nextSlotIdx = (s + 1) % RING_TIER_DEFS[t - 1].slotCount;
+              const p2 = getSlotWorldPos(`industry_${t}`, nextSlotIdx);
+              drawLaserLine(svgBeams, p1.x, p1.y, p2.x, p2.y, '#f59e0b', false);
+            }
+          }
+        }
+        industryConductive = (iActiveCount > 0);
+      } else {
+        logSteps.push('▲ 辅助盘未放置芯片，待激活后射向工厂盘');
+      }
+
+      // 3. 工厂盘固定外圈射出点 (北东 -45°) ➔ 攻击盘 (720, 220)
+      const iEmitX = DISC_META.industry.cx + iRing.radius * 0.707;
+      const iEmitY = DISC_META.industry.cy - iRing.radius * 0.707;
+
+      const cTier = counts.combat;
+      const cRing = DISK_RINGS[`combat_${cTier}`];
+      const cEntryX = DISC_META.combat.cx - cRing.radius * 0.707;
+      const cEntryY = DISC_META.combat.cy + cRing.radius * 0.707;
+
+      let cActiveCount = 0;
+      let combatConductive = false;
+
+      if (industryConductive) {
+        drawLaserLine(svgBridge, iEmitX, iEmitY, cEntryX, cEntryY, '#0284c7', true);
+        drawImpactPoint(svgImpacts, cEntryX, cEntryY, '#e11d48');
+        logSteps.push('🔥 工厂盘固定射出点导通 ➔ 激光注入攻击盘！');
+
+        for (let t = 1; t <= counts.combat; t++) {
+          for (let s = 0; s < RING_TIER_DEFS[t - 1].slotCount; s++) {
+            const slot = BOARD_SLOTS[`combat_${t}_${s}`];
+            if (slot && slot.chip) {
+              cActiveCount++;
+              accumulateBuff(totalBuff, CHIP_SPECS[slot.chip].buff);
+              const p1 = getSlotWorldPos(`combat_${t}`, s);
+              const nextSlotIdx = (s + 1) % RING_TIER_DEFS[t - 1].slotCount;
+              const p2 = getSlotWorldPos(`combat_${t}`, nextSlotIdx);
+              drawLaserLine(svgBeams, p1.x, p1.y, p2.x, p2.y, '#e11d48', false);
+            }
+          }
+        }
+        combatConductive = (cActiveCount > 0);
+      } else {
+        logSteps.push('▲ 工厂盘未导通，能量未能注入攻击盘');
+      }
+
+      // 4. 三盘全贯通共鸣判定
+      const isTri = (supportConductive && industryConductive && combatConductive);
+      if (isTri) {
+        logSteps.push('🌟 【三大阵盘全贯通】三盘全部激活！触发全局 ×1.5倍 最终倍率！');
+        for (const k in totalBuff) {
+          totalBuff[k] = Math.round(totalBuff[k] * 1.5);
+        }
+      }
+
+      updatePanels(totalBuff, isTri, sActiveCount, iActiveCount, cActiveCount, logSteps);
+    }
+
+    function accumulateBuff(target, source) {
+      if (!source) return;
+      for (const [k, v] of Object.entries(source)) {
+        if (target[k] !== undefined) target[k] += v;
+      }
+    }
+
+    function drawLaserLine(svg, x1, y1, x2, y2, color = '#0284c7', animated = true) {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', x1);
+      line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2);
+      line.setAttribute('y2', y2);
+      line.setAttribute('stroke', color);
+      line.setAttribute('stroke-width', '2.5');
+      line.setAttribute('class', animated ? 'laser-glow laser-core' : 'laser-glow');
+      svg.appendChild(line);
+    }
+
+    function drawImpactPoint(svg, cx, cy, color = '#0284c7') {
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', cx);
+      circle.setAttribute('cy', cy);
+      circle.setAttribute('r', '4');
+      circle.setAttribute('fill', color);
+      circle.setAttribute('class', 'animate-ping');
+      svg.appendChild(circle);
+    }
+
+    function updatePanels(buff, isTri, sCount, iCount, cCount, logSteps) {
+      const setTxt = (id, txt) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = txt;
+      };
+
+      setTxt('stat_atk', `+${buff.atk || 0}%`);
+      setTxt('stat_crit', `+${buff.crit || 0}%`);
+      setTxt('stat_penetration', `+${buff.penetration || 0}%`);
+      setTxt('stat_sword_funnel', `+${buff.sword_funnel || 0}把`);
+
+      setTxt('stat_craft_speed', `+${buff.craft_speed || 0}%`);
+      setTxt('stat_mining_speed', `+${buff.mining_speed || 0}%`);
+      setTxt('stat_power_cut', `-${buff.power_cut || 0}%`);
+      setTxt('stat_belt_speed', `+${buff.belt_speed || 0}%`);
+
+      setTxt('stat_def', `+${buff.def || 0}%`);
+      setTxt('stat_speed', `+${buff.speed || 0}%`);
+      setTxt('stat_hp', `+${buff.hp || 0}`);
+      setTxt('stat_flight_battery', `+${buff.flight_battery || 0}%`);
+
+      setTxt('combatActiveSlotCount', `${cCount} 槽激活`);
+      setTxt('industryActiveSlotCount', `${iCount} 槽激活`);
+      setTxt('supportActiveSlotCount', `${sCount} 槽激活`);
+
+      const card = document.getElementById('triResonanceCard');
+      const badge = document.getElementById('triResonanceBadge');
+      if (card && badge) {
+        if (isTri) {
+          card.className = 'p-3.5 rounded-xl border border-sky-400 bg-sky-50 shadow-md ring-2 ring-sky-300/40';
+          badge.className = 'text-[9px] px-2 py-0.5 rounded font-mono-sci font-bold bg-sky-600 text-white animate-pulse';
+          badge.textContent = '● 三盘贯通 ×1.5倍';
+        } else {
+          card.className = 'p-3.5 rounded-xl border border-slate-200 bg-slate-50';
+          badge.className = 'text-[9px] px-2 py-0.5 rounded font-mono-sci font-bold bg-slate-100 text-slate-600';
+          badge.textContent = '待导通';
+        }
+      }
+
+      const logList = document.getElementById('beamLogList');
+      const stepCountEl = document.getElementById('logStepCount');
+      if (logList) {
+        logList.innerHTML = logSteps.map(s => `<div class="leading-relaxed">${s}</div>`).join('');
+      }
+      if (stepCountEl) {
+        stepCountEl.textContent = `${logSteps.length} 状态`;
+      }
+    }
+
+    function toggleLeftPanel(forceOpen = null) {
+      const panel = document.getElementById('leftPanel');
+      if (!panel) return;
+      if (forceOpen === true) panel.classList.remove('collapsed');
+      else if (forceOpen === false) panel.classList.add('collapsed');
+      else panel.classList.toggle('collapsed');
+    }
+
+    function toggleRightPanel(forceOpen = null) {
+      const panel = document.getElementById('rightPanel');
+      if (!panel) return;
+      if (forceOpen === true) panel.classList.remove('collapsed');
+      else if (forceOpen === false) panel.classList.add('collapsed');
+      else panel.classList.toggle('collapsed');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initDiscRings();
+      initBoardSlots();
+      applyDiscRingConfiguration();
+      renderPalette();
+      initRingDirectDragging();
+      updateAllKeystoneSocketsDOM();
+
+      // 默认初始预设：在三盘各安插初始芯片展示通电效果
+      if (BOARD_SLOTS['support_1_0']) BOARD_SLOTS['support_1_0'].chip = 't0_atk_1';
+      if (BOARD_SLOTS['support_1_2']) BOARD_SLOTS['support_1_2'].chip = 't0_speed_1';
+      if (BOARD_SLOTS['industry_1_0']) BOARD_SLOTS['industry_1_0'].chip = 't0_craft_1';
+      if (BOARD_SLOTS['industry_1_3']) BOARD_SLOTS['industry_1_3'].chip = 't0_mine_1';
+      if (BOARD_SLOTS['combat_1_0']) BOARD_SLOTS['combat_1_0'].chip = 't1_atk_3';
+      if (BOARD_SLOTS['combat_1_4']) BOARD_SLOTS['combat_1_4'].chip = 't1_crit_3';
+
+      renderBoardSlots();
+      solveStepNetwork();
+    });
+  </script>
+</body>
+</html>

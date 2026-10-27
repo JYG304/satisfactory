@@ -1,0 +1,1019 @@
+[54332:41184:1027/171023.955:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:31] EACPolicyManager::Create C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625 1
+[54332:41184:1027/171023.972:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_store.cc:165] EACPolicyStore load from disk failed: no policy file exists at C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\Policy\Machine Policy
+[54332:41184:1027/171023.989:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_store.cc:253] EACPolicyStore policy loaded: result.status=EACPolicyLoadStatusForUma(1), scope=TOKEN
+[54332:41184:1027/171024.005:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_store.cc:263] EACPolicyStore policy load failed: No policy found on disk, scope=TOKEN
+[54332:41184:1027/171024.031:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:31] EACPolicyManager::Create C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625 1
+[54332:41184:1027/171024.031:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_store.cc:165] EACPolicyStore load from disk failed: no policy file exists at C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\Policy\Profile Machine Policy
+[54332:41184:1027/171024.055:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_store.cc:253] EACPolicyStore policy loaded: result.status=EACPolicyLoadStatusForUma(1), scope=PROFILE_MACHINE
+[54332:41184:1027/171024.056:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_store.cc:263] EACPolicyStore policy load failed: No policy found on disk, scope=PROFILE_MACHINE
+[54332:41184:1027/171024.081:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:31] EACPolicyManager::Create C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625 1
+[54332:41184:1027/171024.081:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_store.cc:165] EACPolicyStore load from disk failed: no policy file exists at C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\Policy\Web Content Filtering Tasks
+[54332:41184:1027/171024.106:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_store.cc:253] EACPolicyStore policy loaded: result.status=EACPolicyLoadStatusForUma(1), scope=UNKNOWN
+[54332:41184:1027/171024.106:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_store.cc:263] EACPolicyStore policy load failed: No policy found on disk, scope=UNKNOWN
+[54332:41184:1027/171024.130:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:61] EACPolicyManager initializing, scope=TOKEN 0x71e0000cc400
+[54332:41184:1027/171024.131:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:178] EACPolicyManager store loaded, scope=TOKEN
+[54332:41184:1027/171024.155:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:125] EACPolicyManager publishing policies, scope=TOKEN 0x71e0000cc400
+[54332:41184:1027/171024.156:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:61] EACPolicyManager initializing, scope=PROFILE_MACHINE 0x71e0000cc500
+[54332:41184:1027/171024.181:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:178] EACPolicyManager store loaded, scope=PROFILE_MACHINE
+[54332:41184:1027/171024.182:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:125] EACPolicyManager publishing policies, scope=PROFILE_MACHINE 0x71e0000cc500
+[54332:41184:1027/171024.183:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:61] EACPolicyManager initializing, scope=UNKNOWN 0x71e0000cc600
+[54332:41184:1027/171024.183:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:178] EACPolicyManager store loaded, scope=UNKNOWN
+[54332:41184:1027/171024.184:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:125] EACPolicyManager publishing policies, scope=UNKNOWN 0x71e0000cc600
+[54332:41184:1027/171024.185:VERBOSE1:components\policy\core\common\policy_service_impl.cc:641] Taking initial snapshot of POLICY_DOMAIN_CHROME policies
+[54332:41184:1027/171024.190:VERBOSE1:components\variations\service\variations_field_trial_creator.cc:96] VariationsSeedUsage:2
+[54332:41184:1027/171024.191:VERBOSE1:components\variations\service\variations_field_trial_creator.cc:551] VariationsSetupComplete
+[54332:41184:1027/171024.198:VERBOSE1:base\allocator\scheduler_loop_quarantine_config.cc:199] No entry found for browser/global.
+[54332:41184:1027/171024.199:VERBOSE1:base\allocator\scheduler_loop_quarantine_config.cc:199] No entry found for browser/*.
+[54332:41184:1027/171024.237:VERBOSE1:chrome\browser\media\webrtc\webrtc_event_log_manager.cc:126] WebRTC remote-bound event logging enabled.
+[54332:41184:1027/171024.239:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:246] ComponentUpdaterBridge: constructed
+[54332:41184:1027/171024.257:VERBOSE1:components\proxy_config\pref_proxy_config_tracker_impl.cc:510] 0x71e400194480: set chrome proxy config service to 0x71e4000bfcc0
+[54332:41184:1027/171024.268:VERBOSE1:components\device_event_log\device_event_log_impl.cc:260] [17:10:24.268] Display: EVENT: screen_win.cc:1361 Displays updated, count: 1
+[54332:41184:1027/171024.269:VERBOSE1:components\device_event_log\device_event_log_impl.cc:260] [17:10:24.269] Display: EVENT: screen_win.cc:1363 Display[2300000000] bounds=[0,0 800x600], workarea=[0,0 800x600], scale=1, rotation=0, panel_rotation=0 external detected
+[54332:41184:1027/171024.284:VERBOSE1:chrome\browser\component_updater\edge_llm_runtime_installer.cc:361] Edge LLM: platform compatibility check passed
+[54332:59084:1027/171024.285:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Edge On-Device Model Manifest
+[54332:41184:1027/171024.287:VERBOSE1:components\enterprise\browser\controller\chrome_browser_cloud_management_controller.cc:206] Cloud management controller initialization aborted as CBCM is not enabled. Please use the `--enable-chrome-browser-cloud-management` command line flag to enable it if you are not using the official Google Chrome build.
+[54332:41184:1027/171024.287:VERBOSE1:chrome\installer\util\install_util.cc:301] Existing version found: 156.0.4314.42
+[54332:41184:1027/171024.290:VERBOSE1:components\edge_share\core\common\edge_share_features.cc:74] IsEdgeShareEnhancedCopyPasteEnabled returning 1
+[54332:41184:1027/171024.291:VERBOSE1:chrome\browser\enterprise\platform_auth\platform_auth_policy_observer.cc:108] PlatformAuthProviderManager enabled: 0
+[54332:41184:1027/171024.298:VERBOSE1:components\policy\core\common\cloud\user_cloud_policy_store.cc:159] [policy_type=google/chrome/user] Initiating immediate policy load from disk
+[54332:41184:1027/171024.308:VERBOSE1:components\policy\core\common\cloud\user_cloud_policy_store.cc:290] [policy_type=google/chrome/user] No policy found on disk
+[54332:41184:1027/171024.331:VERBOSE1:components\policy\core\common\cloud\user_cloud_policy_store.cc:159] [policy_type=google/extension-install-cloud-policy/chrome/user] Initiating immediate policy load from disk
+[54332:41184:1027/171024.331:VERBOSE1:components\policy\core\common\cloud\user_cloud_policy_store.cc:290] [policy_type=google/extension-install-cloud-policy/chrome/user] No policy found on disk
+[54332:41184:1027/171024.332:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:31] EACPolicyManager::Create C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\Default 1
+[54332:41184:1027/171024.333:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_store.cc:165] EACPolicyStore load from disk failed: no policy file exists at C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\Default\Policy\User Policy
+[54332:41184:1027/171024.334:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_store.cc:253] EACPolicyStore policy loaded: result.status=EACPolicyLoadStatusForUma(1), scope=USER
+[54332:41184:1027/171024.334:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_store.cc:263] EACPolicyStore policy load failed: No policy found on disk, scope=USER
+[54332:41184:1027/171024.335:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:61] EACPolicyManager initializing, scope=USER 0x71e400092e00
+[54332:41184:1027/171024.336:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:178] EACPolicyManager store loaded, scope=USER
+[54332:41184:1027/171024.336:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:125] EACPolicyManager publishing policies, scope=USER 0x71e400092e00
+[54332:41184:1027/171024.337:VERBOSE1:components\policy\core\common\policy_service_impl.cc:641] Taking initial snapshot of POLICY_DOMAIN_CHROME policies
+[54332:41184:1027/171024.367:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:466] MutablePO2TS::MutablePO2TS
+[54332:41184:1027/171024.374:VERBOSE1:components\proxy_config\pref_proxy_config_tracker_impl.cc:510] 0x71e400197a80: set chrome proxy config service to 0x71e40044f180
+[54332:41184:1027/171024.378:VERBOSE1:components\edge_share\core\common\edge_share_features.cc:74] IsEdgeShareEnhancedCopyPasteEnabled returning 1
+[54332:41184:1027/171024.379:VERBOSE1:components\edge_share\core\common\edge_share_features.cc:74] IsEdgeShareEnhancedCopyPasteEnabled returning 1
+[54332:41184:1027/171024.380:VERBOSE1:chrome\browser\permissions\prediction_service\prediction_model_handler_provider_factory.cc:72] [PermissionsAI]: PredictionModelHandlerProviderFactory::BuildServiceInstanceForBrowserContext
+[54332:41184:1027/171024.391:VERBOSE1:components\proxy_config\pref_proxy_config_tracker_impl.cc:510] 0x71e400197600: set chrome proxy config service to 0x71e400453740
+[54332:41184:1027/171024.400:VERBOSE1:components\edge_share\core\common\edge_share_features.cc:74] IsEdgeShareEnhancedCopyPasteEnabled returning 1
+[54332:41184:1027/171024.404:VERBOSE1:base\win\edge_enterprise_util.cc:257] Checking if internal user
+[54332:41184:1027/171024.408:VERBOSE1:components\proxy_config\pref_proxy_config_tracker_impl.cc:510] 0x71e400195680: set chrome proxy config service to 0x71e4008ce640
+[54332:41184:1027/171024.418:VERBOSE1:chrome\browser\enterprise\reporting\cloud_profile_reporting_service_factory.cc:42] Checking if CloudProfileReporting feature is enabled: 1
+[54332:41184:1027/171024.419:VERBOSE1:chrome\browser\enterprise\reporting\cloud_profile_reporting_service_factory.cc:51] Creating CloudProfileReportingService for profile: Default
+[54332:69084:1027/171024.421:VERBOSE1:net\disk_cache\simple\simple_index_file.cc:624] Simple Cache Index is being restored from disk.
+[54332:29292:1027/171024.421:VERBOSE1:net\disk_cache\simple\simple_index_file.cc:624] Simple Cache Index is being restored from disk.
+[54332:41184:1027/171024.430:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] PrefsManager.LocalState.CachedReconnectURL =  (2026-10-27 09:10:24.430402 UTC)
+[54332:41184:1027/171024.441:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] PrefsManager.LocalState.CachedReconnectURLTime = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:24.441974 UTC)
+[54332:41184:1027/171024.442:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] PrefsManager.ProfilePrefs.CachedTargetToken =  (2026-10-27 09:10:24.442640 UTC)
+[54332:41184:1027/171024.443:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] PrefsManager.ProfilePrefs.CachedTargetTokenCV =  (2026-10-27 09:10:24.443253 UTC)
+[54332:41184:1027/171024.443:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] PrefsManager.ProfilePrefs.CachedTargetTokenTime = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:24.443906 UTC)
+[54332:41184:1027/171024.444:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] PrefsManager.LocalState.CachedReconnectURL =  (2026-10-27 09:10:24.444506 UTC)
+[54332:41184:1027/171024.445:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] PrefsManager.LocalState.CachedReconnectURLTime = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:24.445484 UTC)
+[54332:41184:1027/171024.445:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] PrefsManager.ProfilePrefs.CachedTargetToken =  (2026-10-27 09:10:24.446026 UTC)
+[54332:41184:1027/171024.446:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] PrefsManager.ProfilePrefs.CachedTargetTokenCV =  (2026-10-27 09:10:24.446578 UTC)
+[54332:41184:1027/171024.446:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] PrefsManager.ProfilePrefs.CachedTargetTokenTime = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:24.447115 UTC)
+[54332:41184:1027/171024.453:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized @gmail.com to @gmail.com
+[54332:41184:1027/171024.454:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized @gmail.com to @gmail.com
+[54332:41184:1027/171024.455:VERBOSE1:components\signin\core\browser\account_reconcilor.cc:145] AccountReconcilor::AccountReconcilor
+[54332:41184:1027/171024.455:VERBOSE1:components\signin\core\browser\account_reconcilor.cc:168] AccountReconcilor::Initialize
+[54332:41184:1027/171024.457:VERBOSE1:components\edge_coupons\core\browser\coupons_data_manager.cc:515] CouponsDataManager::CouponsDataManager is_bing_identity_valid_for_enroll_: 0 is_rebates_user_: 0
+[54332:29292:1027/171024.460:VERBOSE1:components\autofill\core\browser\data_model\edge_autofill_block_list_utils.cc:100] Failed to read file from edge_autofill_global_block_list.json
+[54332:41184:1027/171024.468:VERBOSE1:chrome\browser\edge_onramp\service\network_primary_browser_service.cc:813] WatchCrossDevicePrimaryBrowserFromPreference(): attaching listener
+[54332:41184:1027/171024.474:VERBOSE1:chrome\browser\edge_onramp\service\network_primary_browser_service.cc:847] TryLogCrossDevicePrimaryBrowserFromPreference(): data not available
+[54332:41184:1027/171024.477:VERBOSE1:extensions\browser\extension_registrar.cc:645] AddComponentExtension Microsoft Edge PDF Viewer
+[54332:41184:1027/171024.478:VERBOSE1:extensions\browser\extension_registrar.cc:647] Component extension Microsoft Edge PDF Viewer (mhjfbmdgcfjbbpaeojofohoefgiehjai) installing/upgrading from '' to 1
+[54332:6992:1027/171024.486:VERBOSE1:components\signin\public\webdata\token_service_table.cc:259] Loaded tokens: result = 3 ; number of tokens loaded = 0
+[54332:41184:1027/171024.523:VERBOSE1:extensions\browser\extension_registrar.cc:645] AddComponentExtension Microsoft Store
+[54332:41184:1027/171024.524:VERBOSE1:extensions\browser\extension_registrar.cc:647] Component extension Microsoft Store (iglcjdemknebjbklcgkfaebgojjphkec) installing/upgrading from '' to 0.2
+[54332:41184:1027/171024.525:VERBOSE1:extensions\browser\extension_registrar.cc:645] AddComponentExtension Microsoft Clipboard Extension
+[54332:41184:1027/171024.526:VERBOSE1:extensions\browser\extension_registrar.cc:647] Component extension Microsoft Clipboard Extension (dgiklkfkllikcanfonkcabmbdfmgleag) installing/upgrading from '' to 1.0
+[54332:41184:1027/171024.527:VERBOSE1:extensions\browser\extension_registrar.cc:645] AddComponentExtension WebRTC Extension
+[54332:41184:1027/171024.528:VERBOSE1:extensions\browser\extension_registrar.cc:647] Component extension WebRTC Extension (nkeimhogjdpnpccoofpliimaahmaaome) installing/upgrading from '' to 4.3.26
+[54332:41184:1027/171024.529:VERBOSE1:extensions\browser\extension_registrar.cc:645] AddComponentExtension Edge Copilot Bridge
+[54332:41184:1027/171024.529:VERBOSE1:extensions\browser\extension_registrar.cc:647] Component extension Edge Copilot Bridge (ndcpkimcihhghdcddljkfmmjccdmcmof) installing/upgrading from '' to 156.0.4312.0
+[54332:41184:1027/171024.531:VERBOSE1:extensions\browser\extension_registrar.cc:645] AddComponentExtension Edge 反馈
+[54332:41184:1027/171024.532:VERBOSE1:extensions\browser\extension_registrar.cc:647] Component extension Edge 反馈 (ihmafllikibpmigkcoadcmckbfhibefp) installing/upgrading from '' to 1.0.0.1
+[54332:41184:1027/171024.534:VERBOSE1:extensions\browser\extension_registrar.cc:645] AddComponentExtension Media Internals Services Extension
+[54332:41184:1027/171024.534:VERBOSE1:extensions\browser\extension_registrar.cc:647] Component extension Media Internals Services Extension (fikbjbembnmfhppjfnmfkahdhfohhjmg) installing/upgrading from '' to 2.0.0
+[54332:41184:1027/171024.536:VERBOSE1:extensions\browser\extension_registrar.cc:645] AddComponentExtension WebRTC Internals Extension
+[54332:41184:1027/171024.536:VERBOSE1:extensions\browser\extension_registrar.cc:647] Component extension WebRTC Internals Extension (ncbjelpjchkpbikbpkcchkhkblodoama) installing/upgrading from '' to 2.0.4
+[54332:41184:1027/171024.541:VERBOSE1:extensions\browser\extension_registrar.cc:645] AddComponentExtension Microsoft Voices
+[54332:41184:1027/171024.541:VERBOSE1:extensions\browser\extension_registrar.cc:647] Component extension Microsoft Voices (jdiccldimpdaibmpdkjnbmckianbfold) installing/upgrading from '' to 1.0
+[54332:41184:1027/171024.545:VERBOSE1:chrome\browser\profiles\edge_profile_manager.cc:1254] attempt to implicit sign in
+[54332:41184:1027/171024.546:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171024.547:VERBOSE1:chrome\browser\policy\edge_admin_center\eac_user_policy_signin_service.cc:330] EACUserPolicySigninService initializing on profile ready event
+[54332:41184:1027/171024.548:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:107] EACPolicyManager refreshing policies, scope=UNKNOWN reason=19 0x71e0000cc600
+[54332:41184:1027/171024.548:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:154] EACPolicyManager refresh complete: success=0, scope=UNKNOWN 0x71e0000cc600
+[54332:41184:1027/171024.549:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:125] EACPolicyManager publishing policies, scope=UNKNOWN 0x71e0000cc600
+[54332:41184:1027/171024.550:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:204] EACPolicyManager disconnecting client and clearing policy, scope=USER
+[54332:41184:1027/171024.550:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_store.cc:311] EACPolicyStore clearing policy, scope=USER
+[54332:41184:1027/171024.551:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:178] EACPolicyManager store loaded, scope=USER
+[54332:41184:1027/171024.551:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:125] EACPolicyManager publishing policies, scope=USER 0x71e400092e00
+[54332:41184:1027/171024.552:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:125] EACPolicyManager publishing policies, scope=USER 0x71e400092e00
+[54332:41184:1027/171024.555:VERBOSE1:chrome\browser\component_updater\hyphenation_component_installer.cc:168] Registering Hyphenation component.
+[54332:59084:1027/171024.555:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for CRLSet
+[54332:75848:1027/171024.561:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Hyphenation
+[54332:24780:1027/171024.561:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for MEI Preload
+[54332:78376:1027/171024.561:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Origin Trials
+[54332:34760:1027/171024.561:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Speech Recognition
+[54332:26316:1027/171024.561:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Subresource Filter Rules
+[54332:41184:1027/171024.561:VERBOSE1:chrome\browser\component_updater\trust_token_key_commitments_component_installer.cc:22] Registering Trust Token Key Commitments component.
+[54332:51572:1027/171024.561:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Trust Protection Lists
+[54332:24780:1027/171024.563:VERBOSE1:components\component_updater\component_installer.cc:372] Preinstalled component found for MEI Preload at C:\Program Files (x86)\Microsoft\Edge\Application\156.0.4314.42\MEIPreload with version 1.0.7.1652906823.
+[54332:48748:1027/171024.586:VERBOSE1:extensions\browser\content_verifier\content_verifier.cc:945] OnFetchComplete mhjfbmdgcfjbbpaeojofohoefgiehjai success:0
+[54332:79860:1027/171024.589:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Widevine Content Decryption Module
+[54332:6992:1027/171024.589:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Trust Token Key Commitments
+[54332:59084:1027/171024.589:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for PKI Metadata
+[54332:41184:1027/171024.589:VERBOSE1:chrome\browser\component_updater\edge_autofill_component_installer.cc:223] Registering Autofill component.
+[54332:75848:1027/171024.630:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Autofill Data
+[54332:48748:1027/171024.627:VERBOSE1:extensions\browser\content_verifier\content_verifier.cc:945] OnFetchComplete iglcjdemknebjbklcgkfaebgojjphkec success:0
+[54332:79860:1027/171024.629:VERBOSE1:components\component_updater\component_installer.cc:372] Preinstalled component found for Widevine Content Decryption Module at C:\Program Files (x86)\Microsoft\Edge\Application\156.0.4314.42\WidevineCdm with version 4.10.3050.1.
+[54332:51572:1027/171024.616:VERBOSE1:components\component_updater\component_installer.cc:372] Preinstalled component found for Trust Protection Lists at C:\Program Files (x86)\Microsoft\Edge\Application\156.0.4314.42\Trust Protection Lists with version 1.0.0.38.
+[54332:70136:1027/171024.630:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Edge AutoLaunch Protocols
+[54332:32448:1027/171024.630:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Zxcvbn Data Dictionaries
+[54332:41184:1027/171024.630:VERBOSE1:chrome\browser\component_updater\first_party_sets_component_installer.cc:40] Registering Related Website Sets component.
+[54332:78376:1027/171024.630:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Domain Actions
+[54332:34760:1027/171024.630:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Edge Data Protection Lists
+[54332:24780:1027/171024.630:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Well Known Domains
+[54332:48748:1027/171024.631:VERBOSE1:extensions\browser\content_verifier\content_verifier.cc:945] OnFetchComplete dgiklkfkllikcanfonkcabmbdfmgleag success:0
+[54332:6992:1027/171024.635:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Safety Tips
+[54332:79860:1027/171024.635:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Edge Shopping
+[54332:41184:1027/171024.635:VERBOSE1:components\component_updater\installer_policies\edge_sidebar_component_installer.cc:272] Feature enabled, registering Edge Sidebar component.
+[54332:48748:1027/171024.638:VERBOSE1:extensions\browser\content_verifier\content_verifier.cc:945] OnFetchComplete nkeimhogjdpnpccoofpliimaahmaaome success:0
+[54332:6992:1027/171024.645:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Edge Sidebar
+[54332:41184:1027/171024.645:VERBOSE1:components\component_updater\installer_policies\edge_sidebar_component_installer.cc:282] EdgeSidebar component registration completed
+[54332:48748:1027/171024.646:VERBOSE1:extensions\browser\content_verifier\content_verifier.cc:945] OnFetchComplete ndcpkimcihhghdcddljkfmmjccdmcmof success:0
+[54332:41184:1027/171024.655:VERBOSE1:components\component_updater\installer_policies\edge_entity_extraction_component_installer.cc:716] Feature enabled, registering Edge Entity Extraction component.
+[54332:48748:1027/171024.656:VERBOSE1:extensions\browser\content_verifier\content_verifier.cc:945] OnFetchComplete ihmafllikibpmigkcoadcmckbfhibefp success:0
+[54332:41184:1027/171024.657:VERBOSE1:components\component_updater\installer_policies\edge_entity_extraction_component_installer.cc:738] EdgeEntityExtraction component registration completed
+[54332:6992:1027/171024.657:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Edge Entity Extraction Config and Models
+[54332:48748:1027/171024.658:VERBOSE1:extensions\browser\content_verifier\content_verifier.cc:945] OnFetchComplete fikbjbembnmfhppjfnmfkahdhfohhjmg success:0
+[54332:41184:1027/171024.658:VERBOSE1:components\component_updater\installer_policies\edge_arbitration_component_installer.cc:226] Feature enabled, registering Edge Arbitration component.
+[54332:48748:1027/171024.659:VERBOSE1:extensions\browser\content_verifier\content_verifier.cc:945] OnFetchComplete ncbjelpjchkpbikbpkcchkhkblodoama success:0
+[54332:41184:1027/171024.661:VERBOSE1:components\component_updater\installer_policies\edge_arbitration_component_installer.cc:236] EdgeArbitration component registration completed
+[54332:6992:1027/171024.661:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for EdgeArbitration
+[54332:48748:1027/171024.661:VERBOSE1:extensions\browser\content_verifier\content_verifier.cc:945] OnFetchComplete jdiccldimpdaibmpdkjnbmckianbfold success:0
+[54332:41184:1027/171024.661:VERBOSE1:components\component_updater\installer_policies\edge_signal_triggers_component_installer.cc:344] Feature enabled, registering Edge Signal Triggers component.
+[54332:41184:1027/171024.663:VERBOSE1:components\component_updater\installer_policies\edge_signal_triggers_component_installer.cc:354] EdgeSignalTriggers component registration completed
+[54332:6992:1027/171024.663:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Edge Signal Triggers Config
+[54332:41184:1027/171024.664:VERBOSE1:components\component_updater\installer_policies\edge_3p_serp_component_installer.cc:225] Feature enabled, registering Edge 3P SERP component.
+[54332:41184:1027/171024.753:VERBOSE1:components\component_updater\installer_policies\edge_3p_serp_component_installer.cc:235] Edge3pSerp component registration completed
+[54332:79860:1027/171024.753:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Edge 3P SERP Config
+[54332:6992:1027/171024.753:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Provenance Data
+[54332:59084:1027/171024.753:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Provenance Data Input Vectors
+[54332:75848:1027/171024.753:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Provenance Data Allow List URLs
+[54332:32448:1027/171024.753:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Edge Travel
+[54332:70136:1027/171024.753:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Typosquatting
+[54332:24780:1027/171024.753:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Edge Video Super Resolution
+[54332:78376:1027/171024.753:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for EADPData Component
+[54332:34760:1027/171024.753:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Edge Wallet
+[54332:26316:1027/171024.753:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Web Notifications Deny List
+[54332:51572:1027/171024.753:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Workspaces Navigation
+[54332:31472:1027/171024.753:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Edge Notifications Component
+[54332:41184:1027/171024.753:VERBOSE1:components\component_updater\installer_policies\on_device_head_suggest_component_installer.cc:72] On Device Head Component will fetch model for locale: ZHCN500000
+[54332:6992:1027/171024.762:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for OnDeviceHeadSuggest
+[54332:79860:1027/171024.762:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Edge Improved Recovery
+[54332:41184:1027/171024.762:VERBOSE1:chrome\browser\component_updater\edge_language_detection_model_installer.cc:193] Registering Edge Language Detection Model component
+[54332:6992:1027/171024.764:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Edge Language Detection Model
+[54332:41184:1027/171024.764:VERBOSE1:chrome\browser\component_updater\edge_llm_runtime_installer.cc:361] Edge LLM: platform compatibility check passed
+[54332:41184:1027/171024.766:VERBOSE1:chrome\browser\browser_process_impl.cc:3248] BrowserProcessImpl::TryCreateEdgeKioskManager: called when not requested
+[54332:41184:1027/171024.769:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1753] AddKeepAlive(Default, kOffTheRecordProfile). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1)]
+[54332:41184:1027/171024.771:VERBOSE1:components\edge_share\core\common\edge_share_features.cc:74] IsEdgeShareEnhancedCopyPasteEnabled returning 1
+[54332:41184:1027/171024.789:VERBOSE1:chrome\browser\permissions\prediction_service\prediction_model_handler_provider_factory.cc:72] [PermissionsAI]: PredictionModelHandlerProviderFactory::BuildServiceInstanceForBrowserContext
+[54332:41184:1027/171024.791:VERBOSE1:components\proxy_config\pref_proxy_config_tracker_impl.cc:510] 0x71e400195f80: set chrome proxy config service to 0x71e400a80a40
+[54332:41184:1027/171024.816:VERBOSE1:chrome\browser\ui\edge_pinned_sites\pinned_sites_launcher.cc:225] Launch start, command_line='"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --headless=new --enable-logging=stderr --v=1 --inprivate --noerrdialogs --no-first-run --user-data-dir="C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625" --flag-switches-begin --flag-switches-end file:///e:/UE5/修仙工厂策划案/scratch/trapped.html'
+[54332:41184:1027/171024.816:VERBOSE1:chrome\browser\ui\startup\startup_browser_creator_edge_utils.cc:1320] SpotlightLaunch::Command line: file:///e:/UE5/修仙工厂策划案/scratch/trapped.html
+[54332:41184:1027/171024.839:VERBOSE1:chrome\browser\ui\startup\startup_browser_creator_edge_utils.cc:1352] SpotlightLaunch::Not a protocol launch.
+[54332:41184:1027/171024.877:VERBOSE1:chrome\browser\ui\views\edge_hub\hub_app_notifications_icon_view.cc:525] OnThemeChanged() start
+[54332:41184:1027/171024.878:VERBOSE1:chrome\browser\ui\views\edge_hub\hub_app_notifications_icon_view.cc:362] GetSizedIconImage() start, size=20
+[54332:41184:1027/171024.879:VERBOSE1:chrome\browser\ui\views\edge_hub\hub_app_notifications_icon_view.cc:509] AddedToWidget() start
+[54332:41184:1027/171024.886:VERBOSE1:chrome\browser\ui\views\edge_hub\hub_app_notifications_icon_view.cc:682] Layout() start
+[54332:41184:1027/171024.892:VERBOSE1:chrome\browser\ui\views\edge_hub\hub_app_notifications_icon_view.cc:525] OnThemeChanged() start
+[54332:41184:1027/171024.893:VERBOSE1:chrome\browser\ui\views\edge_hub\hub_app_notifications_icon_view.cc:362] GetSizedIconImage() start, size=20
+[54332:41184:1027/171024.896:VERBOSE1:chrome\browser\ui\views\edge_hub\hub_app_notifications_icon_view.cc:362] GetSizedIconImage() start, size=20
+[54332:41184:1027/171024.929:VERBOSE1:chrome\browser\edge_dual_engine\dual_engine_navigation_throttle_win.cc:891] Site doesn't exist on sitelist: url = file:///E:/UE5/%E4%BF%AE%E4%BB%99%E5%B7%A5%E5%8E%82%E7%AD%96%E5%88%92%E6%A1%88/scratch/trapped.html
+[54332:41184:1027/171024.933:VERBOSE1:components\edge_entity_extraction\core\browser\entity_extraction_manager.cc:821] EntityExtractionManager::AddProactiveObserverForTab- Started
+[54332:41184:1027/171024.934:VERBOSE1:components\edge_entity_extraction\core\browser\entity_extraction_manager.cc:821] EntityExtractionManager::AddProactiveObserverForTab- Started
+[54332:41184:1027/171024.934:VERBOSE1:components\edge_coupons\core\browser\coupons_data_manager.cc:1665] CouponsDataManager::IsRewardsUser is_bing_identity_valid_for_enroll_: 0 is_rebates_user_: 0
+[54332:41184:1027/171024.935:VERBOSE1:components\edge_coupons\core\browser\coupons_data_manager.cc:1496] CouponsDataManager::FetchRewardsUserInfo is_bing_identity_valid_for_enroll_: 0 is_rebates_user_: 0
+[54332:41184:1027/171024.936:VERBOSE1:chrome\browser\edge_copilot\controller\jit_assist\jit_assist_handler.cc:185] Prerequisites for Copilot JIT assist not met
+[54332:41184:1027/171024.959:VERBOSE1:chrome\browser\ui\views\omnibox\omnibox_popup_closer.cc:96] Closing omnibox popup with reason: kRevertAll
+[54332:41184:1027/171024.965:VERBOSE1:components\edge_entity_extraction\core\browser\entity_extraction_manager.cc:821] EntityExtractionManager::AddProactiveObserverForTab- Started
+[54332:41184:1027/171024.966:VERBOSE1:components\edge_coupons\core\browser\coupons_data_manager.cc:1665] CouponsDataManager::IsRewardsUser is_bing_identity_valid_for_enroll_: 0 is_rebates_user_: 0
+[54332:41184:1027/171024.966:VERBOSE1:components\edge_coupons\core\browser\coupons_data_manager.cc:1496] CouponsDataManager::FetchRewardsUserInfo is_bing_identity_valid_for_enroll_: 0 is_rebates_user_: 0
+[54332:41184:1027/171024.968:VERBOSE1:chrome\browser\ui\views\frame\windowed_find_bar_focus_proxy_view_win.cc:66] OnWidgetActivationChanged - active: 1 focused: 0
+[54332:41184:1027/171024.969:VERBOSE1:chrome\browser\ui\views\frame\windowed_find_bar_focus_proxy_view_win.cc:125] OnWillChangeFocus
+[54332:41184:1027/171024.969:VERBOSE1:chrome\browser\ui\views\edge_hub\hub_app_notifications_icon_view.cc:543] OnThemeChanged() start, focused_before=0x0, focused_now=0x0x71e40033ea00, HasFocus()=false, GetVisible()=false
+[54332:41184:1027/171024.972:VERBOSE1:chrome\browser\edge_shell\spotlight_launch_monitor_win.cc:189] Return IsObserverEnabled:0,IsTelemetryTrackingEnabled:0
+[54332:41184:1027/171025.002:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Edge On-Device Model Manifest
+[54332:41184:1027/171025.002:VERBOSE1:components\component_updater\component_updater_service.cc:194] CrxUpdateService starting up. First update attempt will take place in 60 s seconds. Next update attempt will take place in 36000 s seconds. 
+[54332:41184:1027/171025.013:VERBOSE1:chrome\browser\edge_dual_engine\dual_engine_service_win.cc:1274] DualEngineService::FetchXml - mode=1, url=https://go.microsoft.com/fwlink/?linkid=2171760&bucket=70, type=3
+[54332:41184:1027/171025.014:VERBOSE1:chrome\browser\edge_dual_engine\sitelist_downloader.cc:118] Starting download for https://go.microsoft.com/fwlink/?linkid=2171760&bucket=70
+[54332:41184:1027/171025.020:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:906] MutablePO2TS::OnWebDataServiceRequestDone. Result type: 6
+[54332:41184:1027/171025.021:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:985] MutablePO2TS::LoadAllCredentialsIntoMemory; 0 credential(s).
+[54332:41184:1027/171025.021:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171025.022:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized @gmail.com to @gmail.com
+[54332:41184:1027/171025.023:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized @gmail.com to @gmail.com
+[54332:41184:1027/171025.024:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171025.025:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized @gmail.com to @gmail.com
+[54332:41184:1027/171025.026:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized @gmail.com to @gmail.com
+[54332:41184:1027/171025.119:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1753] AddKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1), kExtensionUpdater (1)]
+[54332:41184:1027/171025.120:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1753] AddKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1), kExtensionUpdater (2)]
+[54332:41184:1027/171025.123:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for CRLSet
+[54332:41184:1027/171025.124:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Hyphenation
+[54332:41184:1027/171025.125:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Origin Trials
+[54332:41184:1027/171025.125:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Speech Recognition
+[54332:41184:1027/171025.126:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Subresource Filter Rules
+[54332:41184:1027/171025.127:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for MEI Preload
+[54332:41184:1027/171025.130:VERBOSE1:components\component_updater\component_installer.cc:679] Component ready, version 1.0.7.1652906823 in C:\Program Files (x86)\Microsoft\Edge\Application\156.0.4314.42\MEIPreload
+[54332:41184:1027/171025.131:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Trust Token Key Commitments
+[54332:41184:1027/171025.132:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for PKI Metadata
+[54332:41184:1027/171025.133:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Autofill Data
+[54332:41184:1027/171025.134:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Widevine Content Decryption Module
+[54332:41184:1027/171025.136:VERBOSE1:components\component_updater\component_installer.cc:679] Component ready, version 4.10.3050.1 in C:\Program Files (x86)\Microsoft\Edge\Application\156.0.4314.42\WidevineCdm
+[54332:41184:1027/171025.136:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Trust Protection Lists
+[54332:41184:1027/171025.137:VERBOSE1:components\component_updater\component_installer.cc:679] Component ready, version 1.0.0.38 in C:\Program Files (x86)\Microsoft\Edge\Application\156.0.4314.42\Trust Protection Lists
+[54332:41184:1027/171025.139:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Edge AutoLaunch Protocols
+[54332:41184:1027/171025.141:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Zxcvbn Data Dictionaries
+[54332:41184:1027/171025.141:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Domain Actions
+[54332:41184:1027/171025.142:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Edge Data Protection Lists
+[54332:41184:1027/171025.143:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Well Known Domains
+[54332:41184:1027/171025.143:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Safety Tips
+[54332:41184:1027/171025.144:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Edge Shopping
+[54332:41184:1027/171025.239:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Edge Sidebar
+[54332:41184:1027/171025.239:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Edge Entity Extraction Config and Models
+[54332:41184:1027/171025.240:VERBOSE1:components\component_updater\installer_policies\edge_entity_extraction_component_installer.cc:510] EntityExtraction: No recent request, using registration app locale: zh-CN -> model_locale: zh
+[54332:41184:1027/171025.241:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for EdgeArbitration
+[54332:41184:1027/171025.242:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Edge Signal Triggers Config
+[54332:41184:1027/171025.242:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Edge 3P SERP Config
+[54332:41184:1027/171025.243:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Provenance Data
+[54332:41184:1027/171025.243:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Provenance Data Input Vectors
+[54332:41184:1027/171025.244:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Provenance Data Allow List URLs
+[54332:41184:1027/171025.244:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Edge Travel
+[54332:41184:1027/171025.245:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Typosquatting
+[54332:41184:1027/171025.245:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Edge Video Super Resolution
+[54332:41184:1027/171025.246:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for EADPData Component
+[54332:41184:1027/171025.246:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Edge Wallet
+[54332:41184:1027/171025.247:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Web Notifications Deny List
+[54332:41184:1027/171025.247:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Workspaces Navigation
+[54332:41184:1027/171025.249:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Edge Notifications Component
+[54332:41184:1027/171025.249:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for OnDeviceHeadSuggest
+[54332:41184:1027/171025.250:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Edge Improved Recovery
+[54332:41184:1027/171025.251:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Edge Language Detection Model
+[54332:6992:1027/171025.258:ERROR:chrome\browser\importer\edge_china_browsers\edge_qqbrowser_importer_utils_win.cc:165] QQBrowser user data path not found.
+[54332:41184:1027/171025.262:VERBOSE1:base\win\edge_enterprise_util.cc:257] Checking if internal user
+[54332:41184:1027/171025.275:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171025.280:VERBOSE1:chrome\browser\component_updater\widevine_cdm_component_installer.cc:113] Registering Widevine CDM 4.10.3050.1 with Chrome
+[54332:26316:1027/171025.284:VERBOSE1:content\browser\loader\file_url_loader_factory.cc:499] FileURLLoader::Start: file:///E:/UE5/%E4%BF%AE%E4%BB%99%E5%B7%A5%E5%8E%82%E7%AD%96%E5%88%92%E6%A1%88/scratch/trapped.html
+[54332:41184:1027/171025.288:VERBOSE1:chrome\browser\web_applications\locks\partitioned_lock_manager.cc:262] Acquiring <PartitionedLockId>{id: 0x31, partition: 0} for ScheduleAllFixes@chrome\browser\web_applications\generated_icon_fix_manager.cc:79
+[54332:41184:1027/171025.288:VERBOSE1:chrome\browser\web_applications\locks\partitioned_lock_manager.cc:243] All locks acquired for ScheduleAllFixes@chrome\browser\web_applications\generated_icon_fix_manager.cc:79
+[54332:41184:1027/171025.290:VERBOSE1:chrome\installer\util\edge_install_util.cc:480] AllowDevelopmentWithoutDevLicense policy is set to 1, bypassing package registration policies.
+[54332:41184:1027/171025.306:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:6992:1027/171025.312:VERBOSE1:net\disk_cache\simple\simple_index_file.cc:624] Simple Cache Index is being restored from disk.
+[54332:41184:1027/171025.321:VERBOSE1:chrome\browser\web_applications\locks\partitioned_lock_manager.cc:286] Releasing <PartitionedLockId>{id: 0x31, partition: 0} requested by ScheduleAllFixes@chrome\browser\web_applications\generated_icon_fix_manager.cc:79
+[54332:6992:1027/171025.321:VERBOSE1:net\disk_cache\simple\simple_index_file.cc:624] Simple Cache Index is being restored from disk.
+[54332:41184:1027/171025.332:VERBOSE1:chrome\browser\web_applications\locks\partitioned_lock_manager.cc:318] Acquiring <PartitionedLockId>{id: 0x31, partition: 0} for MaybeWebAppUninstalledFromSystem@chrome\browser\web_applications\edge_web_app_identity_proxy_manager.cc:442
+[54332:41184:1027/171025.333:VERBOSE1:chrome\browser\web_applications\locks\partitioned_lock_manager.cc:243] All locks acquired for MaybeWebAppUninstalledFromSystem@chrome\browser\web_applications\edge_web_app_identity_proxy_manager.cc:442
+[54332:41184:1027/171025.334:VERBOSE1:chrome\browser\extensions\api\edge_app_pinning_private\app_pinning_helper.cc:349] GetPins, filter: '<invalid>'
+[54332:41184:1027/171025.335:VERBOSE1:chrome\browser\edge_pinned_sites\pinned_sites.cc:510] GetAll start, profile=0x71e4001a0500, pin_location=3
+[54332:41184:1027/171025.346:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171025.367:VERBOSE1:components\edge_coupons\core\browser\coupons_data_manager.cc:1365] CouponsDataManager::SetIsBingIdentityValidForEnroll is_bing_identity_valid_for_enroll_: 0 value: 1 is_rebates_user_: 0
+[54332:41184:1027/171025.389:VERBOSE1:chrome\browser\web_applications\locks\partitioned_lock_manager.cc:286] Releasing <PartitionedLockId>{id: 0x31, partition: 0} requested by MaybeWebAppUninstalledFromSystem@chrome\browser\web_applications\edge_web_app_identity_proxy_manager.cc:442
+[54332:41184:1027/171025.390:VERBOSE1:chrome\browser\web_applications\locks\partitioned_lock_manager.cc:318] Acquiring <PartitionedLockId>{id: 0x31, partition: 0} for OnSyncBridgeReady@chrome\browser\web_applications\web_app_provider.cc:657
+[54332:41184:1027/171025.391:VERBOSE1:chrome\browser\web_applications\locks\partitioned_lock_manager.cc:243] All locks acquired for OnSyncBridgeReady@chrome\browser\web_applications\web_app_provider.cc:657
+[54332:41184:1027/171025.404:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:6992:1027/171025.405:VERBOSE1:net\disk_cache\simple\simple_index_file.cc:624] Simple Cache Index is being restored from disk.
+[54332:41184:1027/171025.417:VERBOSE1:components\edge_entity_extraction\content\browser\content_entity_extraction_driver.cc:1095] ContentEntityExtractionDriver::OnPageAway  page_id: 
+[54332:41184:1027/171025.423:VERBOSE1:components\autofill\core\browser\edge_autofill_core\suggestion_manager\edge_autofill_copilot_manager.cc:86] autofill::EdgeAutofillCopilotManager::MaybeInitializeCopilotDataManager No MSA account signed in
+[54332:41184:1027/171025.427:VERBOSE1:chrome\browser\edge_ai_telemetry\ai_feature_dwell_time_tracker.cc:367] DWELL: main_frame url=file:///E:/UE5/%E4%BF%AE%E4%BB%99%E5%B7%A5%E5%8E%82%E7%AD%96%E5%88%92%E6%A1%88/scratch/trapped.html surface=-1
+[54332:41184:1027/171025.434:VERBOSE1:chrome\browser\web_applications\locks\partitioned_lock_manager.cc:286] Releasing <PartitionedLockId>{id: 0x31, partition: 0} requested by OnSyncBridgeReady@chrome\browser\web_applications\web_app_provider.cc:657
+[54332:41184:1027/171025.446:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171025.573:VERBOSE1:content\browser\edge_process_pooling\edge_process_pool.cc:112] Pooling match not found, make a new host
+[54332:41184:1027/171025.575:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:101] 0 starting process and opening pool
+[54332:41184:1027/171025.576:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:117] 0 Service added, running clients: 1
+[54332:41184:1027/171025.589:INFO:CONSOLE:0] "Tracking Prevention blocked access to storage for https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css.", source: file:///E:/UE5/%E4%BF%AE%E4%BB%99%E5%B7%A5%E5%8E%82%E7%AD%96%E5%88%92%E6%A1%88/scratch/trapped.html (0)
+[54332:41184:1027/171025.590:INFO:CONSOLE:0] "Tracking Prevention blocked access to storage for https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css.", source: file:///E:/UE5/%E4%BF%AE%E4%BB%99%E5%B7%A5%E5%8E%82%E7%AD%96%E5%88%92%E6%A1%88/scratch/trapped.html (0)
+[54332:41184:1027/171025.591:INFO:CONSOLE:0] "Tracking Prevention blocked access to storage for https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css.", source: file:///E:/UE5/%E4%BF%AE%E4%BB%99%E5%B7%A5%E5%8E%82%E7%AD%96%E5%88%92%E6%A1%88/scratch/trapped.html (0)
+[54332:41184:1027/171025.592:INFO:CONSOLE:0] "Tracking Prevention blocked access to storage for https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css.", source: file:///E:/UE5/%E4%BF%AE%E4%BB%99%E5%B7%A5%E5%8E%82%E7%AD%96%E5%88%92%E6%A1%88/scratch/trapped.html (0)
+[54332:41184:1027/171025.645:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:235] 88772 service closed, running clients: 0
+[54332:41184:1027/171025.646:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:254] 88772 should close pool is 1
+[54332:41184:1027/171025.653:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:69] 88772 closing process pool
+[54332:41184:1027/171025.662:INFO:CONSOLE:6220] "[ProtocolLaunch] handler constructed; wiring port events.", source: chrome-extension://ndcpkimcihhghdcddljkfmmjccdmcmof/background.rollup.js (6220)
+[54332:41184:1027/171025.665:VERBOSE1:extensions\browser\install_signer.cc:484] Sending request: {"hash":"7D1+gQbBn/6SkHUoucSStQR5f2DAd5BHxbtk6sSAR8k=","ids":["ncennffkjdiamlpmcbajkmaiiiddgioo"],"protocol_version":1}
+[54332:41184:1027/171025.666:VERBOSE1:content\browser\edge_dual_engine\internet_explorer_session_host_pool_win.cc:24] Session host list contains 0session.
+[54332:41184:1027/171025.668:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1814] RemoveKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1), kExtensionUpdater (1)]
+[54332:41184:1027/171025.847:VERBOSE1:chrome\browser\edge_dual_engine\dual_engine_nurturing_observer.cc:194] Pin Edge Quit for no WebOC visit time
+[54332:41184:1027/171026.088:VERBOSE1:content\browser\edge_process_pooling\edge_process_pool.cc:112] Pooling match not found, make a new host
+[54332:41184:1027/171026.089:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:101] 0 starting process and opening pool
+[54332:41184:1027/171026.090:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:117] 0 Service added, running clients: 1
+[54332:41184:1027/171026.135:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:235] 73116 service closed, running clients: 0
+[54332:41184:1027/171026.136:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:254] 73116 should close pool is 1
+[54332:41184:1027/171026.173:VERBOSE1:extensions\browser\install_signer.cc:518] Got response: {
+  "protocol_version": 1,
+  "signature": "BL7n1zM9YMZoNccnZrcFaAh6p/bTWFyLoXyUG5B3ji0ZwUW8QpqX7bw9GglOVleGCKifSgTTsEbtjSFlxiiB52r+9/PV9QTt1y5P/YzmsCY8ojDAR65x01GrEKc+Ecnah+EuRIr9iwx4AIFcMcHLo86QtCEkB/o9p4TDGtst2b3kgRF+14YLCAZqubC31n7pihoum17TOErA4E02NamdY/qjPTpGSiOtINLd59wkMZTHzkMfltB4gjaiqWoC7xWL3/R6oZOHuPLozb3XnSz0z+AYyM75HYb8a9+eCla1LBOe5aYeAon3WiuQAOzEMQ0bWGJHS9paaZUfQXFq7SzlLg==",
+  "expiry": "2027-01-19",
+  "pubkey_sha1_hash": "a2159534e3753e716819beb8aae14b326927505a"
+}
+
+[54332:41184:1027/171026.179:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:69] 73116 closing process pool
+[54332:41184:1027/171026.281:VERBOSE1:components\update_client\request_sender.cc:423] Request completed from url: https://edge.microsoft.com/componentupdater/api/v1/update?cup2key=7:yQQMoRszOzZSghQ5GQfNKIsJrC5_qqKEGGQ15qmCX_8&cup2hreq=343ae709d0a010f102f0ff7e4fdab72097ff40aeb37b2e164c1df8e133261472
+[54332:41184:1027/171026.283:VERBOSE1:components\update_client\pipeline.cc:456] MakePipeline result.status: ok
+[54332:41184:1027/171026.338:INFO:CONSOLE:64] "cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation", source: https://cdn.tailwindcss.com/ (64)
+[54332:41184:1027/171026.464:VERBOSE1:content\browser\edge_process_pooling\edge_process_pool.cc:112] Pooling match not found, make a new host
+[54332:41184:1027/171026.465:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:101] 0 starting process and opening pool
+[54332:41184:1027/171026.466:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:117] 0 Service added, running clients: 1
+[54332:41184:1027/171026.516:VERBOSE1:content\browser\edge_process_pooling\edge_process_pool.cc:106] Pooling match found: 63428
+[54332:41184:1027/171026.517:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:117] 63428 Service added, running clients: 2
+[54332:41184:1027/171026.834:INFO:CONSOLE:8] "PAGE_ERROR: Uncaught TypeError: Cannot read properties of undefined (reading 'category') at line 1906 20", source: file:///E:/UE5/%E4%BF%AE%E4%BB%99%E5%B7%A5%E5%8E%82%E7%AD%96%E5%88%92%E6%A1%88/scratch/trapped.html (8)
+[54332:41184:1027/171026.834:INFO:CONSOLE:1906] "Uncaught TypeError: Cannot read properties of undefined (reading 'category')", source: file:///E:/UE5/%E4%BF%AE%E4%BB%99%E5%B7%A5%E5%8E%82%E7%AD%96%E5%88%92%E6%A1%88/scratch/trapped.html (1906)
+[54332:41184:1027/171026.836:VERBOSE1:content\browser\edge_dual_engine\internet_explorer_session_host_pool_win.cc:24] Session host list contains 0session.
+[54332:41184:1027/171026.836:VERBOSE1:content\browser\edge_dual_engine\internet_explorer_session_host_pool_win.cc:24] Session host list contains 0session.
+[54332:41184:1027/171026.837:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:235] 63428 service closed, running clients: 1
+[54332:41184:1027/171026.838:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:254] 63428 should close pool is 0
+[54332:41184:1027/171026.840:VERBOSE1:components\edge_entity_extraction\core\browser\entity_extraction_manager.cc:181] EntityExtractionManager::OnLanguageDetermined - content_lang: , model_lang:zh-CN, html_root_lang: zh-CN
+[54332:41184:1027/171026.841:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:235] 63428 service closed, running clients: 0
+[54332:41184:1027/171026.842:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:254] 63428 should close pool is 1
+[54332:41184:1027/171026.923:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1753] AddKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1), kExtensionUpdater (2)]
+[54332:41184:1027/171026.929:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:69] 63428 closing process pool
+[54332:41184:1027/171027.121:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:1160] MutablePO2TS::UpdateCredentials; Refresh Token was absent. account_id=78df1c22f10cbdee
+[54332:41184:1027/171027.122:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:1197] MutablePO2TS::PersistCredentials for account_id=78df1c22f10cbdee
+[54332:41184:1027/171027.123:WARNING:components\signin\internal\identity_manager\account_fetcher_service.cc:252] Edge does not support fetching account capabilities
+[54332:41184:1027/171027.123:WARNING:components\signin\internal\identity_manager\account_fetcher_service.cc:213] Should not execute: Tests depending on this function may fail
+[54332:41184:1027/171027.124:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171027.125:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized @gmail.com to @gmail.com
+[54332:41184:1027/171027.125:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized @gmail.com to @gmail.com
+[54332:41184:1027/171027.126:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171027.126:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized @gmail.com to @gmail.com
+[54332:41184:1027/171027.127:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized @gmail.com to @gmail.com
+[54332:41184:1027/171027.128:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171027.129:VERBOSE1:chrome\browser\policy\edge_admin_center\eac_user_policy_signin_service.cc:181] EACUserPolicySigninService refresh token updated for account: 78df1c22f10cbdee
+[54332:41184:1027/171027.130:VERBOSE1:chrome\browser\policy\edge_admin_center\eac_user_policy_signin_service.cc:183] EACUserPolicySigninService primary account: 
+[54332:41184:1027/171027.132:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171027.133:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized @gmail.com to @gmail.com
+[54332:41184:1027/171027.134:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized @gmail.com to @gmail.com
+[54332:41184:1027/171027.134:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171027.135:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized @gmail.com to @gmail.com
+[54332:41184:1027/171027.136:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized @gmail.com to @gmail.com
+[54332:41184:1027/171027.137:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171027.138:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171027.148:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171027.149:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized a100773122@outlook.com to a100773122@outlook.com
+[54332:41184:1027/171027.150:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized a100773122@outlook.com to a100773122@outlook.com
+[54332:41184:1027/171027.151:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171027.151:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171027.153:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171027.154:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171027.155:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171027.156:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized a100773122@outlook.com to a100773122@outlook.com
+[54332:41184:1027/171027.156:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized a100773122@outlook.com to a100773122@outlook.com
+[54332:41184:1027/171027.158:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171027.161:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:59084:1027/171027.162:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] Dispatcher.HandleRegistrations.sync.notification = true (2026-10-27 09:10:27.163074 UTC)
+[54332:41184:1027/171027.163:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:59084:1027/171027.163:VERBOSE1:components\edge_cloud_messaging\internal\dispatcher.cc:122] Dispatcher::RegisterOnWorkingThread(): channel_ref_count_ = 1
+[54332:41184:1027/171027.164:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:59084:1027/171027.164:VERBOSE1:components\edge_cloud_messaging\internal\dispatcher.cc:347] Dispatcher::CreateChannel()
+[54332:41184:1027/171027.165:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:59084:1027/171027.166:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] Channel.State = WaitingForAccessToken (2026-10-27 09:10:27.166528 UTC)
+[54332:41184:1027/171027.167:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized a100773122@outlook.com to a100773122@outlook.com
+[54332:59084:1027/171027.167:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] NetworkChannel.ClientId =  (2026-10-27 09:10:27.168007 UTC)
+[54332:41184:1027/171027.167:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized a100773122@outlook.com to a100773122@outlook.com
+[54332:59084:1027/171027.168:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] NetworkChannel.AuthorizationValue =  (2026-10-27 09:10:27.169187 UTC)
+[54332:41184:1027/171027.169:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:59084:1027/171027.169:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] NetworkChannel.State = Idle (2026-10-27 09:10:27.170607 UTC)
+[54332:41184:1027/171027.170:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:59084:1027/171027.171:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] NetworkChannel.NetworkAvailable = false (2026-10-27 09:10:27.171954 UTC)
+[54332:59084:1027/171027.172:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] NetworkChannel.HandshakeSucceeded = false (2026-10-27 09:10:27.173128 UTC)
+[54332:59084:1027/171027.173:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] NetworkChannel.HasMultipleSyncingDevices = -1 (2026-10-27 09:10:27.173731 UTC)
+[54332:59084:1027/171027.173:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] URLProvider.CurrentURLType = kNone (2026-10-27 09:10:27.174312 UTC)
+[54332:41184:1027/171027.173:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:59084:1027/171027.174:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] URLProvider.CurrentURL =  (2026-10-27 09:10:27.175182 UTC)
+[54332:41184:1027/171027.178:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:59084:1027/171027.179:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] URLProvider.NextURLType = kNone (2026-10-27 09:10:27.179281 UTC)
+[54332:41184:1027/171027.179:VERBOSE1:google_apis\gaia\gaia_auth_util.cc:53] Canonicalized a100773122@outlook.com to a100773122@outlook.com
+[54332:59084:1027/171027.179:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] URLProvider.NextURL =  (2026-10-27 09:10:27.180568 UTC)
+[54332:41184:1027/171027.189:VERBOSE1:components\policy\core\browser\cloud\user_policy_signin_service_base.cc:246] UserPolicySigninServiceBase::InitializeForSignedInUser
+[54332:59084:1027/171027.190:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] URLProvider.CachedURLFailureTimes = 0 (2026-10-27 09:10:27.191562 UTC)
+[54332:41184:1027/171027.193:VERBOSE1:chrome\browser\policy\edge_admin_center\eac_user_policy_signin_service.cc:139] EACUserPolicySigninService primary account changed
+[54332:59084:1027/171027.193:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] URLProvider.NextURLType = kDefault (2026-10-27 09:10:27.194185 UTC)
+[54332:41184:1027/171027.194:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:59084:1027/171027.194:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] URLProvider.NextURL = wss://access-point.cloudmessaging.edge.microsoft.com (2026-10-27 09:10:27.195508 UTC)
+[54332:41184:1027/171027.195:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:59084:1027/171027.196:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] WebSocketClient.Implementation = MojoWebSocketClient (2026-10-27 09:10:27.196875 UTC)
+[54332:41184:1027/171027.196:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:192] EACPolicyManager connecting client 0x71e400092e00
+[54332:59084:1027/171027.197:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] WebSocketClient.State = Idle (2026-10-27 09:10:27.198002 UTC)
+[54332:41184:1027/171027.198:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:192] EACPolicyManager connecting client 0x71e0000cc400
+[54332:59084:1027/171027.199:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] WebSocketClient.URL =  (2026-10-27 09:10:27.199445 UTC)
+[54332:41184:1027/171027.199:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:192] EACPolicyManager connecting client 0x71e0000cc500
+[54332:59084:1027/171027.200:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] WebSocketClient.HeadersCount = 0 (2026-10-27 09:10:27.201174 UTC)
+[54332:41184:1027/171027.201:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:107] EACPolicyManager refreshing policies, scope=USER reason=19 0x71e400092e00
+[54332:59084:1027/171027.202:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] WebSocketClient.Sent = 0 (2026-10-27 09:10:27.202417 UTC)
+[54332:41184:1027/171027.202:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_service.cc:92] EACPolicyService refreshing policy: scope=USER
+[54332:59084:1027/171027.203:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] WebSocketClient.Received = 0 (2026-10-27 09:10:27.203604 UTC)
+[54332:41184:1027/171027.203:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_client.cc:239] EACPolicyClient download policy, scope=USER
+[54332:59084:1027/171027.204:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] NetworkChannel.RetryFailureCount = 0 (2026-10-27 09:10:27.204882 UTC)
+[54332:41184:1027/171027.205:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_client.cc:300] EACPolicyClient downloading policy from: https://clients.config.office.net/user/v1.0/edge/windows/policies/?status=active&version=156.0.4314.42&channel=stable, correlation_id=c9064007-580d-47b7-9499-dca2ed2e0ae5
+[54332:59084:1027/171027.205:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] NetworkChannel.RetryBackoffReleaseTime = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:27.206012 UTC)
+[54332:41184:1027/171027.206:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:59084:1027/171027.207:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] NetworkChannel.RetryTimerFireOn = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:27.207442 UTC)
+[54332:41184:1027/171027.207:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:59084:1027/171027.208:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] NetworkChannel.NetworkAvailable = true (2026-10-27 09:10:27.208804 UTC)
+[54332:41184:1027/171027.209:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:107] EACPolicyManager refreshing policies, scope=TOKEN reason=19 0x71e0000cc400
+[54332:59084:1027/171027.210:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] Channel.Authentication.FetchTime = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:27.210364 UTC)
+[54332:41184:1027/171027.210:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_service.cc:92] EACPolicyService refreshing policy: scope=TOKEN
+[54332:59084:1027/171027.211:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] Channel.Authentication.ExpireTime = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:27.211817 UTC)
+[54332:41184:1027/171027.212:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_client.cc:239] EACPolicyClient download policy, scope=TOKEN
+[54332:59084:1027/171027.212:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] Channel.PingInterval = 0 s (2026-10-27 09:10:27.213145 UTC)
+[54332:41184:1027/171027.213:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_client.cc:254] EACPolicyClient no enrollment token, skipping, scope=TOKEN
+[54332:59084:1027/171027.214:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] Channel.SupportedFeatures =  (2026-10-27 09:10:27.214367 UTC)
+[54332:41184:1027/171027.214:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_store.cc:311] EACPolicyStore clearing policy, scope=TOKEN
+[54332:59084:1027/171027.215:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] Channel.DroppedTime = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:27.215542 UTC)
+[54332:41184:1027/171027.215:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:178] EACPolicyManager store loaded, scope=TOKEN
+[54332:59084:1027/171027.216:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] Channel.RunningOnThread = ThreadPoolForegroundWorker (2026-10-27 09:10:27.216624 UTC)
+[54332:41184:1027/171027.216:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:139] EACPolicyManager skipped publishing policies, waiting_for_policy_refresh_=1 scope=TOKEN
+[54332:41184:1027/171027.218:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:154] EACPolicyManager refresh complete: success=0, scope=TOKEN 0x71e0000cc400
+[54332:41184:1027/171027.219:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:125] EACPolicyManager publishing policies, scope=TOKEN 0x71e0000cc400
+[54332:41184:1027/171027.232:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:588] MutablePO2TS::UpdateAuthError. Error: 0 account_id=78df1c22f10cbdee
+[54332:41184:1027/171027.233:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:588] MutablePO2TS::UpdateAuthError. Error: 0 account_id=78df1c22f10cbdee
+[54332:41184:1027/171027.235:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171027.239:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:588] MutablePO2TS::UpdateAuthError. Error: 7 account_id=78df1c22f10cbdee
+[54332:41184:1027/171027.241:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_client.cc:426] EACPolicyClient access token fetch failed: Service unavailable; try again later ()., correlation_id=c9064007-580d-47b7-9499-dca2ed2e0ae5
+[54332:41184:1027/171027.242:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_client.cc:95] EACPolicyClient completing download request: data=<empty>, result=4, http_status_or_net_error=0, correlation_id=c9064007-580d-47b7-9499-dca2ed2e0ae5
+[54332:41184:1027/171027.243:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_service.cc:116] EACPolicyService policy refreshed: result=4, http_status_or_net_error=0
+[54332:41184:1027/171027.244:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:154] EACPolicyManager refresh complete: success=0, scope=USER 0x71e400092e00
+[54332:41184:1027/171027.245:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_manager.cc:125] EACPolicyManager publishing policies, scope=USER 0x71e400092e00
+[54332:41184:1027/171027.246:VERBOSE1:components\policy\core\common\edge_admin_center\eac_policy_service.cc:165] EACPolicyService scheduling policy refresh: interval=5 minutes
+[54332:41184:1027/171027.246:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] AuthManager.SignedIn = false (2026-10-27 09:10:27.247050 UTC)
+[54332:41184:1027/171027.247:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] AuthManager.AccessToken =  (2026-10-27 09:10:27.247666 UTC)
+[54332:41184:1027/171027.248:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] AuthManager.SyncClientId =  (2026-10-27 09:10:27.249344 UTC)
+[54332:41184:1027/171027.249:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] AuthManager.State = Idle (2026-10-27 09:10:27.250133 UTC)
+[54332:41184:1027/171027.250:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] AuthManager.AccessTokenExpireTime = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:27.250989 UTC)
+[54332:41184:1027/171027.251:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] AuthManager.FetchStartTime = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:27.251700 UTC)
+[54332:41184:1027/171027.252:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] AuthManager.TimeoutTimerFireOn = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:27.252504 UTC)
+[54332:41184:1027/171027.252:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] AuthManager.RetryFailureCount = 0 (2026-10-27 09:10:27.253196 UTC)
+[54332:41184:1027/171027.253:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] AuthManager.RetryBackoffReleaseTime = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:27.253846 UTC)
+[54332:41184:1027/171027.254:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] AuthManager.RetryTimerFireOn = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:27.255301 UTC)
+[54332:41184:1027/171027.256:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:38] AuthManager.RenewTimerFireOn = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:27.257028 UTC)
+[54332:41184:1027/171027.256:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] AuthManager.SignedIn = true (2026-10-27 09:10:27.257699 UTC)
+[54332:41184:1027/171027.257:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] AuthManager.SyncClientId = TYp9P287SwU40Ja5D7TvcA== (2026-10-27 09:10:27.258401 UTC)
+[54332:41184:1027/171027.258:VERBOSE1:components\edge_cloud_messaging\internal\auth\auth_manager_impl.cc:480] State changed: Idle => Fetching
+[54332:6992:1027/171027.258:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] NetworkChannel.ClientId = TYp9P287SwU40Ja5D7TvcA== (2026-10-27 09:10:27.259412 UTC)
+[54332:41184:1027/171027.260:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] AuthManager.State = Fetching (2026-10-27 09:10:27.260038 UTC)
+[54332:41184:1027/171027.260:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171027.261:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171027.262:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] AuthManager.FetchStartTime = 2026-10-27 09:10:27.263104 UTC (2026-10-27 09:10:27.263105 UTC)
+[54332:41184:1027/171027.263:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] AuthManager.TimeoutTimerFireOn = 2026-10-27 09:15:27.263763 UTC (2026-10-27 09:10:27.263763 UTC)
+[54332:41184:1027/171027.429:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1753] AddKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1), kExtensionUpdater (3)]
+[54332:48748:1027/171027.529:VERBOSE1:base\allocator\scheduler_loop_quarantine_config.cc:199] No entry found for browser/io.
+[54332:41184:1027/171027.530:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.HistoryJournal.HJ_BrowserLaunchInfo [components\telemetry_client\telemetry_service.cc(237)]
+[54332:29600:1027/171027.531:VERBOSE1:chrome\installer\util\install_util.cc:301] Existing version found: 156.0.4314.42
+[54332:41184:1027/171027.531:VERBOSE1:components\edge_coupons\core\browser\coupons_data_manager.cc:1496] CouponsDataManager::FetchRewardsUserInfo is_bing_identity_valid_for_enroll_: 1 is_rebates_user_: 0
+[54332:41184:1027/171027.533:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:493] FetchLatestAsset: Fetching latest asset from component eodcfhpdifcaamjndfbdfbbhjkjgbion, name constraint: ""
+[54332:41184:1027/171027.534:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:363] ComponentUpdaterBridge: Component eodcfhpdifcaamjndfbdfbbhjkjgbion has null version (0.0.0.0), cannot skip OnDemandUpdate
+[54332:41184:1027/171027.534:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:556] FetchLatestAsset: Created request cc4757c0-44b5-4755-b195-acb700052e36 for component eodcfhpdifcaamjndfbdfbbhjkjgbion
+[54332:29600:1027/171027.532:VERBOSE1:chrome\installer\util\install_util.cc:325] No existing install found.
+[54332:41184:1027/171027.535:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.HistoryJournal.HJ_PreferenceHomepageCurrent [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171027.536:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.HistoryJournal.HJ_PreferenceDefaultSearchProviderCurrent [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171027.538:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.HistoryJournal.HJ_BrowserInfo [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171027.538:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.HistoryJournal.HJ_BeforeNavigateExtended [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171027.539:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.HistoryJournal.HJ_TabCreated [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171027.540:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.HistoryJournal.HJ_BrowserWindowGainedFocus [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171027.540:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.HistoryJournal.HJ_NavigateCompleteExtended [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171027.546:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171027.549:VERBOSE1:chrome\browser\web_applications\locks\partitioned_lock_manager.cc:262] Acquiring <PartitionedLockId>{id: 0x31, partition: 0} for SynchronizeInstalledApps@chrome\browser\web_applications\externally_managed_app_manager.cc:206
+[54332:41184:1027/171027.550:VERBOSE1:chrome\browser\web_applications\locks\partitioned_lock_manager.cc:243] All locks acquired for SynchronizeInstalledApps@chrome\browser\web_applications\externally_managed_app_manager.cc:206
+[54332:41184:1027/171027.552:VERBOSE1:chrome\browser\web_applications\locks\partitioned_lock_manager.cc:286] Releasing <PartitionedLockId>{id: 0x31, partition: 0} requested by SynchronizeInstalledApps@chrome\browser\web_applications\externally_managed_app_manager.cc:206
+[54332:41184:1027/171027.560:VERBOSE1:components\device_event_log\device_event_log_impl.cc:260] [17:10:27.560] USB: USER: usb_service_win.cc:663 USB device added: path=\\?\usb#vid_8087&pid_0029#6&11ee8953&0&4#{a5dcbf10-6530-11d2-901f-00c04fb951ed} vendor=32903 "", product=41 "", serial="", driver="BTHUSB", guid=dddf8306-77e7-4396-addf-7194b47b595b
+[54332:41184:1027/171027.561:VERBOSE1:components\device_event_log\device_event_log_impl.cc:260] [17:10:27.561] USB: DEBUG: usb_device_handle_win.cc:1096 Failed to read descriptor from node connection: 连到系统上的设备没有发挥作用。 (0x1F)
+[54332:41184:1027/171027.575:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171027.583:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171027.585:VERBOSE1:chrome\browser\local_discovery\service_discovery_device_lister.cc:36] DeviceListerStart: service_type: _googlecast._tcp.local
+[54332:41184:1027/171027.586:VERBOSE1:chrome\browser\local_discovery\service_discovery_device_lister.cc:42] DiscoverNewDevices: service_type: _googlecast._tcp.local
+[54332:41184:1027/171027.634:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:493] FetchLatestAsset: Fetching latest asset from component npbipokbgmclmkjhfjicdgnedhkocjpl, name constraint: "domains_config_gz"
+[54332:41184:1027/171027.635:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:363] ComponentUpdaterBridge: Component npbipokbgmclmkjhfjicdgnedhkocjpl has null version (0.0.0.0), cannot skip OnDemandUpdate
+[54332:41184:1027/171027.635:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:556] FetchLatestAsset: Created request 7cd9a75a-f65c-4f50-abcd-aec8a2f1ce06 for component npbipokbgmclmkjhfjicdgnedhkocjpl
+[54332:41184:1027/171027.664:VERBOSE1:components\device_event_log\device_event_log_impl.cc:260] [17:10:27.664] USB: USER: usb_service_win.cc:663 USB device added: path=\\?\usb#vid_04f2&pid_b711#200901010001#{a5dcbf10-6530-11d2-901f-00c04fb951ed} vendor=1266 "", product=46865 "", serial="200901010001", driver="usbccgp", guid=5daef33a-2fa9-41f3-8c82-128bd456a0ee
+[54332:41184:1027/171027.668:VERBOSE1:components\device_event_log\device_event_log_impl.cc:260] [17:10:27.668] USB: USER: usb_service_win.cc:663 USB device added: path=\\?\usb#vid_048d&pid_6008#7&59d8d81&0&3#{a5dcbf10-6530-11d2-901f-00c04fb951ed} vendor=1165 "ITE Tech. Inc.", product=24584 "ITE Device(8291)", serial="", driver="usbccgp", guid=60b61eaf-884f-4a52-b1fd-e410374dc4ab
+[54332:41184:1027/171027.670:VERBOSE1:components\device_event_log\device_event_log_impl.cc:260] [17:10:27.670] USB: USER: usb_service_win.cc:663 USB device added: path=\\?\usb#vid_1d57&pid_fa60#7&2a998394&0&2#{a5dcbf10-6530-11d2-901f-00c04fb951ed} vendor=7511 "", product=64096 "2.4G Wireless Device", serial="", driver="usbccgp", guid=636c69d5-d08e-44e3-ac98-70e761f4219f
+[54332:41184:1027/171027.674:VERBOSE1:components\device_event_log\device_event_log_impl.cc:260] [17:10:27.675] USB: USER: usb_service_win.cc:663 USB device added: path=\\?\usb#vid_1d57&pid_fa61#6&11ee8953&0&2#{a5dcbf10-6530-11d2-901f-00c04fb951ed} vendor=7511 "LXDDZ", product=64097 "2.4G Wireless Mouse", serial="", driver="usbccgp", guid=42e41773-aaa0-441f-9cef-c4465e0f65f5
+[54332:41184:1027/171027.675:VERBOSE1:components\device_event_log\device_event_log_impl.cc:260] [17:10:27.676] USB: USER: usb_service_win.cc:663 USB device added: path=\\?\usb#vid_0781&pid_558c#msft30323132303454343033383935#{a5dcbf10-6530-11d2-901f-00c04fb951ed} vendor=1921 "SanDisk", product=21900 "Extreme SSD", serial="323132303454343033383935", driver="UASPStor", guid=829ca918-a9d1-4837-9428-4af7ca833da9
+[54332:41184:1027/171027.676:VERBOSE1:components\device_event_log\device_event_log_impl.cc:260] [17:10:27.677] USB: USER: usb_service_win.cc:663 USB device added: path=\\?\usb#vid_0bda&pid_0316#20120501030900000#{a5dcbf10-6530-11d2-901f-00c04fb951ed} vendor=3034 "", product=790 "", serial="20120501030900000", driver="RTSUER", guid=36903d3b-e9c2-4674-b64e-1996d62a074e
+[54332:41184:1027/171027.677:VERBOSE1:components\device_event_log\device_event_log_impl.cc:260] [17:10:27.678] USB: USER: usb_service_win.cc:663 USB device added: path=\\?\usb#vid_13fd&pid_5912#msft302890a1gmf74e________#{a5dcbf10-6530-11d2-901f-00c04fb951ed} vendor=5117 "Generic ", product=22802 "External", serial="2890A1GMF74E        ", driver="UASPStor", guid=c5400ec8-355a-4799-a656-efa0977782e3
+[54332:41184:1027/171027.688:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:29600:1027/171027.707:VERBOSE1:components\component_updater\component_installer.cc:553] StartRegistration for Related Website Sets
+[54332:41184:1027/171027.711:VERBOSE1:components\component_updater\component_installer.cc:624] FinishRegistration for Related Website Sets
+[54332:41184:1027/171027.748:VERBOSE1:chrome\browser\component_updater\first_party_sets_component_installer.cc:45] Received Related Website Sets
+[54332:41184:1027/171027.748:VERBOSE1:chrome\browser\importer\migration_cleaner.cc:84] Cleanup result : 1
+[54332:48636:1027/171027.858:VERBOSE1:base\win\edge_trace_logging\trace_logging.cc:21] Register TraceLogging provider
+[54332:48636:1027/171027.859:VERBOSE1:base\win\edge_trace_logging\trace_logging.cc:28] Unregister TraceLogging provider
+[54332:41184:1027/171027.865:VERBOSE1:chrome\browser\web_applications\locks\partitioned_lock_manager.cc:262] Acquiring <PartitionedLockId>{id: 0x31, partition: 0} for SynchronizeInstalledApps@chrome\browser\web_applications\externally_managed_app_manager.cc:206
+[54332:41184:1027/171027.865:VERBOSE1:chrome\browser\web_applications\locks\partitioned_lock_manager.cc:243] All locks acquired for SynchronizeInstalledApps@chrome\browser\web_applications\externally_managed_app_manager.cc:206
+[54332:41184:1027/171027.866:VERBOSE1:chrome\browser\web_applications\locks\partitioned_lock_manager.cc:286] Releasing <PartitionedLockId>{id: 0x31, partition: 0} requested by SynchronizeInstalledApps@chrome\browser\web_applications\externally_managed_app_manager.cc:206
+[54332:41184:1027/171027.870:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:48636:1027/171027.888:VERBOSE1:base\win\edge_trace_logging\trace_logging.cc:21] Register TraceLogging provider
+[54332:48636:1027/171027.890:VERBOSE1:base\win\edge_trace_logging\trace_logging.cc:28] Unregister TraceLogging provider
+[54332:48748:1027/171027.924:VERBOSE1:net\dns\mdns_client_impl.cc:204] Sockets ready:4
+[54332:41184:1027/171027.948:VERBOSE1:components\edge_coupons\core\browser\coupons_data_manager.cc:3192] CouponsDataManager::OnAnonChanged is_bing_identity_valid_for_enroll_: 1 is_rebates_user_: 0
+[54332:41184:1027/171027.949:VERBOSE1:components\edge_coupons\core\browser\coupons_data_manager.cc:1496] CouponsDataManager::FetchRewardsUserInfo is_bing_identity_valid_for_enroll_: 1 is_rebates_user_: 0
+[54332:41184:1027/171027.969:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:588] MutablePO2TS::UpdateAuthError. Error: 0 account_id=78df1c22f10cbdee
+[54332:6992:1027/171027.971:VERBOSE1:components\sync\engine\syncer.cc:470] Configuring types Encryption Keys
+[54332:41184:1027/171027.980:VERBOSE1:components\update_client\crx_downloader.cc:224] Download failed: DownloadMetrics{url=http://msedge.b.tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/8a506dbf-6074-414c-ac07-7f355caa3c06?P1=1793672470&P2=404&P3=2&P4=K2ZdAstfXHhp1crmq0GXJBCXudifsslGsqP6EsHDxTCoEtJwXFsKLbl9rKQ4WCVnvj7xyC3h0Ce5A4OzuckTtA%3d%3d, downloader=bits, error=-2145386423, extra_code1=0, downloaded_bytes=-1, total_bytes=-1, download_time_ms=114}
+[54332:41184:1027/171028.010:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171028.022:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Toolbar.Buttons.Clicked
+[54332:41184:1027/171028.023:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Toolbar.Buttons.Clicked.Hub
+[54332:41184:1027/171028.024:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Session.EdgeSessionDuration
+[54332:41184:1027/171028.024:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.HubApp.Open.Pane
+[54332:41184:1027/171028.025:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.HubApp.Open.Popup
+[54332:41184:1027/171028.026:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Underside.Events
+[54332:41184:1027/171028.027:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.ShorelineSearch.SearchToggleEvent
+[54332:41184:1027/171028.027:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Toolbar.DiscoverButton.OpenByHover
+[54332:41184:1027/171028.028:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Toolbar.DiscoverButton.OpenByClick
+[54332:41184:1027/171028.029:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Shopping.Engagement
+[54332:41184:1027/171028.030:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Shopping.Engagement.Discover
+[54332:41184:1027/171028.030:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Shopping.Engagement.Discover.Auto
+[54332:41184:1027/171028.031:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Shopping.Engagement.Discover.Manual
+[54332:41184:1027/171028.031:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Shopping.Engagement.Auto
+[54332:41184:1027/171028.032:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Shopping.Engagement.Manual
+[54332:41184:1027/171028.032:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Collections.Collection.Create
+[54332:41184:1027/171028.033:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Collections.Card.TypeAdded
+[54332:41184:1027/171028.034:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Collections.Card.UpdateNote
+[54332:41184:1027/171028.034:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Collections.Card.CopiedShared
+[54332:41184:1027/171028.035:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Collections.Card.OpenLink
+[54332:41184:1027/171028.035:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Collections.Export.Application
+[54332:41184:1027/171028.037:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Tabs.VerticalTabStripShown
+[54332:41184:1027/171028.037:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.HubApp.Discover.Chat.UserQueryCount
+[54332:41184:1027/171028.038:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.ConsumerCopilot.UserSentMessage
+[54332:41184:1027/171028.038:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.SplitScreen.UserAction
+[54332:41184:1027/171028.048:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.SplitScreen.InstanceCount
+[54332:41184:1027/171028.049:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Fremont.HeartBeat.WorkspaceOpen
+[54332:41184:1027/171028.050:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.FremontWorkspaces.WorkspaceAction
+[54332:41184:1027/171028.050:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Fremont.FluidErrorCode.OnTabChangedAt
+[54332:41184:1027/171028.060:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Fremont.FluidErrorCode.OnTabInserted
+[54332:41184:1027/171028.061:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Fremont.FluidErrorCode.OnTabMoved
+[54332:41184:1027/171028.062:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Fremont.FluidErrorCode.OnTabReplaced
+[54332:41184:1027/171028.063:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Fremont.FluidErrorCode.OnTabRemoved
+[54332:41184:1027/171028.064:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Extensions.Theme.TypeUsageAtBrowserStart
+[54332:41184:1027/171028.064:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.NewTabPage.TopSitesTileActivated
+[54332:41184:1027/171028.065:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.SearchInteraction.NewTabPageSearchBox
+[54332:41184:1027/171028.065:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Pipeline.BrowserNetworkUsage.1Day.Chrome
+[54332:41184:1027/171028.066:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Pipeline.BrowserNetworkUsage.1Day.MSEdge
+[54332:41184:1027/171028.067:VERBOSE1:components\segmentation_platform\internal\signals\signal_filter_processor.cc:61] Segmentation platform started observing Microsoft.Pipeline.BrowserNetworkUsage.1Day.Total
+[54332:41184:1027/171028.109:VERBOSE1:extensions\browser\install_signer.cc:484] Sending request: {"hash":"22CQ25ZGzhrHBSnqWaGYoSExMhT24itbX9LFVqMcqG8=","ids":["jmjflgjpcpepeafmmgdpfkogkghcpiha"],"protocol_version":1}
+[54332:79860:1027/171028.114:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for manifest.json
+[54332:41184:1027/171028.114:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1814] RemoveKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1), kExtensionUpdater (2)]
+[54332:48748:1027/171028.116:VERBOSE1:extensions\browser\content_verifier\content_verifier.cc:945] OnFetchComplete jmjflgjpcpepeafmmgdpfkogkghcpiha success:1
+[54332:41184:1027/171028.116:VERBOSE1:chrome\browser\extensions\api\edge_app_pinning_private\app_pinning_helper.cc:375] OnGotPins, success=1, pinned_sites=0
+[54332:41184:1027/171028.118:VERBOSE1:chrome\browser\extensions\api\edge_app_pinning_private\app_pinning_helper.cc:435] RunGetPinsCallback begin.
+[54332:48748:1027/171028.118:VERBOSE1:extensions\browser\content_verifier\content_verifier.cc:945] OnFetchComplete jmjflgjpcpepeafmmgdpfkogkghcpiha success:1
+[54332:41184:1027/171028.259:VERBOSE1:content\browser\edge_process_pooling\edge_process_pool.cc:112] Pooling match not found, make a new host
+[54332:41184:1027/171028.260:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:101] 0 starting process and opening pool
+[54332:41184:1027/171028.261:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:117] 0 Service added, running clients: 1
+[54332:41184:1027/171028.316:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171028.404:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:588] MutablePO2TS::UpdateAuthError. Error: 0 account_id=78df1c22f10cbdee
+[54332:41184:1027/171028.405:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] AuthManager.FetchStartTime = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:28.405657 UTC)
+[54332:41184:1027/171028.406:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] AuthManager.TimeoutTimerFireOn = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:28.406565 UTC)
+[54332:41184:1027/171028.406:VERBOSE1:components\edge_cloud_messaging\internal\auth\auth_manager_impl.cc:480] State changed: Fetching => Fetched
+[54332:41184:1027/171028.407:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] AuthManager.State = Fetched (2026-10-27 09:10:28.407849 UTC)
+[54332:41184:1027/171028.408:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] AuthManager.AccessToken = eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6...dvsKPJNE0.1t8uEY6SD3Fp5MIyVa1AlA (2026-10-27 09:10:28.408499 UTC)
+[54332:41184:1027/171028.408:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] AuthManager.AccessTokenExpireTime = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:28.409073 UTC)
+[54332:79860:1027/171028.409:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] NetworkChannel.AuthorizationValue = aadv2 eyJhbGciOiJSU0EtT0FFUCIsIm...dvsKPJNE0.1t8uEY6SD3Fp5MIyVa1AlA (2026-10-27 09:10:28.409099 UTC)
+[54332:79860:1027/171028.409:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] Channel.Authentication.FetchTime = 2026-10-27 09:10:28.410168 UTC (2026-10-27 09:10:28.410169 UTC)
+[54332:79860:1027/171028.410:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] Channel.Authentication.ExpireTime = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:28.410751 UTC)
+[54332:79860:1027/171028.410:VERBOSE1:components\edge_cloud_messaging\internal\channel.cc:195] State changed: WaitingForAccessToken => WaitingForNetworkChannel
+[54332:79860:1027/171028.411:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] Channel.State = WaitingForNetworkChannel (2026-10-27 09:10:28.411937 UTC)
+[54332:79860:1027/171028.412:VERBOSE1:components\edge_cloud_messaging\internal\network_channel\network_channel_impl.cc:258] NetworkChannelImpl::Start()
+[54332:79860:1027/171028.413:VERBOSE1:components\edge_cloud_messaging\internal\network_channel\network_channel_impl.cc:236] State changed: Idle => Connecting
+[54332:79860:1027/171028.413:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] NetworkChannel.State = Connecting (2026-10-27 09:10:28.414246 UTC)
+[54332:79860:1027/171028.414:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] NetworkChannel.HasMultipleSyncingDevices = 1 (2026-10-27 09:10:28.414944 UTC)
+[54332:79860:1027/171028.414:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] URLProvider.CurrentURLType = kDefault (2026-10-27 09:10:28.415548 UTC)
+[54332:79860:1027/171028.415:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] URLProvider.CurrentURL = wss://access-point.cloudmessaging.edge.microsoft.com (2026-10-27 09:10:28.416208 UTC)
+[54332:79860:1027/171028.415:VERBOSE1:components\edge_cloud_messaging\internal\websocket_client\websocket_client.cc:105] State changed: Idle => Connecting
+[54332:79860:1027/171028.416:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] WebSocketClient.State = Connecting (2026-10-27 09:10:28.417579 UTC)
+[54332:79860:1027/171028.417:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] WebSocketClient.URL = wss://access-point.cloudmessaging.edge.microsoft.com (2026-10-27 09:10:28.418301 UTC)
+[54332:79860:1027/171028.418:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] WebSocketClient.HeadersCount = 4 (2026-10-27 09:10:28.419632 UTC)
+[54332:79860:1027/171028.419:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] WebSocketClient.Sent = 0 (2026-10-27 09:10:28.420248 UTC)
+[54332:79860:1027/171028.420:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] WebSocketClient.Received = 0 (2026-10-27 09:10:28.421070 UTC)
+[54332:41184:1027/171028.501:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:235] 13168 service closed, running clients: 0
+[54332:41184:1027/171028.502:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:254] 13168 should close pool is 1
+[54332:41184:1027/171028.509:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:69] 13168 closing process pool
+[54332:41184:1027/171028.527:VERBOSE1:extensions\browser\install_signer.cc:518] Got response: {"signature":"hlbkIcpb7EMSJJSyledssIZO4BM0S/0NXtfrfccAfxhRQYU/zo5Xi+DSVVnGFwLNgijnpDmSQzcKjsfhqLShFZ9HS3twh/8r5Sg6bBPHCSSyXtn+iPnj60ypT/wwtllkzrRiYahlJN2zfD/37CFQuzug4iXyYsZRsuQYRmLZP7e2Ptm3+H0KxoaZ7ljzGmH32T8rf4eBoVbI+/Wzpw2/CewDdw9wFpWBu8VIdwV3s5tqxLVmHXhWI40l53hSzEIPD5EM/HtTPniMkbNJNOT5wBEdijnyHmrwroYVjBn0V6L0k1BAGSd5TpgXcUKI85/6PDkqirGqM4Il0ztmICsH3g==","expiry":"2027-01-19","invalid_ids":[],"protocol_version":1}
+[54332:41184:1027/171028.559:VERBOSE1:extensions\browser\install_signer.cc:484] Sending request: {"hash":"HL+kVZeEp0IT+5hjaKWJzsyodHGCrfEO8ME1JKsjIp4=","ids":["ghbmnnjooekpmoecnnnilnnbdlolhkhi","ncennffkjdiamlpmcbajkmaiiiddgioo"],"protocol_version":1}
+[54332:41184:1027/171028.561:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1814] RemoveKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1), kExtensionUpdater (1)]
+[54332:41184:1027/171028.562:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1814] RemoveKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1)]
+[54332:41184:1027/171028.594:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171028.605:VERBOSE1:chrome\browser\edge_personalized_data_collection\personalized_data_collection_consent_state_manager_service.cc:140] PersonalizedDataCollectionConsentStateManagerService::OnAccountInfoForSANcan_prompt : 1
+[54332:41184:1027/171028.700:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171028.736:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171028.777:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171028.793:VERBOSE1:components\update_client\url_fetcher_downloader.cc:172] url fetcher response started for: http://msedge.b.tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/8a506dbf-6074-414c-ac07-7f355caa3c06?P1=1793672470&P2=404&P3=2&P4=K2ZdAstfXHhp1crmq0GXJBCXudifsslGsqP6EsHDxTCoEtJwXFsKLbl9rKQ4WCVnvj7xyC3h0Ce5A4OzuckTtA%3d%3d
+[54332:79860:1027/171028.862:VERBOSE1:components\sync\engine\net\http_bridge.cc:389] HttpBridge received response code: 200
+[54332:6992:1027/171028.862:VERBOSE1:components\sync\engine\get_updates_processor.cc:248] TelemetryEntityLatency(): Latency since server commit for [NIGORI] not recorded since browser not active long enough.
+[54332:41184:1027/171028.863:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:6992:1027/171028.864:VERBOSE1:components\sync\engine\get_updates_processor.cc:269] TelemetryEntityLatency(): Latency since client commit for [NIGORI] not recorded since browser not active long enough.
+[54332:79860:1027/171028.864:VERBOSE1:components\edge_cloud_messaging\internal\websocket_client\websocket_client.cc:105] State changed: Connecting => Connected
+[54332:79860:1027/171028.865:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] WebSocketClient.State = Connected (2026-10-27 09:10:28.866112 UTC)
+[54332:41184:1027/171028.865:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:79860:1027/171028.866:VERBOSE1:components\edge_cloud_messaging\internal\network_channel\network_channel_impl.cc:236] State changed: Connecting => Connected
+[54332:41184:1027/171028.867:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:79860:1027/171028.867:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] NetworkChannel.State = Connected (2026-10-27 09:10:28.867999 UTC)
+[54332:79860:1027/171028.868:VERBOSE1:components\edge_cloud_messaging\internal\channel.cc:195] State changed: WaitingForNetworkChannel => WaitingForServerHandshake
+[54332:79860:1027/171028.869:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] Channel.State = WaitingForServerHandshake (2026-10-27 09:10:28.869784 UTC)
+[54332:79860:1027/171028.870:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] WebSocketClient.Received = 1 (2026-10-27 09:10:28.870686 UTC)
+[54332:41184:1027/171028.870:VERBOSE1:components\update_client\url_fetcher_downloader.cc:147] Download succeeded: DownloadMetrics{url=http://msedge.b.tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/8a506dbf-6074-414c-ac07-7f355caa3c06?P1=1793672470&P2=404&P3=2&P4=K2ZdAstfXHhp1crmq0GXJBCXudifsslGsqP6EsHDxTCoEtJwXFsKLbl9rKQ4WCVnvj7xyC3h0Ce5A4OzuckTtA%3d%3d, downloader=direct, error=0, extra_code1=0, downloaded_bytes=20795, total_bytes=20795, download_time_ms=886}, file: C:\Users\a1007\AppData\Local\Temp\msedge_url_fetcher_54332_1269321118\8a506dbf-6074-414c-ac07-7f355caa3c06
+[54332:79860:1027/171028.870:VERBOSE1:components\edge_cloud_messaging\internal\channel.cc:195] State changed: WaitingForServerHandshake => Connected
+[54332:41184:1027/171028.871:VERBOSE1:components\update_client\crx_downloader.cc:182] Download succeeded: DownloadMetrics{url=http://msedge.b.tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/8a506dbf-6074-414c-ac07-7f355caa3c06?P1=1793672470&P2=404&P3=2&P4=K2ZdAstfXHhp1crmq0GXJBCXudifsslGsqP6EsHDxTCoEtJwXFsKLbl9rKQ4WCVnvj7xyC3h0Ce5A4OzuckTtA%3d%3d, downloader=direct, error=0, extra_code1=0, downloaded_bytes=20795, total_bytes=20795, download_time_ms=886}, file: C:\Users\a1007\AppData\Local\Temp\msedge_url_fetcher_54332_1269321118\8a506dbf-6074-414c-ac07-7f355caa3c06
+[54332:79860:1027/171028.871:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] Channel.State = Connected (2026-10-27 09:10:28.872329 UTC)
+[54332:6992:1027/171028.872:VERBOSE1:components\sync\engine\syncer.cc:629] Committing from types Encryption Keys
+[54332:79860:1027/171028.873:VERBOSE1:components\edge_cloud_messaging\internal\network_channel\network_channel_impl.cc:324] NetworkChannelImpl::NotifyHandshakeSucceeded(): wss://aks-prod-southeastasia.access-point.cloudmessaging.edge.microsoft.com
+[54332:41184:1027/171028.874:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:79860:1027/171028.874:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] NetworkChannel.HandshakeSucceeded = true (2026-10-27 09:10:28.874750 UTC)
+[54332:41184:1027/171028.875:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:79860:1027/171028.875:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] PrefsManager.LocalState.CachedReconnectURL = wss://aks-prod-southeastasia.access-point.cloudmessaging.edge.microsoft.com (2026-10-27 09:10:28.875954 UTC)
+[54332:41184:1027/171028.876:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:79860:1027/171028.876:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] PrefsManager.LocalState.CachedReconnectURLTime = 2026-10-27 09:10:28.875953 UTC (2026-10-27 09:10:28.877157 UTC)
+[54332:41184:1027/171028.877:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:79860:1027/171028.877:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] URLProvider.NextURLType = kCached (2026-10-27 09:10:28.878238 UTC)
+[54332:79860:1027/171028.878:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] URLProvider.NextURL = wss://aks-prod-southeastasia.access-point.cloudmessaging.edge.microsoft.com (2026-10-27 09:10:28.879514 UTC)
+[54332:41184:1027/171028.878:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:79860:1027/171028.879:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] NetworkChannel.RetryFailureCount = 0 (2026-10-27 09:10:28.880267 UTC)
+[54332:59084:1027/171028.880:VERBOSE1:components\update_client\unpacker.cc:88] Verifying component: C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\component_crx_cache\c8156046f8dc4e172a78dd9fc55d25cae57273b13a7cbc953b5faddfd12105c8
+[54332:79860:1027/171028.952:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] NetworkChannel.RetryBackoffReleaseTime = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:28.952860 UTC)
+[54332:79860:1027/171028.953:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] PrefsManager.ProfilePrefs.CachedTargetToken = VdGSZ0p1G/0nW/bcTutQmw==$NVKlTj1VMrgtNHNdqUmjN9USU5mcYlgsEAn6ssur9/pJ1lS0xYEwDXdM9kXM3ezzSNgz0RBWkeUEF+yd2ZFAAbDIzGq/b5UjVhhaXVItuwbmZu1p5d8MSkAZ0enNtDO49+D1pIIvzGP+tG8EZV6AldxdL7SISLrYCYI2PXxT/Ow= (2026-10-27 09:10:28.954102 UTC)
+[54332:59084:1027/171028.953:VERBOSE1:components\update_client\unpacker.cc:101] Verification result: 0
+[54332:79860:1027/171028.954:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] PrefsManager.ProfilePrefs.CachedTargetTokenCV = 1167389847195748609 (2026-10-27 09:10:28.954699 UTC)
+[54332:79860:1027/171028.955:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] PrefsManager.ProfilePrefs.CachedTargetTokenTime = 2026-10-27 09:10:28.954101 UTC (2026-10-27 09:10:28.955790 UTC)
+[54332:59084:1027/171028.955:VERBOSE1:components\update_client\unpacker.cc:127] Unpacking in: C:\Users\a1007\AppData\Local\Temp\msedge_chrome_Unpacker_BeginUnzipping54332_2094950103
+[54332:79860:1027/171028.955:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] Channel.PingInterval = 120 s (2026-10-27 09:10:28.956385 UTC)
+[54332:79860:1027/171028.957:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] Channel.SupportedFeatures = request-ack (2026-10-27 09:10:28.957955 UTC)
+[54332:41184:1027/171028.955:VERBOSE1:components\sync\invalidations\edge_fcm_handler.cc:142] FCMHandler::OnTokenChanged(): cv = 1167389847195748609
+[54332:79860:1027/171028.958:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] Channel.Authentication.ExpireTime = 2026-10-27 17:10:27.000000 UTC (2026-10-27 09:10:28.958676 UTC)
+[54332:41184:1027/171028.959:VERBOSE1:components\sync\invalidations\edge_fcm_handler.cc:154] FCMHandler::OnChannelEstablished()
+[54332:41184:1027/171028.960:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] AuthManager.AccessTokenExpireTime = 2026-10-27 17:10:27.000000 UTC (2026-10-27 09:10:28.960383 UTC)
+[54332:41184:1027/171028.960:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] AuthManager.RetryFailureCount = 0 (2026-10-27 09:10:28.961120 UTC)
+[54332:41184:1027/171028.961:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] AuthManager.RetryBackoffReleaseTime = 1601-01-01 00:00:00.000000 UTC (2026-10-27 09:10:28.961803 UTC)
+[54332:41184:1027/171028.962:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] AuthManager.RenewTimerFireOn = 2026-10-27 17:10:17.000000 UTC (2026-10-27 09:10:28.962604 UTC)
+[54332:41184:1027/171028.972:VERBOSE1:components\edge_cloud_messaging\internal\auth\auth_manager_impl.cc:480] State changed: Fetched => Accepted
+[54332:41184:1027/171028.973:VERBOSE1:components\edge_cloud_messaging\public\diagnostics\diagnostics_manager.cc:52] AuthManager.State = Accepted (2026-10-27 09:10:28.973599 UTC)
+[54332:41184:1027/171029.045:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:79860:1027/171029.058:VERBOSE1:components\component_updater\component_installer.cc:198] Install: version=2026.9.18.5 current version=0.0.0.0
+[54332:79860:1027/171029.058:VERBOSE1:components\component_updater\component_installer.cc:217] unpack_path=C:\Users\a1007\AppData\Local\Temp\msedge_chrome_Unpacker_BeginUnzipping54332_2094950103 install_path=C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\EdgeOptimizationGuideModelsManifest\2026.9.18.5
+[54332:79860:1027/171029.081:VERBOSE1:chrome\browser\component_updater\edge_optimization_guide_models_manifest_installer.cc:238] Edge LLM: validated all catalog views
+[54332:41184:1027/171029.081:VERBOSE1:components\component_updater\component_installer.cc:679] Component ready, version 2026.9.18.5 in C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\EdgeOptimizationGuideModelsManifest\2026.9.18.5
+[54332:79860:1027/171029.097:VERBOSE1:chrome\browser\component_updater\edge_optimization_guide_models_manifest_installer.cc:238] Edge LLM: validated all catalog views
+[54332:41184:1027/171029.098:VERBOSE1:chrome\browser\optimization_guide\model_execution\edge_manifest_asset_manager_delegate.cc:839] Edge LLM: catalog view awaits FP16 classification
+[54332:41184:1027/171029.132:VERBOSE1:extensions\browser\install_signer.cc:518] Got response: {
+  "protocol_version": 1,
+  "signature": "g0TFC07+VgjtS/OvGyoiOKsILlzorPkKGvUwxmmO/lMjEeRg0u3ulwceWv7XdtSyM1XQS4WcomO1Tzo/rgHKg2BX9r/0H2trow/2OQx7LfapUerSfABA08EVHZjxVuDHWKvVPPmenb0VxxmnV2vm4hMJWyOCsg8xGmSeUImJZSCIHiFrthGJQjb/nMThmLl0mY6o9p7f0U4FYowbHU6qETIEilfQLfh+d19lOAJ8VhdcgKhrtNgESBdy4eYyW4j/5l7phbeAX6/Ntut0RdYzYZgFuvnivE3i3S4gylSVWfb/LRgaat1F49H7MaxHSjhRpNCJnH8Z4NkioQ4ZQqsVrw==",
+  "expiry": "2027-01-19",
+  "pubkey_sha1_hash": "a2159534e3753e716819beb8aae14b326927505a"
+}
+
+[54332:41184:1027/171029.311:VERBOSE1:components\update_client\request_sender.cc:423] Request completed from url: https://edge.microsoft.com/componentupdater/api/v1/update
+[54332:41184:1027/171029.311:VERBOSE1:components\component_updater\component_updater_service.cc:567] Update completed with error 0
+[54332:41184:1027/171029.312:VERBOSE1:base\win\edge_enterprise_util.cc:257] Checking if internal user
+[54332:41184:1027/171029.716:VERBOSE1:components\update_client\request_sender.cc:423] Request completed from url: https://edge.microsoft.com/componentupdater/api/v1/update?cup2key=7:CidXHulubbu-ADVotocHF-ktn7l3sFSHkcRTD5N2fRc&cup2hreq=54528c151cdb602727fe865cb4850e17e8f026a120c622a14e4aded32122849f
+[54332:41184:1027/171029.717:VERBOSE1:components\update_client\pipeline.cc:456] MakePipeline result.status: ok
+[54332:79860:1027/171029.753:VERBOSE1:components\sync\engine\net\http_bridge.cc:389] HttpBridge received response code: 200
+[54332:41184:1027/171029.754:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171029.761:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:6992:1027/171029.766:VERBOSE1:components\sync\engine\syncer.cc:470] Configuring types Device Info, Encryption Keys
+[54332:41184:1027/171029.769:VERBOSE1:components\update_client\crx_downloader.cc:224] Download failed: DownloadMetrics{url=http://msedge.b.tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/682f0409-daf0-4b68-9e13-25396fbb48a7?P1=1793632236&P2=404&P3=2&P4=ZGIejW4Nn1kCiKwfRdAfpkNnBGuEeQaU77VFiB8KfiCvXSrSKSs8hPkTeZH2qIBAY%2f5cz1ojilZLWR94Srzccg%3d%3d, downloader=bits, error=-2145386423, extra_code1=0, downloaded_bytes=-1, total_bytes=-1, download_time_ms=49}
+[54332:41184:1027/171029.807:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171029.942:VERBOSE1:components\update_client\url_fetcher_downloader.cc:172] url fetcher response started for: http://msedge.b.tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/682f0409-daf0-4b68-9e13-25396fbb48a7?P1=1793632236&P2=404&P3=2&P4=ZGIejW4Nn1kCiKwfRdAfpkNnBGuEeQaU77VFiB8KfiCvXSrSKSs8hPkTeZH2qIBAY%2f5cz1ojilZLWR94Srzccg%3d%3d
+[54332:79860:1027/171030.191:VERBOSE1:components\sync\engine\net\http_bridge.cc:389] HttpBridge received response code: 200
+[54332:6992:1027/171030.192:VERBOSE1:components\sync\engine\get_updates_processor.cc:248] TelemetryEntityLatency(): Latency since server commit for [DEVICE_INFO] not recorded since browser not active long enough.
+[54332:6992:1027/171030.192:VERBOSE1:components\sync\engine\get_updates_processor.cc:269] TelemetryEntityLatency(): Latency since client commit for [DEVICE_INFO] not recorded since browser not active long enough.
+[54332:6992:1027/171030.192:VERBOSE1:components\sync\engine\get_updates_processor.cc:248] TelemetryEntityLatency(): Latency since server commit for [DEVICE_INFO] not recorded since browser not active long enough.
+[54332:6992:1027/171030.193:VERBOSE1:components\sync\engine\get_updates_processor.cc:269] TelemetryEntityLatency(): Latency since client commit for [DEVICE_INFO] not recorded since browser not active long enough.
+[54332:6992:1027/171030.193:VERBOSE1:components\sync\engine\get_updates_processor.cc:248] TelemetryEntityLatency(): Latency since server commit for [DEVICE_INFO] not recorded since browser not active long enough.
+[54332:6992:1027/171030.194:VERBOSE1:components\sync\engine\get_updates_processor.cc:269] TelemetryEntityLatency(): Latency since client commit for [DEVICE_INFO] not recorded since browser not active long enough.
+[54332:6992:1027/171030.195:VERBOSE1:components\sync\engine\get_updates_processor.cc:248] TelemetryEntityLatency(): Latency since server commit for [DEVICE_INFO] not recorded since browser not active long enough.
+[54332:6992:1027/171030.195:VERBOSE1:components\sync\engine\get_updates_processor.cc:269] TelemetryEntityLatency(): Latency since client commit for [DEVICE_INFO] not recorded since browser not active long enough.
+[54332:6992:1027/171030.196:VERBOSE1:components\sync\engine\get_updates_processor.cc:248] TelemetryEntityLatency(): Latency since server commit for [DEVICE_INFO] not recorded since browser not active long enough.
+[54332:6992:1027/171030.197:VERBOSE1:components\sync\engine\get_updates_processor.cc:269] TelemetryEntityLatency(): Latency since client commit for [DEVICE_INFO] not recorded since browser not active long enough.
+[54332:6992:1027/171030.197:VERBOSE1:components\sync\engine\get_updates_processor.cc:248] TelemetryEntityLatency(): Latency since server commit for [DEVICE_INFO] not recorded since browser not active long enough.
+[54332:6992:1027/171030.198:VERBOSE1:components\sync\engine\get_updates_processor.cc:269] TelemetryEntityLatency(): Latency since client commit for [DEVICE_INFO] not recorded since browser not active long enough.
+[54332:6992:1027/171030.199:VERBOSE1:components\sync\engine\get_updates_processor.cc:248] TelemetryEntityLatency(): Latency since server commit for [DEVICE_INFO] not recorded since browser not active long enough.
+[54332:6992:1027/171030.200:VERBOSE1:components\sync\engine\get_updates_processor.cc:269] TelemetryEntityLatency(): Latency since client commit for [DEVICE_INFO] not recorded since browser not active long enough.
+[54332:6992:1027/171030.200:VERBOSE1:components\sync\engine\get_updates_processor.cc:248] TelemetryEntityLatency(): Latency since server commit for [DEVICE_INFO] not recorded since browser not active long enough.
+[54332:6992:1027/171030.201:VERBOSE1:components\sync\engine\get_updates_processor.cc:269] TelemetryEntityLatency(): Latency since client commit for [DEVICE_INFO] not recorded since browser not active long enough.
+[54332:41184:1027/171030.202:WARNING:components\sync\base\data_type.cc:1673] Unknown field number 40781
+[54332:41184:1027/171030.203:WARNING:components\sync\base\data_type.cc:1673] Unknown field number 40781
+[54332:41184:1027/171030.203:WARNING:components\sync\base\data_type.cc:1673] Unknown field number 40781
+[54332:41184:1027/171030.204:WARNING:components\sync\base\data_type.cc:1673] Unknown field number 707230
+[54332:41184:1027/171030.205:WARNING:components\sync\base\data_type.cc:1673] Unknown field number 40781
+[54332:41184:1027/171030.229:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:6992:1027/171030.230:VERBOSE1:components\sync\engine\syncer.cc:470] Configuring types Extensions, Extension settings, Send Tab To Self, Web Apps, Encryption Keys
+[54332:41184:1027/171030.382:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:79860:1027/171030.795:VERBOSE1:components\sync\engine\net\http_bridge.cc:389] HttpBridge received response code: 200
+[54332:6992:1027/171030.796:VERBOSE1:components\sync\engine\get_updates_processor.cc:248] TelemetryEntityLatency(): Latency since server commit for [EXTENSION] not recorded since browser not active long enough.
+[54332:6992:1027/171030.796:VERBOSE1:components\sync\engine\get_updates_processor.cc:269] TelemetryEntityLatency(): Latency since client commit for [EXTENSION] not recorded since browser not active long enough.
+[54332:6992:1027/171030.796:VERBOSE1:components\sync\engine\get_updates_processor.cc:248] TelemetryEntityLatency(): Latency since server commit for [EXTENSION_SETTING] not recorded since browser not active long enough.
+[54332:6992:1027/171030.799:VERBOSE1:components\sync\engine\get_updates_processor.cc:269] TelemetryEntityLatency(): Latency since client commit for [EXTENSION_SETTING] not recorded since browser not active long enough.
+[54332:6992:1027/171030.799:VERBOSE1:components\sync\engine\get_updates_processor.cc:248] TelemetryEntityLatency(): Latency since server commit for [EXTENSION_SETTING] not recorded since browser not active long enough.
+[54332:6992:1027/171030.799:VERBOSE1:components\sync\engine\get_updates_processor.cc:269] TelemetryEntityLatency(): Latency since client commit for [EXTENSION_SETTING] not recorded since browser not active long enough.
+[54332:6992:1027/171030.800:VERBOSE1:components\sync\engine\get_updates_processor.cc:248] TelemetryEntityLatency(): Latency since server commit for [EXTENSION_SETTING] not recorded since browser not active long enough.
+[54332:6992:1027/171030.800:VERBOSE1:components\sync\engine\get_updates_processor.cc:269] TelemetryEntityLatency(): Latency since client commit for [EXTENSION_SETTING] not recorded since browser not active long enough.
+[54332:6992:1027/171030.802:VERBOSE1:components\sync\engine\get_updates_processor.cc:248] TelemetryEntityLatency(): Latency since server commit for [EXTENSION_SETTING] not recorded since browser not active long enough.
+[54332:6992:1027/171030.802:VERBOSE1:components\sync\engine\get_updates_processor.cc:269] TelemetryEntityLatency(): Latency since client commit for [EXTENSION_SETTING] not recorded since browser not active long enough.
+[54332:6992:1027/171030.803:VERBOSE1:components\sync\engine\get_updates_processor.cc:248] TelemetryEntityLatency(): Latency since server commit for [EXTENSION] not recorded since browser not active long enough.
+[54332:6992:1027/171030.804:VERBOSE1:components\sync\engine\get_updates_processor.cc:269] TelemetryEntityLatency(): Latency since client commit for [EXTENSION] not recorded since browser not active long enough.
+[54332:6992:1027/171030.804:VERBOSE1:components\sync\engine\get_updates_processor.cc:248] TelemetryEntityLatency(): Latency since server commit for [EXTENSION] not recorded since browser not active long enough.
+[54332:6992:1027/171030.805:VERBOSE1:components\sync\engine\get_updates_processor.cc:269] TelemetryEntityLatency(): Latency since client commit for [EXTENSION] not recorded since browser not active long enough.
+[54332:6992:1027/171030.806:VERBOSE1:components\sync\engine\get_updates_processor.cc:248] TelemetryEntityLatency(): Latency since server commit for [EXTENSION] not recorded since browser not active long enough.
+[54332:6992:1027/171030.807:VERBOSE1:components\sync\engine\get_updates_processor.cc:269] TelemetryEntityLatency(): Latency since client commit for [EXTENSION] not recorded since browser not active long enough.
+[54332:41184:1027/171030.809:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1753] AddKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1), kExtensionUpdater (1)]
+[54332:41184:1027/171030.810:VERBOSE1:base\win\edge_enterprise_util.cc:257] Checking if internal user
+[54332:41184:1027/171030.812:VERBOSE1:base\win\edge_enterprise_util.cc:257] Checking if internal user
+[54332:41184:1027/171030.819:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171030.824:VERBOSE1:chrome\browser\edge_continuous_migration\continuous_migration_sync_service_observer.cc:80] is sync active1
+[54332:41184:1027/171030.826:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171030.827:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:6992:1027/171030.844:VERBOSE1:components\sync\engine\syncer.cc:424] Downloading types Extensions, Extension settings, Device Info, User Consents, Send Tab To Self, Web Apps, Encryption Keys
+[54332:41184:1027/171030.849:VERBOSE1:components\update_client\url_fetcher_downloader.cc:147] Download succeeded: DownloadMetrics{url=http://msedge.b.tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/682f0409-daf0-4b68-9e13-25396fbb48a7?P1=1793632236&P2=404&P3=2&P4=ZGIejW4Nn1kCiKwfRdAfpkNnBGuEeQaU77VFiB8KfiCvXSrSKSs8hPkTeZH2qIBAY%2f5cz1ojilZLWR94Srzccg%3d%3d, downloader=direct, error=0, extra_code1=0, downloaded_bytes=2772537, total_bytes=2772537, download_time_ms=1079}, file: C:\Users\a1007\AppData\Local\Temp\msedge_url_fetcher_54332_1166333364\682f0409-daf0-4b68-9e13-25396fbb48a7
+[54332:41184:1027/171030.855:VERBOSE1:components\update_client\crx_downloader.cc:182] Download succeeded: DownloadMetrics{url=http://msedge.b.tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/682f0409-daf0-4b68-9e13-25396fbb48a7?P1=1793632236&P2=404&P3=2&P4=ZGIejW4Nn1kCiKwfRdAfpkNnBGuEeQaU77VFiB8KfiCvXSrSKSs8hPkTeZH2qIBAY%2f5cz1ojilZLWR94Srzccg%3d%3d, downloader=direct, error=0, extra_code1=0, downloaded_bytes=2772537, total_bytes=2772537, download_time_ms=1079}, file: C:\Users\a1007\AppData\Local\Temp\msedge_url_fetcher_54332_1166333364\682f0409-daf0-4b68-9e13-25396fbb48a7
+[54332:79860:1027/171030.858:VERBOSE1:components\update_client\unpacker.cc:88] Verifying component: C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\component_crx_cache\a9592ae40712c6cfdf7d142e2563ca4ec8f696cfe53e267ad0ea630c43beaa33
+[54332:79860:1027/171030.869:VERBOSE1:components\update_client\unpacker.cc:101] Verification result: 0
+[54332:79860:1027/171030.870:VERBOSE1:components\update_client\unpacker.cc:127] Unpacking in: C:\Users\a1007\AppData\Local\Temp\msedge_chrome_Unpacker_BeginUnzipping54332_1424364092
+[54332:79860:1027/171030.949:VERBOSE1:components\component_updater\component_installer.cc:198] Install: version=2026.1.30.1 current version=0.0.0.0
+[54332:79860:1027/171030.950:VERBOSE1:components\component_updater\component_installer.cc:217] unpack_path=C:\Users\a1007\AppData\Local\Temp\msedge_chrome_Unpacker_BeginUnzipping54332_1424364092 install_path=C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\EdgeLanguageDetectionModel\2026.1.30.1
+[54332:41184:1027/171030.954:VERBOSE1:components\component_updater\component_installer.cc:679] Component ready, version 2026.1.30.1 in C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\EdgeLanguageDetectionModel\2026.1.30.1
+[54332:41184:1027/171030.955:VERBOSE1:components\optimization_guide\core\delivery\prediction_manager.cc:1136] Processing component model for target 2 version 2026.1.30.1 at C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\EdgeLanguageDetectionModel\2026.1.30.1\model.ftz
+[54332:41184:1027/171030.955:VERBOSE1:chrome\browser\component_updater\edge_language_detection_model_installer.cc:150] Edge Language Detection Model ready, version 2026.1.30.1 at C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\EdgeLanguageDetectionModel\2026.1.30.1\model.ftz
+[54332:41184:1027/171031.197:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171031.263:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:79860:1027/171031.487:VERBOSE1:components\sync\engine\net\http_bridge.cc:389] HttpBridge received response code: 200
+[54332:6992:1027/171031.501:VERBOSE1:components\sync\engine\syncer.cc:629] Committing from types Extensions, Extension settings, Device Info, User Consents, Send Tab To Self, Web Apps, Encryption Keys
+[54332:41184:1027/171031.554:VERBOSE1:components\update_client\request_sender.cc:423] Request completed from url: https://edge.microsoft.com/componentupdater/api/v1/update
+[54332:41184:1027/171031.555:VERBOSE1:components\component_updater\component_updater_service.cc:567] Update completed with error 0
+[54332:41184:1027/171031.556:VERBOSE1:base\win\edge_enterprise_util.cc:257] Checking if internal user
+[54332:41184:1027/171031.585:VERBOSE1:components\update_client\request_sender.cc:423] Request completed from url: https://edge.microsoft.com/extensionwebstorebase/v1/crx
+[54332:41184:1027/171031.586:VERBOSE1:components\update_client\pipeline.cc:456] MakePipeline result.status: noupdate
+[54332:41184:1027/171031.802:VERBOSE1:components\update_client\request_sender.cc:423] Request completed from url: https://edge.microsoft.com/componentupdater/api/v1/update?cup2key=7:nld7WSeoVJURW2_W_xN90KdYBOo0fVUwACmrQXVQJvg&cup2hreq=74186ea4def093d7156e1560e62e64b40d1bfa9ca49f1bfaac4b161ff498e54c
+[54332:41184:1027/171031.803:VERBOSE1:components\update_client\pipeline.cc:456] MakePipeline result.status: ok
+[54332:41184:1027/171031.842:VERBOSE1:components\update_client\request_sender.cc:423] Request completed from url: https://update.googleapis.com/service/update2/json?cup2key=ML-DSA-44-16:YCp5Nd_uuuWq5ynvUUSrOGMq-W8igxGezBs-6yuQtYg&cup2hreq=60d7a9a36626772446cda1d1e412796ab25cc5d448cad76143b3e015f897343e
+[54332:41184:1027/171031.843:VERBOSE1:components\update_client\pipeline.cc:456] MakePipeline result.status: ok
+[54332:41184:1027/171032.047:VERBOSE1:components\update_client\url_fetcher_downloader.cc:172] url fetcher response started for: http://msedge.f.tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/dadee85a-ef0f-411e-a9da-4f5235a4c9e4?P1=1793128126&P2=404&P3=2&P4=I7U6jrhSZqisEshhqzqh0KMZKtW4u3yeT9QdbP2btRBFXm%2b5qyvA98LfMoqqoP4k62X55i9QGZLWriyqsdtd4g%3d%3d
+[54332:41184:1027/171032.061:VERBOSE1:components\update_client\url_fetcher_downloader.cc:147] Download succeeded: DownloadMetrics{url=http://msedge.f.tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/dadee85a-ef0f-411e-a9da-4f5235a4c9e4?P1=1793128126&P2=404&P3=2&P4=I7U6jrhSZqisEshhqzqh0KMZKtW4u3yeT9QdbP2btRBFXm%2b5qyvA98LfMoqqoP4k62X55i9QGZLWriyqsdtd4g%3d%3d, downloader=direct, error=0, extra_code1=0, downloaded_bytes=20895, total_bytes=20895, download_time_ms=255}, file: C:\Users\a1007\AppData\Local\Temp\msedge_url_fetcher_54332_351735421\dadee85a-ef0f-411e-a9da-4f5235a4c9e4
+[54332:41184:1027/171032.062:VERBOSE1:components\update_client\crx_downloader.cc:182] Download succeeded: DownloadMetrics{url=http://msedge.f.tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/dadee85a-ef0f-411e-a9da-4f5235a4c9e4?P1=1793128126&P2=404&P3=2&P4=I7U6jrhSZqisEshhqzqh0KMZKtW4u3yeT9QdbP2btRBFXm%2b5qyvA98LfMoqqoP4k62X55i9QGZLWriyqsdtd4g%3d%3d, downloader=direct, error=0, extra_code1=0, downloaded_bytes=20895, total_bytes=20895, download_time_ms=255}, file: C:\Users\a1007\AppData\Local\Temp\msedge_url_fetcher_54332_351735421\dadee85a-ef0f-411e-a9da-4f5235a4c9e4
+[54332:79860:1027/171032.064:VERBOSE1:components\update_client\unpacker.cc:88] Verifying component: C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\component_crx_cache\df5bb9f2afeb58b7c813d43eaa32cf6b240e346614ec52425bb5ff323450cd51
+[54332:79860:1027/171032.065:VERBOSE1:components\update_client\unpacker.cc:101] Verification result: 0
+[54332:79860:1027/171032.066:VERBOSE1:components\update_client\unpacker.cc:127] Unpacking in: C:\Users\a1007\AppData\Local\Temp\msedge_chrome_Unpacker_BeginUnzipping54332_1129562497
+[54332:41184:1027/171032.099:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171032.125:VERBOSE1:content\browser\edge_process_pooling\edge_process_pool.cc:112] Pooling match not found, make a new host
+[54332:41184:1027/171032.126:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:101] 0 starting process and opening pool
+[54332:41184:1027/171032.127:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:117] 0 Service added, running clients: 1
+[54332:59084:1027/171032.148:VERBOSE1:components\component_updater\component_installer.cc:198] Install: version=2026.5.28.1 current version=0.0.0.0
+[54332:59084:1027/171032.149:VERBOSE1:components\component_updater\component_installer.cc:217] unpack_path=C:\Users\a1007\AppData\Local\Temp\msedge_chrome_Unpacker_BeginUnzipping54332_1129562497 install_path=C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\EdgeArbitration\2026.5.28.1
+[54332:59084:1027/171032.157:VERBOSE1:components\component_updater\installer_policies\edge_arbitration_component_installer.cc:215] EdgeArbitrationComponentInstallerPolicy::GetInstalledFile: version_dir: C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\EdgeArbitration\2026.5.28.1\arbitration_priority_list\41.0.0\asset
+[54332:41184:1027/171032.158:VERBOSE1:components\component_updater\component_installer.cc:679] Component ready, version 2026.5.28.1 in C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\EdgeArbitration\2026.5.28.1
+[54332:41184:1027/171032.159:VERBOSE1:components\component_updater\installer_policies\edge_arbitration_component_installer.cc:103] EdgeArbitration component ready, version: 2026.5.28.1 install_dir: C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\EdgeArbitration\2026.5.28.1
+[54332:29600:1027/171032.160:VERBOSE1:components\component_updater\installer_policies\edge_arbitration_component_installer.cc:215] EdgeArbitrationComponentInstallerPolicy::GetInstalledFile: version_dir: C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\EdgeArbitration\2026.5.28.1\arbitration_priority_list\41.0.0\asset
+[54332:41184:1027/171032.161:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:830] Component is ready: eodcfhpdifcaamjndfbdfbbhjkjgbion
+[54332:41184:1027/171032.162:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:846] OnComponentReady: Processing 1 pending requests for component eodcfhpdifcaamjndfbdfbbhjkjgbion
+[54332:41184:1027/171032.162:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:879] ProcessPendingRequest: Processing request for component eodcfhpdifcaamjndfbdfbbhjkjgbion, file: 
+[54332:41184:1027/171032.162:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:925] ProcessPendingRequestWithItem: Processing component eodcfhpdifcaamjndfbdfbbhjkjgbion, has component=1, file_constraint=, file_constraint.size()=0
+[54332:41184:1027/171032.163:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:945] ProcessPendingRequestWithItem: Calling GetInstalledFile for component eodcfhpdifcaamjndfbdfbbhjkjgbion with constraint: 
+[54332:41184:1027/171032.164:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:960] ProcessPendingRequestWithItem: File path from installer: C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\EdgeArbitration\2026.5.28.1\arbitration_priority_list\41.0.0\asset
+[54332:41184:1027/171032.164:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:974] ProcessPendingRequestWithItem: Using version: 41.0.0
+[54332:41184:1027/171032.166:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:1014] ComponentUpdaterBridge: Successfully read 21436 bytes from C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\EdgeArbitration\2026.5.28.1\arbitration_priority_list\41.0.0\asset (version: 41.0.0)
+[54332:41184:1027/171032.167:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:334] ComponentUpdaterBridge: Cached content for eodcfhpdifcaamjndfbdfbbhjkjgbion:, version: 41.0.0, size: 21436
+[54332:41184:1027/171032.206:VERBOSE1:components\edge_arbitration_service\arbitration_logger.cc:257] ArbitrationAssetFetcher::OnGetPriorityListAssetFromComponentUpdater - Received config updated from ComponentUpdater with version:41.0.0
+[54332:41184:1027/171032.207:VERBOSE1:components\edge_arbitration_service\arbitration_logger.cc:257] Not fetching config updates. Local config > New Config
+[54332:41184:1027/171032.208:VERBOSE1:components\edge_arbitration_service\arbitration_logger.cc:257] ArbitrationService::OnRemoteConfigUpdate - Not updating local config because the config version has not been not updated
+[54332:41184:1027/171032.209:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:235] 65320 service closed, running clients: 0
+[54332:41184:1027/171032.210:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:254] 65320 should close pool is 1
+[54332:41184:1027/171032.218:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:69] 65320 closing process pool
+[54332:79860:1027/171032.240:VERBOSE1:components\sync\engine\net\http_bridge.cc:389] HttpBridge received response code: 200
+[54332:41184:1027/171032.241:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171032.243:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171032.330:VERBOSE1:components\update_client\url_fetcher_downloader.cc:172] url fetcher response started for: https://clients2.googleusercontent.com/crx/blobs/AZPVhcRcmLtG1ycxiKVX-z-MppRs3zriFV3MFYnoj1Y7YMicXcvXlk0mDe2UaBzIBSzJWB_ji4yeiBltXkvmgqBIwm49zHoXNEhDqyUZ9sHwVWFfjKWg83pClgy7PphwqyA8AMZSmuXc7ErNK-4qTr9MT-Vq9PbZKljvNg/NCENNFFKJDIAMLPMCBAJKMAIIIDDGIOO_4_1_4_0.crx
+[54332:6992:1027/171032.447:VERBOSE1:components\sync\engine\syncer.cc:629] Committing from types Extensions, Extension settings, Device Info, User Consents, Send Tab To Self, Web Apps, Encryption Keys
+[54332:41184:1027/171032.449:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171032.456:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171032.613:VERBOSE1:components\update_client\request_sender.cc:423] Request completed from url: https://edge.microsoft.com/componentupdater/api/v1/update
+[54332:41184:1027/171032.614:VERBOSE1:components\component_updater\component_updater_service.cc:567] Update completed with error 0
+[54332:41184:1027/171032.615:VERBOSE1:base\win\edge_enterprise_util.cc:257] Checking if internal user
+[54332:41184:1027/171032.616:VERBOSE1:components\component_updater\installer_policies\edge_entity_extraction_component_installer.cc:510] EntityExtraction: No recent request, using registration app locale: zh-CN -> model_locale: zh
+[54332:41184:1027/171032.616:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:710] OnUpdateComplete: for request cc4757c0-44b5-4755-b195-acb700052e36, component eodcfhpdifcaamjndfbdfbbhjkjgbion, error: 0
+[54332:41184:1027/171032.617:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:716] OnUpdateComplete: Request cc4757c0-44b5-4755-b195-acb700052e36 not found (may have been cancelled)
+[54332:41184:1027/171032.774:VERBOSE1:components\update_client\request_sender.cc:423] Request completed from url: https://edge.microsoft.com/componentupdater/api/v1/update?cup2key=7:eO19mkNi9ZFLK55XgFTSemBTGxeM3MdYR2u6GG53sq4&cup2hreq=4d5ebc14008bb1e8b64233087234e9f5460f432bfadc210d5f27b2e6366181c8
+[54332:41184:1027/171032.775:VERBOSE1:components\update_client\pipeline.cc:456] MakePipeline result.status: ok
+[54332:41184:1027/171033.030:VERBOSE1:components\update_client\url_fetcher_downloader.cc:172] url fetcher response started for: http://msedge.f.tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/011dd0ec-77ec-44fe-9614-84c7a47d2fa9?P1=1793621114&P2=404&P3=2&P4=RKXczTs%2b5ZTqSmB8T%2bQrgsUa6Vhgw%2fYjnKSRNpkcoofkSSvzqfIlFDOw%2bxad1NmH1BRTy%2bDKPN5z0vtTzv2zjQ%3d%3d
+[54332:41184:1027/171033.403:VERBOSE1:components\update_client\url_fetcher_downloader.cc:147] Download succeeded: DownloadMetrics{url=https://clients2.googleusercontent.com/crx/blobs/AZPVhcRcmLtG1ycxiKVX-z-MppRs3zriFV3MFYnoj1Y7YMicXcvXlk0mDe2UaBzIBSzJWB_ji4yeiBltXkvmgqBIwm49zHoXNEhDqyUZ9sHwVWFfjKWg83pClgy7PphwqyA8AMZSmuXc7ErNK-4qTr9MT-Vq9PbZKljvNg/NCENNFFKJDIAMLPMCBAJKMAIIIDDGIOO_4_1_4_0.crx, downloader=direct, error=0, extra_code1=0, downloaded_bytes=4584930, total_bytes=4584930, download_time_ms=1557}, file: C:\Users\a1007\AppData\Local\Temp\msedge_url_fetcher_54332_149619722\NCENNFFKJDIAMLPMCBAJKMAIIIDDGIOO_4_1_4_0.crx
+[54332:41184:1027/171033.410:VERBOSE1:components\update_client\crx_downloader.cc:182] Download succeeded: DownloadMetrics{url=https://clients2.googleusercontent.com/crx/blobs/AZPVhcRcmLtG1ycxiKVX-z-MppRs3zriFV3MFYnoj1Y7YMicXcvXlk0mDe2UaBzIBSzJWB_ji4yeiBltXkvmgqBIwm49zHoXNEhDqyUZ9sHwVWFfjKWg83pClgy7PphwqyA8AMZSmuXc7ErNK-4qTr9MT-Vq9PbZKljvNg/NCENNFFKJDIAMLPMCBAJKMAIIIDDGIOO_4_1_4_0.crx, downloader=direct, error=0, extra_code1=0, downloaded_bytes=4584930, total_bytes=4584930, download_time_ms=1557}, file: C:\Users\a1007\AppData\Local\Temp\msedge_url_fetcher_54332_149619722\NCENNFFKJDIAMLPMCBAJKMAIIIDDGIOO_4_1_4_0.crx
+[54332:6992:1027/171033.413:VERBOSE1:components\update_client\unpacker.cc:88] Verifying component: C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\extensions_crx_cache\6bf281cec6503af6fe9348563ae50cd4d485907f1ff4f0dade32caf37cadab65
+[54332:41184:1027/171033.427:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1753] AddKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1), kExtensionUpdater (2)]
+[54332:6992:1027/171033.430:VERBOSE1:components\update_client\unpacker.cc:101] Verification result: 0
+[54332:6992:1027/171033.431:VERBOSE1:components\update_client\unpacker.cc:127] Unpacking in: C:\Users\a1007\AppData\Local\Temp\chromiumcrx_chrome_Unpacker_BeginUnzipping54332_781750848
+[54332:41184:1027/171033.709:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171033.728:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1753] AddKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1), kExtensionUpdater (3)]
+[54332:41184:1027/171033.767:VERBOSE1:content\browser\edge_process_pooling\edge_process_pool.cc:112] Pooling match not found, make a new host
+[54332:41184:1027/171033.769:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:101] 0 starting process and opening pool
+[54332:41184:1027/171033.769:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:117] 0 Service added, running clients: 1
+[54332:41184:1027/171033.821:VERBOSE1:content\browser\edge_process_pooling\edge_process_pool.cc:106] Pooling match found: 73816
+[54332:41184:1027/171033.821:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:117] 73816 Service added, running clients: 2
+[54332:41184:1027/171033.827:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:235] 73816 service closed, running clients: 1
+[54332:41184:1027/171033.828:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:254] 73816 should close pool is 0
+[54332:41184:1027/171033.865:VERBOSE1:content\browser\edge_dual_engine\internet_explorer_session_host_pool_win.cc:24] Session host list contains 0session.
+[54332:41184:1027/171033.867:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1814] RemoveKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1), kExtensionUpdater (2)]
+[54332:41184:1027/171033.952:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:235] 73816 service closed, running clients: 0
+[54332:41184:1027/171033.953:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:254] 73816 should close pool is 1
+[54332:41184:1027/171033.964:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:69] 73816 closing process pool
+[54332:41184:1027/171033.996:VERBOSE1:extensions\browser\install_signer.cc:484] Sending request: {"hash":"mosCv5lxeZ43CA+9gidyJEVuhwGMb5xiYYWEHT6Rxiw=","ids":["iikmkjmpaadaobahmlepeloendndfphd","jmjflgjpcpepeafmmgdpfkogkghcpiha"],"protocol_version":1}
+[54332:41184:1027/171034.014:VERBOSE1:content\browser\edge_dual_engine\internet_explorer_session_host_pool_win.cc:24] Session host list contains 0session.
+[54332:41184:1027/171034.015:VERBOSE1:content\browser\edge_dual_engine\internet_explorer_session_host_pool_win.cc:24] Session host list contains 0session.
+[54332:41184:1027/171034.016:VERBOSE1:content\browser\edge_dual_engine\internet_explorer_session_host_pool_win.cc:24] Session host list contains 0session.
+[54332:41184:1027/171034.016:VERBOSE1:content\browser\edge_dual_engine\internet_explorer_session_host_pool_win.cc:24] Session host list contains 0session.
+[54332:41184:1027/171034.017:VERBOSE1:content\browser\edge_dual_engine\internet_explorer_session_host_pool_win.cc:24] Session host list contains 0session.
+[54332:41184:1027/171034.022:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1814] RemoveKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1), kExtensionUpdater (1)]
+[54332:6992:1027/171034.047:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/ar/messages.json
+[54332:79860:1027/171034.047:VERBOSE1:content\browser\loader\file_url_loader_factory.cc:499] FileURLLoader::Start: file:///C:/Users/a1007/AppData/Local/Temp/HeadlessEdge54332851893625/Default/Extensions/iikmkjmpaadaobahmlepeloendndfphd/5.5.1_0/background.js
+[54332:6992:1027/171034.048:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/be/messages.json
+[54332:6992:1027/171034.049:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/cs/messages.json
+[54332:6992:1027/171034.049:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/da/messages.json
+[54332:6992:1027/171034.050:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/de/messages.json
+[54332:6992:1027/171034.051:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/el/messages.json
+[54332:6992:1027/171034.051:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/en/messages.json
+[54332:6992:1027/171034.052:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/es/messages.json
+[54332:6992:1027/171034.053:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/fr/messages.json
+[54332:6992:1027/171034.053:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/he/messages.json
+[54332:6992:1027/171034.054:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/hi/messages.json
+[54332:6992:1027/171034.055:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/hr/messages.json
+[54332:6992:1027/171034.056:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/hu/messages.json
+[54332:6992:1027/171034.056:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/id/messages.json
+[54332:6992:1027/171034.057:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/it/messages.json
+[54332:6992:1027/171034.058:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/ja/messages.json
+[54332:6992:1027/171034.059:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/ko/messages.json
+[54332:6992:1027/171034.060:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/mk/messages.json
+[54332:6992:1027/171034.060:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/nb/messages.json
+[54332:6992:1027/171034.061:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/nl/messages.json
+[54332:6992:1027/171034.062:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/pl/messages.json
+[54332:6992:1027/171034.062:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/pt_BR/messages.json
+[54332:6992:1027/171034.063:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/pt_PT/messages.json
+[54332:6992:1027/171034.070:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/ru/messages.json
+[54332:6992:1027/171034.071:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/sk/messages.json
+[54332:6992:1027/171034.071:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/sr/messages.json
+[54332:6992:1027/171034.072:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/tr/messages.json
+[54332:6992:1027/171034.074:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/uk/messages.json
+[54332:6992:1027/171034.074:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/vi/messages.json
+[54332:6992:1027/171034.074:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/zh_CN/messages.json
+[54332:6992:1027/171034.076:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/zh_TW/messages.json
+[54332:6992:1027/171034.076:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for images/icon.png
+[54332:6992:1027/171034.076:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for images/icon128.png
+[54332:6992:1027/171034.077:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for images/icon48.png
+[54332:6992:1027/171034.078:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for images/icon_grey16.png
+[54332:6992:1027/171034.080:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for images/icon_grey19.png
+[54332:6992:1027/171034.080:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for images/icon_grey24.png
+[54332:6992:1027/171034.081:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for images/icon_grey32.png
+[54332:6992:1027/171034.081:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for images/icon_grey38.png
+[54332:6992:1027/171034.082:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for manifest.json
+[54332:48748:1027/171034.087:VERBOSE1:extensions\browser\content_verifier\content_verifier.cc:945] OnFetchComplete iikmkjmpaadaobahmlepeloendndfphd success:1
+[54332:6992:1027/171034.202:VERBOSE1:content\browser\loader\file_url_loader_factory.cc:499] FileURLLoader::Start: file:///C:/Users/a1007/AppData/Local/Temp/HeadlessEdge54332851893625/Default/Extensions/iikmkjmpaadaobahmlepeloendndfphd/5.5.1_0/test.js
+[54332:79860:1027/171034.250:VERBOSE1:content\browser\loader\file_url_loader_factory.cc:499] FileURLLoader::Start: file:///C:/Users/a1007/AppData/Local/Temp/HeadlessEdge54332851893625/Default/Extensions/iikmkjmpaadaobahmlepeloendndfphd/5.5.1_0/images/icon_grey19.png
+[54332:75848:1027/171034.250:VERBOSE1:content\browser\loader\file_url_loader_factory.cc:499] FileURLLoader::Start: file:///C:/Users/a1007/AppData/Local/Temp/HeadlessEdge54332851893625/Default/Extensions/iikmkjmpaadaobahmlepeloendndfphd/5.5.1_0/images/icon_grey24.png
+[54332:59084:1027/171034.250:VERBOSE1:content\browser\loader\file_url_loader_factory.cc:499] FileURLLoader::Start: file:///C:/Users/a1007/AppData/Local/Temp/HeadlessEdge54332851893625/Default/Extensions/iikmkjmpaadaobahmlepeloendndfphd/5.5.1_0/images/icon_grey32.png
+[54332:41184:1027/171034.252:INFO:CONSOLE:613] "alarm: init done [object Object] [object Object]", source: chrome-extension://iikmkjmpaadaobahmlepeloendndfphd/background.js (613)
+[54332:32448:1027/171034.251:VERBOSE1:content\browser\loader\file_url_loader_factory.cc:499] FileURLLoader::Start: file:///C:/Users/a1007/AppData/Local/Temp/HeadlessEdge54332851893625/Default/Extensions/iikmkjmpaadaobahmlepeloendndfphd/5.5.1_0/images/icon_grey38.png
+[54332:6992:1027/171034.250:VERBOSE1:content\browser\loader\file_url_loader_factory.cc:499] FileURLLoader::Start: file:///C:/Users/a1007/AppData/Local/Temp/HeadlessEdge54332851893625/Default/Extensions/iikmkjmpaadaobahmlepeloendndfphd/5.5.1_0/images/icon_grey16.png
+[54332:41184:1027/171034.406:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1753] AddKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1), kExtensionUpdater (2)]
+[54332:41184:1027/171034.562:INFO:CONSOLE:304] "Storage: use storage.local", source: chrome-extension://iikmkjmpaadaobahmlepeloendndfphd/background.js (304)
+[54332:41184:1027/171034.564:INFO:CONSOLE:304] "Storage: use memory", source: chrome-extension://iikmkjmpaadaobahmlepeloendndfphd/background.js (304)
+[54332:41184:1027/171034.566:INFO:CONSOLE:614] "alarm: schedule[?|sync] [object Object]  undefined", source: chrome-extension://iikmkjmpaadaobahmlepeloendndfphd/background.js (614)
+[54332:41184:1027/171034.567:INFO:CONSOLE:615] "alarm: schedule[pbwqfuc96o|sync] mutex acquired", source: chrome-extension://iikmkjmpaadaobahmlepeloendndfphd/background.js (615)
+[54332:79860:1027/171034.571:VERBOSE1:content\browser\loader\file_url_loader_factory.cc:499] FileURLLoader::Start: file:///C:/Users/a1007/AppData/Local/Temp/HeadlessEdge54332851893625/Default/Extensions/iikmkjmpaadaobahmlepeloendndfphd/5.5.1_0/images/icon_forbidden16.png
+[54332:6992:1027/171034.571:VERBOSE1:content\browser\loader\file_url_loader_factory.cc:499] FileURLLoader::Start: file:///C:/Users/a1007/AppData/Local/Temp/HeadlessEdge54332851893625/Default/Extensions/iikmkjmpaadaobahmlepeloendndfphd/5.5.1_0/images/icon_forbidden38.png
+[54332:59084:1027/171034.571:VERBOSE1:content\browser\loader\file_url_loader_factory.cc:499] FileURLLoader::Start: file:///C:/Users/a1007/AppData/Local/Temp/HeadlessEdge54332851893625/Default/Extensions/iikmkjmpaadaobahmlepeloendndfphd/5.5.1_0/images/icon_forbidden24.png
+[54332:75848:1027/171034.571:VERBOSE1:content\browser\loader\file_url_loader_factory.cc:499] FileURLLoader::Start: file:///C:/Users/a1007/AppData/Local/Temp/HeadlessEdge54332851893625/Default/Extensions/iikmkjmpaadaobahmlepeloendndfphd/5.5.1_0/images/icon_forbidden19.png
+[54332:32448:1027/171034.571:VERBOSE1:content\browser\loader\file_url_loader_factory.cc:499] FileURLLoader::Start: file:///C:/Users/a1007/AppData/Local/Temp/HeadlessEdge54332851893625/Default/Extensions/iikmkjmpaadaobahmlepeloendndfphd/5.5.1_0/images/icon_forbidden32.png
+[54332:41184:1027/171034.573:INFO:CONSOLE:615] "alarm: schedule[pbwqfuc96o|sync] mutex release", source: chrome-extension://iikmkjmpaadaobahmlepeloendndfphd/background.js (615)
+[54332:41184:1027/171034.575:INFO:CONSOLE:614] "alarm: schedule[?|blu] [object Object]  undefined", source: chrome-extension://iikmkjmpaadaobahmlepeloendndfphd/background.js (614)
+[54332:41184:1027/171034.576:INFO:CONSOLE:615] "alarm: schedule[0n75zyadoc|blu] mutex acquired", source: chrome-extension://iikmkjmpaadaobahmlepeloendndfphd/background.js (615)
+[54332:41184:1027/171034.586:INFO:CONSOLE:615] "alarm: schedule[0n75zyadoc|blu] mutex release", source: chrome-extension://iikmkjmpaadaobahmlepeloendndfphd/background.js (615)
+[54332:41184:1027/171034.587:INFO:CONSOLE:614] "alarm: schedule[?|suc] [object Object]  undefined", source: chrome-extension://iikmkjmpaadaobahmlepeloendndfphd/background.js (614)
+[54332:41184:1027/171034.588:INFO:CONSOLE:615] "alarm: schedule[xkgr2vnlnx|suc] mutex acquired", source: chrome-extension://iikmkjmpaadaobahmlepeloendndfphd/background.js (615)
+[54332:41184:1027/171034.590:INFO:CONSOLE:615] "alarm: schedule[xkgr2vnlnx|suc] mutex release", source: chrome-extension://iikmkjmpaadaobahmlepeloendndfphd/background.js (615)
+[54332:41184:1027/171034.591:INFO:CONSOLE:614] "alarm: schedule[?|devMode] [object Object]  undefined", source: chrome-extension://iikmkjmpaadaobahmlepeloendndfphd/background.js (614)
+[54332:41184:1027/171034.591:INFO:CONSOLE:615] "alarm: schedule[cr2zcsm7jm|devMode] mutex acquired", source: chrome-extension://iikmkjmpaadaobahmlepeloendndfphd/background.js (615)
+[54332:41184:1027/171034.592:INFO:CONSOLE:615] "alarm: schedule[cr2zcsm7jm|devMode] mutex release", source: chrome-extension://iikmkjmpaadaobahmlepeloendndfphd/background.js (615)
+[54332:41184:1027/171034.604:VERBOSE1:content\browser\edge_process_pooling\edge_process_pool.cc:112] Pooling match not found, make a new host
+[54332:41184:1027/171034.605:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:101] 0 starting process and opening pool
+[54332:41184:1027/171034.605:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:117] 0 Service added, running clients: 1
+[54332:41184:1027/171034.614:VERBOSE1:extensions\browser\install_signer.cc:518] Got response: {"signature":"k5OTeLEOMnGgNCjixvsd7xCJJw8oVUoSPty3UfXGNnXA6HLnDTJ4Ldrs2YuJbqlzuYFIo1kXX1xhoZNu8e70QUuuSfITY0LYsn8eQ6fHMF9jgglwJsNe/RcwndvFuifGgLU22dEVFOweBWGP4UUUOcUorbYZJhO6hxSTF9xRIUOtcdwDofMUvuJVSTEcGHAXMntjsaLdcLd5PM+GEqrdCDGOQ8DMf4EZE+04Xh48g1OdZGDwd0MnqyytwFOrtNNoXCLM0kOCgcrDFFecsfBiwopgF/KHlQsGz6YSiAFAsYqVArw0eb9KNdKYNMXyZKykcMyeRYo1DLozysfpySFxPg==","expiry":"2027-01-19","invalid_ids":[],"protocol_version":1}
+[54332:41184:1027/171034.664:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:235] 39748 service closed, running clients: 0
+[54332:41184:1027/171034.664:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:254] 39748 should close pool is 1
+[54332:41184:1027/171034.673:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:69] 39748 closing process pool
+[54332:41184:1027/171034.679:VERBOSE1:extensions\browser\install_signer.cc:484] Sending request: {"hash":"lLglVPxiDsnSIRNXcpNHxDn0T53h+SbDAAQYZwzvvwY=","ids":["iikmkjmpaadaobahmlepeloendndfphd","jmjflgjpcpepeafmmgdpfkogkghcpiha","olejpddkpemncjcdehodpdmifdhodcaf"],"protocol_version":1}
+[54332:41184:1027/171034.702:VERBOSE1:components\signin\internal\identity_manager\mutable_profile_oauth2_token_service_delegate.cc:704] MutablePO2TS::RefreshTokenIsAvailable
+[54332:41184:1027/171034.710:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1814] RemoveKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1), kExtensionUpdater (1)]
+[54332:6992:1027/171034.785:VERBOSE1:content\browser\loader\file_url_loader_factory.cc:499] FileURLLoader::Start: file:///C:/Users/a1007/AppData/Local/Temp/HeadlessEdge54332851893625/Default/Extensions/olejpddkpemncjcdehodpdmifdhodcaf/0.9.8_0/background.js
+[54332:41184:1027/171035.433:VERBOSE1:extensions\browser\install_signer.cc:518] Got response: {"signature":"l6oYObCVwQnEhD9L8kOp0mWQVhAMZJDBunMDQk3MIDaED6+17QdDodhq4ZskB34k2KVAmzmY7gOmmI53mpgw3zqOZqnOwt8Ks/62KW+zVIVmeQEtPcOH/ZDqoIjlMZby5iuUkLZe+WOWNPp6PTMuCj5kNqLe+y6SigDh8zth+YvxRDFfrjGmcS0qmHSzBxVhVKYY5X32ZXsWBb+txXPQ6X2ul/6Y2vqW78eMP4861fQx+pf6+bYO6HtJQ6/dIC5zSeaknby/ojp9TlGzr8ewSM8Gmr2Vz1fAOaSvzULa5M2ltmcFKbfbURB3CTJz8FfqXPSDwGEbFjfTw7SKXsC/EA==","expiry":"2027-01-19","invalid_ids":[],"protocol_version":1}
+[54332:41184:1027/171035.597:INFO:CONSOLE:0] "Unchecked runtime.lastError: No current window", source:  (0)
+[54332:41184:1027/171036.368:VERBOSE1:components\update_client\url_fetcher_downloader.cc:147] Download succeeded: DownloadMetrics{url=http://msedge.f.tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/011dd0ec-77ec-44fe-9614-84c7a47d2fa9?P1=1793621114&P2=404&P3=2&P4=RKXczTs%2b5ZTqSmB8T%2bQrgsUa6Vhgw%2fYjnKSRNpkcoofkSSvzqfIlFDOw%2bxad1NmH1BRTy%2bDKPN5z0vtTzv2zjQ%3d%3d, downloader=direct, error=0, extra_code1=0, downloaded_bytes=13503686, total_bytes=13503686, download_time_ms=3590}, file: C:\Users\a1007\AppData\Local\Temp\msedge_url_fetcher_54332_1874955609\011dd0ec-77ec-44fe-9614-84c7a47d2fa9
+[54332:41184:1027/171036.391:VERBOSE1:components\update_client\crx_downloader.cc:182] Download succeeded: DownloadMetrics{url=http://msedge.f.tlu.dl.delivery.mp.microsoft.com/filestreamingservice/files/011dd0ec-77ec-44fe-9614-84c7a47d2fa9?P1=1793621114&P2=404&P3=2&P4=RKXczTs%2b5ZTqSmB8T%2bQrgsUa6Vhgw%2fYjnKSRNpkcoofkSSvzqfIlFDOw%2bxad1NmH1BRTy%2bDKPN5z0vtTzv2zjQ%3d%3d, downloader=direct, error=0, extra_code1=0, downloaded_bytes=13503686, total_bytes=13503686, download_time_ms=3590}, file: C:\Users\a1007\AppData\Local\Temp\msedge_url_fetcher_54332_1874955609\011dd0ec-77ec-44fe-9614-84c7a47d2fa9
+[54332:6992:1027/171036.396:VERBOSE1:components\update_client\unpacker.cc:88] Verifying component: C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\component_crx_cache\8cdbcef0ee51fcfab8f4353e62e82e6e90288144d4da3515719f2355c17501d4
+[54332:79860:1027/171036.396:VERBOSE1:extensions\browser\content_hash_fetcher.cc:51] URLFetchComplete for olejpddkpemncjcdehodpdmifdhodcaf is_success:1 https://edge.microsoft.com/extensionwebstorebase/v1/crx?response=redirect&x=uc%26installsource%3Dsignature%26id%3Dolejpddkpemncjcdehodpdmifdhodcaf%26v%3D0.9.8
+[54332:79860:1027/171036.397:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:240] JSON parsed ok for olejpddkpemncjcdehodpdmifdhodcaf
+[54332:79860:1027/171036.400:WARNING:extensions\browser\content_verifier\content_hash.cc:282] Fetched verified_contents.json with size: 3605 bytes for extension id: olejpddkpemncjcdehodpdmifdhodcaf version: 0.9.8
+[54332:79860:1027/171036.407:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for manifest.json
+[54332:79860:1027/171036.412:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for spectorjs-128.png
+[54332:79860:1027/171036.412:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for spectorjs-19.png
+[54332:79860:1027/171036.413:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for spectorjs-38.png
+[54332:79860:1027/171036.413:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for spectorjs-48.png
+[54332:48748:1027/171036.416:VERBOSE1:extensions\browser\content_verifier\content_verifier.cc:945] OnFetchComplete olejpddkpemncjcdehodpdmifdhodcaf success:1
+[54332:6992:1027/171036.434:VERBOSE1:components\update_client\unpacker.cc:101] Verification result: 0
+[54332:6992:1027/171036.442:VERBOSE1:components\update_client\unpacker.cc:127] Unpacking in: C:\Users\a1007\AppData\Local\Temp\msedge_chrome_Unpacker_BeginUnzipping54332_389711283
+[54332:6992:1027/171036.691:VERBOSE1:components\component_updater\component_installer.cc:198] Install: version=2026.10.19.3 current version=0.0.0.0
+[54332:6992:1027/171036.692:VERBOSE1:components\component_updater\component_installer.cc:217] unpack_path=C:\Users\a1007\AppData\Local\Temp\msedge_chrome_Unpacker_BeginUnzipping54332_389711283 install_path=C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\Edge Entity Extraction\2026.10.19.3
+[54332:6992:1027/171036.698:VERBOSE1:components\component_updater\installer_policies\edge_entity_extraction_component_installer.cc:448] ComputeInstalledFilePath: using version constraint "3.*.*" for domains config
+[54332:6992:1027/171036.700:VERBOSE1:components\component_updater\installer_policies\edge_entity_extraction_component_installer.cc:373] FindOnnxVersionDir: using constraint "3.2.*" for onnx.product.desktop.zh
+[54332:41184:1027/171036.701:VERBOSE1:components\component_updater\component_installer.cc:679] Component ready, version 2026.10.19.3 in C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\Edge Entity Extraction\2026.10.19.3
+[54332:41184:1027/171036.702:VERBOSE1:components\component_updater\installer_policies\edge_entity_extraction_component_installer.cc:522] EdgeEntityExtraction component ready, version: 2026.10.19.3 install_dir: C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\Edge Entity Extraction\2026.10.19.3
+[54332:41184:1027/171036.703:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:830] Component is ready: npbipokbgmclmkjhfjicdgnedhkocjpl
+[54332:41184:1027/171036.704:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:846] OnComponentReady: Processing 1 pending requests for component npbipokbgmclmkjhfjicdgnedhkocjpl
+[54332:41184:1027/171036.704:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:879] ProcessPendingRequest: Processing request for component npbipokbgmclmkjhfjicdgnedhkocjpl, file: domains_config_gz
+[54332:41184:1027/171036.705:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:925] ProcessPendingRequestWithItem: Processing component npbipokbgmclmkjhfjicdgnedhkocjpl, has component=1, file_constraint=domains_config_gz, file_constraint.size()=17
+[54332:41184:1027/171036.706:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:945] ProcessPendingRequestWithItem: Calling GetInstalledFile for component npbipokbgmclmkjhfjicdgnedhkocjpl with constraint: domains_config_gz
+[54332:41184:1027/171036.706:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:960] ProcessPendingRequestWithItem: File path from installer: C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\Edge Entity Extraction\2026.10.19.3\domains_config_gz\3.0.0\asset
+[54332:41184:1027/171036.707:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:974] ProcessPendingRequestWithItem: Using version: 3.0.0
+[54332:41184:1027/171036.709:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:1014] ComponentUpdaterBridge: Successfully read 151426 bytes from C:\Users\a1007\AppData\Local\Temp\HeadlessEdge54332851893625\Edge Entity Extraction\2026.10.19.3\domains_config_gz\3.0.0\asset (version: 3.0.0)
+[54332:41184:1027/171036.709:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:334] ComponentUpdaterBridge: Cached content for npbipokbgmclmkjhfjicdgnedhkocjpl:domains_config_gz, version: 3.0.0, size: 151426
+[54332:41184:1027/171036.923:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1753] AddKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1), kExtensionUpdater (2)]
+[54332:41184:1027/171037.131:VERBOSE1:components\update_client\request_sender.cc:423] Request completed from url: https://edge.microsoft.com/componentupdater/api/v1/update
+[54332:41184:1027/171037.132:VERBOSE1:components\component_updater\component_updater_service.cc:567] Update completed with error 0
+[54332:41184:1027/171037.133:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:710] OnUpdateComplete: for request 7cd9a75a-f65c-4f50-abcd-aec8a2f1ce06, component npbipokbgmclmkjhfjicdgnedhkocjpl, error: 0
+[54332:41184:1027/171037.133:VERBOSE1:components\component_updater\edge_component_updater_bridge.cc:716] OnUpdateComplete: Request 7cd9a75a-f65c-4f50-abcd-aec8a2f1ce06 not found (may have been cancelled)
+[54332:41184:1027/171038.228:VERBOSE1:content\browser\edge_process_pooling\edge_process_pool.cc:112] Pooling match not found, make a new host
+[54332:41184:1027/171038.229:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:101] 0 starting process and opening pool
+[54332:41184:1027/171038.230:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:117] 0 Service added, running clients: 1
+[54332:41184:1027/171038.471:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:235] 40548 service closed, running clients: 0
+[54332:41184:1027/171038.471:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:254] 40548 should close pool is 1
+[54332:41184:1027/171038.480:VERBOSE1:content\browser\edge_process_pooling\edge_pooling_utility_process_host.cc:69] 40548 closing process pool
+[54332:41184:1027/171038.555:VERBOSE1:extensions\browser\install_signer.cc:484] Sending request: {"hash":"yirAJ5CWJCiVqliB5bV7XGSakpWF7i2jEIJL+Aw/j5c=","ids":["iikmkjmpaadaobahmlepeloendndfphd","jmjflgjpcpepeafmmgdpfkogkghcpiha","kacbklkbjmnjkhnellgciecdogkkldoj","olejpddkpemncjcdehodpdmifdhodcaf"],"protocol_version":1}
+[54332:41184:1027/171038.555:VERBOSE1:content\browser\edge_dual_engine\internet_explorer_session_host_pool_win.cc:24] Session host list contains 0session.
+[54332:41184:1027/171038.562:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1814] RemoveKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1), kExtensionUpdater (1)]
+[54332:41184:1027/171038.562:VERBOSE1:chrome\browser\profiles\profile_manager.cc:1814] RemoveKeepAlive(Default, kExtensionUpdater). keep_alives=[kWaitingForFirstBrowserWindow (1), kOffTheRecordProfile (1)]
+[54332:79860:1027/171038.578:VERBOSE1:content\browser\loader\file_url_loader_factory.cc:499] FileURLLoader::Start: file:///C:/Users/a1007/AppData/Local/Temp/HeadlessEdge54332851893625/Default/Extensions/kacbklkbjmnjkhnellgciecdogkkldoj/11.1.0_0/background.bundle.js
+[54332:6992:1027/171038.717:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/am/messages.json
+[54332:6992:1027/171038.717:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/ar/messages.json
+[54332:6992:1027/171038.718:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/bg/messages.json
+[54332:6992:1027/171038.719:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/bn/messages.json
+[54332:6992:1027/171038.719:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/ca/messages.json
+[54332:6992:1027/171038.720:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/cs/messages.json
+[54332:6992:1027/171038.721:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/da/messages.json
+[54332:6992:1027/171038.721:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/de/messages.json
+[54332:6992:1027/171038.722:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/el/messages.json
+[54332:6992:1027/171038.723:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/en/messages.json
+[54332:6992:1027/171038.723:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/en_AU/messages.json
+[54332:6992:1027/171038.724:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/en_GB/messages.json
+[54332:6992:1027/171038.724:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/en_US/messages.json
+[54332:6992:1027/171038.725:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/es/messages.json
+[54332:6992:1027/171038.726:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/es_419/messages.json
+[54332:6992:1027/171038.726:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/et/messages.json
+[54332:6992:1027/171038.727:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/fa/messages.json
+[54332:6992:1027/171038.728:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/fi/messages.json
+[54332:6992:1027/171038.728:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/fil/messages.json
+[54332:6992:1027/171038.729:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/fr/messages.json
+[54332:6992:1027/171038.730:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/gu/messages.json
+[54332:6992:1027/171038.730:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/he/messages.json
+[54332:6992:1027/171038.730:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/hi/messages.json
+[54332:6992:1027/171038.731:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/hr/messages.json
+[54332:6992:1027/171038.731:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/hu/messages.json
+[54332:6992:1027/171038.732:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/id/messages.json
+[54332:6992:1027/171038.732:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/it/messages.json
+[54332:6992:1027/171038.733:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/ja/messages.json
+[54332:6992:1027/171038.734:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/kn/messages.json
+[54332:6992:1027/171038.734:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/ko/messages.json
+[54332:6992:1027/171038.735:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/lt/messages.json
+[54332:6992:1027/171038.735:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/lv/messages.json
+[54332:6992:1027/171038.736:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/ml/messages.json
+[54332:6992:1027/171038.737:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/mr/messages.json
+[54332:6992:1027/171038.737:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/ms/messages.json
+[54332:6992:1027/171038.738:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/nl/messages.json
+[54332:6992:1027/171038.738:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/no/messages.json
+[54332:6992:1027/171038.739:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/pl/messages.json
+[54332:6992:1027/171038.740:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/pt_BR/messages.json
+[54332:6992:1027/171038.740:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/pt_PT/messages.json
+[54332:6992:1027/171038.741:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/ro/messages.json
+[54332:6992:1027/171038.741:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/ru/messages.json
+[54332:6992:1027/171038.742:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/sk/messages.json
+[54332:6992:1027/171038.742:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/sl/messages.json
+[54332:6992:1027/171038.743:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/sr/messages.json
+[54332:6992:1027/171038.743:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/sv/messages.json
+[54332:6992:1027/171038.744:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/sw/messages.json
+[54332:6992:1027/171038.745:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/ta/messages.json
+[54332:6992:1027/171038.745:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/te/messages.json
+[54332:6992:1027/171038.746:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/th/messages.json
+[54332:6992:1027/171038.753:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/tr/messages.json
+[54332:6992:1027/171038.754:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/uk/messages.json
+[54332:6992:1027/171038.754:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/vi/messages.json
+[54332:6992:1027/171038.756:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/zh_CN/messages.json
+[54332:6992:1027/171038.756:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for _locales/zh_TW/messages.json
+[54332:6992:1027/171038.756:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for images/icons/icon128@2x.png
+[54332:6992:1027/171038.757:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for images/icons/icon16@2x.png
+[54332:6992:1027/171038.758:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for images/icons/icon19@2x.png
+[54332:6992:1027/171038.758:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for images/icons/icon48@2x.png
+[54332:6992:1027/171038.759:VERBOSE1:extensions\browser\content_verifier\content_hash.cc:414] content mismatch for manifest.json
+[54332:48748:1027/171038.771:VERBOSE1:extensions\browser\content_verifier\content_verifier.cc:945] OnFetchComplete kacbklkbjmnjkhnellgciecdogkkldoj success:1
+[54332:41184:1027/171038.967:VERBOSE1:extensions\browser\install_signer.cc:518] Got response: {"signature":"fVVI/xZKY3NrQP74qxlUAB5W2c6qBV4XH2QdfZeUcq7kTjL4Giezb41/WDxaAcWyuSGorUj401pJPPy5/ollqIyFF8A7a6+gg7IYUzyRm4ef/2qVIlPtJaO7c0iHkJnOtyVMF1j7q9wYOC/ZkNSZ5MClBnshdYp2dQwhBNFrC/0rHUyVTW8i50sz41Hk7/CK/KxvV9IaMWSWeaKwDiDh2JkzsW1h/i0BY4iqzlrOYBlwhGvGdkl+vFSscKMr2odm3Vp3jYjuk7/cIDt0cbEIPIyKR8KVeVMbRv9N/0Kxye2XDhgnFqHSP9essrYxVe1JsqSN8vI79+EPwAHvYyyQAg==","expiry":"2027-01-19","invalid_ids":[],"protocol_version":1}
+[54332:41184:1027/171039.066:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
+[54332:41184:1027/171039.232:INFO:CONSOLE:0] "Uncaught (in promise) Error: No current window", source: chrome-extension://kacbklkbjmnjkhnellgciecdogkkldoj/background.bundle.js (0)
+[54332:41184:1027/171039.380:VERBOSE1:components\telemetry_client\telemetry_service.cc:808] NoConsent: Microsoft.WebBrowser.Security.PKI [components\telemetry_client\telemetry_service.cc(237)]
