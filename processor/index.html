@@ -2100,9 +2100,10 @@
 
 
     /* =========================================================================
-       3. 三大主盘结构定义 + 境界环数配比 (练气:2/1环 | 筑基:3/2环 | 金丹:4/3环)
-          ★ 核心要求：除了1个大盘子(主修盘)，另外两个小盘子大小100%对齐！
-          ★ 全屏 / 2K / 4K 分辨率自适应缩放支持
+       3. 三大主盘结构定义 + 独立最外圈接引环(不计入基础环) + 境界环数配比
+          ★ 核心要求1：除1个大盘(主修盘)外，另外两个小盘大小100%对齐！
+          ★ 核心要求2：放极核插槽的圈是【独立在最外面那一圈】，不算在基础环里面！
+          ★ 核心要求3：全屏 / 2K / 4K 分辨率自适应缩放支持
        ========================================================================= */
     const STAGE_LOGICAL_W = 1640;
     const STAGE_LOGICAL_H = 860;
@@ -2145,31 +2146,31 @@
     let CURRENT_REALM = 'qi';      // 'qi' | 'foundation' | 'core'
     let SPEC_DISC = 'combat';      // 'combat' | 'industry' | 'support' (单选大盘)
 
-    // 中心核状态：记录各盘中心是否已被射入充能、是否已被点一下取下(detached)、安放在哪个外圈插槽(placedAtSlot)
+    // 中心核状态：记录各盘中心是否已被射入充能(charged)、是否已被点一下取下(detached)、安放在哪个【独立最外圈插槽】(placedAtDock)
     const CENTER_CORE_STATE = {
-      support:  { charged: false, detached: false, placedAtSlot: null },
-      industry: { charged: false, detached: false, placedAtSlot: null },
-      combat:   { charged: false, detached: false, placedAtSlot: null }
+      support:  { charged: false, detached: false, placedAtDock: null },
+      industry: { charged: false, detached: false, placedAtDock: null },
+      combat:   { charged: false, detached: false, placedAtDock: null }
     };
 
-    // ★ 三大主盘采用完全统一的同心环半径规制 (1环R=72, 2环R=115, 3环R=158, 4环R=200)
-    // 确保任何时候：1个大盘(N+1环)尺寸突出，另外2个小盘(N环)大小100%对齐，且每环宽敞不拥挤！
+    // ★ 三大主盘采用完全统一的【基础环】半径规制 (1环R=66, 2环R=106, 3环R=146, 4环R=186)
+    // 在基础环的最外围，还有一圈独立的【最外圈接引环 (R = 最外基础环 + 36)】，不算在基础环内！
     const DISC_CONFIG = {
       support: {
         key: 'support',
         name: '🛡️ 辅助盘',
         shortTag: '辅',
         cx: 1310, cy: 250,
-        emitAngleDeg: 155, // 最外圈固定方位射出角
+        emitAngleDeg: 155, // 独立最外圈固定方位射出角
         nodeBorder: 'border-sky-500 hover:border-sky-700 bg-sky-50/95 hover:bg-sky-100',
         nodeDot: 'bg-sky-500',
         nodeBadge: 'bg-sky-600 text-white border-sky-300',
         coreColorHex: '#0284c7',
         rings: [
-          { tier: 1, id: 'support_1', name: '辅助盘·1环(内)', radius: 72,  slotCount: 6 },
-          { tier: 2, id: 'support_2', name: '辅助盘·2环',     radius: 115, slotCount: 8 },
-          { tier: 3, id: 'support_3', name: '辅助盘·3环',     radius: 158, slotCount: 10 },
-          { tier: 4, id: 'support_4', name: '辅助盘·4环(外)', radius: 200, slotCount: 16 }
+          { tier: 1, id: 'support_1', name: '辅助盘·基础1环', radius: 66,  slotCount: 6 },
+          { tier: 2, id: 'support_2', name: '辅助盘·基础2环', radius: 106, slotCount: 8 },
+          { tier: 3, id: 'support_3', name: '辅助盘·基础3环', radius: 146, slotCount: 10 },
+          { tier: 4, id: 'support_4', name: '辅助盘·基础4环', radius: 186, slotCount: 16 }
         ]
       },
       industry: {
@@ -2177,16 +2178,16 @@
         name: '⚙️ 工厂盘',
         shortTag: '工',
         cx: 890, cy: 430,
-        emitAngleDeg: 162, // 最外圈固定方位射出角
+        emitAngleDeg: 162, // 独立最外圈固定方位射出角
         nodeBorder: 'border-amber-500 hover:border-amber-700 bg-amber-50/95 hover:bg-amber-100',
         nodeDot: 'bg-amber-500',
         nodeBadge: 'bg-amber-600 text-white border-amber-300',
         coreColorHex: '#d97706',
         rings: [
-          { tier: 1, id: 'industry_1', name: '工厂盘·1环(内)', radius: 72,  slotCount: 6 },
-          { tier: 2, id: 'industry_2', name: '工厂盘·2环',     radius: 115, slotCount: 8 },
-          { tier: 3, id: 'industry_3', name: '工厂盘·3环',     radius: 158, slotCount: 10 },
-          { tier: 4, id: 'industry_4', name: '工厂盘·4环(外)', radius: 200, slotCount: 16 }
+          { tier: 1, id: 'industry_1', name: '工厂盘·基础1环', radius: 66,  slotCount: 6 },
+          { tier: 2, id: 'industry_2', name: '工厂盘·基础2环', radius: 106, slotCount: 8 },
+          { tier: 3, id: 'industry_3', name: '工厂盘·基础3环', radius: 146, slotCount: 10 },
+          { tier: 4, id: 'industry_4', name: '工厂盘·基础4环', radius: 186, slotCount: 16 }
         ]
       },
       combat: {
@@ -2194,16 +2195,16 @@
         name: '⚔️ 攻击盘',
         shortTag: '攻',
         cx: 390, cy: 490,
-        emitAngleDeg: 342, // 最外圈固定方位射出角
+        emitAngleDeg: 342, // 独立最外圈固定方位射出角
         nodeBorder: 'border-rose-500 hover:border-rose-700 bg-rose-50/95 hover:bg-rose-100',
         nodeDot: 'bg-rose-500',
         nodeBadge: 'bg-rose-600 text-white border-rose-300',
         coreColorHex: '#e11d48',
         rings: [
-          { tier: 1, id: 'combat_1', name: '攻击盘·1环(内)', radius: 72,  slotCount: 6 },
-          { tier: 2, id: 'combat_2', name: '攻击盘·2环',     radius: 115, slotCount: 8 },
-          { tier: 3, id: 'combat_3', name: '攻击盘·3环',     radius: 158, slotCount: 10 },
-          { tier: 4, id: 'combat_4', name: '攻击盘·4环(外)', radius: 200, slotCount: 16 }
+          { tier: 1, id: 'combat_1', name: '攻击盘·基础1环', radius: 66,  slotCount: 6 },
+          { tier: 2, id: 'combat_2', name: '攻击盘·基础2环', radius: 106, slotCount: 8 },
+          { tier: 3, id: 'combat_3', name: '攻击盘·基础3环', radius: 146, slotCount: 10 },
+          { tier: 4, id: 'combat_4', name: '攻击盘·基础4环', radius: 186, slotCount: 16 }
         ]
       }
     };
@@ -2218,6 +2219,58 @@
         combat:   SPEC_DISC === 'combat'   ? cfg.primary : cfg.secondary,
         industry: SPEC_DISC === 'industry' ? cfg.primary : cfg.secondary,
         support:  SPEC_DISC === 'support'  ? cfg.primary : cfg.secondary
+      };
+    }
+
+    // 获取某盘【独立最外圈接引环】的当前半径（始终位于最外层基础环之外 +36px，不计入基础环数）
+    function getOuterDockRadius(discKey) {
+      const counts = getActiveRingCounts();
+      const maxTier = counts[discKey] || 1;
+      const maxBasicR = DISC_CONFIG[discKey].rings[maxTier - 1].radius;
+      return maxBasicR + 36;
+    }
+
+    // ★ 独立最外圈接引插槽定义：每个盘在独立最外圈设有 4 个专用外接插槽 (北-90° / 东0° / 南90° / 西180°)
+    // 专门用来插从其他盘中心取下的中心节点，绝不占用基础环芯片槽位！
+    const DOCK_ANGLES = [
+      { idx: 0, angleDeg: 270, dirName: '北(上)' }, // -90°
+      { idx: 1, angleDeg: 0,   dirName: '东(右)' }, // 0°
+      { idx: 2, angleDeg: 90,  dirName: '南(下)' }, // 90°
+      { idx: 3, angleDeg: 180, dirName: '西(左)' }  // 180°
+    ];
+
+    let OUTER_DOCK_SLOTS = {};
+    function initOuterDockSlots() {
+      const prev = Object.assign({}, OUTER_DOCK_SLOTS);
+      OUTER_DOCK_SLOTS = {};
+      for (const dKey of ['support', 'industry', 'combat']) {
+        DOCK_ANGLES.forEach(da => {
+          const dockKey = `dock_${dKey}_${da.idx}`;
+          OUTER_DOCK_SLOTS[dockKey] = {
+            dockKey,
+            discKey: dKey,
+            dockIndex: da.idx,
+            angleDeg: da.angleDeg,
+            dirName: da.dirName,
+            coreChip: prev[dockKey] ? prev[dockKey].coreChip : null
+          };
+        });
+      }
+    }
+
+    function getOuterDockWorldPos(dockKey) {
+      const dSlot = OUTER_DOCK_SLOTS[dockKey];
+      if (!dSlot) return { x: 0, y: 0, angleDeg: 0, radius: 100 };
+      const dMeta = DISC_CONFIG[dSlot.discKey];
+      const r = getOuterDockRadius(dSlot.discKey);
+      const rad = (dSlot.angleDeg * Math.PI) / 180;
+      return {
+        x: dMeta.cx + r * Math.cos(rad),
+        y: dMeta.cy + r * Math.sin(rad),
+        angleDeg: dSlot.angleDeg,
+        radius: r,
+        cx: dMeta.cx,
+        cy: dMeta.cy
       };
     }
 
@@ -2257,6 +2310,7 @@
           };
         }
       }
+      initOuterDockSlots();
     }
 
     function setRealm(realmKey) {
@@ -2294,7 +2348,7 @@
     }
     window.setSpecDisc = setSpecDisc;
 
-    // ★ 动态绘制三大主盘 SVG 精密工程外框 (保持第一版黑白青浑天仪卡尺制图风格，且两个小盘尺寸100%对齐！)
+    // ★ 动态绘制三大主盘 SVG 精密工程外框 (包含独立最外圈接引环轨道与卡尺，两个小盘100%等大对齐)
     function renderDynamicSvgDiscCasings() {
       const g = document.getElementById('dynamicSvgDiscCasings');
       if (!g) return;
@@ -2303,10 +2357,11 @@
 
       for (const [dKey, dMeta] of Object.entries(DISC_CONFIG)) {
         const maxTier = counts[dKey];
-        const outR = dMeta.rings[maxTier - 1].radius; // 1环72, 2环115, 3环158, 4环200
-        const bezelR = outR + 24;
-        const caliperR = outR + 38;
-        const caliperOuterR = outR + 50;
+        const maxBasicR = dMeta.rings[maxTier - 1].radius; // 基础环最外半径
+        const dockR = getOuterDockRadius(dKey);            // 独立外接圈半径 (maxBasicR + 36)
+        const bezelR = dockR + 16;
+        const caliperR = dockR + 28;
+        const caliperOuterR = dockR + 40;
         const cx = dMeta.cx;
         const cy = dMeta.cy;
 
@@ -2334,39 +2389,48 @@
           ticksHtml += `<line x1="${ix}" y1="${iy}" x2="${ox}" y2="${oy}" stroke="#0f172a" stroke-width="${sw}" />`;
         }
 
-        // 盘底暗渠 (盘心 -> 最外圈固定射出点)
+        // 独立外接圈与基础环之间的4道正交导光桥接轨
+        let bridgeLinesHtml = '';
+        [0, 90, 180, 270].forEach(deg => {
+          const rad = deg * Math.PI / 180;
+          const x1 = (cx + maxBasicR * Math.cos(rad)).toFixed(1);
+          const y1 = (cy + maxBasicR * Math.sin(rad)).toFixed(1);
+          const x2 = (cx + dockR * Math.cos(rad)).toFixed(1);
+          const y2 = (cy + dockR * Math.sin(rad)).toFixed(1);
+          bridgeLinesHtml += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="2 2" />`;
+        });
+
+        // 盘底暗渠 (盘心 -> 独立最外圈固定射出点)
         const emitRad = (dMeta.emitAngleDeg * Math.PI) / 180;
-        const emitX = (cx + outR * Math.cos(emitRad)).toFixed(1);
-        const emitY = (cy + outR * Math.sin(emitRad)).toFixed(1);
+        const emitX = (cx + dockR * Math.cos(emitRad)).toFixed(1);
+        const emitY = (cy + dockR * Math.sin(emitRad)).toFixed(1);
 
         // 45° 剖面斜纹工程铭牌底框
-        const hatchW = Math.round(outR * 1.15);
-        const hatchH = 46;
+        const hatchW = Math.round(dockR * 1.05);
+        const hatchH = 44;
         const hatchX = Math.round(cx - hatchW / 2);
-        const hatchY = Math.round(cy - bezelR - 22);
+        const hatchY = Math.round(cy - bezelR - 20);
 
         svgHtml += `
           <g id="svgDiscCasing_${dKey}">
             <!-- 45° 精密剖面斜纹工程底框 -->
             <rect x="${hatchX}" y="${hatchY}" width="${hatchW}" height="${hatchH}" fill="url(#blueprintHatch)" stroke="#0f172a" stroke-width="1.1" stroke-dasharray="3 3" opacity="0.85" />
-            <!-- 盘体纯白工程底盘与外圈分度环 (保持第一版黑白青精密工程风，不改盘体颜色) -->
-            <circle cx="${cx}" cy="${cy}" r="${bezelR + 8}" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="3 4" fill="none" />
+            <!-- 盘体纯白工程底盘与外圈分度环 (保持第一版黑白青精密工程风) -->
+            <circle cx="${cx}" cy="${cy}" r="${bezelR + 6}" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="3 4" fill="none" />
             <circle cx="${cx}" cy="${cy}" r="${bezelR}" stroke="#0f172a" stroke-width="1.6" fill="#ffffff" />
-            <circle cx="${cx}" cy="${cy}" r="${outR + 11}" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="2 2" fill="none" />
+            
+            <!-- ★ 独立在最外面的【外接导光环轨道】(r = dockR，与内部基础环明显区分) ★ -->
+            <circle cx="${cx}" cy="${cy}" r="${dockR}" stroke="#0284c7" stroke-width="2" stroke-dasharray="6 3" fill="none" opacity="0.85" />
+            <circle cx="${cx}" cy="${cy}" r="${dockR - 14}" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2 3" fill="#f8fafc" fill-opacity="0.45" />
+            ${bridgeLinesHtml}
+
             <!-- 黄道面刻度椭圆 -->
-            <ellipse cx="${cx}" cy="${cy}" rx="${bezelR + 6}" ry="${Math.round(bezelR * 0.36)}" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="3 4" fill="none" transform="rotate(-21.6 ${cx} ${cy})" opacity="0.7" />
-            <!-- 四极正交分度刻度线 -->
-            <g stroke="#0f172a" stroke-width="1.6">
-              <line x1="${cx}" y1="${cy - bezelR - 6}" x2="${cx}" y2="${cy - bezelR + 6}" />
-              <line x1="${cx}" y1="${cy + bezelR - 6}" x2="${cx}" y2="${cy + bezelR + 6}" />
-              <line x1="${cx - bezelR - 6}" y1="${cy}" x2="${cx - bezelR + 6}" y2="${cy}" />
-              <line x1="${cx + bezelR - 6}" y1="${cy}" x2="${cx + bezelR + 6}" y2="${cy}" />
-            </g>
+            <ellipse cx="${cx}" cy="${cy}" rx="${bezelR + 4}" ry="${Math.round(bezelR * 0.35)}" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="3 4" fill="none" transform="rotate(-21.6 ${cx} ${cy})" opacity="0.65" />
             <!-- 90° 梳状精密分度卡尺弧 -->
             <path d="M ${c1x} ${c1y} A ${caliperR} ${caliperR} 0 0 1 ${c2x} ${c2y}" fill="none" stroke="#0f172a" stroke-width="1.8" />
             <path d="M ${o1x} ${o1y} A ${caliperOuterR} ${caliperOuterR} 0 0 1 ${o2x} ${o2y}" fill="none" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="2 2" />
             <g>${ticksHtml}</g>
-            <!-- 盘底暗渠虚线 (盘心 ➔ 最外圈射出点) -->
+            <!-- 盘底暗渠虚线 (盘心 ➔ 独立最外圈射出点) -->
             <line x1="${cx}" y1="${cy}" x2="${emitX}" y2="${emitY}" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="3 3" opacity="0.75" />
           </g>
         `;
@@ -2379,7 +2443,7 @@
         }
       }
 
-      // 辅助盘右侧始发准直虚线与状态标签
+      // 辅助盘右侧始发准直虚线与状态标签 (接入辅助盘最外层基础环)
       const supMaxTier = counts.support;
       const supOutR = DISC_CONFIG.support.rings[supMaxTier - 1].radius;
       const entryRad = (345.17 * Math.PI) / 180;
@@ -2397,7 +2461,7 @@
       g.innerHTML = svgHtml;
     }
 
-    // 渲染三盘动态环体 (100%保持第一版黑白青精密工程样式，不改盘体颜色)
+    // 渲染三盘【基础环】DOM (1~4环，不改盘体颜色) + 独立外圈标识
     function renderDynamicRingsDOM() {
       const container = document.getElementById('dynamicRingsDomContainer');
       if (!container) return;
@@ -2406,29 +2470,39 @@
 
       for (const [dKey, dMeta] of Object.entries(DISC_CONFIG)) {
         const maxTier = counts[dKey];
+        const dockR = getOuterDockRadius(dKey);
         const badgeEl = document.getElementById('badge_disc_' + dKey);
         if (badgeEl) {
           const isSpec = (SPEC_DISC === dKey);
-          badgeEl.textContent = `${maxTier}环·${isSpec ? '大盘(主修)' : '小盘(对齐)'}`;
+          badgeEl.textContent = `基础${maxTier}环+独立外圈 · ${isSpec ? '大盘' : '小盘'}`;
           badgeEl.className = isSpec
-            ? 'text-[10px] font-mono-sci font-bold px-1.5 rounded bg-slate-900 text-amber-300'
-            : 'text-[10px] font-mono-sci font-bold px-1.5 rounded bg-slate-100 text-slate-600';
+            ? 'text-[9.5px] font-mono-sci font-bold px-1.5 rounded bg-slate-900 text-amber-300'
+            : 'text-[9.5px] font-mono-sci font-bold px-1.5 rounded bg-slate-100 text-slate-600';
         }
 
+        // 1. 渲染独立最外圈的环顶铭牌 (明确标识：独立外圈·不计入基础环)
+        htmlStr += `
+          <div class="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 px-1.5 py-0.2 rounded bg-sky-950 text-sky-200 border border-sky-400 text-[7.5px] font-mono-sci font-bold shadow-xs whitespace-nowrap"
+               style="left: ${dMeta.cx}px; top: ${dMeta.cy - dockR - 12}px;">
+            ◎ 独立外接圈 (放中心核·不占基础环)
+          </div>
+        `;
+
+        // 2. 渲染内部基础环 (1~maxTier)
         dMeta.rings.forEach(r => {
           if (r.tier > maxTier) return;
           const ringObj = DISK_RINGS[r.id];
-          const isOuter = (r.tier === maxTier);
+          const isOuterBasic = (r.tier === maxTier);
           const size = r.radius * 2;
           const left = dMeta.cx - r.radius;
           const top = dMeta.cy - r.radius;
-          const borderClass = isOuter ? 'border-2 border-slate-900' : 'border border-slate-600';
+          const borderClass = isOuterBasic ? 'border-2 border-slate-900' : 'border border-slate-600';
           htmlStr += `
             <div id="${ringObj.elId}" class="absolute rounded-full ${borderClass} ring-trans pointer-events-none"
                  style="width: ${size}px; height: ${size}px; left: ${left}px; top: ${top}px; transform: rotate(${ringObj.currentAngle}deg);">
               <div class="absolute inset-0 rounded-full border border-dashed border-sky-400/70"></div>
-              <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[8px] font-mono-sci text-slate-800 font-bold bg-white px-1.5 rounded border border-slate-300 shadow-xs whitespace-nowrap">
-                ${r.tier}环·${r.slotCount}槽
+              <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[7.5px] font-mono-sci text-slate-800 font-bold bg-white px-1.5 rounded border border-slate-300 shadow-xs whitespace-nowrap">
+                基础${r.tier}环·${r.slotCount}槽
               </div>
             </div>
           `;
@@ -2437,25 +2511,23 @@
       container.innerHTML = htmlStr;
     }
 
-    // 渲染每盘最外圈固定方位的射出点
+    // 渲染每盘【独立最外圈】上的固定方位射出点 + 4个独立外接插槽 (专门用来放置取下的中心极核！)
     function renderOuterFixedNozzles() {
       const layer = document.getElementById('outerFixedNozzlesLayer');
       if (!layer) return;
-      const counts = getActiveRingCounts();
       let htmlStr = '';
 
+      // 1. 每个盘独立最外圈上的固定【射出点】
       for (const [dKey, dMeta] of Object.entries(DISC_CONFIG)) {
-        const outTier = counts[dKey];
-        const outRing = DISK_RINGS[`${dKey}_${outTier}`];
-        if (!outRing) continue;
+        const dockR = getOuterDockRadius(dKey);
         const rad = (dMeta.emitAngleDeg * Math.PI) / 180;
-        const nx = dMeta.cx + outRing.radius * Math.cos(rad);
-        const ny = dMeta.cy + outRing.radius * Math.sin(rad);
+        const nx = dMeta.cx + dockR * Math.cos(rad);
+        const ny = dMeta.cy + dockR * Math.sin(rad);
 
         htmlStr += `
-          <div class="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
+          <div class="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none"
                style="left: ${nx}px; top: ${ny}px;"
-               title="【${dMeta.name} · 最外圈固定方位射出点】">
+               title="【${dMeta.name} · 独立外圈固定射出点】">
             <div class="w-4 h-4 rounded-full bg-slate-900 border-2 border-sky-400 shadow flex items-center justify-center">
               <div class="w-1.5 h-1.5 rounded-full bg-sky-300 animate-ping"></div>
             </div>
@@ -2465,28 +2537,170 @@
           </div>
         `;
       }
+
+      // 2. 每个盘独立最外圈上的 4 个专用【外接极核插槽 (OUTER_DOCK_SLOTS)】
+      for (const [dockKey, dSlot] of Object.entries(OUTER_DOCK_SLOTS)) {
+        const pos = getOuterDockWorldPos(dockKey);
+        const dMeta = DISC_CONFIG[dSlot.discKey];
+        const hasCore = !!(dSlot.coreChip && CHIP_SPECS[dSlot.coreChip]);
+
+        if (hasCore) {
+          const spec = CHIP_SPECS[dSlot.coreChip];
+          const srcDisc = spec.sourceDisc;
+          htmlStr += `
+            <div id="dockEl_${dockKey}"
+                 onmousedown="handlePlacedDockCoreMouseDown('${dockKey}', '${srcDisc}', event)"
+                 onclick="removeCoreFromDock('${dockKey}', event)"
+                 oncontextmenu="removeCoreFromDock('${dockKey}', event); return false;"
+                 class="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 w-9 h-9 rounded-lg bg-slate-900 border-2 border-amber-400 shadow-xl flex items-center justify-center cursor-grab active:cursor-grabbing group z-40 transition-transform hover:scale-115"
+                 style="left: ${pos.x}px; top: ${pos.y}px;"
+                 title="【${dMeta.name}·独立外圈${dSlot.dirName}接引槽】&#10;当前已插入：${spec.name}&#10;• 按住可拖拽换槽&#10;• 点击或右键可取下">
+              <div class="w-7 h-7 rounded-full ${spec.matClass} flex items-center justify-center">
+                <i class="fa-solid ${spec.icon} text-xs pointer-events-none"></i>
+              </div>
+              <span class="pointer-events-none absolute -bottom-3 px-1 rounded bg-amber-400 text-slate-950 border border-slate-900 text-[6.5px] font-mono-sci font-black whitespace-nowrap shadow">
+                ⚡已接入(${spec.tag.slice(0,2)})
+              </span>
+            </div>
+          `;
+        } else {
+          htmlStr += `
+            <div id="dockEl_${dockKey}"
+                 onclick="handleDockSlotClick('${dockKey}', event)"
+                 ondragover="event.preventDefault(); this.classList.add('scale-125');"
+                 ondragleave="this.classList.remove('scale-125');"
+                 ondrop="handleDockSlotDrop('${dockKey}', event)"
+                 class="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-md bg-white/95 hover:bg-sky-50 border-2 border-slate-800 hover:border-sky-500 shadow-sm flex items-center justify-center cursor-pointer group z-30 transition-all"
+                 style="left: ${pos.x}px; top: ${pos.y}px;"
+                 title="【${dMeta.name} · 独立最外圈${dSlot.dirName}接引插槽】&#10;★ 独立于基础环之外，专门用于插入从其他盘中心取下的【中心节点】以激活跨盘导入线！">
+              <div class="w-4 h-4 rounded-xs border border-dashed border-sky-600 flex items-center justify-center">
+                <i class="fa-solid fa-plug text-[8px] text-sky-700 pointer-events-none"></i>
+              </div>
+              <span class="pointer-events-none absolute -bottom-2.5 px-1 rounded bg-slate-800 text-sky-200 text-[6px] font-mono-sci font-bold whitespace-nowrap border border-sky-400/50">
+                外接·${dSlot.dirName.slice(0,1)}
+              </span>
+            </div>
+          `;
+        }
+      }
+
       layer.innerHTML = htmlStr;
     }
 
+    // 将中心核放入某盘【独立最外圈插槽】
+    function placeCoreInOuterDock(dockKey, coreChipId) {
+      const dSlot = OUTER_DOCK_SLOTS[dockKey];
+      const spec = CHIP_SPECS[coreChipId];
+      if (!dSlot || !spec || !spec.isCenterCore) return;
+
+      const srcDisc = spec.sourceDisc;
+      if (dSlot.discKey === srcDisc) {
+        alert(`【${spec.name}】是从${DISC_CONFIG[srcDisc].name}取下的中心核，请将它拖到【其他盘子的独立最外圈插槽】上！`);
+        return;
+      }
+
+      // 清理该中心核原先所在的独立外圈槽
+      const cState = CENTER_CORE_STATE[srcDisc];
+      if (cState.placedAtDock && OUTER_DOCK_SLOTS[cState.placedAtDock]) {
+        OUTER_DOCK_SLOTS[cState.placedAtDock].coreChip = null;
+      }
+      // 如果目标外圈槽原本插着别的中心核，将其释放回待拖拽状态
+      if (dSlot.coreChip && CHIP_SPECS[dSlot.coreChip] && dSlot.coreChip !== coreChipId) {
+        const oldSrc = CHIP_SPECS[dSlot.coreChip].sourceDisc;
+        CENTER_CORE_STATE[oldSrc].placedAtDock = null;
+        CENTER_CORE_STATE[oldSrc].detached = true;
+      }
+
+      dSlot.coreChip = coreChipId;
+      cState.placedAtDock = dockKey;
+      cState.detached = true;
+      ACTIVE_SELECTED_CHIP = null;
+      updateSelectedChipIndicator();
+      if (audio) audio.playConnect();
+      refreshDiscRingsAndSlots();
+    }
+    window.placeCoreInOuterDock = placeCoreInOuterDock;
+
+    function removeCoreFromDock(dockKey, e) {
+      if (e) e.stopPropagation();
+      if (Date.now() - LAST_CORE_DRAG_TIMESTAMP < 250) return;
+      const dSlot = OUTER_DOCK_SLOTS[dockKey];
+      if (!dSlot || !dSlot.coreChip) return;
+      const spec = CHIP_SPECS[dSlot.coreChip];
+      if (spec && spec.isCenterCore) {
+        const srcDisc = spec.sourceDisc;
+        CENTER_CORE_STATE[srcDisc].placedAtDock = null;
+        CENTER_CORE_STATE[srcDisc].detached = true; // 取下后悬浮在原盘心旁，方便随时重拖
+      }
+      dSlot.coreChip = null;
+      if (audio) audio.playRemove();
+      refreshDiscRingsAndSlots();
+    }
+    window.removeCoreFromDock = removeCoreFromDock;
+
+    function handleDockSlotClick(dockKey, e) {
+      if (e) e.stopPropagation();
+      if (ACTIVE_SELECTED_CHIP && CHIP_SPECS[ACTIVE_SELECTED_CHIP] && CHIP_SPECS[ACTIVE_SELECTED_CHIP].isCenterCore) {
+        placeCoreInOuterDock(dockKey, ACTIVE_SELECTED_CHIP);
+      }
+    }
+    window.handleDockSlotClick = handleDockSlotClick;
+
+    function handleDockSlotDrop(dockKey, e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const typeId = e.dataTransfer ? e.dataTransfer.getData('text/plain') : null;
+      if (typeId && CHIP_SPECS[typeId] && CHIP_SPECS[typeId].isCenterCore) {
+        placeCoreInOuterDock(dockKey, typeId);
+      }
+    }
+    window.handleDockSlotDrop = handleDockSlotDrop;
+
+    function handlePlacedDockCoreMouseDown(dockKey, srcDisc, e) {
+      if (e.button !== 0) return;
+      e.stopPropagation();
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const onMove = (me) => {
+        if (Math.hypot(me.clientX - startX, me.clientY - startY) > 5) {
+          window.removeEventListener('mousemove', onMove);
+          window.removeEventListener('mouseup', onUp);
+          if (OUTER_DOCK_SLOTS[dockKey]) OUTER_DOCK_SLOTS[dockKey].coreChip = null;
+          CENTER_CORE_STATE[srcDisc].placedAtDock = null;
+          CENTER_CORE_STATE[srcDisc].detached = true;
+          refreshDiscRingsAndSlots();
+          startCorePointerDrag(srcDisc, me);
+        }
+      };
+      const onUp = () => {
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+      };
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+    }
+    window.handlePlacedDockCoreMouseDown = handlePlacedDockCoreMouseDown;
+
     /* =========================================================================
-       ★ 核心交互：点一下盘心取下中心节点 ➔ 按住拖拽到另外盘子的外圈插槽连上导入线！
+       ★ 核心交互：点一下盘心取下中心节点 ➔ 按住拖拽到另外盘子的【独立最外圈插槽】连上导入线！
        ========================================================================= */
     let IS_DRAGGING_CORE = false;
     let DRAGGING_CORE_DISC = null;
     let LAST_CORE_DRAG_TIMESTAMP = 0;
 
-    // 1. 点击盘心：点一下就把中心节点取下来（弹出悬浮可拖拽极核）！
     function handleCenterCoreClick(discKey, e) {
       if (e) e.stopPropagation();
-      if (Date.now() - LAST_CORE_DRAG_TIMESTAMP < 250) return; // 刚刚完成拖拽释放，不重复触发click
+      if (Date.now() - LAST_CORE_DRAG_TIMESTAMP < 250) return;
 
       const state = CENTER_CORE_STATE[discKey];
       const coreChipId = 'core_' + discKey;
 
-      // 如果该中心核此前已经插在其他盘的外圈插槽上，点一下原盘心 ➔ 立即取下回到盘心旁待拖拽状态！
-      if (state.placedAtSlot && BOARD_SLOTS[state.placedAtSlot]) {
-        BOARD_SLOTS[state.placedAtSlot].chip = null;
-        state.placedAtSlot = null;
+      // 如果该中心核此前已经插在其他盘的独立外圈插槽上，点一下原盘心 ➔ 立即取下回到盘心旁待拖拽状态！
+      if (state.placedAtDock && OUTER_DOCK_SLOTS[state.placedAtDock]) {
+        OUTER_DOCK_SLOTS[state.placedAtDock].coreChip = null;
+        state.placedAtDock = null;
         state.detached = true;
         ACTIVE_SELECTED_CHIP = coreChipId;
         updateSelectedChipIndicator();
@@ -2496,11 +2710,10 @@
       }
 
       if (!state.charged) {
-        alert(`【${DISC_CONFIG[discKey].name}中心尚未充能】\n请先让光路射入本盘中心（在1环放置「🔺 变轨三角」折向中心），中心激活后点一下即可取下，并拖拽到其他盘的外圈插槽！`);
+        alert(`【${DISC_CONFIG[discKey].name}中心尚未充能】\n请先让光路射入本盘中心（在基础1环放置「🔺 变轨三角」折向中心），中心激活后点一下即可取下，并拖拽到其他盘的【独立外圈插槽】！`);
         return;
       }
 
-      // 切换“取下(detached)”与“归位”状态：点一下取下来！
       if (!state.detached) {
         state.detached = true;
         ACTIVE_SELECTED_CHIP = coreChipId;
@@ -2515,11 +2728,10 @@
     }
     window.handleCenterCoreClick = handleCenterCoreClick;
 
-    // 2. 在盘心上按下鼠标并拖动：支持直接从盘心拖出中心节点！
     function handleCenterHubMouseDown(discKey, e) {
       if (e.button !== 0) return;
       const state = CENTER_CORE_STATE[discKey];
-      if (!state.charged && !state.placedAtSlot) return;
+      if (!state.charged && !state.placedAtDock) return;
 
       const startX = e.clientX;
       const startY = e.clientY;
@@ -2528,10 +2740,9 @@
         if (Math.hypot(me.clientX - startX, me.clientY - startY) > 5) {
           window.removeEventListener('mousemove', onCheckMove);
           window.removeEventListener('mouseup', onCancelCheck);
-          // 如果原先插在某外圈槽，先拔出并进入拖拽
-          if (state.placedAtSlot && BOARD_SLOTS[state.placedAtSlot]) {
-            BOARD_SLOTS[state.placedAtSlot].chip = null;
-            state.placedAtSlot = null;
+          if (state.placedAtDock && OUTER_DOCK_SLOTS[state.placedAtDock]) {
+            OUTER_DOCK_SLOTS[state.placedAtDock].coreChip = null;
+            state.placedAtDock = null;
           }
           state.detached = true;
           refreshDiscRingsAndSlots();
@@ -2547,7 +2758,7 @@
     }
     window.handleCenterHubMouseDown = handleCenterHubMouseDown;
 
-    // 3. 按住已取下的中心节点（或已插在外圈的中心核）进行丝滑拖拽 + 实时预览导入线 + 自动吸附目标盘外圈插槽！
+    // 按住取下的中心节点拖拽至其他盘【独立最外圈插槽 (OUTER_DOCK_SLOTS)】
     function startCorePointerDrag(discKey, startEvent) {
       if (startEvent) {
         startEvent.preventDefault();
@@ -2566,12 +2777,11 @@
       ACTIVE_SELECTED_CHIP = coreChipId;
       updateSelectedChipIndicator();
 
-      // 高亮所有其他盘的最外圈插槽，提示玩家拖到这里！
-      const counts = getActiveRingCounts();
-      for (const [sKey, sData] of Object.entries(BOARD_SLOTS)) {
-        if (sData.discKey !== discKey && sData.tier === counts[sData.discKey]) {
-          const el = document.getElementById('slot_' + sKey);
-          if (el) el.classList.add('ring-4', 'ring-sky-400', 'scale-125', 'z-40');
+      // 高亮其他两个盘【独立最外圈】上的全部专用外接插槽！
+      for (const [dockKey, dSlot] of Object.entries(OUTER_DOCK_SLOTS)) {
+        if (dSlot.discKey !== discKey) {
+          const el = document.getElementById('dockEl_' + dockKey);
+          if (el) el.classList.add('ring-4', 'ring-sky-400', 'scale-125', 'z-50');
         }
       }
 
@@ -2586,12 +2796,12 @@
           <i class="fa-solid ${spec.icon} text-sm"></i>
         </div>
         <span class="mt-1 px-2 py-0.5 rounded-full bg-slate-900/95 text-amber-300 border border-sky-400 text-[10px] font-mono-sci font-bold shadow-lg whitespace-nowrap">
-          ⚡ 拖拽至其他盘【最外圈插槽】松开即连上！
+          ⚡ 拖至其他盘【独立最外圈·外接槽】松开即连上！
         </span>
       `;
       document.body.appendChild(ghost);
 
-      // 创建 SVG 动态预览导入线
+      // 创建 SVG 动态预览导入线 (从源盘独立外圈射出点拉向鼠标)
       let previewLine = document.getElementById('coreDragPreviewBeam');
       if (previewLine) previewLine.remove();
       previewLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -2602,15 +2812,14 @@
       previewLine.setAttribute('opacity', '0.9');
       if (svgBeams) svgBeams.appendChild(previewLine);
 
-      const srcOutTier = counts[discKey];
-      const srcOutRing = DISK_RINGS[`${discKey}_${srcOutTier}`];
+      const srcDockR = getOuterDockRadius(discKey);
       const emitRad = (dMeta.emitAngleDeg * Math.PI) / 180;
-      const emitX = dMeta.cx + srcOutRing.radius * Math.cos(emitRad);
-      const emitY = dMeta.cy + srcOutRing.radius * Math.sin(emitRad);
+      const emitX = dMeta.cx + srcDockR * Math.cos(emitRad);
+      const emitY = dMeta.cy + srcDockR * Math.sin(emitRad);
       previewLine.setAttribute('x1', emitX);
       previewLine.setAttribute('y1', emitY);
 
-      let hoveredTargetSlotKey = null;
+      let hoveredTargetDockKey = null;
 
       function updateDragPos(clientX, clientY) {
         ghost.style.left = `${clientX}px`;
@@ -2621,33 +2830,31 @@
         const stageX = (clientX - rect.left) / scale;
         const stageY = (clientY - rect.top) / scale;
 
-        // 寻找距离鼠标最近的其他盘最外圈插槽 (吸附半径 48px)
-        let bestKey = null;
-        let minDist = 48;
-        for (const [sKey, sData] of Object.entries(BOARD_SLOTS)) {
-          if (sData.discKey === discKey) continue;
-          if (sData.tier !== counts[sData.discKey]) continue;
-          const pos = getSlotWorldPos(sData.ringId, sData.slotIndex);
+        // 寻找距离鼠标最近的其他盘【独立最外圈插槽】(吸附半径 65px)
+        let bestDockKey = null;
+        let minDist = 65;
+        for (const [dockKey, dSlot] of Object.entries(OUTER_DOCK_SLOTS)) {
+          if (dSlot.discKey === discKey) continue;
+          const pos = getOuterDockWorldPos(dockKey);
           const d = Math.hypot(stageX - pos.x, stageY - pos.y);
           if (d < minDist) {
             minDist = d;
-            bestKey = sKey;
+            bestDockKey = dockKey;
           }
         }
 
-        if (hoveredTargetSlotKey && hoveredTargetSlotKey !== bestKey) {
-          const prevEl = document.getElementById('slot_' + hoveredTargetSlotKey);
+        if (hoveredTargetDockKey && hoveredTargetDockKey !== bestDockKey) {
+          const prevEl = document.getElementById('dockEl_' + hoveredTargetDockKey);
           if (prevEl) prevEl.classList.remove('scale-150', 'ring-amber-400');
         }
-        hoveredTargetSlotKey = bestKey;
+        hoveredTargetDockKey = bestDockKey;
 
-        if (bestKey) {
-          const targetSlotData = BOARD_SLOTS[bestKey];
-          const snapPos = getSlotWorldPos(targetSlotData.ringId, targetSlotData.slotIndex);
+        if (bestDockKey) {
+          const snapPos = getOuterDockWorldPos(bestDockKey);
           previewLine.setAttribute('x2', snapPos.x);
           previewLine.setAttribute('y2', snapPos.y);
           previewLine.setAttribute('stroke', '#fbbf24');
-          const curEl = document.getElementById('slot_' + bestKey);
+          const curEl = document.getElementById('dockEl_' + bestDockKey);
           if (curEl) curEl.classList.add('scale-150', 'ring-amber-400');
         } else {
           previewLine.setAttribute('x2', stageX);
@@ -2662,7 +2869,7 @@
         updateDragPos(me.clientX, me.clientY);
       };
 
-      const onMouseUp = (ue) => {
+      const onMouseUp = () => {
         window.removeEventListener('mousemove', onMouseMove);
         window.removeEventListener('mouseup', onMouseUp);
         IS_DRAGGING_CORE = false;
@@ -2672,16 +2879,13 @@
         if (ghost) ghost.remove();
         if (previewLine) previewLine.remove();
 
-        // 清除所有外圈插槽高亮
-        for (const sKey of Object.keys(BOARD_SLOTS)) {
-          const el = document.getElementById('slot_' + sKey);
-          if (el) el.classList.remove('ring-4', 'ring-sky-400', 'ring-amber-400', 'scale-125', 'scale-150', 'z-40');
+        for (const dockKey of Object.keys(OUTER_DOCK_SLOTS)) {
+          const el = document.getElementById('dockEl_' + dockKey);
+          if (el) el.classList.remove('ring-4', 'ring-sky-400', 'ring-amber-400', 'scale-125', 'scale-150', 'z-50');
         }
 
-        if (hoveredTargetSlotKey) {
-          // 成功拖入目标盘外圈插槽 ➔ 立即连上跨盘导入线！
-          placeChip(hoveredTargetSlotKey, coreChipId);
-          if (audio) audio.playConnect();
+        if (hoveredTargetDockKey) {
+          placeCoreInOuterDock(hoveredTargetDockKey, coreChipId);
         } else {
           refreshDiscRingsAndSlots();
         }
@@ -2692,7 +2896,7 @@
     }
     window.startCorePointerDrag = startCorePointerDrag;
 
-    // 4. 更新三大盘心与“已取下悬浮极核节点”的 DOM 表现
+    // 更新三大盘心与“已取下悬浮极核节点”的 DOM 表现
     function updateCenterHubsDOM() {
       const detachedLayer = document.getElementById('detachedCoresLayer');
       let detachedHtml = '';
@@ -2705,19 +2909,17 @@
         const spec = CHIP_SPECS['core_' + dKey];
         if (!boxEl || !textEl || !badgeEl) continue;
 
-        if (state.placedAtSlot && BOARD_SLOTS[state.placedAtSlot]) {
-          const targetSlot = BOARD_SLOTS[state.placedAtSlot];
-          const targetDiscName = DISC_CONFIG[targetSlot.discKey].shortTag;
+        if (state.placedAtDock && OUTER_DOCK_SLOTS[state.placedAtDock]) {
+          const targetDock = OUTER_DOCK_SLOTS[state.placedAtDock];
+          const targetDiscName = DISC_CONFIG[targetDock.discKey].shortTag;
           boxEl.className = 'relative w-11 h-11 rounded-full bg-slate-100 border-2 border-dashed border-sky-500 flex items-center justify-center shadow-inner transition-transform group-hover:scale-110';
-          textEl.textContent = `🔗已连入[${targetDiscName}${targetSlot.tier}·${targetSlot.slotIndex + 1}](点此取下)`;
+          textEl.textContent = `🔗已连入[${targetDiscName}·外接${targetDock.dirName.slice(0,1)}](点此取下)`;
           badgeEl.className = 'mt-0.5 px-1.5 py-0.5 rounded bg-slate-900 text-[7.5px] font-mono-sci font-bold text-sky-300 border border-sky-400 whitespace-nowrap shadow-xs';
         } else if (state.detached) {
-          // ★ 已点一下取下！盘心显示空槽，旁边弹出可按住拖拽的实体中心节点！
           boxEl.className = 'relative w-10 h-10 rounded-full bg-slate-200/80 border-2 border-dashed border-slate-500 flex items-center justify-center shadow-inner opacity-75';
           textEl.textContent = '⭕ 已取下(点此归位)';
           badgeEl.className = 'mt-0.5 px-1.5 py-0.5 rounded bg-slate-700 text-[7.5px] font-mono-sci font-bold text-slate-200 border border-slate-500 whitespace-nowrap';
 
-          // 在盘心右上方弹出醒目的“已取下中心核”，玩家可直接按住它拖拽到其他盘外圈！
           const popX = dMeta.cx + 38;
           const popY = dMeta.cy - 38;
           detachedHtml += `
@@ -2725,12 +2927,12 @@
                  onmousedown="startCorePointerDrag('${dKey}', event)"
                  class="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing flex flex-col items-center group z-50"
                  style="left: ${popX}px; top: ${popY}px;"
-                 title="【已取下的${dMeta.name}中心节点】&#10;按住鼠标左键将它拖拽到其他盘子的最外圈插槽上，松开即可连上导入线！">
+                 title="【已取下的${dMeta.name}中心节点】&#10;按住鼠标左键将它拖拽到其他盘子的【独立最外圈·外接槽】上，松开即可连上导入线！">
               <div class="relative w-11 h-11 rounded-full ${spec.matClass} flex items-center justify-center shadow-2xl ring-4 ring-amber-300/80 animate-bounce group-hover:scale-125 transition-transform">
                 <i class="fa-solid ${spec.icon} text-sm pointer-events-none"></i>
               </div>
               <span class="mt-0.5 px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 border border-slate-900 text-[8px] font-mono-sci font-black whitespace-nowrap shadow-md">
-                🖐️已取下! 按住拖至它盘外圈
+                🖐️已取下! 按住拖至它盘独立外圈
               </span>
             </div>
           `;
@@ -3064,33 +3266,6 @@ function renderPalette() {
             placeChip(slotKey, typeId);
           });
 
-          slotEl.addEventListener("mousedown", (e) => {
-            if (e.button !== 0) return;
-            const curChip = BOARD_SLOTS[slotKey] ? BOARD_SLOTS[slotKey].chip : null;
-            if (curChip && CHIP_SPECS[curChip] && CHIP_SPECS[curChip].isCenterCore) {
-              const srcDisc = CHIP_SPECS[curChip].sourceDisc;
-              const startX = e.clientX;
-              const startY = e.clientY;
-              const onMove = (me) => {
-                if (Math.hypot(me.clientX - startX, me.clientY - startY) > 5) {
-                  window.removeEventListener("mousemove", onMove);
-                  window.removeEventListener("mouseup", onUp);
-                  BOARD_SLOTS[slotKey].chip = null;
-                  CENTER_CORE_STATE[srcDisc].placedAtSlot = null;
-                  CENTER_CORE_STATE[srcDisc].detached = true;
-                  refreshDiscRingsAndSlots();
-                  startCorePointerDrag(srcDisc, me);
-                }
-              };
-              const onUp = () => {
-                window.removeEventListener("mousemove", onMove);
-                window.removeEventListener("mouseup", onUp);
-              };
-              window.addEventListener("mousemove", onMove);
-              window.addEventListener("mouseup", onUp);
-            }
-          });
-
           slotEl.addEventListener("click", (e) => {
             e.stopPropagation();
             if (Date.now() - LAST_CORE_DRAG_TIMESTAMP < 250) return;
@@ -3138,36 +3313,36 @@ function renderPalette() {
           slotEl.style.opacity = "1";
           slotEl.style.pointerEvents = "auto";
           slotEl.style.zIndex = "35";
-          slotEl.style.width = "34px";
-          slotEl.style.height = "34px";
+          slotEl.style.width = "32px";
+          slotEl.style.height = "32px";
           slotEl.setAttribute("data-has-chip", "true");
           slotEl.innerHTML = `
-            <div class="relative w-full h-full flex items-center justify-center cursor-pointer group" title="${spec.name} (${spec.tag})\n${spec.buffDesc}\n${spec.stepDesc}\n【按住可拖拽换槽 / 点击或右键取回】">
+            <div class="relative w-full h-full flex items-center justify-center cursor-pointer group" title="${spec.name} (${spec.tag})\n${spec.buffDesc}\n${spec.stepDesc}\n【点击或右键取回】">
               <div class="absolute -inset-1 rounded-full border-2 ${discMeta.nodeBorder} pointer-events-none"></div>
               <div class="w-7 h-7 ${spec.shape} ${spec.matClass} flex items-center justify-center relative z-10 transition-transform group-hover:scale-110 shadow-md">
                 <i class="fa-solid ${spec.icon} text-xs pointer-events-none"></i>
               </div>
-              <div class="pointer-events-none absolute -bottom-2 -right-2 px-1 rounded text-[7.5px] font-mono-sci font-bold border shadow-xs z-20 ${discMeta.nodeBadge}">
+              <div class="pointer-events-none absolute -bottom-2 -right-2 px-1 rounded text-[7px] font-mono-sci font-bold border shadow-xs z-20 ${discMeta.nodeBadge}">
                 ${runeTag}
               </div>
-              <button onclick="removeChip('${slotKey}'); event.stopPropagation();" class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[9px] font-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-xs z-30" title="移除构件">×</button>
+              <button onclick="removeChip('${slotKey}'); event.stopPropagation();" class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[9px] font-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-xs z-30" title="移除芯片">×</button>
             </div>
           `;
         } else {
-          // 空插槽：严格按照要求，红色盘对应红色节点，蓝色盘对应蓝色节点，黄色盘对应黄色节点！
+          // 基础环空插槽：红盘红节点、黄盘黄节点、蓝盘蓝节点
           slotEl.setAttribute("data-has-chip", "false");
           slotEl.style.display = "block";
           slotEl.style.opacity = "1";
           slotEl.style.pointerEvents = "auto";
           slotEl.style.zIndex = "10";
-          slotEl.style.width = "26px";
-          slotEl.style.height = "26px";
+          slotEl.style.width = "25px";
+          slotEl.style.height = "25px";
           slotEl.innerHTML = `
-            <div class="relative w-full h-full flex items-center justify-center group cursor-pointer" title="${discMeta.name} ${slotData.tier}环 第${slotData.slotIndex + 1}号节点 (${runeTag})\n【支持将取下的中心极核拖拽至此插槽】">
+            <div class="relative w-full h-full flex items-center justify-center group cursor-pointer" title="${discMeta.name} 基础${slotData.tier}环 第${slotData.slotIndex + 1}号芯片槽 (${runeTag})\n【点击/拖拽】装配步进芯片或变轨三角">
               <div class="w-full h-full rounded-full flex items-center justify-center transition-all border-2 border-dashed ${discMeta.nodeBorder} shadow-xs hover:scale-115">
-                <div class="w-2.5 h-2.5 rounded-full ${discMeta.nodeDot} pointer-events-none"></div>
+                <div class="w-2 h-2 rounded-full ${discMeta.nodeDot} pointer-events-none"></div>
               </div>
-              <span class="pointer-events-none absolute -bottom-2 px-0.5 rounded text-[7px] font-mono-sci font-bold border shadow-xs ${discMeta.nodeBadge}">${slotData.slotIndex + 1}</span>
+              <span class="pointer-events-none absolute -bottom-2 px-0.5 rounded text-[6.5px] font-mono-sci font-bold border shadow-xs ${discMeta.nodeBadge}">${slotData.slotIndex + 1}</span>
             </div>
           `;
         }
@@ -3179,37 +3354,22 @@ function renderPalette() {
       const targetSlot = BOARD_SLOTS[slotKey];
       if (!spec || !targetSlot) return;
 
-      // 如果是中心取下的极核 (core_support / core_industry / core_combat)：
-      // 检查是否放在【其他盘子的最外圈插槽】里！
+      // 如果玩家把【中心极核】点在了基础环插槽上，自动帮他吸附到该盘最近的【独立最外圈插槽】！
       if (spec.isCenterCore) {
-        const srcDisc = spec.sourceDisc;
-        if (targetSlot.discKey === srcDisc) {
-          alert(`【${spec.name}】是从${DISC_CONFIG[srcDisc].name}取下的中心核，请将它拖拽到【其他盘子的外圈插槽】中以激活跨盘导入线！`);
-          return;
+        const slotPos = getSlotWorldPos(targetSlot.ringId, targetSlot.slotIndex);
+        let nearestDock = `dock_${targetSlot.discKey}_0`;
+        let minD = 9999;
+        for (const [dKey, dObj] of Object.entries(OUTER_DOCK_SLOTS)) {
+          if (dObj.discKey !== targetSlot.discKey) continue;
+          const dp = getOuterDockWorldPos(dKey);
+          const dist = Math.hypot(slotPos.x - dp.x, slotPos.y - dp.y);
+          if (dist < minD) {
+            minD = dist;
+            nearestDock = dKey;
+          }
         }
-        const counts = getActiveRingCounts();
-        const targetOutermostTier = counts[targetSlot.discKey];
-        if (targetSlot.tier !== targetOutermostTier) {
-          alert(`请将【${spec.name}】拖拽到${DISC_CONFIG[targetSlot.discKey].name}的【最外圈 (${targetOutermostTier}环) 插槽】中，以连上跨盘导入线！`);
-          return;
-        }
-        // 清理该核心之前的放置记录
-        const cState = CENTER_CORE_STATE[srcDisc];
-        if (cState.placedAtSlot && BOARD_SLOTS[cState.placedAtSlot]) {
-          BOARD_SLOTS[cState.placedAtSlot].chip = null;
-        }
-        cState.placedAtSlot = slotKey;
-        cState.detached = true;
-        ACTIVE_SELECTED_CHIP = null;
-        updateSelectedChipIndicator();
-      }
-
-      // 如果覆盖了某个旧的中心核，恢复原中心核为已取下待拖拽状态
-      const oldChip = targetSlot.chip;
-      if (oldChip && CHIP_SPECS[oldChip] && CHIP_SPECS[oldChip].isCenterCore && oldChip !== typeId) {
-        const oldSrc = CHIP_SPECS[oldChip].sourceDisc;
-        CENTER_CORE_STATE[oldSrc].placedAtSlot = null;
-        CENTER_CORE_STATE[oldSrc].detached = true;
+        placeCoreInOuterDock(nearestDock, typeId);
+        return;
       }
 
       targetSlot.chip = typeId;
@@ -3220,13 +3380,6 @@ function renderPalette() {
     function removeChip(slotKey) {
       const slotData = BOARD_SLOTS[slotKey];
       if (!slotData || !slotData.chip) return;
-      const spec = CHIP_SPECS[slotData.chip];
-      if (spec && spec.isCenterCore) {
-        const srcDisc = spec.sourceDisc;
-        CENTER_CORE_STATE[srcDisc].placedAtSlot = null;
-        // 从外圈取回时保留已取下悬浮状态，方便立即重新拖拽
-        CENTER_CORE_STATE[srcDisc].detached = true;
-      }
       slotData.chip = null;
       if (audio) audio.playRemove();
       refreshDiscRingsAndSlots();
@@ -3236,10 +3389,13 @@ function renderPalette() {
       for (const k in BOARD_SLOTS) {
         BOARD_SLOTS[k].chip = null;
       }
+      for (const k in OUTER_DOCK_SLOTS) {
+        OUTER_DOCK_SLOTS[k].coreChip = null;
+      }
       for (const dKey of ['support', 'industry', 'combat']) {
         CENTER_CORE_STATE[dKey].charged = false;
         CENTER_CORE_STATE[dKey].detached = false;
-        CENTER_CORE_STATE[dKey].placedAtSlot = null;
+        CENTER_CORE_STATE[dKey].placedAtDock = null;
       }
       ACTIVE_SELECTED_CHIP = null;
       renderPalette();
@@ -3268,14 +3424,13 @@ function renderPalette() {
     }
     window.rotateRing = rotateRing;
 
-    // 根据鼠标坐标自动拾取三大盘当前激活的最贴近环道
     function pickClosestActiveRing(mouseX, mouseY) {
       const counts = getActiveRingCounts();
       for (const [dKey, dMeta] of Object.entries(DISC_CONFIG)) {
         const dist = Math.hypot(mouseX - dMeta.cx, mouseY - dMeta.cy);
         const maxTier = counts[dKey];
-        const maxRadius = dMeta.rings[maxTier - 1].radius + 28;
-        if (dist <= maxRadius && dist >= 22) {
+        const maxRadius = dMeta.rings[maxTier - 1].radius + 24;
+        if (dist <= maxRadius && dist >= 20) {
           let bestRingId = null;
           let minDiff = 9999;
           for (let t = 1; t <= maxTier; t++) {
@@ -3333,6 +3488,7 @@ function renderPalette() {
         if (IS_DRAGGING_CORE) return;
         if (e.target.closest('.keystone-hub-socket')) return;
         if (e.target.closest('#detachedCoresLayer')) return;
+        if (e.target.closest('#outerFixedNozzlesLayer')) return;
         if (e.target.closest('#slotsLayer > div')) return;
 
         const rect = stage.getBoundingClientRect();
@@ -3419,7 +3575,7 @@ function renderPalette() {
     }
 
     /* =========================================================================
-       7. 三大主盘光路解算 + 中心核取下拖拽至它盘外圈激活【跨盘导入线】机制
+       7. 三大主盘光路解算 + 独立最外圈插槽【跨盘导入线】+ 跨三盘星位(+120%效果)
        ========================================================================= */
     function solveStepNetwork() {
       const svgBeams = document.getElementById('svgBeamsGroup');
@@ -3429,7 +3585,6 @@ function renderPalette() {
       svgBeams.innerHTML = '';
       svgImpacts.innerHTML = '';
 
-      // 每次解算先重置中心射入充能标记
       CENTER_CORE_STATE.support.charged = false;
       CENTER_CORE_STATE.industry.charged = false;
       CENTER_CORE_STATE.combat.charged = false;
@@ -3450,7 +3605,7 @@ function renderPalette() {
       const counts = getActiveRingCounts();
       const floorDef = FLOOR_SHAPE_DEFS[CURRENT_FLOOR_SHAPE] || FLOOR_SHAPE_DEFS.dipper;
 
-      // 内部子函数：解算单个盘体从指定外环插槽进入后的光线步进与向心折跃
+      // 内部子函数：解算单个盘体从指定基础环插槽进入后的光线步进与向心折跃
       function traceDiscOpticalPath(discKey, startRingId, startSlotIdx) {
         let curRingId = startRingId;
         let curSlotIdx = startSlotIdx;
@@ -3474,14 +3629,14 @@ function renderPalette() {
           const curPos = getSlotWorldPos(curRingId, curSlotIdx);
           chainNodes.push({ ring: curRingId, slot: curSlotIdx, chipKey, spec, x: curPos.x, y: curPos.y });
 
-          // 底盘星象重合检测
+          // ★ 底盘星象重合检测：按照要求，一个节点放上去增加 120% 的效果 (即 ×2.2倍)！
           let nodeMult = 1.0;
           if (floorDef && floorDef.nodes) {
             const matchedFloor = floorDef.nodes.find(fn => Math.hypot(curPos.x - fn.x, curPos.y - fn.y) <= 26);
             if (matchedFloor) {
               hitFloorNodesSet.add(matchedFloor.id);
-              nodeMult = floorDef.mult || 2.5;
-              logSteps.push(`✦ [${spec.name}] 对齐底盘星宿【${matchedFloor.name}】享 ${nodeMult.toFixed(1)}x 加成！`);
+              nodeMult = 2.2; // 增加 120% 效果 (100% + 120% = 220%)
+              logSteps.push(`✦ [${spec.name}] 踩中${floorDef.name}星位【${matchedFloor.name}】，效果增加 +120%！`);
             }
           }
 
@@ -3492,7 +3647,7 @@ function renderPalette() {
             });
           }
 
-          // 三角变轨规：向内环折射，若已在最内环(1环)则直接射入盘体中心！
+          // 三角变轨规：向内层基础环折射，若已在基础1环则直接射入盘体中心！
           if (spec.type === 'shift_in') {
             const curRingObj = DISK_RINGS[curRingId];
             if (curRingObj.tier > 1) {
@@ -3515,21 +3670,20 @@ function renderPalette() {
               curSlotIdx = align.slotIndex;
               continue;
             } else {
-              // 已在 1 环：直接射入盘体中心！激活中心极核可取下状态！
+              // 已在基础 1 环：直接射入盘体中心！激活中心极核可取下状态！
               drawBeamLine(svgBeams, curPos.x, curPos.y, dMeta.cx, dMeta.cy, 'rose', true);
               drawImpactSpark(svgImpacts, dMeta.cx, dMeta.cy, '#fbbf24', 6.5);
               CENTER_CORE_STATE[discKey].charged = true;
               if (discKey === 'combat') crossActivated = true;
 
-              // 同时画出从盘心通往本盘最外圈固定射出点的盘底暗渠能量线
-              const outTier = counts[discKey];
-              const outRing = DISK_RINGS[`${discKey}_${outTier}`];
+              // 同时画出从盘心通往本盘【独立最外圈】固定射出点的盘底暗渠能量线
+              const dockR = getOuterDockRadius(discKey);
               const emitRad = (dMeta.emitAngleDeg * Math.PI) / 180;
-              const emitX = dMeta.cx + outRing.radius * Math.cos(emitRad);
-              const emitY = dMeta.cy + outRing.radius * Math.sin(emitRad);
+              const emitX = dMeta.cx + dockR * Math.cos(emitRad);
+              const emitY = dMeta.cy + dockR * Math.sin(emitRad);
               drawBeamLine(svgBeams, dMeta.cx, dMeta.cy, emitX, emitY, 'gold', false);
 
-              logSteps.push(`👑 【${dMeta.name}中心射入成功！】点一下盘心即可取下中心节点，拖拽至其他盘外圈插槽即可连上导入线！`);
+              logSteps.push(`👑 【${dMeta.name}中心射入成功！】点一下盘心取下中心节点，拖到其他盘【独立最外圈·外接槽】即可连上导入线！`);
               break;
             }
           } else {
@@ -3546,7 +3700,7 @@ function renderPalette() {
       }
 
       // =========================================================================
-      // 第一阶段：右侧始发源 (1542, 188) 射入 🛡️ 辅助盘 当前最外圈
+      // 第一阶段：右侧始发源 (1542, 188) 射入 🛡️ 辅助盘 最外层基础环
       // =========================================================================
       const rightEmitterPos = { x: 1542, y: 188 };
       const supOutTier = counts.support;
@@ -3566,7 +3720,7 @@ function renderPalette() {
           apertureStatusEl.setAttribute('fill', '#f59e0b');
           apertureStatusEl.textContent = `▲ 待找平 (偏离 ${supAlign.diff.toFixed(1)}°)`;
         }
-        logSteps.push(`⚡ [始发待找平] 激光射至辅助盘最外圈 (${supOutRing.name})，偏离插槽 ${supAlign.diff.toFixed(1)}°（请旋转辅助盘外圈对齐）`);
+        logSteps.push(`⚡ [始发待找平] 激光射至辅助盘 (${supOutRing.name})，偏离插槽 ${supAlign.diff.toFixed(1)}°（请旋转辅助盘对齐）`);
       } else {
         const startSlotPos = getSlotWorldPos(supOutRingId, supAlign.slotIndex);
         drawBeamLine(svgBeams, rightEmitterPos.x, rightEmitterPos.y, startSlotPos.x, startSlotPos.y, 'cyan', true);
@@ -3575,63 +3729,83 @@ function renderPalette() {
           apertureStatusEl.setAttribute('fill', '#00f0ff');
           apertureStatusEl.textContent = `● 准直导通 (辅${supOutTier}·${supAlign.slotIndex + 1}槽)`;
         }
-        logSteps.push(`⚡ [始发激光接入] 注入【🛡️ 辅助盘】最外圈 (${supOutRing.name}) 第 ${supAlign.slotIndex + 1} 槽！`);
+        logSteps.push(`⚡ [始发激光接入] 注入【🛡️ 辅助盘】(${supOutRing.name}) 第 ${supAlign.slotIndex + 1} 槽！`);
         traceDiscOpticalPath('support', supOutRingId, supAlign.slotIndex);
       }
 
       // =========================================================================
-      // 第二阶段：检查各盘中心核是否已被取下并拖入其他盘最外圈插槽 ➔ 激活跨盘【导入线】！
+      // 第二阶段：检查各盘中心核是否已被取下并放入其他盘【独立最外圈插槽 (OUTER_DOCK_SLOTS)】
+      //           ➔ 激活跨盘【导入线】并向内注入目标盘最外层基础环！
       // =========================================================================
       const triggeredDiscs = new Set(['support']);
       for (let pass = 0; pass < 3; pass++) {
         for (const srcKey of ['support', 'industry', 'combat']) {
           const cState = CENTER_CORE_STATE[srcKey];
-          if (!cState.charged || !cState.placedAtSlot) continue;
+          if (!cState.charged || !cState.placedAtDock) continue;
 
-          const targetSlotData = BOARD_SLOTS[cState.placedAtSlot];
-          if (!targetSlotData || targetSlotData.chip !== 'core_' + srcKey) continue;
+          const targetDock = OUTER_DOCK_SLOTS[cState.placedAtDock];
+          if (!targetDock || targetDock.coreChip !== 'core_' + srcKey) continue;
 
-          const dstKey = targetSlotData.discKey;
-          const dstOutTier = counts[dstKey];
-          // 必须处在该目标盘当前最外圈才导通
-          if (targetSlotData.tier !== dstOutTier) continue;
+          const dstKey = targetDock.discKey;
           if (triggeredDiscs.has(dstKey)) continue;
           triggeredDiscs.add(dstKey);
 
-          // 计算源盘最外圈固定射出点坐标
+          // 1. 源盘【独立最外圈】固定射出点坐标
           const srcMeta = DISC_CONFIG[srcKey];
-          const srcOutTier = counts[srcKey];
-          const srcOutRing = DISK_RINGS[`${srcKey}_${srcOutTier}`];
+          const srcDockR = getOuterDockRadius(srcKey);
           const emitRad = (srcMeta.emitAngleDeg * Math.PI) / 180;
-          const emitX = srcMeta.cx + srcOutRing.radius * Math.cos(emitRad);
-          const emitY = srcMeta.cy + srcOutRing.radius * Math.sin(emitRad);
+          const emitX = srcMeta.cx + srcDockR * Math.cos(emitRad);
+          const emitY = srcMeta.cy + srcDockR * Math.sin(emitRad);
 
-          // 目标盘外圈插槽坐标
-          const dstPos = getSlotWorldPos(targetSlotData.ringId, targetSlotData.slotIndex);
+          // 2. 目标盘【独立最外圈】外接插槽坐标
+          const dstDockPos = getOuterDockWorldPos(cState.placedAtDock);
 
-          // 绘制高亮跨盘导入线！
-          drawBeamLine(svgBeams, emitX, emitY, dstPos.x, dstPos.y, 'hyper', true);
-          drawImpactSpark(svgImpacts, dstPos.x, dstPos.y, '#00f0ff', 6);
-          logSteps.push(`🚀 【跨盘导入线激活！】${srcMeta.name}外圈射出点 ➔ 注入${DISC_CONFIG[dstKey].name}外圈第 ${targetSlotData.slotIndex + 1} 槽（中心导光核）！`);
+          // 绘制高亮跨盘导入线 (源盘独立外圈射出点 ➔ 目标盘独立外圈外接槽)！
+          drawBeamLine(svgBeams, emitX, emitY, dstDockPos.x, dstDockPos.y, 'hyper', true);
+          drawImpactSpark(svgImpacts, dstDockPos.x, dstDockPos.y, '#fbbf24', 6);
 
-          // 解算目标盘内部光路
-          traceDiscOpticalPath(dstKey, targetSlotData.ringId, targetSlotData.slotIndex);
+          // 累加中心导光核自身的属性加成
+          const coreSpec = CHIP_SPECS['core_' + srcKey];
+          if (coreSpec && coreSpec.buff) {
+            Object.entries(coreSpec.buff).forEach(([prop, val]) => {
+              totalBuff[prop] = (totalBuff[prop] || 0) + val;
+            });
+          }
+
+          // 3. 从目标盘【独立最外圈外接槽】向内径向注入目标盘最外层【基础环】！
+          const dstMeta = DISC_CONFIG[dstKey];
+          const dstOutTier = counts[dstKey];
+          const dstOutRingId = `${dstKey}_${dstOutTier}`;
+          const dstOutRing = DISK_RINGS[dstOutRingId];
+          const injectRad = (targetDock.angleDeg * Math.PI) / 180;
+          const ringEdgeX = dstMeta.cx + dstOutRing.radius * Math.cos(injectRad);
+          const ringEdgeY = dstMeta.cy + dstOutRing.radius * Math.sin(injectRad);
+
+          const align = getClosestSlotToAngle(dstOutRingId, targetDock.angleDeg, 22);
+          if (!align.isAligned) {
+            drawBeamLine(svgBeams, dstDockPos.x, dstDockPos.y, ringEdgeX, ringEdgeY, 'rose', true);
+            drawImpactSpark(svgImpacts, ringEdgeX, ringEdgeY, '#f59e0b', 5);
+            logSteps.push(`🚀 [导入线已连上] ${srcMeta.name} ➔ ${dstMeta.name}独立外圈【${targetDock.dirName}外接槽】，请旋转${dstOutRing.name}对齐该外接槽！`);
+          } else {
+            const entrySlotPos = getSlotWorldPos(dstOutRingId, align.slotIndex);
+            drawBeamLine(svgBeams, dstDockPos.x, dstDockPos.y, entrySlotPos.x, entrySlotPos.y, 'rose', true);
+            drawImpactSpark(svgImpacts, entrySlotPos.x, entrySlotPos.y, '#00f0ff', 5.5);
+            logSteps.push(`🚀 【跨盘导入线导通！】${srcMeta.name}射出点 ➔ ${dstMeta.name}独立外圈【${targetDock.dirName}外接槽】➔ 注入${dstOutRing.name}第 ${align.slotIndex + 1} 槽！`);
+            traceDiscOpticalPath(dstKey, dstOutRingId, align.slotIndex);
+          }
         }
       }
 
       const totalConstellationSlots = (floorDef && floorDef.nodes) ? floorDef.nodes.length : 7;
       const isConstellationAllSatisfied = hitFloorNodesSet.size >= totalConstellationSlots;
-      const constellationMultiplier = isConstellationAllSatisfied ? 1.2 : 1.0;
+      const constellationMultiplier = isConstellationAllSatisfied ? 2.2 : 1.0;
 
       if (isConstellationAllSatisfied) {
-        logSteps.push(`👑 【星象全满】满足${floorDef.name}全部 ${totalConstellationSlots} 处星象插槽！触发全属性 ×1.2 倍加成！`);
-        Object.keys(totalBuff).forEach(k => {
-          if (k !== 'sword_funnel' && k !== 'inventory') {
-            totalBuff[k] = Math.round(totalBuff[k] * 1.2);
-          }
-        });
+        logSteps.push(`👑 【${floorDef.name}·七星全满共鸣！】三大盘全部 ${totalConstellationSlots} 处星位点亮！每个星位节点均已享受 +120% 效果增幅！`);
       }
 
+      // 重新渲染底盘星象以点亮命中的星位与跨盘星脉连线
+      renderFloorBase(true, hitFloorNodesSet);
       updatePanels(chainNodes, totalBuff, constellationMultiplier, crossActivated, logSteps, hitFloorNodesSet, activeKeystones);
       updateCenterHubsDOM();
     }
@@ -3751,251 +3925,202 @@ function renderPalette() {
       svgGroup.appendChild(circle);
     }
 
-    /* =========================================================================
-       8.9 底板基准系统 (北斗七星阵 / 天衡T字 / 雷劫Z字 / 四象方环)
+        /* =========================================================================
+       8.9 底板基准系统 (跨三盘星象分布：北斗七星等 7 个点分布在不同盘子上面，单个节点放上去增加 120% 效果！)
        ========================================================================= */
     let CURRENT_FLOOR_SHAPE = 'dipper';
 
-    // ✦ 真正有意义的底板：所有底板全部由实际盘面插槽节点网络连线构成 (类似北斗七星连线) ✦
     const FLOOR_SHAPE_DEFS = {
-      // 1. 【北斗七星天衡阵】(7星道门至尊法身：天枢贪狼、天璇巨门、天玑禄存、天权文曲、玉衡廉贞、开阳武曲、摇光破军)
+      // 1. 【北斗七星天衡阵】(跨三盘分布：辅助盘2星 + 工厂盘2星 + 攻击盘3星 = 7星连珠，单点增加120%效果！)
       dipper: {
         name: '北斗七星天衡阵',
-        desc: '道门七星君真符印刻：7 大星宿各具专属图腾、色系与神道法则。全阵芯片对准即享 2.5x 狂暴星宿加成！',
-        mult: 2.5,
-        nodes: [
-          { id: 'dipper_1', num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe', x: 367, y: 652, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram', title: '斗魁首将 / 暴击攻速', desc: '暴击+30%, 攻速+25%' },
-          { id: 'dipper_2', num: 'Ⅱ', name: '天璇·巨门', en: 'Merak', x: 587, y: 616, color: '#0284c7', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress', title: '天阙重门 / 金汤防御', desc: '防御+400, 气血+800' },
-          { id: 'dipper_3', num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda', x: 506, y: 347, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '司禄司财 / 天工宝鼎', desc: '采矿+50%, 冶炼+40%' },
-          { id: 'dipper_4', num: 'Ⅳ', name: '天权·文曲', en: 'Megrez', x: 637, y: 400, bx: 642, by: 412, color: '#6366f1', bg: '#eef2ff', border: '#4f46e5', shape: 'hexagram', title: '文曲星主 / 灵枢天卷', desc: '制造速度+60%, 能耗-30%' },
-          { id: 'dipper_5', num: 'Ⅴ', name: '玉衡·廉贞', en: 'Alioth', x: 885, y: 254, color: '#a855f7', bg: '#faf5ff', border: '#9333ea', shape: 'diamond', title: '司衡折转 / 极光紫霓', desc: '跨盘折射折跃倍率+50%' },
-          { id: 'dipper_6', num: 'Ⅵ', name: '开阳·武曲', en: 'Mizar', x: 1032, y: 245, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'sunburst', title: '战神司命 / 烈阳金戈', desc: '全局攻击+35%, 破甲+20%' },
-          { id: 'dipper_7', num: 'Ⅶ', name: '摇光·破军', en: 'Alkaid', x: 1256, y: 148, color: '#0891b2', bg: '#ecfeff', border: '#0e7490', shape: 'trident', title: '斗柄天梢 / 万剑极北', desc: '巡航飞剑+2把, 飞剑穿透+40%' }
-        ]
-      },
-
-      // 2. 【南斗六司延寿阵】(南斗主生：司命天府、司禄天梁、延寿天机、益算天同、度厄天相、上生七杀)
-      southern_dipper: {
-        name: '南斗六司延寿阵',
-        desc: '道书云“南斗注生，北斗注死”：南斗六司执掌宗门寿元气血与渡劫金身。芯片覆盖享 2.4x 生生不息气血长生加成！',
-        mult: 2.4,
-        nodes: [
-          { id: 'sd_1', num: '南Ⅰ', name: '司命·天府', en: 'Life Sovereign', x: 450, y: 670, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'lotus', title: '第一天府司命星君', desc: '气血+1200, 移速+20%' },
-          { id: 'sd_2', num: '南Ⅱ', name: '司禄·天梁', en: 'Wealth Beam', x: 367, y: 652, color: '#0ea5e9', bg: '#f0f9ff', border: '#0284c7', shape: 'triquetra', title: '第二天梁司禄星君', desc: '宗门灵石产出+80%' },
-          { id: 'sd_3', num: '南Ⅲ', name: '延寿·天机', en: 'Longevity Pivot', x: 315, y: 470, color: '#06b6d4', bg: '#ecfeff', border: '#0891b2', shape: 'diamond', title: '第三天机延寿星君', desc: '飞剑电池上限+150%' },
-          { id: 'sd_4', num: '南Ⅳ', name: '益算·天同', en: 'Calculation Core', x: 492, y: 529, color: '#8b5cf6', bg: '#faf5ff', border: '#7c3aed', shape: 'hexagram', title: '第四天同益算星君', desc: '工厂研发与制造速度+70%' },
-          { id: 'sd_5', num: '南Ⅴ', name: '度厄·天相', en: 'Calamity Warden', x: 201, y: 578, color: '#f59e0b', bg: '#fffbeb', border: '#d97706', shape: 'fortress', title: '第五天相度厄星君', desc: '渡劫免死护盾+1层, 防御+500' },
-          { id: 'sd_6', num: '南Ⅵ', name: '上生·七杀', en: 'Ascension Killer', x: 100, y: 622, color: '#ef4444', bg: '#fef2f2', border: '#b91c1c', shape: 'octagram', title: '第六七杀上生星君', desc: '飞剑巡航+2把, 飞剑攻击+60%' }
-        ]
-      },
-
-      // 3. 【紫微帝垣万剑阵】(三垣之首紫微帝座：紫微帝星、勾陈大帝、太乙太微、北极四辅、探天灵瞳)
-      ziwei: {
-        name: '紫微帝垣万剑阵',
-        desc: '天阙至尊紫微大帝本命星垣：统御周天万象。围绕天枢极核与极轨探天副盘形成至尊法域，享 3.0x 万剑归宗帝王倍率！',
-        mult: 3.0,
-        nodes: [
-          { id: 'zw_1', num: '帝垣', name: '紫微·帝星', en: 'Polaris Emperor', x: 450, y: 470, color: '#fbbf24', bg: '#fffbeb', border: '#b45309', shape: 'sunburst', title: '中天紫微北极大帝', desc: '万剑归宗！巡航飞剑+3把' },
-          { id: 'zw_2', num: '勾陈', name: '勾陈·上宫', en: 'Gouchen Sovereign', x: 480, y: 404, color: '#a855f7', bg: '#faf5ff', border: '#7e22ce', shape: 'diamond', title: '勾陈上宫天皇大帝', desc: '全局破甲穿透+50%' },
-          { id: 'zw_3', num: '天乙', name: '天乙·神皇', en: 'Tianyi Minister', x: 506, y: 347, color: '#38bdf8', bg: '#f0f9ff', border: '#0284c7', shape: 'hexagram', title: '紫微左辅天乙星官', desc: '制造速度+80%' },
-          { id: 'zw_4', num: '太乙', name: '太乙·玄机', en: 'Taiyi Mystery', x: 492, y: 529, color: '#34d399', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '紫微右弼太乙星官', desc: '传送带速度+50%' },
-          { id: 'zw_5', num: '东辅', name: '北极·青极', en: 'Azure Flank', x: 637, y: 400, color: '#06b6d4', bg: '#ecfeff', border: '#0891b2', shape: 'fortress', title: '天垣东四辅正极', desc: '采矿速度+60%' },
-          { id: 'zw_6', num: '西辅', name: '北极·白极', en: 'White Flank', x: 266, y: 550, color: '#94a3b8', bg: '#f8fafc', border: '#475569', shape: 'fortress', title: '天垣西四辅正极', desc: '全阵防御+600' },
-          { id: 'zw_7', num: '探天', name: '灵瞳·天眼', en: 'Polar Eye Star', x: 250, y: 150, color: '#38bdf8', bg: '#f0f9ff', border: '#0284c7', shape: 'octagram', title: '极轨探天副盘灵瞳', desc: '全图灵视开雾, 暴击+30%' },
-          { id: 'zw_8', num: '辰光', name: '辰光·司晨', en: 'Chrono Nexus', x: 1210, y: 160, color: '#f59e0b', bg: '#fffbeb', border: '#d97706', shape: 'sunburst', title: '手表双盘调频总纲', desc: '周天循环加速+40%' }
-        ]
-      },
-
-      // 4. 【二十八宿四象天灵阵】(青龙、白虎、朱雀、玄武四大守护星神)
-      four_symbols: {
-        name: '二十八宿四象阵',
-        desc: '苍龙、白虎、朱雀、玄武四象灵穴锁住四方天机。重合四极享 2.2x 四象相生聚灵工厂加速！',
+        desc: '七星跨三盘贯通（辅助盘2星 · 工厂盘2星 · 攻击盘3星）：任意星位放上芯片并通电，该节点直接增加 +120% 效果！',
         mult: 2.2,
         nodes: [
-          { id: 'fs_1', num: '东方', name: '青龙·角亢', en: 'Azure Dragon', x: 650, y: 470, color: '#10b981', bg: '#ecfdf5', border: '#047857', shape: 'dragon', title: '东方七宿青龙首', desc: '生机勃发：采矿速度+80%' },
-          { id: 'fs_2', num: '南方', name: '朱雀·井鬼', en: 'Vermilion Bird', x: 450, y: 670, color: '#ef4444', bg: '#fef2f2', border: '#b91c1c', shape: 'flame', title: '南方七宿朱雀首', desc: '离火熔炉：冶炼制造+80%' },
-          { id: 'fs_3', num: '西方', name: '白虎·奎娄', en: 'White Tiger', x: 250, y: 470, color: '#0ea5e9', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress', title: '西方七宿白虎首', desc: '庚金剑气：攻击力+50%' },
-          { id: 'fs_4', num: '北方', name: '玄武·斗牛', en: 'Black Tortoise', x: 450, y: 270, color: '#0f172a', bg: '#f8fafc', border: '#334155', shape: 'turtle', title: '北方七宿玄武首', desc: '玄冥重甲：防御+800' },
-          { id: 'fs_5', num: '动力', name: '苍龙·翼宿', en: 'Dragon Wing', x: 1032, y: 245, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '动力盘龙翼灵穴', desc: '传送带速度+60%' },
-          { id: 'fs_6', num: '探天', name: '白虎·觜宿', en: 'Tiger Fang', x: 250, y: 150, color: '#38bdf8', bg: '#f0f9ff', border: '#0284c7', shape: 'octagram', title: '极轨探天虎灵穴', desc: '全图探测, 飞剑+1把' },
-          { id: 'fs_7', num: '终末', name: '玄武·危宿', en: 'Tortoise Shell', x: 150, y: 600, color: '#8b5cf6', bg: '#faf5ff', border: '#7c3aed', shape: 'diamond', title: '释能终端玄武壳', desc: '虚空地线污染-80%' }
+          // ⚔️ 攻击盘 (斗魁 3 星)
+          { id: 'dipper_1', disc: 'combat',   num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe',    x: 324,  y: 490, bx: 205, by: 455, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram',  title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'dipper_2', disc: 'combat',   num: 'Ⅱ', name: '天璇·巨门', en: 'Merak',    x: 390,  y: 596, bx: 406, by: 585, color: '#0284c7', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress',  title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'dipper_3', disc: 'combat',   num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda',   x: 496,  y: 490, bx: 512, by: 475, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+          // ⚙️ 工厂盘 (斗身 2 星)
+          { id: 'dipper_4', disc: 'industry', num: 'Ⅳ', name: '天权·文曲', en: 'Megrez',   x: 947,  y: 397, bx: 963, by: 385, color: '#6366f1', bg: '#eef2ff', border: '#4f46e5', shape: 'hexagram',  title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'dipper_5', disc: 'industry', num: 'Ⅴ', name: '玉衡·廉贞', en: 'Alioth',   x: 890,  y: 364, bx: 765, by: 342, color: '#a855f7', bg: '#faf5ff', border: '#9333ea', shape: 'diamond',   title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          // 🛡️ 辅助盘 (斗柄 2 星)
+          { id: 'dipper_6', disc: 'support',  num: 'Ⅵ', name: '开阳·武曲', en: 'Mizar',    x: 1357, y: 297, bx: 1372, by: 292, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'sunburst',  title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'dipper_7', disc: 'support',  num: 'Ⅶ', name: '摇光·破军', en: 'Alkaid',   x: 1374, y: 233, bx: 1390, by: 215, color: '#0891b2', bg: '#ecfeff', border: '#0e7490', shape: 'trident',   title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' }
+        ],
+        links: [
+          ['dipper_7', 'dipper_6'],
+          ['dipper_6', 'dipper_5'],
+          ['dipper_5', 'dipper_4'],
+          ['dipper_4', 'dipper_3'],
+          ['dipper_3', 'dipper_2'],
+          ['dipper_2', 'dipper_1'],
+          ['dipper_1', 'dipper_3']
         ]
       },
 
-      // 5. 【九曜行天日月轮】(日宫太阳、月宫太阴、金木水火土五星曜)
+      // 2. 【南斗六司延寿阵】(跨三盘 2+2+2 分布，单点增加120%效果)
+      southern_dipper: {
+        name: '南斗六司延寿阵',
+        desc: '南斗六司跨三盘分布（每盘2星）：单个节点放上芯片即增加 +120% 效果！',
+        mult: 2.2,
+        nodes: [
+          { id: 'sd_1', disc: 'combat',   num: '南Ⅰ', name: '司命·天府', en: 'Life Sovereign',   x: 390,  y: 424, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'lotus',     title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'sd_2', disc: 'combat',   num: '南Ⅱ', name: '司禄·天梁', en: 'Wealth Beam',      x: 390,  y: 556, color: '#0ea5e9', bg: '#f0f9ff', border: '#0284c7', shape: 'triquetra', title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'sd_3', disc: 'industry', num: '南Ⅲ', name: '延寿·天机', en: 'Longevity Pivot',  x: 890,  y: 364, color: '#06b6d4', bg: '#ecfeff', border: '#0891b2', shape: 'diamond',   title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'sd_4', disc: 'industry', num: '南Ⅳ', name: '益算·天同', en: 'Calculation Core', x: 890,  y: 496, color: '#8b5cf6', bg: '#faf5ff', border: '#7c3aed', shape: 'hexagram',  title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'sd_5', disc: 'support',  num: '南Ⅴ', name: '度厄·天相', en: 'Calamity Warden',  x: 1374, y: 233, color: '#f59e0b', bg: '#fffbeb', border: '#d97706', shape: 'fortress',  title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'sd_6', disc: 'support',  num: '南Ⅵ', name: '上生·七杀', en: 'Ascension Killer', x: 1293, y: 314, color: '#ef4444', bg: '#fef2f2', border: '#b91c1c', shape: 'octagram',  title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' }
+        ],
+        links: [['sd_6', 'sd_5'], ['sd_5', 'sd_3'], ['sd_3', 'sd_4'], ['sd_4', 'sd_2'], ['sd_2', 'sd_1']]
+      },
+
+      // 3. 【紫微帝垣万剑阵】(跨三盘分布，单点增加120%效果)
+      ziwei: {
+        name: '紫微帝垣万剑阵',
+        desc: '紫微星垣横跨三盘：任意星位放上芯片即增加 +120% 效果！',
+        mult: 2.2,
+        nodes: [
+          { id: 'zw_1', disc: 'combat',   num: '帝垣', name: '紫微·帝星', en: 'Polaris Emperor',   x: 390,  y: 384, color: '#fbbf24', bg: '#fffbeb', border: '#b45309', shape: 'sunburst',  title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'zw_2', disc: 'combat',   num: '勾陈', name: '勾陈·上宫', en: 'Gouchen Sovereign', x: 496,  y: 490, color: '#a855f7', bg: '#faf5ff', border: '#7e22ce', shape: 'diamond',   title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'zw_3', disc: 'combat',   num: '天乙', name: '天乙·神皇', en: 'Tianyi Minister',   x: 284,  y: 490, color: '#38bdf8', bg: '#f0f9ff', border: '#0284c7', shape: 'hexagram',  title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'zw_4', disc: 'industry', num: '太乙', name: '太乙·玄机', en: 'Taiyi Mystery',     x: 890,  y: 364, color: '#34d399', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'zw_5', disc: 'industry', num: '东辅', name: '北极·青极', en: 'Azure Flank',       x: 947,  y: 463, color: '#06b6d4', bg: '#ecfeff', border: '#0891b2', shape: 'fortress',  title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'zw_6', disc: 'support',  num: '西辅', name: '北极·白极', en: 'White Flank',       x: 1374, y: 233, color: '#94a3b8', bg: '#f8fafc', border: '#475569', shape: 'fortress',  title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'zw_7', disc: 'support',  num: '辰光', name: '辰光·司晨', en: 'Chrono Nexus',      x: 1357, y: 297, color: '#f59e0b', bg: '#fffbeb', border: '#d97706', shape: 'sunburst',  title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' }
+        ],
+        links: [['zw_6', 'zw_7'], ['zw_7', 'zw_4'], ['zw_4', 'zw_5'], ['zw_5', 'zw_2'], ['zw_2', 'zw_1'], ['zw_1', 'zw_3']]
+      },
+
+      // 4. 【二十八宿四象阵】(跨三盘分布，单点增加120%效果)
+      four_symbols: {
+        name: '二十八宿四象阵',
+        desc: '苍龙、白虎、朱雀、玄武灵穴跨三盘锁住天机：单点放上芯片增加 +120% 效果！',
+        mult: 2.2,
+        nodes: [
+          { id: 'fs_1', disc: 'combat',   num: '东方', name: '青龙·角亢', en: 'Azure Dragon',   x: 496,  y: 490, color: '#10b981', bg: '#ecfdf5', border: '#047857', shape: 'dragon',    title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'fs_2', disc: 'combat',   num: '南方', name: '朱雀·井鬼', en: 'Vermilion Bird', x: 390,  y: 596, color: '#ef4444', bg: '#fef2f2', border: '#b91c1c', shape: 'flame',     title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'fs_3', disc: 'combat',   num: '西方', name: '白虎·奎娄', en: 'White Tiger',    x: 284,  y: 490, color: '#0ea5e9', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress',  title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'fs_4', disc: 'industry', num: '北方', name: '玄武·斗牛', en: 'Black Tortoise', x: 890,  y: 364, color: '#0f172a', bg: '#f8fafc', border: '#334155', shape: 'turtle',    title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'fs_5', disc: 'industry', num: '动力', name: '苍龙·翼宿', en: 'Dragon Wing',    x: 947,  y: 397, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'fs_6', disc: 'support',  num: '探天', name: '白虎·觜宿', en: 'Tiger Fang',     x: 1374, y: 233, color: '#38bdf8', bg: '#f0f9ff', border: '#0284c7', shape: 'octagram',  title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'fs_7', disc: 'support',  num: '终末', name: '玄武·危宿', en: 'Tortoise Shell', x: 1357, y: 297, color: '#8b5cf6', bg: '#faf5ff', border: '#7c3aed', shape: 'diamond',   title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' }
+        ],
+        links: [['fs_6', 'fs_7'], ['fs_7', 'fs_5'], ['fs_5', 'fs_4'], ['fs_4', 'fs_1'], ['fs_1', 'fs_2'], ['fs_2', 'fs_3']]
+      },
+
+      // 5. 【九曜行天日月轮】(跨三盘分布，单点增加120%效果)
       nine_luminaries: {
         name: '九曜行天日月轮',
-        desc: '太阳太阴与五星经天纬地：阴阳交泰、五行轮转。重合九曜享 2.6x 阴阳调和与五行灵液激增！',
-        mult: 2.6,
+        desc: '日月五星跨三盘排布：任意星位放上芯片即增加 +120% 效果！',
+        mult: 2.2,
         nodes: [
-          { id: 'nl_1', num: '大阳', name: '日宫·太阳', en: 'Solar Luminary', x: 960, y: 280, color: '#f59e0b', bg: '#fffbeb', border: '#d97706', shape: 'sunburst', title: '动力轴心大日光辉', desc: '灵能超频, 飞剑攻击+40%' },
-          { id: 'nl_2', num: '太阴', name: '月宫·太阴', en: 'Lunar Luminary', x: 1210, y: 160, color: '#38bdf8', bg: '#f0f9ff', border: '#0284c7', shape: 'diamond', title: '手表盘心清辉皓月', desc: '能耗降低-40%' },
-          { id: 'nl_3', num: '岁星', name: '岁星·木德', en: 'Jupiter Wood', x: 587, y: 616, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '东方岁星灵植生发', desc: '采矿速度+50%' },
-          { id: 'nl_4', num: '荧惑', name: '荧惑·火德', en: 'Mars Fire', x: 492, y: 529, color: '#ef4444', bg: '#fef2f2', border: '#b91c1c', shape: 'flame', title: '南方荧惑战煞三昧', desc: '暴击+35%, 攻速+25%' },
-          { id: 'nl_5', num: '镇星', name: '镇星·土德', en: 'Saturn Earth', x: 450, y: 470, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'fortress', title: '中宫镇星固若金汤', desc: '气血+1000, 防御+500' },
-          { id: 'nl_6', num: '太白', name: '太白·金德', en: 'Venus Metal', x: 266, y: 550, color: '#64748b', bg: '#f8fafc', border: '#334155', shape: 'octagram', title: '西方太白主杀万剑', desc: '巡航飞剑+2把' },
-          { id: 'nl_7', num: '辰星', name: '辰星·水德', en: 'Mercury Water', x: 450, y: 335, color: '#06b6d4', bg: '#ecfeff', border: '#0891b2', shape: 'hexagram', title: '北方辰星智深通玄', desc: '制造速度+50%' }
-        ]
+          { id: 'nl_1', disc: 'support',  num: '太阳', name: '日宫·太阳', en: 'Solar Luminary', x: 1374, y: 233, color: '#f59e0b', bg: '#fffbeb', border: '#d97706', shape: 'sunburst',  title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'nl_2', disc: 'support',  num: '太阴', name: '月宫·太阴', en: 'Lunar Luminary', x: 1357, y: 297, color: '#38bdf8', bg: '#f0f9ff', border: '#0284c7', shape: 'diamond',   title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'nl_3', disc: 'industry', num: '岁星', name: '岁星·木德', en: 'Jupiter Wood',   x: 890,  y: 364, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'nl_4', disc: 'industry', num: '荧惑', name: '荧惑·火德', en: 'Mars Fire',      x: 947,  y: 397, color: '#ef4444', bg: '#fef2f2', border: '#b91c1c', shape: 'flame',     title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'nl_5', disc: 'combat',   num: '镇星', name: '镇星·土德', en: 'Saturn Earth',   x: 496,  y: 490, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'fortress',  title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'nl_6', disc: 'combat',   num: '太白', name: '太白·金德', en: 'Venus Metal',    x: 390,  y: 596, color: '#64748b', bg: '#f8fafc', border: '#334155', shape: 'octagram',  title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'nl_7', disc: 'combat',   num: '辰星', name: '辰星·水德', en: 'Mercury Water',  x: 324,  y: 490, color: '#06b6d4', bg: '#ecfeff', border: '#0891b2', shape: 'hexagram',  title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' }
+        ],
+        links: [['nl_1', 'nl_2'], ['nl_2', 'nl_3'], ['nl_3', 'nl_4'], ['nl_4', 'nl_5'], ['nl_5', 'nl_6'], ['nl_6', 'nl_7']]
       },
 
-      // 6. 【天罡三十六雷劫阵】(九天应元雷声普化天尊雷劫矩阵)
+      // 6. 【天罡雷劫破虚阵】(跨三盘分布，单点增加120%效果)
       thunder_matrix: {
         name: '天罡雷劫破虚阵',
-        desc: '引九天紫霄神雷淬体炼器：渡劫飞升、过载爆发。重合雷印享 2.8x 狂暴过载与致命斩杀！',
-        mult: 2.8,
+        desc: '九天紫霄雷印跨三盘贯通：任意雷印放上芯片即增加 +120% 效果！',
+        mult: 2.2,
         nodes: [
-          { id: 'tm_1', num: '天雷', name: '初阳·破天雷', en: 'Lightning 1', x: 1256, y: 148, color: '#38bdf8', bg: '#f0f9ff', border: '#0284c7', shape: 'lightning', title: '始发初引青雷', desc: '攻速+30%' },
-          { id: 'tm_2', num: '神雷', name: '玉枢·轰电劫', en: 'Lightning 2', x: 1032, y: 245, color: '#818cf8', bg: '#eef2ff', border: '#4f46e5', shape: 'lightning', title: '动力盘玉枢雷印', desc: '能量爆发+50%' },
-          { id: 'tm_3', num: '劫心', name: '中元·渡劫枢', en: 'Lightning Nexus', x: 735, y: 363, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'lotus', title: '中元悬浮透镜雷劫眼', desc: '渡劫免死护盾+1' },
-          { id: 'tm_4', num: '紫霄', name: '紫霄·九霄雷', en: 'Lightning 3', x: 637, y: 400, color: '#c084fc', bg: '#faf5ff', border: '#9333ea', shape: 'lightning', title: '浑天主天环紫霄极雷', desc: '全阵暴击+40%' },
-          { id: 'tm_5', num: '破虚', name: '天枢·诛仙劫', en: 'Lightning Core', x: 450, y: 470, color: '#f43f5e', bg: '#fff1f2', border: '#e11d48', shape: 'sunburst', title: '主极核诛仙大天劫', desc: '攻击力+80%, 破甲+40%' },
-          { id: 'tm_6', num: '归墟', name: '归墟·散雷霆', en: 'Lightning End', x: 201, y: 578, color: '#a855f7', bg: '#faf5ff', border: '#7e22ce', shape: 'trident', title: '终端释能地线雷池', desc: '全盘电耗-60%' }
-        ]
+          { id: 'tm_1', disc: 'support',  num: '天雷', name: '初阳·破天雷', en: 'Lightning 1',    x: 1374, y: 233, color: '#38bdf8', bg: '#f0f9ff', border: '#0284c7', shape: 'lightning', title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'tm_2', disc: 'support',  num: '神雷', name: '玉枢·轰电劫', en: 'Lightning 2',    x: 1357, y: 297, color: '#818cf8', bg: '#eef2ff', border: '#4f46e5', shape: 'lightning', title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'tm_3', disc: 'industry', num: '劫心', name: '中元·渡劫枢', en: 'Lightning Nexus',x: 890,  y: 364, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'lotus',     title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'tm_4', disc: 'industry', num: '紫霄', name: '紫霄·九霄雷', en: 'Lightning 3',    x: 947,  y: 397, color: '#c084fc', bg: '#faf5ff', border: '#9333ea', shape: 'lightning', title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'tm_5', disc: 'combat',   num: '破虚', name: '天枢·诛仙劫', en: 'Lightning Core', x: 496,  y: 490, color: '#f43f5e', bg: '#fff1f2', border: '#e11d48', shape: 'sunburst',  title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+          { id: 'tm_6', disc: 'combat',   num: '归墟', name: '归墟·散雷霆', en: 'Lightning End',  x: 390,  y: 596, color: '#a855f7', bg: '#faf5ff', border: '#7e22ce', shape: 'trident',   title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' }
+        ],
+        links: [['tm_1', 'tm_2'], ['tm_2', 'tm_3'], ['tm_3', 'tm_4'], ['tm_4', 'tm_5'], ['tm_5', 'tm_6']]
       }
     };
+
     function renderFloorBase(isActive = false, hitSet = null) {
       const svg = document.getElementById('floorSvgLayer');
       if (!svg) return;
 
       const shapeDef = FLOOR_SHAPE_DEFS[CURRENT_FLOOR_SHAPE] || FLOOR_SHAPE_DEFS.dipper;
+      const counts = getActiveRingCounts();
 
-      // 辅助函数：根据每个星宿的专属形制渲染专属 SVG 图腾印记
       function renderStarGlyph(node, isAligned) {
         const c = isAligned ? node.color : '#475569';
         const fill = isAligned ? node.color : 'none';
-        const fillOpacity = isAligned ? '0.2' : '0';
-        const strokeW = isAligned ? '2' : '1.3';
+        const fillOpacity = isAligned ? '0.28' : '0';
+        const strokeW = isAligned ? '2.2' : '1.4';
         const x = node.x;
         const y = node.y;
 
         switch (node.shape) {
-          // 8. 混沌青莲印 (Lotus)
-          case 'lotus': {
-            return `
-              <circle cx="${x}" cy="${y}" r="12" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
-              <path d="M ${x} ${y-12} Q ${x-7} ${y-2} ${x} ${y+8} Q ${x+7} ${y-2} ${x} ${y-12} Z" fill="${c}" fill-opacity="0.3" stroke="${c}" stroke-width="1.2" />
-              <circle cx="${x}" cy="${y}" r="3.5" fill="${isAligned ? node.color : '#ffffff'}" />
-            `;
-          }
-          // 9. 青龙真元印 (Dragon)
-          case 'dragon': {
-            return `
-              <circle cx="${x}" cy="${y}" r="13" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" stroke-dasharray="3 2" />
-              <path d="M ${x-9} ${y+5} C ${x-5} ${y-10}, ${x+5} ${y+10}, ${x+9} ${y-5}" fill="none" stroke="${c}" stroke-width="1.8" />
-              <circle cx="${x}" cy="${y}" r="3.5" fill="${isAligned ? node.color : '#ffffff'}" />
-            `;
-          }
-          // 10. 朱雀神火印 (Flame)
-          case 'flame': {
-            return `
-              <circle cx="${x}" cy="${y}" r="12" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
-              <path d="M ${x} ${y-14} Q ${x+8} ${y-3} ${x+5} ${y+8} Q ${x} ${y+12} ${x-5} ${y+8} Q ${x-8} ${y-3} ${x} ${y-14} Z" fill="${fill}" fill-opacity="0.4" stroke="${c}" stroke-width="1.4" />
-              <circle cx="${x}" cy="${y+3}" r="3" fill="${isAligned ? node.color : '#ffffff'}" />
-            `;
-          }
-          // 11. 玄武金甲印 (Turtle)
-          case 'turtle': {
-            return `
-              <rect x="${x-12}" y="${y-12}" width="24" height="24" rx="6" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
-              <polygon points="${x},${y-8} ${x+7},${y-4} ${x+7},${y+4} ${x},${y+8} ${x-7},${y+4} ${x-7},${y-4}" fill="none" stroke="${c}" stroke-width="1.2" stroke-dasharray="2 1" />
-              <circle cx="${x}" cy="${y}" r="3" fill="${isAligned ? node.color : '#ffffff'}" />
-            `;
-          }
-          // 12. 紫霄雷印 (Lightning)
-          case 'lightning': {
-            return `
-              <circle cx="${x}" cy="${y}" r="12" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
-              <polygon points="${x-2},${y-12} ${x+4},${y-3} ${x},${y-3} ${x+2},${y+12} ${x-4},${y+2} ${x},${y+2}" fill="${c}" />
-            `;
-          }
-          // 1. 天枢·贪狼：八角战星轮 (Octagram)
-          case 'octagram': {
-            return `
-              <rect x="${x - 12}" y="${y - 12}" width="24" height="24" rx="2" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
-              <rect x="${x - 12}" y="${y - 12}" width="24" height="24" rx="2" fill="none" stroke="${c}" stroke-width="${strokeW}" transform="rotate(45 ${x} ${y})" />
-              <circle cx="${x}" cy="${y}" r="4" fill="${isAligned ? node.color : '#ffffff'}" stroke="${c}" stroke-width="1.5" />
-            `;
-          }
-          // 2. 天璇·巨门：四极金阙重门印 (Quad Fortress Gate)
-          case 'fortress': {
-            return `
-              <rect x="${x - 13}" y="${y - 13}" width="26" height="26" rx="1" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
-              <rect x="${x - 8}" y="${y - 8}" width="16" height="16" fill="none" stroke="${c}" stroke-width="1.2" stroke-dasharray="2 2" />
-              <line x1="${x - 13}" y1="${y}" x2="${x + 13}" y2="${y}" stroke="${c}" stroke-width="1.2" />
-              <line x1="${x}" y1="${y - 13}" x2="${x}" y2="${y + 13}" stroke="${c}" stroke-width="1.2" />
-              <circle cx="${x}" cy="${y}" r="3" fill="${isAligned ? node.color : '#ffffff'}" />
-            `;
-          }
-          // 3. 天玑·禄存：三足生机宝鼎印 (Triquetra Trefoil)
-          case 'triquetra': {
-            return `
-              <circle cx="${x}" cy="${y - 7}" r="9" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
-              <circle cx="${x - 6}" cy="${y + 4}" r="9" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
-              <circle cx="${x + 6}" cy="${y + 4}" r="9" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
-              <circle cx="${x}" cy="${y}" r="3.5" fill="${isAligned ? node.color : '#ffffff'}" stroke="${c}" stroke-width="1.4" />
-            `;
-          }
-          // 4. 天权·文曲：六芒灵枢天符印 (Hexagram Star)
-          case 'hexagram': {
-            return `
-              <polygon points="${x},${y-13} ${x+11},${y+7} ${x-11},${y+7}" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
-              <polygon points="${x},${y+13} ${x+11},${y-7} ${x-11},${y-7}" fill="none" stroke="${c}" stroke-width="${strokeW}" />
-              <circle cx="${x}" cy="${y}" r="4" fill="${isAligned ? node.color : '#ffffff'}" stroke="${c}" stroke-width="1.4" />
-            `;
-          }
-          // 5. 玉衡·廉贞：司天准衡双菱印 (Diamond Rhombus Balance)
-          case 'diamond': {
-            return `
-              <polygon points="${x},${y-15} ${x+13},${y} ${x},${y+15} ${x-13},${y}" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
-              <polygon points="${x},${y-9} ${x+8},${y} ${x},${y+9} ${x-8},${y}" fill="none" stroke="${c}" stroke-width="1" stroke-dasharray="2 2" />
-              <line x1="${x - 17}" y1="${y}" x2="${x + 17}" y2="${y}" stroke="${c}" stroke-width="1.4" />
-              <circle cx="${x}" cy="${y}" r="3.5" fill="${isAligned ? node.color : '#ffffff'}" />
-            `;
-          }
-          // 6. 开阳·武曲：日轮金戈齿轮印 (Sunburst Gear)
-          case 'sunburst': {
-            return `
-              <circle cx="${x}" cy="${y}" r="13" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" stroke-dasharray="4 2" />
-              <line x1="${x-16}" y1="${y}" x2="${x+16}" y2="${y}" stroke="${c}" stroke-width="1.6" />
-              <line x1="${x}" y1="${y-16}" x2="${x}" y2="${y+16}" stroke="${c}" stroke-width="1.6" />
-              <line x1="${x-11}" y1="${y-11}" x2="${x+11}" y2="${y+11}" stroke="${c}" stroke-width="1.2" />
-              <line x1="${x+11}" y1="${y-11}" x2="${x-11}" y2="${y+11}" stroke="${c}" stroke-width="1.2" />
-              <circle cx="${x}" cy="${y}" r="5" fill="${isAligned ? node.color : '#ffffff'}" stroke="${c}" stroke-width="1.5" />
-            `;
-          }
-          // 7. 摇光·破军：三尖破军战矛印 (Trident Comet Spear)
-          case 'trident': {
-            return `
-              <line x1="${x}" y1="${y - 17}" x2="${x}" y2="${y + 14}" stroke="${c}" stroke-width="2" />
-              <line x1="${x - 12}" y1="${y - 8}" x2="${x}" y2="${y + 10}" stroke="${c}" stroke-width="1.4" />
-              <line x1="${x + 12}" y1="${y - 8}" x2="${x}" y2="${y + 10}" stroke="${c}" stroke-width="1.4" />
-              <polygon points="${x},${y-18} ${x-4},${y-10} ${x+4},${y-10}" fill="${c}" />
-              <circle cx="${x}" cy="${y}" r="4" fill="${isAligned ? node.color : '#ffffff'}" stroke="${c}" stroke-width="1.5" />
-            `;
-          }
-          default: {
-            return `
-              <circle cx="${x}" cy="${y}" r="12" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
-              <circle cx="${x}" cy="${y}" r="4" fill="${isAligned ? '#00f0ff' : '#ffffff'}" stroke="${c}" stroke-width="1.5" />
-            `;
-          }
+          case 'lotus':
+            return `<circle cx="${x}" cy="${y}" r="13" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+                    <path d="M ${x} ${y-12} Q ${x-7} ${y-2} ${x} ${y+8} Q ${x+7} ${y-2} ${x} ${y-12} Z" fill="${c}" fill-opacity="0.3" stroke="${c}" stroke-width="1.2" />
+                    <circle cx="${x}" cy="${y}" r="3.5" fill="${isAligned ? node.color : '#ffffff'}" />`;
+          case 'dragon':
+            return `<circle cx="${x}" cy="${y}" r="13" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" stroke-dasharray="3 2" />
+                    <path d="M ${x-9} ${y+5} C ${x-5} ${y-10}, ${x+5} ${y+10}, ${x+9} ${y-5}" fill="none" stroke="${c}" stroke-width="1.8" />
+                    <circle cx="${x}" cy="${y}" r="3.5" fill="${isAligned ? node.color : '#ffffff'}" />`;
+          case 'flame':
+            return `<circle cx="${x}" cy="${y}" r="13" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+                    <path d="M ${x} ${y-14} Q ${x+8} ${y-3} ${x+5} ${y+8} Q ${x} ${y+12} ${x-5} ${y+8} Q ${x-8} ${y-3} ${x} ${y-14} Z" fill="${fill}" fill-opacity="0.4" stroke="${c}" stroke-width="1.4" />
+                    <circle cx="${x}" cy="${y+3}" r="3" fill="${isAligned ? node.color : '#ffffff'}" />`;
+          case 'turtle':
+            return `<rect x="${x-12}" y="${y-12}" width="24" height="24" rx="6" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+                    <polygon points="${x},${y-8} ${x+7},${y-4} ${x+7},${y+4} ${x},${y+8} ${x-7},${y+4} ${x-7},${y-4}" fill="none" stroke="${c}" stroke-width="1.2" stroke-dasharray="2 1" />
+                    <circle cx="${x}" cy="${y}" r="3" fill="${isAligned ? node.color : '#ffffff'}" />`;
+          case 'lightning':
+            return `<circle cx="${x}" cy="${y}" r="13" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+                    <polygon points="${x-2},${y-12} ${x+4},${y-3} ${x},${y-3} ${x+2},${y+12} ${x-4},${y+2} ${x},${y+2}" fill="${c}" />`;
+          case 'octagram':
+            return `<rect x="${x - 12}" y="${y - 12}" width="24" height="24" rx="2" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+                    <rect x="${x - 12}" y="${y - 12}" width="24" height="24" rx="2" fill="none" stroke="${c}" stroke-width="${strokeW}" transform="rotate(45 ${x} ${y})" />
+                    <circle cx="${x}" cy="${y}" r="4" fill="${isAligned ? node.color : '#ffffff'}" stroke="${c}" stroke-width="1.5" />`;
+          case 'fortress':
+            return `<rect x="${x - 13}" y="${y - 13}" width="26" height="26" rx="1" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+                    <rect x="${x - 8}" y="${y - 8}" width="16" height="16" fill="none" stroke="${c}" stroke-width="1.2" stroke-dasharray="2 2" />
+                    <circle cx="${x}" cy="${y}" r="3" fill="${isAligned ? node.color : '#ffffff'}" />`;
+          case 'triquetra':
+            return `<circle cx="${x}" cy="${y - 7}" r="9" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+                    <circle cx="${x - 6}" cy="${y + 4}" r="9" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+                    <circle cx="${x + 6}" cy="${y + 4}" r="9" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+                    <circle cx="${x}" cy="${y}" r="3.5" fill="${isAligned ? node.color : '#ffffff'}" stroke="${c}" stroke-width="1.4" />`;
+          case 'hexagram':
+            return `<polygon points="${x},${y-13} ${x+11},${y+7} ${x-11},${y+7}" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+                    <polygon points="${x},${y+13} ${x+11},${y-7} ${x-11},${y-7}" fill="none" stroke="${c}" stroke-width="${strokeW}" />
+                    <circle cx="${x}" cy="${y}" r="4" fill="${isAligned ? node.color : '#ffffff'}" stroke="${c}" stroke-width="1.4" />`;
+          case 'diamond':
+            return `<polygon points="${x},${y-15} ${x+13},${y} ${x},${y+15} ${x-13},${y}" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+                    <circle cx="${x}" cy="${y}" r="3.5" fill="${isAligned ? node.color : '#ffffff'}" />`;
+          case 'sunburst':
+            return `<circle cx="${x}" cy="${y}" r="13" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" stroke-dasharray="4 2" />
+                    <circle cx="${x}" cy="${y}" r="5" fill="${isAligned ? node.color : '#ffffff'}" stroke="${c}" stroke-width="1.5" />`;
+          case 'trident':
+            return `<circle cx="${x}" cy="${y}" r="13" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />
+                    <polygon points="${x},${y-15} ${x-5},${y-5} ${x+5},${y-5}" fill="${c}" />
+                    <circle cx="${x}" cy="${y}" r="4" fill="${isAligned ? node.color : '#ffffff'}" stroke="${c}" stroke-width="1.5" />`;
+          default:
+            return `<circle cx="${x}" cy="${y}" r="12" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${c}" stroke-width="${strokeW}" />`;
         }
       }
 
-      let nodesHtml = '';
+      // 先判定哪些星位当前有芯片重合
+      const alignedMap = {};
       if (shapeDef.nodes) {
         shapeDef.nodes.forEach(node => {
-          let isAligned = (hitSet && hitSet.has(node.id));
-
+          let isAligned = !!(hitSet && hitSet.has(node.id));
           if (!isAligned) {
-            const allRings = ['sub_c1', 'sub_c2', 'sub_b_outer', 'sub_b_inner', 'tian', 'di', 'ren', 'sub_d', 'polar'];
-            for (const rId of allRings) {
-              const rMeta = DISK_RINGS[rId];
-              if (!rMeta) continue;
+            for (const [rId, rMeta] of Object.entries(DISK_RINGS)) {
+              if (rMeta.tier > (counts[rMeta.discKey] || 1)) continue;
               for (let sIdx = 0; sIdx < rMeta.slotCount; sIdx++) {
                 const p = getSlotWorldPos(rId, sIdx);
-                const dist = Math.hypot(p.x - node.x, p.y - node.y);
-                if (dist <= 22) {
+                if (Math.hypot(p.x - node.x, p.y - node.y) <= 26) {
                   const sKey = `${rId}_${sIdx}`;
                   if (BOARD_SLOTS[sKey] && BOARD_SLOTS[sKey].chip) {
                     isAligned = true;
@@ -4006,41 +4131,59 @@ function renderPalette() {
               if (isAligned) break;
             }
           }
+          alignedMap[node.id] = isAligned;
+        });
+      }
 
+      // 1. 绘制跨三盘星脉连线 (如北斗七星斗柄➔斗身➔斗魁连线)
+      let linksHtml = '';
+      if (shapeDef.links && shapeDef.nodes) {
+        const nodeById = Object.fromEntries(shapeDef.nodes.map(n => [n.id, n]));
+        shapeDef.links.forEach(([idA, idB]) => {
+          const nA = nodeById[idA];
+          const nB = nodeById[idB];
+          if (!nA || !nB) return;
+          const bothLit = alignedMap[idA] && alignedMap[idB];
+          const strokeCol = bothLit ? '#f59e0b' : '#94a3b8';
+          const strokeW = bothLit ? '2.4' : '1.4';
+          const dash = bothLit ? '8 4' : '4 5';
+          const op = bothLit ? '0.85' : '0.45';
+          linksHtml += `<line x1="${nA.x}" y1="${nA.y}" x2="${nB.x}" y2="${nB.y}" stroke="${strokeCol}" stroke-width="${strokeW}" stroke-dasharray="${dash}" opacity="${op}" />`;
+        });
+      }
+
+      // 2. 绘制各盘上的星宿图腾与 "+120% 效果" 铭牌
+      let nodesHtml = '';
+      if (shapeDef.nodes) {
+        shapeDef.nodes.forEach(node => {
+          const isAligned = alignedMap[node.id];
           const nodeColor = node.color || (isAligned ? '#00f0ff' : '#0f172a');
           const badgeBg = isAligned ? '#0f172a' : (node.bg || '#ffffff');
           const borderCol = isAligned ? nodeColor : (node.border || '#cbd5e1');
-          const textCol = isAligned ? nodeColor : '#1e293b';
-          const auraClass = isAligned ? 'animate-pulse' : '';
+          const textCol = isAligned ? '#fbbf24' : '#1e293b';
 
           const badgeX = node.bx !== undefined ? node.bx : node.x + 15;
-          const badgeY = node.by !== undefined ? node.by : node.y - 15;
+          const badgeY = node.by !== undefined ? node.by : node.y - 16;
 
           nodesHtml += `
-            <g class="${auraClass}">
-              <!-- 阵宿专属图腾轮廓 -->
+            <g>
               ${renderStarGlyph(node, isAligned)}
-              
-              <!-- 醒目星宿身份铭牌 (包含罗马数码序号、真名、道门司命法则) -->
-              <rect x="${badgeX}" y="${badgeY}" width="${node.name.length * 9 + 36}" height="17" rx="3" 
-                    fill="${badgeBg}" stroke="${borderCol}" stroke-width="${isAligned ? '1.5' : '0.9'}" opacity="0.96" />
-              <text x="${badgeX + 4}" y="${badgeY + 12}" font-family="'Noto Sans SC', sans-serif" font-weight="900" font-size="8.5" fill="${textCol}">
+              <rect x="${badgeX}" y="${badgeY}" width="108" height="28" rx="4"
+                    fill="${badgeBg}" stroke="${borderCol}" stroke-width="${isAligned ? '1.6' : '1'}" opacity="0.95" />
+              <text x="${badgeX + 5}" y="${badgeY + 11}" font-family="'Noto Sans SC', sans-serif" font-weight="900" font-size="8.5" fill="${textCol}">
                 ${node.num ? node.num + ' ' : ''}${node.name}
               </text>
-              ${isAligned 
-                ? `<text x="${badgeX + 1}" y="${badgeY + 29}" font-family="'Share Tech Mono', monospace" font-size="7.5" fill="${nodeColor}" font-weight="bold">● ALIGNED (${node.desc || 'ACTIVE'})</text>`
-                : `<text x="${badgeX + 1}" y="${badgeY + 27}" font-family="'Share Tech Mono', monospace" font-size="6.5" fill="#64748b">${node.title || node.en}</text>`
-              }
+              <text x="${badgeX + 5}" y="${badgeY + 23}" font-family="'Share Tech Mono', monospace" font-size="7.5" fill="${isAligned ? '#38bdf8' : '#d97706'}" font-weight="bold">
+                ${isAligned ? '✦ 已激活 (+120%效果)' : '○ 放上芯片 +120%效果'}
+              </text>
             </g>
           `;
         });
       }
 
       svg.innerHTML = `
-        <!-- 底盘固定印记徽章群 (纯固定矩阵，无连线) -->
+        <g id="floorConstellationLinksGroup">${linksHtml}</g>
         <g id="floorActiveNodesGroup">${nodesHtml}</g>
-        <!-- 底板名称与加成倍率水印 -->
-        
       `;
     }
 
@@ -4059,7 +4202,9 @@ function renderPalette() {
       renderFloorBase(true);
       solveStepNetwork();
     }
-    
+    window.switchFloorShape = switchFloorShape;
+
+
     function updatePanels(chainNodes, totalBuff, constellationMultiplier, isCrossActive, logSteps, hitStarsSet = new Set(), activeKeystones = []) {
       const rightTag = document.getElementById('rightChainStatusTag');
       const countPill = document.getElementById('statActiveCountPill');
@@ -4170,58 +4315,65 @@ function renderPalette() {
       for (const dKey of ['support', 'industry', 'combat']) {
         CENTER_CORE_STATE[dKey].charged = false;
         CENTER_CORE_STATE[dKey].detached = false;
-        CENTER_CORE_STATE[dKey].placedAtSlot = null;
+        CENTER_CORE_STATE[dKey].placedAtDock = null;
       }
 
       if (type === 'multi_disc_overdrive') {
         switchFloorShape('dipper');
-        // 预设为练气期（1个大盘：攻击盘2环；2个等大小盘：工厂盘1环、辅助盘1环）
+        // 预设为练气期（1个大盘：攻击盘2环；2个等大小盘：工厂盘1环、辅助盘1环；每盘最外围均有独立外接圈）
         CURRENT_REALM = 'qi';
         SPEC_DISC = 'combat';
 
-        // 1. 辅助盘 1环 (6槽，R=72)：旋转 15.2° 使第2槽(索引1)精准对准 345.2° 始发源
+        // 1. 🛡️ 辅助盘 基础1环 (6槽，R=66)：旋转 15.2° 对准始发源，点亮北斗第7星(摇光)、第6星(开阳)并射入辅助盘中心！
         DISK_RINGS['support_1'].currentAngle = 15.2;
-        BOARD_SLOTS['support_1_1'].chip = 't0_speed_1';      // 1 ➔ 2
-        BOARD_SLOTS['support_1_2'].chip = 't0_atk_1';        // 2 ➔ 3
+        BOARD_SLOTS['support_1_1'].chip = 't0_speed_1';      // 踩中【Ⅶ 摇光】(+120%效果) ➔ 2
+        BOARD_SLOTS['support_1_2'].chip = 't0_atk_1';        // 踩中【Ⅵ 开阳】(+120%效果) ➔ 3
         BOARD_SLOTS['support_1_3'].chip = 'chip_triangle_in'; // 3 ➔ 射入辅助盘中心！
 
-        // 2. 工厂盘 1环 (6槽，R=72)：预装好后续芯片；辅助盘中心核连入第2槽(索引1)
-        BOARD_SLOTS['industry_1_1'].chip = 'core_support';   // 1 ➔ 2 (导入线入口!)
+        // 2. 将【辅助盘中心核】插入 ⚙️ 工厂盘【独立最外圈 · 北(上)外接槽 (dock_industry_0)】！
+        OUTER_DOCK_SLOTS['dock_industry_0'].coreChip = 'core_support';
         CENTER_CORE_STATE.support.detached = true;
-        CENTER_CORE_STATE.support.placedAtSlot = 'industry_1_1';
-        BOARD_SLOTS['industry_1_2'].chip = 't0_craft_1';     // 2 ➔ 3
+        CENTER_CORE_STATE.support.placedAtDock = 'dock_industry_0';
+
+        // 工厂盘 基础1环 (6槽，R=66)：从第1槽(索引0，正北-90°)接收入射，点亮北斗第5星(玉衡)、第4星(天权)并射入工厂盘中心！
+        BOARD_SLOTS['industry_1_0'].chip = 't0_craft_1';     // 踩中【Ⅴ 玉衡】(+120%效果) ➔ 1
+        BOARD_SLOTS['industry_1_1'].chip = 't0_mine_2';      // 踩中【Ⅳ 天权】(+120%效果) ➔ 3
         BOARD_SLOTS['industry_1_3'].chip = 'chip_triangle_in'; // 3 ➔ 射入工厂盘中心！
 
-        // 3. 攻击盘 2环(外圈, 8槽, R=115)：工厂盘中心核连入第3槽(索引2)
-        BOARD_SLOTS['combat_2_2'].chip = 'core_industry';    // 2 ➔ 3 (导入线入口!)
+        // 3. 将【工厂盘中心核】插入 ⚔️ 攻击盘【独立最外圈 · 东(右)外接槽 (dock_combat_1)】！
+        OUTER_DOCK_SLOTS['dock_combat_1'].coreChip = 'core_industry';
         CENTER_CORE_STATE.industry.detached = true;
-        CENTER_CORE_STATE.industry.placedAtSlot = 'combat_2_2';
-        BOARD_SLOTS['combat_2_3'].chip = 't1_atk_3';         // 3 + 3 = 6
-        BOARD_SLOTS['combat_2_6'].chip = 'chip_triangle_in'; // 6 ➔ 向心折射入攻击盘 1环！
+        CENTER_CORE_STATE.industry.placedAtDock = 'dock_combat_1';
 
-        // 4. 攻击盘 1环 (6槽, R=72)：接收入射并射入攻击盘中心！
+        // 攻击盘 基础2环 (8槽，R=106)：从第3槽(索引2，正东0°)接收入射，点亮北斗第3星(天玑)、第2星(天璇)并向内折射入基础1环！
+        BOARD_SLOTS['combat_2_2'].chip = 't0_burn_2';        // 踩中【Ⅲ 天玑】(+120%效果) ➔ 4
+        BOARD_SLOTS['combat_2_4'].chip = 't0_def_2';         // 踩中【Ⅱ 天璇】(+120%效果) ➔ 6
+        BOARD_SLOTS['combat_2_6'].chip = 'chip_triangle_in'; // 6 (180°) ➔ 向心折射入攻击盘基础1环！
+
+        // 4. 攻击盘 基础1环 (6槽，R=66)：旋转 30° 使第5槽(索引4)对准 180°，点亮北斗第1星(天枢)并射入攻击盘中心！
         DISK_RINGS['combat_1'].currentAngle = 30;
-        BOARD_SLOTS['combat_1_4'].chip = 't0_def_2';         // 4 + 2 = 0
+        BOARD_SLOTS['combat_1_4'].chip = 't0_belt_2';        // 踩中【Ⅰ 天枢】(+120%效果) ➔ 0
         BOARD_SLOTS['combat_1_0'].chip = 'chip_triangle_in'; // 0 ➔ 射入攻击盘中心！
       } else if (type === 'outer_chain') {
         switchFloorShape('dipper');
         CURRENT_REALM = 'qi';
         SPEC_DISC = 'combat';
 
-        // 演示“点一下取下中心节点 ➔ 拖拽到另外盘子外圈连上”的待连线工况：
-        // 辅助盘已射入中心！工厂盘与攻击盘内部芯片已就绪，等待玩家点一下辅助盘中心取下并拖到工厂盘外圈第2槽！
+        // 演示待连线工况：三盘内部芯片已就绪，辅助盘已射入中心，等待玩家点一下辅助盘中心取下极核并拖到工厂盘【独立最外圈·北外接槽】！
         DISK_RINGS['support_1'].currentAngle = 15.2;
         BOARD_SLOTS['support_1_1'].chip = 't0_speed_1';
         BOARD_SLOTS['support_1_2'].chip = 't0_atk_1';
         BOARD_SLOTS['support_1_3'].chip = 'chip_triangle_in';
 
-        BOARD_SLOTS['industry_1_2'].chip = 't0_craft_1';
+        BOARD_SLOTS['industry_1_0'].chip = 't0_craft_1';
+        BOARD_SLOTS['industry_1_1'].chip = 't0_mine_2';
         BOARD_SLOTS['industry_1_3'].chip = 'chip_triangle_in';
 
-        BOARD_SLOTS['combat_2_3'].chip = 't1_atk_3';
+        BOARD_SLOTS['combat_2_2'].chip = 't0_burn_2';
+        BOARD_SLOTS['combat_2_4'].chip = 't0_def_2';
         BOARD_SLOTS['combat_2_6'].chip = 'chip_triangle_in';
         DISK_RINGS['combat_1'].currentAngle = 30;
-        BOARD_SLOTS['combat_1_4'].chip = 't0_def_2';
+        BOARD_SLOTS['combat_1_4'].chip = 't0_belt_2';
         BOARD_SLOTS['combat_1_0'].chip = 'chip_triangle_in';
       }
 
