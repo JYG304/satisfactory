@@ -125,7 +125,7 @@
 
       if (spec.isCenterCore) {
         const slotPos = getSlotWorldPos(targetSlot.ringId, targetSlot.slotIndex);
-        let nearestDock = `dock_${targetSlot.discKey}_0`;
+        let nearestDock = null;
         let minD = 9999;
         for (const [dKey, dObj] of Object.entries(OUTER_DOCK_SLOTS)) {
           if (dObj.discKey !== targetSlot.discKey) continue;
@@ -136,7 +136,9 @@
             nearestDock = dKey;
           }
         }
-        placeCoreInOuterDock(nearestDock, typeId);
+        if (nearestDock) {
+          placeCoreInOuterDock(nearestDock, typeId);
+        }
         return;
       }
 
@@ -217,7 +219,8 @@
         const dist = Math.hypot(mouseX - dMeta.cx, mouseY - dMeta.cy);
         const maxTier = counts[dKey];
         const dockR = getOuterDockRadius(dKey);
-        if (dist <= dockR + 28 && dist >= 20) {
+        const maxCheckR = (dKey === 'support') ? (dMeta.rings[maxTier - 1].radius + 28) : (dockR + 28);
+        if (dist <= maxCheckR && dist >= 20) {
           let bestRingId = null;
           let minDiff = 9999;
           // 1. 检查内部基础环
@@ -229,11 +232,13 @@
               bestRingId = rDef.id;
             }
           }
-          // 2. 检查可旋转独立最外圈 (`${dKey}_dock`)
-          const dockDiff = Math.abs(dist - dockR);
-          if (dockDiff < minDiff) {
-            minDiff = dockDiff;
-            bestRingId = `${dKey}_dock`;
+          // 2. 检查可旋转独立最外圈 (`${dKey}_dock`)，仅非 support 盘拥有独立外圈
+          if (dKey !== 'support' && DISK_RINGS[`${dKey}_dock`]) {
+            const dockDiff = Math.abs(dist - dockR);
+            if (dockDiff < minDiff) {
+              minDiff = dockDiff;
+              bestRingId = `${dKey}_dock`;
+            }
           }
           if (bestRingId) return bestRingId;
         }

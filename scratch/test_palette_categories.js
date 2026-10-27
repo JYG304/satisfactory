@@ -29,6 +29,7 @@ global.document = {
     if (!elements[id]) elements[id] = createMockEl(id);
     return elements[id];
   },
+  createElement: (tag) => createMockEl('el_' + tag),
   createElementNS: () => createMockEl('svg-element'),
   querySelector: () => null,
   querySelectorAll: () => [],
@@ -37,13 +38,18 @@ global.document = {
 
 global.window = {
   document: global.document,
-  addEventListener: () => {},
+  addEventListener: (event, cb) => {
+    if (event === 'DOMContentLoaded') global.__onDOMContentLoaded = cb;
+  },
   innerWidth: 1920,
-  innerHeight: 1080
+  innerHeight: 1080,
+  devicePixelRatio: 1,
+  screen: { width: 1920, height: 1080 }
 };
 
 // Execute scriptCode
 eval(scriptCode);
+if (global.__onDOMContentLoaded) global.__onDOMContentLoaded();
 
 console.log('--- Verifying Tabs in HTML Markup ---');
 ['tab_all', 'tab_combat', 'tab_support', 'tab_industry', 'tab_shift'].forEach(id => {
@@ -59,6 +65,23 @@ console.log('--- Verifying Tabs in HTML Markup ---');
   }
   console.log(`Obsolete tab ${id} absent: OK`);
 });
+
+console.log('--- Verifying Outer Dock Slots and Rings ---');
+const dockKeys = Object.keys(window.OUTER_DOCK_SLOTS);
+console.log('Active dock slots:', dockKeys);
+if (dockKeys.includes('dock_support_0')) {
+  throw new Error('dock_support_0 should be removed! Blue disc already has right emitter input source.');
+}
+if (!dockKeys.includes('dock_industry_0') || !dockKeys.includes('dock_combat_0')) {
+  throw new Error('Expected dock_industry_0 and dock_combat_0 to be present');
+}
+
+const dockRingKeys = Object.keys(window.DISK_RINGS).filter(k => k.includes('dock'));
+console.log('Active dock rings:', dockRingKeys);
+if (dockRingKeys.includes('support_dock')) {
+  throw new Error('support_dock should not exist on blue disc!');
+}
+console.log('Blue disc input port and outer dock ring successfully removed: OK!');
 
 console.log('--- Verifying Chip Categorization ---');
 clearBoard();

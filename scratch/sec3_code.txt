@@ -186,24 +186,28 @@
           degId: 'deg_' + r.id
         };
       });
-      // ★ 每个盘最外层的【可旋转独立外圈】也注册进 DISK_RINGS，与基础环一样支持拖拽旋转和滚轮旋转！
-      const dockRingId = `${dKey}_dock`;
-      DISK_RINGS[dockRingId] = {
-        id: dockRingId,
-        discKey: dKey,
-        tier: 99,
-        isDockRing: true,
-        name: `${dMeta.name}·独立外圈`,
-        cx: dMeta.cx,
-        cy: dMeta.cy,
-        radius: 102,
-        slotCount: 12,
-        currentAngle: 0,
-        slotOffset: 0,
-        elId: 'ringEl_' + dockRingId,
-        degId: 'deg_' + dockRingId
-      };
+      // ★ 仅工厂盘与攻击盘最外层设立【可旋转独立外圈】（用于接收前一盘中心核的导入线）；
+      // 🛡️ 辅助盘(蓝色盘子)已有右侧高能激光源作为输入源，不需要外部输入槽与独立外圈！
+      if (dKey !== 'support') {
+        const dockRingId = `${dKey}_dock`;
+        DISK_RINGS[dockRingId] = {
+          id: dockRingId,
+          discKey: dKey,
+          tier: 99,
+          isDockRing: true,
+          name: `${dMeta.name}·独立外圈`,
+          cx: dMeta.cx,
+          cy: dMeta.cy,
+          radius: 102,
+          slotCount: 12,
+          currentAngle: 0,
+          slotOffset: 0,
+          elId: 'ringEl_' + dockRingId,
+          degId: 'deg_' + dockRingId
+        };
+      }
     }
+    window.DISK_RINGS = DISK_RINGS;
 
     // ★ 独立最外圈上的射入槽：每个盘的独立外圈只设【1个】外圈射入槽（跟随独立外圈 360° 自由旋转！）
     const DOCK_BASE_SLOTS = [
@@ -214,7 +218,8 @@
     function initOuterDockSlots() {
       const prev = Object.assign({}, OUTER_DOCK_SLOTS);
       OUTER_DOCK_SLOTS = {};
-      for (const dKey of ['support', 'industry', 'combat']) {
+      // 🛡️ 辅助盘(蓝色盘子)已有右侧原生高能输入源，不需要外部输入槽；仅 ⚙️ 工厂盘 与 ⚔️ 攻击盘 设立可旋转独立外圈输入槽
+      for (const dKey of ['industry', 'combat']) {
         DOCK_BASE_SLOTS.forEach(bs => {
           const dockKey = `dock_${dKey}_${bs.idx}`;
           OUTER_DOCK_SLOTS[dockKey] = {
@@ -228,6 +233,7 @@
           };
         });
       }
+      window.OUTER_DOCK_SLOTS = OUTER_DOCK_SLOTS;
     }
 
     // 计算独立外圈插槽旋转后的实时世界坐标与当前角度
@@ -406,14 +412,18 @@
         const badgeEl = document.getElementById('badge_disc_' + dKey);
         if (badgeEl) {
           const isSpec = (SPEC_DISC === dKey);
-          badgeEl.textContent = `基础${maxTier}环+独立外圈 · ${isSpec ? '大盘' : '小盘'}`;
+          if (dKey === 'support') {
+            badgeEl.textContent = `基础${maxTier}环 (光路始发源) · ${isSpec ? '大盘' : '小盘'}`;
+          } else {
+            badgeEl.textContent = `基础${maxTier}环+独立外圈 · ${isSpec ? '大盘' : '小盘'}`;
+          }
           badgeEl.className = isSpec
             ? 'text-[9.5px] font-mono-sci font-bold px-1.5 rounded bg-slate-900 text-amber-300'
             : 'text-[9.5px] font-mono-sci font-bold px-1.5 rounded bg-slate-100 text-slate-600';
         }
 
-        // 1. ★ 渲染最外层【可旋转独立外圈】DOM 轨道（支持直接拖拽/滚轮旋转）
-        if (dockRingObj) {
+        // 1. ★ 渲染最外层【可旋转独立外圈】DOM 轨道（仅工厂盘与攻击盘，辅助盘作为初始源盘无外圈输入槽）
+        if (dockRingObj && dKey !== 'support') {
           const dSize = dockR * 2;
           const dLeft = dMeta.cx - dockR;
           const dTop = dMeta.cy - dockR;
