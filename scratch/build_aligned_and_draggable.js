@@ -248,22 +248,134 @@ const coreSpecsToInsert = `    const CHIP_SPECS = {
 `;
 baseHtml = baseHtml.replace(chipSpecsStart, coreSpecsToInsert);
 
-// Hide internal center-core items and already-equipped unique chips from left palette list (插完了就直接从芯片栏消失！)
-baseHtml = baseHtml.replace(
-  `const keys = Object.keys(CHIP_SPECS).filter(k => !k.startsWith('chip_atk_') && !k.startsWith('chip_def_') && !k.startsWith('chip_belt_') && !k.startsWith('chip_herb_'));`,
-  `const keys = Object.keys(CHIP_SPECS).filter(k => !CHIP_SPECS[k].isCenterCore && !(typeof getChipEquippedSlotLabel === 'function' && getChipEquippedSlotLabel(k)) && !k.startsWith('chip_atk_') && !k.startsWith('chip_def_') && !k.startsWith('chip_belt_') && !k.startsWith('chip_herb_'));`
-);
+// 6. Simplify chip palette to 4 clear categories: 变轨 (1个), 攻击, 辅助, 工厂 (plus 全部)
+const oldTabBlock = `      <!-- 构件分类筛选 Tab (全部 / 战伐 / 浮游飞剑 / 工业 / 身法 / 变轨) -->
+      <div class="px-3 py-1.5 border-b border-slate-200 flex items-center space-x-1 text-[10.5px] font-mono-sci bg-slate-50/60 overflow-x-auto ficsit-scrollbar">
+        <button onclick="filterPalette('all')" id="tab_all" class="px-2 py-0.5 rounded bg-slate-900 text-white font-bold shrink-0">全部</button>
+        <button onclick="filterPalette('funnel')" id="tab_funnel" class="px-2 py-0.5 rounded bg-white text-amber-700 border border-amber-300 hover:border-amber-700 shrink-0 font-bold">🗡️ 浮游飞剑</button>
+        <button onclick="filterPalette('combat')" id="tab_combat" class="px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-200 hover:border-slate-800 shrink-0">⚔️ 战伐</button>
+        <button onclick="filterPalette('industry')" id="tab_industry" class="px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-200 hover:border-slate-800 shrink-0">🏭 工业</button>
+        <button onclick="filterPalette('mobility')" id="tab_mobility" class="px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-200 hover:border-slate-800 shrink-0">👟 身法</button>
+        <button onclick="filterPalette('shift')" id="tab_shift" class="px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-200 hover:border-slate-800 shrink-0">🔺 变轨</button>
+        <button onclick="filterPalette('keystone')" id="tab_keystone" class="px-2.5 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-400 hover:bg-amber-100 shrink-0 font-bold shadow-xs">💎 核心插件</button>
+      </div>`;
+
+const newTabBlock = `      <!-- 构件分类筛选 Tab (全部 / 攻击 / 辅助 / 工厂 / 变轨) -->
+      <div class="px-3 py-1.5 border-b border-slate-200 flex items-center space-x-1 text-[10.5px] font-mono-sci bg-slate-50/60 overflow-x-auto ficsit-scrollbar">
+        <button onclick="filterPalette('all')" id="tab_all" class="px-2 py-0.5 rounded bg-slate-900 text-white font-bold shrink-0 shadow-xs">全部</button>
+        <button onclick="filterPalette('combat')" id="tab_combat" class="px-2 py-0.5 rounded bg-white text-rose-700 border border-rose-200 hover:border-rose-600 shrink-0 font-bold">⚔️ 攻击</button>
+        <button onclick="filterPalette('support')" id="tab_support" class="px-2 py-0.5 rounded bg-white text-amber-700 border border-amber-200 hover:border-amber-600 shrink-0 font-bold">🛡️ 辅助</button>
+        <button onclick="filterPalette('industry')" id="tab_industry" class="px-2 py-0.5 rounded bg-white text-sky-700 border border-sky-200 hover:border-sky-600 shrink-0 font-bold">⚙️ 工厂</button>
+        <button onclick="filterPalette('shift')" id="tab_shift" class="px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200 hover:border-slate-800 shrink-0 font-bold">🔺 变轨</button>
+      </div>`;
+
+baseHtml = baseHtml.replace(oldTabBlock, newTabBlock);
+
+const oldFilterPalette = `    let CURRENT_PALETTE_FILTER = 'all';
+
+    function filterPalette(filterKey) {
+      CURRENT_PALETTE_FILTER = filterKey;
+      ['all', 's1', 's2', 's3', 's5', 's8', 'shift', 'keystone', 'funnel', 'combat', 'industry', 'mobility'].forEach(key => {
+        const tab = document.getElementById(\`tab_\${key}\`);
+        if (!tab) return;
+        if (key === filterKey) {
+          tab.className = 'px-1.5 py-0.5 rounded bg-slate-900 text-white font-bold shrink-0 shadow-xs';
+        } else {
+          tab.className = 'px-1.5 py-0.5 rounded bg-white text-slate-700 border border-slate-200 hover:border-slate-800 shrink-0';
+        }
+      });
+      renderPalette();
+    }`;
+
+const newFilterPalette = `    function getChipTypeCategory(spec) {
+      if (!spec) return 'other';
+      if (spec.type === 'shift_in' || spec.id === 'chip_triangle_in') return 'shift';
+      const b = spec.buff || {};
+      if (b.atk || b.atspd || b.crit || b.sword_funnel || spec.category === 'funnel') return 'combat';
+      if (spec.category === 'mobility' || b.def || b.hp || b.speed || b.stamina || b.flight_battery || b.inventory) return 'support';
+      if (spec.category === 'industry' || b.craft_speed || b.mining_speed || b.burn_speed || b.belt_speed || b.power_cut || b.pollute_cut) return 'industry';
+      return 'combat';
+    }
+    window.getChipTypeCategory = getChipTypeCategory;
+
+    let CURRENT_PALETTE_FILTER = 'all';
+
+    function filterPalette(filterKey) {
+      CURRENT_PALETTE_FILTER = filterKey;
+      const tabStyles = {
+        all: { active: 'bg-slate-900 text-white shadow-xs', inactive: 'bg-white text-slate-700 border border-slate-200 hover:border-slate-800' },
+        combat: { active: 'bg-rose-600 text-white shadow-xs', inactive: 'bg-white text-rose-700 border border-rose-200 hover:border-rose-600' },
+        support: { active: 'bg-amber-600 text-white shadow-xs', inactive: 'bg-white text-amber-700 border border-amber-200 hover:border-amber-600' },
+        industry: { active: 'bg-sky-600 text-white shadow-xs', inactive: 'bg-white text-sky-700 border border-sky-200 hover:border-sky-600' },
+        shift: { active: 'bg-slate-800 text-white shadow-xs', inactive: 'bg-white text-slate-700 border border-slate-200 hover:border-slate-800' }
+      };
+      Object.keys(tabStyles).forEach(key => {
+        const tab = document.getElementById(\`tab_\${key}\`);
+        if (!tab) return;
+        const isAct = (key === filterKey);
+        tab.className = \`px-2 py-0.5 rounded font-bold shrink-0 transition-colors \${isAct ? tabStyles[key].active : tabStyles[key].inactive}\`;
+      });
+      renderPalette();
+    }`;
+
+baseHtml = baseHtml.replace(oldFilterPalette, newFilterPalette);
+
+const oldRenderPaletteKeys = `      const keys = Object.keys(CHIP_SPECS).filter(k => !k.startsWith('chip_atk_') && !k.startsWith('chip_def_') && !k.startsWith('chip_belt_') && !k.startsWith('chip_herb_'));
+
+      let filteredKeys = keys;
+      if (CURRENT_PALETTE_FILTER === 's1') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].step === 1 && CHIP_SPECS[k].type === 'step');
+      } else if (CURRENT_PALETTE_FILTER === 's2') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].step === 2 && CHIP_SPECS[k].type === 'step');
+      } else if (CURRENT_PALETTE_FILTER === 's3') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].step === 3 && CHIP_SPECS[k].type === 'step');
+      } else if (CURRENT_PALETTE_FILTER === 's5') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].step === 5 && CHIP_SPECS[k].type === 'step');
+      } else if (CURRENT_PALETTE_FILTER === 's8') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].step === 8 && CHIP_SPECS[k].type === 'step');
+      } else if (CURRENT_PALETTE_FILTER === 'shift') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].type === 'shift_in');
+      } else if (CURRENT_PALETTE_FILTER === 'funnel') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].category === 'funnel');
+      } else if (CURRENT_PALETTE_FILTER === 'combat') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].category === 'combat');
+      } else if (CURRENT_PALETTE_FILTER === 'industry') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].category === 'industry');
+      } else if (CURRENT_PALETTE_FILTER === 'mobility') {
+        filteredKeys = keys.filter(k => CHIP_SPECS[k].category === 'mobility');
+      }`;
+
+const newRenderPaletteKeys = `      const keys = Object.keys(CHIP_SPECS).filter(k => 
+        !CHIP_SPECS[k].isCenterCore && 
+        !(typeof getChipEquippedSlotLabel === 'function' && getChipEquippedSlotLabel(k)) && 
+        !k.startsWith('chip_atk_') && 
+        !k.startsWith('chip_def_') && 
+        !k.startsWith('chip_belt_') && 
+        !k.startsWith('chip_herb_')
+      );
+
+      let filteredKeys = keys;
+      if (CURRENT_PALETTE_FILTER !== 'all') {
+        filteredKeys = keys.filter(k => getChipTypeCategory(CHIP_SPECS[k]) === CURRENT_PALETTE_FILTER);
+      }
+
+      if (filteredKeys.length === 0) {
+        container.innerHTML = \`
+          <div class="py-8 text-center text-slate-400 font-mono-sci text-xs">
+            <i class="fa-solid fa-box-open text-2xl mb-2 text-slate-300"></i>
+            <div>该分类构件已全部装配至盘面</div>
+            <div class="text-[10px] text-slate-400 mt-1">从盘面取下构件即可在此自动归位</div>
+          </div>
+        \`;
+        return;
+      }`;
+
+baseHtml = baseHtml.replace(oldRenderPaletteKeys, newRenderPaletteKeys);
 
 // Apply center icon color styling in left palette
 baseHtml = baseHtml.replace(
   `<i class="fa-solid \${spec.icon} text-sm"></i>`,
   `<i class="fa-solid \${spec.icon} text-sm" style="\${typeof getChipCenterIconStyle === 'function' ? getChipCenterIconStyle(spec) : ''}"></i>`
-);
-
-// Remove "💎 核心插件" tab since it is no longer used
-baseHtml = baseHtml.replace(
-  `<button onclick="filterPalette('keystone')" id="tab_keystone" class="px-2.5 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-400 hover:bg-amber-100 shrink-0 font-bold shadow-xs">💎 核心插件</button>`,
-  ``
 );
 
 // Elevate floorCrossContainer to z-index: 15 (above ring lines z-index: 2, below chips z-index: 20) so the 58px golden star pedestals sit cleanly on the rings and protrude around the 32px chips

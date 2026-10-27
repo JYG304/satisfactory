@@ -61,7 +61,7 @@
 
     // 查询某个唯一芯片当前已装配在哪个槽位（每个属性芯片只能用一次！）
     function getChipEquippedSlotLabel(typeId) {
-      if (!typeId || typeId === 'chip_triangle_in') return null;
+      if (!typeId) return null;
       if (typeof BOARD_SLOTS !== 'object' || !BOARD_SLOTS) return null;
       for (const [sKey, sData] of Object.entries(BOARD_SLOTS)) {
         if (sData && sData.chip === typeId) {
