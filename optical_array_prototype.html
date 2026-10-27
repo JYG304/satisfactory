@@ -2264,11 +2264,9 @@
       };
     }
 
-    // ★ 独立最外圈上的外接插槽：跟随该盘的独立外圈 (`${dKey}_dock`) 一起旋转！
-    // 每个盘的独立外圈设 2 个对称外接插槽 (0号位在正北 -90°，1号位在正南 90°，由于外圈可任意旋转，可转到360°任意方位！)
+    // ★ 独立最外圈上的射入槽：每个盘的独立外圈只设【1个】外圈射入槽（跟随独立外圈 360° 自由旋转！）
     const DOCK_BASE_SLOTS = [
-      { idx: 0, baseDeg: -90, label: '外圈槽A' },
-      { idx: 1, baseDeg: 90,  label: '外圈槽B' }
+      { idx: 0, baseDeg: -90, label: '外圈射入槽' }
     ];
 
     let OUTER_DOCK_SLOTS = {};
@@ -4094,24 +4092,7 @@ function renderPalette() {
         });
       }
 
-      // 1. 绘制跨三盘星脉连线 (如北斗七星斗柄➔斗身➔斗魁连线)
-      let linksHtml = '';
-      if (shapeDef.links && shapeDef.nodes) {
-        const nodeById = Object.fromEntries(shapeDef.nodes.map(n => [n.id, n]));
-        shapeDef.links.forEach(([idA, idB]) => {
-          const nA = nodeById[idA];
-          const nB = nodeById[idB];
-          if (!nA || !nB) return;
-          const bothLit = alignedMap[idA] && alignedMap[idB];
-          const strokeCol = bothLit ? '#f59e0b' : '#94a3b8';
-          const strokeW = bothLit ? '2.4' : '1.4';
-          const dash = bothLit ? '8 4' : '4 5';
-          const op = bothLit ? '0.85' : '0.45';
-          linksHtml += `<line x1="${nA.x}" y1="${nA.y}" x2="${nB.x}" y2="${nB.y}" stroke="${strokeCol}" stroke-width="${strokeW}" stroke-dasharray="${dash}" opacity="${op}" />`;
-        });
-      }
-
-      // 2. 绘制各盘上的星宿图腾与 "+120% 效果" 铭牌
+      // 绘制各盘上的星宿图腾与 "+120% 效果" 铭牌 (纯固定星位印记，不画多余黄线)
       let nodesHtml = '';
       if (shapeDef.nodes) {
         shapeDef.nodes.forEach(node => {
@@ -4141,7 +4122,6 @@ function renderPalette() {
       }
 
       svg.innerHTML = `
-        <g id="floorConstellationLinksGroup">${linksHtml}</g>
         <g id="floorActiveNodesGroup">${nodesHtml}</g>
       `;
     }
