@@ -378,6 +378,17 @@ baseHtml = baseHtml.replace(
   `<i class="fa-solid \${spec.icon} text-sm" style="\${typeof getChipCenterIconStyle === 'function' ? getChipCenterIconStyle(spec) : ''}"></i>`
 );
 
+// Clarify that the shift mirror is a reusable routing tool that can be placed multiple times
+baseHtml = baseHtml.replace(
+  `const stepBadge = spec.type === 'step' ? \`+\${spec.step}格\` : '变轨规';`,
+  `const stepBadge = spec.type === 'step' ? \`+\${spec.step}格\` : '变轨规 · 无限放置';`
+);
+
+baseHtml = baseHtml.replace(
+  `"stepDesc": "折射光流至相邻内圈",`,
+  `"stepDesc": "折射光流至相邻内圈 (可无限次多次放置)",`
+);
+
 // Elevate floorCrossContainer to z-index: 15 (above ring lines z-index: 2, below chips z-index: 20) so the 58px golden star pedestals sit cleanly on the rings and protrude around the 32px chips
 baseHtml = baseHtml.replace(
   `<div id="floorCrossContainer" class="absolute inset-0 pointer-events-none transition-all duration-300" style="z-index: 1;">`,

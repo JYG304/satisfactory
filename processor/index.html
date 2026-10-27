@@ -1747,7 +1747,7 @@
     "matClass": "token-shift border-sky-400",
     "buff": {},
     "buffDesc": "导向内环 / 跨盘外挂",
-    "stepDesc": "折射光流至相邻内圈",
+    "stepDesc": "折射光流至相邻内圈 (可无限次多次放置)",
     "icon": "fa-play",
     "textColor": "text-slate-900",
     "badgeColor": "bg-sky-100 text-sky-900 border-sky-400"
@@ -2178,9 +2178,9 @@
     }
     window.setActiveInteractRing = setActiveInteractRing;
 
-    // 查询某个唯一芯片当前已装配在哪个槽位（每个属性芯片只能用一次！）
+    // 查询某个唯一芯片当前已装配在哪个槽位（属性芯片只能用一次；变轨节点可无限次多次放置！）
     function getChipEquippedSlotLabel(typeId) {
-      if (!typeId) return null;
+      if (!typeId || typeId === 'chip_triangle_in') return null;
       if (typeof BOARD_SLOTS !== 'object' || !BOARD_SLOTS) return null;
       for (const [sKey, sData] of Object.entries(BOARD_SLOTS)) {
         if (sData && sData.chip === typeId) {
@@ -3202,7 +3202,7 @@ function renderPalette() {
       let html = '';
       filteredKeys.forEach(typeId => {
         const spec = CHIP_SPECS[typeId];
-        const stepBadge = spec.type === 'step' ? `+${spec.step}格` : '变轨规';
+        const stepBadge = spec.type === 'step' ? `+${spec.step}格` : '变轨规 · 无限放置';
         const isSelected = (ACTIVE_SELECTED_CHIP === typeId);
         html += `
           <div class="p-2.5 rounded-lg transition cursor-pointer flex items-center space-x-3 group shadow-xs hover:shadow-sm ${

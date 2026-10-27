@@ -98,7 +98,7 @@ cardCount = (containerHtml.match(/ondragstart="onPaletteDragStart/g) || []).leng
 console.log('All chips count (clear board):', cardCount);
 if (cardCount !== 46) throw new Error('Expected 46 total chips, got ' + cardCount);
 
-// Test scenario loading which equips chips
+// Test scenario loading which equips chips (including multiple chip_triangle_in)
 console.log('--- Testing Scenario Equip and Palette Auto-Update ---');
 window.loadScenario('act1_qi_pioneer');
 
@@ -107,7 +107,16 @@ containerHtml = document.getElementById('paletteListContainer').innerHTML;
 const equippedAllCount = (containerHtml.match(/ondragstart="onPaletteDragStart/g) || []).length;
 console.log('Available unequipped chips in act1_qi_pioneer:', equippedAllCount);
 if (equippedAllCount >= 46) {
-  throw new Error('Equipped chips should disappear from palette! Expected < 46, got ' + equippedAllCount);
+  throw new Error('Equipped unique chips should disappear from palette! Expected < 46, got ' + equippedAllCount);
+}
+
+// Crucial: chip_triangle_in MUST remain available in palette even when placed multiple times across the board!
+filterPalette('shift');
+containerHtml = document.getElementById('paletteListContainer').innerHTML;
+const shiftInScenarioCount = (containerHtml.match(/ondragstart="onPaletteDragStart/g) || []).length;
+console.log('Shift chip available in palette during scenario (placed 4 times in act1_qi_pioneer):', shiftInScenarioCount);
+if (shiftInScenarioCount !== 1) {
+  throw new Error('Shift mirror MUST remain available in palette for continuous placement! Got ' + shiftInScenarioCount);
 }
 
 // Clear board restores all chips
