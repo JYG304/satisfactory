@@ -3141,7 +3141,7 @@ function renderPalette() {
         return;
       }
 
-      const keys = Object.keys(CHIP_SPECS).filter(k => !CHIP_SPECS[k].isCenterCore && !k.startsWith('chip_atk_') && !k.startsWith('chip_def_') && !k.startsWith('chip_belt_') && !k.startsWith('chip_herb_'));
+      const keys = Object.keys(CHIP_SPECS).filter(k => !CHIP_SPECS[k].isCenterCore && !(typeof getChipEquippedSlotLabel === 'function' && getChipEquippedSlotLabel(k)) && !k.startsWith('chip_atk_') && !k.startsWith('chip_def_') && !k.startsWith('chip_belt_') && !k.startsWith('chip_herb_'));
 
       let filteredKeys = keys;
       if (CURRENT_PALETTE_FILTER === 's1') {
@@ -3169,8 +3169,7 @@ function renderPalette() {
       let html = '';
       filteredKeys.forEach(typeId => {
         const spec = CHIP_SPECS[typeId];
-        const usedSlot = typeof getChipEquippedSlotLabel === 'function' ? getChipEquippedSlotLabel(typeId) : null;
-        const stepBadge = usedSlot ? `● 已插[${usedSlot}]` : (spec.type === 'step' ? `+${spec.step}格 · 限1枚` : '变轨规(通用)');
+        const stepBadge = spec.type === 'step' ? `+${spec.step}格` : '变轨规';
         const isSelected = (ACTIVE_SELECTED_CHIP === typeId);
         html += `
           <div class="p-2.5 rounded-lg transition cursor-pointer flex items-center space-x-3 group shadow-xs hover:shadow-sm ${
@@ -3319,7 +3318,10 @@ function renderPalette() {
           slotEl.style.height = "32px";
           slotEl.setAttribute("data-has-chip", "true");
           slotEl.innerHTML = `
-            <div class="relative w-full h-full flex items-center justify-center cursor-pointer group" title="${spec.name} (${spec.tag})\n${spec.buffDesc}\n${spec.stepDesc}\n【点击或右键取回】">
+            <div class="relative w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing group"
+                 draggable="true"
+                 ondragstart="if(window.audio)audio.init(); event.dataTransfer.setData('text/plain', '${slotData.chip}');"
+                 title="${spec.name} (${spec.tag})\n${spec.buffDesc}\n${spec.stepDesc}\n【按住拖拽】换槽\n【点击或右键】取回芯片栏">
               <div class="absolute -inset-1 rounded-full border-2 ${discMeta.nodeBorder} pointer-events-none"></div>
               <div class="w-7 h-7 ${spec.shape} ${spec.matClass} flex items-center justify-center relative z-10 transition-transform group-hover:scale-110 shadow-md">
                 <i class="fa-solid ${spec.icon} text-xs pointer-events-none" style="${getChipCenterIconStyle(spec)}"></i>
@@ -3379,12 +3381,16 @@ function renderPalette() {
         return;
       }
 
-      // ★ 一个属性芯片只能用一次！如果该芯片已插在其他槽位，自动从原槽位拔下并移至当前新槽位
+      // ★ 一个属性芯片只能用一次！如果该芯片已插在其他槽位，自动从原槽位拔下并移至当前新槽位；插完后从左侧芯片栏直接消失！
       if (spec.type !== 'shift_in') {
         for (const [otherKey, otherSlot] of Object.entries(BOARD_SLOTS)) {
           if (otherKey !== slotKey && otherSlot.chip === typeId) {
             otherSlot.chip = null;
           }
+        }
+        if (ACTIVE_SELECTED_CHIP === typeId) {
+          ACTIVE_SELECTED_CHIP = null;
+          updateSelectedChipIndicator();
         }
       }
 
