@@ -2150,6 +2150,28 @@
 
     let CURRENT_REALM = 'qi';      // 'qi' | 'foundation' | 'core'
     let SPEC_DISC = 'combat';      // 'combat' | 'industry' | 'support' (单选大盘)
+    let ACTIVE_INTERACT_DISC = null; // ★ 玩家当前正在操作/转动的盘子：只有动哪个盘子，才显示哪个盘子上的空槽位！
+
+    function setActiveInteractDisc(discKey) {
+      if (ACTIVE_INTERACT_DISC === discKey) return;
+      ACTIVE_INTERACT_DISC = discKey;
+      if (typeof renderBoardSlots === 'function') renderBoardSlots();
+    }
+    window.setActiveInteractDisc = setActiveInteractDisc;
+
+    // 查询某个唯一芯片当前已装配在哪个槽位（每个属性芯片只能用一次！）
+    function getChipEquippedSlotLabel(typeId) {
+      if (!typeId || typeId === 'chip_triangle_in') return null;
+      if (typeof BOARD_SLOTS !== 'object' || !BOARD_SLOTS) return null;
+      for (const [sKey, sData] of Object.entries(BOARD_SLOTS)) {
+        if (sData && sData.chip === typeId) {
+          const dMeta = DISC_CONFIG[sData.discKey];
+          return dMeta ? `${dMeta.shortTag}${sData.tier}·${sData.slotIndex + 1}` : sKey;
+        }
+      }
+      return null;
+    }
+    window.getChipEquippedSlotLabel = getChipEquippedSlotLabel;
 
     // 中心核状态：记录各盘中心是否已被射入充能(charged)、是否已被点一下取下(detached)、安放在哪个【独立最外圈插槽】(placedAtDock)
     const CENTER_CORE_STATE = {
@@ -3151,7 +3173,8 @@ function renderPalette() {
       let html = '';
       filteredKeys.forEach(typeId => {
         const spec = CHIP_SPECS[typeId];
-        const stepBadge = spec.type === 'step' ? `+${spec.step}格` : '变轨规';
+        const usedSlot = typeof getChipEquippedSlotLabel === 'function' ? getChipEquippedSlotLabel(typeId) : null;
+        const stepBadge = usedSlot ? `● 已插[${usedSlot}]` : (spec.type === 'step' ? `+${spec.step}格 · 限1枚` : '变轨规(通用)');
         const isSelected = (ACTIVE_SELECTED_CHIP === typeId);
         html += `
           <div class="p-2.5 rounded-lg transition cursor-pointer flex items-center space-x-3 group shadow-xs hover:shadow-sm ${
@@ -3313,6 +3336,13 @@ function renderPalette() {
           `;
         } else {
           slotEl.setAttribute("data-has-chip", "false");
+          // ★ 只有玩家当前动哪个盘子（或拖拽芯片悬停到哪个盘子），才显示哪个盘子上的空槽位！
+          if (ACTIVE_INTERACT_DISC !== slotData.discKey) {
+            slotEl.style.display = "none";
+            slotEl.style.opacity = "0";
+            slotEl.style.pointerEvents = "none";
+            continue;
+          }
           slotEl.style.display = "block";
           slotEl.style.opacity = "1";
           slotEl.style.pointerEvents = "auto";
@@ -3353,16 +3383,29 @@ function renderPalette() {
         return;
       }
 
+      // ★ 一个属性芯片只能用一次！如果该芯片已插在其他槽位，自动从原槽位拔下并移至当前新槽位
+      if (spec.type !== 'shift_in') {
+        for (const [otherKey, otherSlot] of Object.entries(BOARD_SLOTS)) {
+          if (otherKey !== slotKey && otherSlot.chip === typeId) {
+            otherSlot.chip = null;
+          }
+        }
+      }
+
+      ACTIVE_INTERACT_DISC = targetSlot.discKey;
       targetSlot.chip = typeId;
       if (audio) audio.playPlace();
+      if (typeof renderPalette === 'function') renderPalette();
       refreshDiscRingsAndSlots();
     }
 
     function removeChip(slotKey) {
       const slotData = BOARD_SLOTS[slotKey];
       if (!slotData || !slotData.chip) return;
+      ACTIVE_INTERACT_DISC = slotData.discKey;
       slotData.chip = null;
       if (audio) audio.playRemove();
+      if (typeof renderPalette === 'function') renderPalette();
       refreshDiscRingsAndSlots();
     }
 
@@ -3461,6 +3504,7 @@ function renderPalette() {
         if (targetRing && DISK_RINGS[targetRing]) {
           const dir = e.deltaY > 0 ? 1 : -1;
           const ring = DISK_RINGS[targetRing];
+          ACTIVE_INTERACT_DISC = ring.discKey;
           const degStep = 360 / ring.slotCount;
           ring.currentAngle = Number(((ring.currentAngle + dir * (degStep / 2) + 360) % 360).toFixed(1));
           ring.slotOffset = Number((ring.currentAngle / degStep).toFixed(2));
@@ -3487,6 +3531,35 @@ function renderPalette() {
       let ringStartAngle = 0;
       let hasMoved = false;
 
+      // 辅助函数：判断鼠标坐标落在哪一个盘子的范围内
+      function pickDiscAtPos(mx, my) {
+        for (const [dKey, dMeta] of Object.entries(DISC_CONFIG)) {
+          const dist = Math.hypot(mx - dMeta.cx, my - dMeta.cy);
+          if (dist <= getOuterDockRadius(dKey) + 45) return dKey;
+        }
+        return null;
+      }
+
+      // 当拖拽芯片经过盘面或选中左侧芯片移动鼠标时，自动唤出对应盘子的空槽位
+      section.addEventListener('dragover', (de) => {
+        const rect = stage.getBoundingClientRect();
+        const scale = rect.width / STAGE_LOGICAL_W;
+        const mx = (de.clientX - rect.left) / scale;
+        const my = (de.clientY - rect.top) / scale;
+        const dKey = pickDiscAtPos(mx, my);
+        if (dKey) setActiveInteractDisc(dKey);
+      });
+
+      section.addEventListener('mousemove', (me) => {
+        if (!ACTIVE_SELECTED_CHIP) return;
+        const rect = stage.getBoundingClientRect();
+        const scale = rect.width / STAGE_LOGICAL_W;
+        const mx = (me.clientX - rect.left) / scale;
+        const my = (me.clientY - rect.top) / scale;
+        const dKey = pickDiscAtPos(mx, my);
+        if (dKey) setActiveInteractDisc(dKey);
+      });
+
       section.addEventListener('mousedown', (e) => {
         if (IS_DRAGGING_CORE) return;
         // 忽略顶部悬浮按钮栏
@@ -3495,30 +3568,44 @@ function renderPalette() {
         const isMiddleOrSpace = (e.button === 1 || (e.button === 0 && isSpacePressed));
         if (e.button !== 0 && e.button !== 1) return;
 
-        if (!isMiddleOrSpace) {
-          if (e.target.closest('.keystone-hub-socket')) return;
-          if (e.target.closest('#detachedCoresLayer')) return;
-          if (e.target.closest('#outerFixedNozzlesLayer')) return;
-          if (e.target.closest('#slotsLayer > div')) return;
-        }
-
         const rect = stage.getBoundingClientRect();
         const scale = rect.width / STAGE_LOGICAL_W;
         const mouseX = (e.clientX - rect.left) / scale;
         const mouseY = (e.clientY - rect.top) / scale;
+        const clickedDisc = pickDiscAtPos(mouseX, mouseY);
+
+        if (!isMiddleOrSpace) {
+          if (e.target.closest('.keystone-hub-socket')) {
+            if (clickedDisc) setActiveInteractDisc(clickedDisc);
+            return;
+          }
+          if (e.target.closest('#detachedCoresLayer')) return;
+          if (e.target.closest('#outerFixedNozzlesLayer')) {
+            if (clickedDisc) setActiveInteractDisc(clickedDisc);
+            return;
+          }
+          if (e.target.closest('#slotsLayer > div')) {
+            if (clickedDisc) setActiveInteractDisc(clickedDisc);
+            return;
+          }
+        }
 
         const picked = isMiddleOrSpace ? null : pickClosestActiveRing(mouseX, mouseY);
 
-        // ★ 如果点击在画布空白处（或按住中键/空格键拖拽）➔ 自由拖拽平移整张画布！
+        // ★ 如果点击在画布空白处（或按住中键/空格键拖拽）➔ 自由拖拽平移整张画布；若是单纯点击空白处则收起空槽位！
         if (!picked) {
           e.preventDefault();
           const startPanClientX = e.clientX;
           const startPanClientY = e.clientY;
           const initialPanX = STAGE_PAN_X;
           const initialPanY = STAGE_PAN_Y;
+          let panMoved = false;
           section.style.cursor = 'grabbing';
 
           const onPanMove = (me) => {
+            if (Math.hypot(me.clientX - startPanClientX, me.clientY - startPanClientY) > 4) {
+              panMoved = true;
+            }
             STAGE_PAN_X = initialPanX + (me.clientX - startPanClientX);
             STAGE_PAN_Y = initialPanY + (me.clientY - startPanClientY);
             fitStageToViewport(true);
@@ -3526,6 +3613,9 @@ function renderPalette() {
           const onPanUp = () => {
             section.style.cursor = '';
             fitStageToViewport(false);
+            if (!panMoved && !isMiddleOrSpace) {
+              setActiveInteractDisc(clickedDisc);
+            }
             window.removeEventListener('mousemove', onPanMove);
             window.removeEventListener('mouseup', onPanUp);
           };
@@ -3536,6 +3626,7 @@ function renderPalette() {
 
         activeRingKey = picked;
         const ring = DISK_RINGS[activeRingKey];
+        setActiveInteractDisc(ring.discKey);
         centerDragX = ring.cx;
         centerDragY = ring.cy;
         isDragging = true;
@@ -4379,8 +4470,10 @@ function renderPalette() {
         BOARD_SLOTS['combat_1_3'].chip = 'chip_triangle_in';
       }
 
+      ACTIVE_INTERACT_DISC = null;
       setRealm(CURRENT_REALM);
       setSpecDisc(SPEC_DISC);
+      if (typeof renderPalette === 'function') renderPalette();
       if (audio) audio.playConnect();
     }
     window.loadScenario = loadScenario;
