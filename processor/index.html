@@ -2108,8 +2108,10 @@
     const STAGE_LOGICAL_W = 1640;
     const STAGE_LOGICAL_H = 860;
     let USER_ZOOM_FACTOR = 1.0;
+    let STAGE_PAN_X = 0;
+    let STAGE_PAN_Y = 0;
 
-    function fitStageToViewport() {
+    function fitStageToViewport(isPanning = false) {
       const section = document.getElementById('astrolabeStageSection');
       const stage = document.getElementById('diskStage');
       if (!section || !stage) return;
@@ -2117,7 +2119,8 @@
       const availH = section.clientHeight || (window.innerHeight - 64);
       const baseScale = Math.min((availW - 16) / STAGE_LOGICAL_W, (availH - 16) / STAGE_LOGICAL_H);
       const finalScale = Math.max(0.45, Math.min(3.5, baseScale * USER_ZOOM_FACTOR));
-      stage.style.transform = `scale(${finalScale.toFixed(4)})`;
+      stage.style.transition = isPanning ? 'none' : 'transform 120ms ease-out';
+      stage.style.transform = `translate(${Math.round(STAGE_PAN_X)}px, ${Math.round(STAGE_PAN_Y)}px) scale(${finalScale.toFixed(4)})`;
 
       const pctEl = document.getElementById('zoomPercentText');
       if (pctEl) pctEl.textContent = `${Math.round(finalScale * 100)}%`;
@@ -2130,13 +2133,15 @@
     window.fitStageToViewport = fitStageToViewport;
 
     function adjustUserZoom(delta) {
-      USER_ZOOM_FACTOR = Math.max(0.6, Math.min(2.2, Number((USER_ZOOM_FACTOR + delta).toFixed(2))));
+      USER_ZOOM_FACTOR = Math.max(0.5, Math.min(2.8, Number((USER_ZOOM_FACTOR + delta).toFixed(2))));
       fitStageToViewport();
     }
     window.adjustUserZoom = adjustUserZoom;
 
     function resetUserZoom() {
       USER_ZOOM_FACTOR = 1.0;
+      STAGE_PAN_X = 0;
+      STAGE_PAN_Y = 0;
       fitStageToViewport();
     }
     window.resetUserZoom = resetUserZoom;
@@ -3420,16 +3425,25 @@ function renderPalette() {
 
     function initRingDirectDragging() {
       const stage = document.getElementById('diskStage');
+      const section = document.getElementById('astrolabeStageSection') || stage;
       if (!stage) return;
 
-      stage.addEventListener('wheel', (e) => {
+      let isSpacePressed = false;
+      window.addEventListener('keydown', (ke) => {
+        if (ke.code === 'Space') isSpacePressed = true;
+      });
+      window.addEventListener('keyup', (ke) => {
+        if (ke.code === 'Space') isSpacePressed = false;
+      });
+
+      section.addEventListener('wheel', (e) => {
         e.preventDefault();
         const rect = stage.getBoundingClientRect();
         const scale = rect.width / STAGE_LOGICAL_W;
         const mouseX = (e.clientX - rect.left) / scale;
         const mouseY = (e.clientY - rect.top) / scale;
 
-        const targetRing = pickClosestActiveRing(mouseX, mouseY);
+        const targetRing = (!e.ctrlKey && !isSpacePressed) ? pickClosestActiveRing(mouseX, mouseY) : null;
         if (targetRing && DISK_RINGS[targetRing]) {
           const dir = e.deltaY > 0 ? 1 : -1;
           const ring = DISK_RINGS[targetRing];
@@ -3444,6 +3458,10 @@ function renderPalette() {
           solveStepNetwork();
           updateCenterHubsDOM();
           if (audio) audio.playRotate();
+        } else {
+          // 在画布空白处滚动滚轮（或按住Ctrl/空格滚轮）➔ 直接缩放画布！
+          const zoomDelta = e.deltaY < 0 ? 0.1 : -0.1;
+          adjustUserZoom(zoomDelta);
         }
       }, { passive: false });
 
@@ -3455,21 +3473,52 @@ function renderPalette() {
       let ringStartAngle = 0;
       let hasMoved = false;
 
-      stage.addEventListener('mousedown', (e) => {
-        if (e.button !== 0) return;
+      section.addEventListener('mousedown', (e) => {
         if (IS_DRAGGING_CORE) return;
-        if (e.target.closest('.keystone-hub-socket')) return;
-        if (e.target.closest('#detachedCoresLayer')) return;
-        if (e.target.closest('#outerFixedNozzlesLayer')) return;
-        if (e.target.closest('#slotsLayer > div')) return;
+        // 忽略顶部悬浮按钮栏
+        if (e.target.closest('button')) return;
+
+        const isMiddleOrSpace = (e.button === 1 || (e.button === 0 && isSpacePressed));
+        if (e.button !== 0 && e.button !== 1) return;
+
+        if (!isMiddleOrSpace) {
+          if (e.target.closest('.keystone-hub-socket')) return;
+          if (e.target.closest('#detachedCoresLayer')) return;
+          if (e.target.closest('#outerFixedNozzlesLayer')) return;
+          if (e.target.closest('#slotsLayer > div')) return;
+        }
 
         const rect = stage.getBoundingClientRect();
         const scale = rect.width / STAGE_LOGICAL_W;
         const mouseX = (e.clientX - rect.left) / scale;
         const mouseY = (e.clientY - rect.top) / scale;
 
-        const picked = pickClosestActiveRing(mouseX, mouseY);
-        if (!picked) return;
+        const picked = isMiddleOrSpace ? null : pickClosestActiveRing(mouseX, mouseY);
+
+        // ★ 如果点击在画布空白处（或按住中键/空格键拖拽）➔ 自由拖拽平移整张画布！
+        if (!picked) {
+          e.preventDefault();
+          const startPanClientX = e.clientX;
+          const startPanClientY = e.clientY;
+          const initialPanX = STAGE_PAN_X;
+          const initialPanY = STAGE_PAN_Y;
+          section.style.cursor = 'grabbing';
+
+          const onPanMove = (me) => {
+            STAGE_PAN_X = initialPanX + (me.clientX - startPanClientX);
+            STAGE_PAN_Y = initialPanY + (me.clientY - startPanClientY);
+            fitStageToViewport(true);
+          };
+          const onPanUp = () => {
+            section.style.cursor = '';
+            fitStageToViewport(false);
+            window.removeEventListener('mousemove', onPanMove);
+            window.removeEventListener('mouseup', onPanUp);
+          };
+          window.addEventListener('mousemove', onPanMove);
+          window.addEventListener('mouseup', onPanUp);
+          return;
+        }
 
         activeRingKey = picked;
         const ring = DISK_RINGS[activeRingKey];
