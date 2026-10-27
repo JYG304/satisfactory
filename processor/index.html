@@ -235,14 +235,8 @@
           <line x1="880" y1="520" x2="560" y2="520" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4" />
           <line x1="510" y1="410" x2="610" y2="330" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4" />
 
-          <!-- 1. 顶部：攻击盘背景 (cx: 720, cy: 220, R=165) -->
-          <circle cx="720" cy="220" r="168" stroke="#f43f5e" stroke-width="1.5" stroke-dasharray="4 3" fill="#fff1f2" fill-opacity="0.25"/>
-
-          <!-- 2. 左下：工厂盘背景 (cx: 400, cy: 520, R=165) -->
-          <circle cx="400" cy="520" r="168" stroke="#d97706" stroke-width="1.5" stroke-dasharray="4 3" fill="#fffbeb" fill-opacity="0.25"/>
-
-          <!-- 3. 右下：辅助盘背景 (cx: 1040, cy: 520, R=165) -->
-          <circle cx="1040" cy="520" r="168" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="4 3" fill="#f0f9ff" fill-opacity="0.25"/>
+          <!-- 动态三大盘激活外轮廓底晕层 -->
+          <g id="dynamicDiscBgGroup"></g>
         </svg>
 
         <!-- 三大盘醒目状态卡片 (点击可直接设为主修盘) -->
@@ -1628,6 +1622,8 @@ const KEYSTONE_TRAITS = {
         applyDiscRingConfiguration();
       }
     }
+    window.setSpecialization = setSpecialization;
+    window.setRealm = setRealm;
 
     function setSpecialization(discKey) {
       if (['combat', 'industry', 'support'].includes(discKey)) {
@@ -1650,6 +1646,8 @@ const KEYSTONE_TRAITS = {
         applyDiscRingConfiguration();
       }
     }
+    window.setSpecialization = setSpecialization;
+    window.setRealm = setRealm;
 
     let DISK_RINGS = {};
     let BOARD_SLOTS = {};
@@ -1700,6 +1698,32 @@ const KEYSTONE_TRAITS = {
     }
 
     // 切换主修盘或境界后：动态更新活跃环与插槽
+    const TIER_SLOT_TOTALS = { 1: 6, 2: 14, 3: 26, 4: 42 };
+
+    function renderDynamicDiscBackgrounds() {
+      const g = document.getElementById('dynamicDiscBgGroup');
+      if (!g) return;
+      const counts = getDiscRingCounts();
+      let svgHtml = '';
+
+      for (const [discKey, meta] of Object.entries(DISC_META)) {
+        const activeTiers = counts[discKey];
+        const tierDef = RING_TIER_DEFS[activeTiers - 1];
+        const rBg = tierDef.radius + 18;
+        const isSpec = (SPECIALIZED_DISC === discKey);
+
+        svgHtml += `
+          <!-- ${meta.name} 动态激活范围底晕 (随活跃环半径自适应扩展) -->
+          <circle cx="${meta.cx}" cy="${meta.cy}" r="${rBg}" 
+                  stroke="${meta.color}" stroke-width="${isSpec ? '2' : '1.5'}" 
+                  stroke-dasharray="${isSpec ? 'none' : '4 3'}" 
+                  fill="${meta.bgFill}" fill-opacity="${isSpec ? '0.45' : '0.2'}" 
+                  class="transition-all duration-300" />
+        `;
+      }
+      g.innerHTML = svgHtml;
+    }
+
     function applyDiscRingConfiguration() {
       const counts = getDiscRingCounts();
 
@@ -1707,16 +1731,17 @@ const KEYSTONE_TRAITS = {
         ring.isActive = (ring.tier <= counts[ring.discKey]);
       }
 
-      // 实时更新三大盘状态角标
+      // 实时更新三大盘状态角标与插槽总数
       const updateBadge = (id, count, isSpec, color) => {
         const el = document.getElementById(id);
         if (!el) return;
+        const totalSlots = TIER_SLOT_TOTALS[count] || 6;
         if (isSpec) {
-          el.className = `text-[9px] font-mono-sci font-bold px-1.5 py-0.2 rounded bg-${color}-100 text-${color}-800 border border-${color}-300`;
-          el.textContent = `${count}环 · 主修`;
+          el.className = `text-[9px] font-mono-sci font-bold px-2 py-0.5 rounded-full bg-${color}-100 text-${color}-800 border border-${color}-300 shadow-xs`;
+          el.textContent = `${count}环 · ${totalSlots}插槽 (主修特化)`;
         } else {
-          el.className = 'text-[9px] font-mono-sci font-bold px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200';
-          el.textContent = `${count}环 · 次级`;
+          el.className = 'text-[9px] font-mono-sci font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200';
+          el.textContent = `${count}环 · ${totalSlots}插槽 (次级协同)`;
         }
       };
 
@@ -1724,6 +1749,7 @@ const KEYSTONE_TRAITS = {
       updateBadge('badge_industry_status', counts.industry, SPECIALIZED_DISC === 'industry', 'amber');
       updateBadge('badge_support_status', counts.support, SPECIALIZED_DISC === 'support', 'sky');
 
+      renderDynamicDiscBackgrounds();
       renderRingsDOM();
       renderFixedEmissionPorts();
       renderBoardSlots();
@@ -1770,21 +1796,18 @@ const KEYSTONE_TRAITS = {
           const curDeg = ring ? ring.currentAngle : 0;
 
           html += `
-            <div id="ringEl_${ringKey}" class="absolute rounded-full ring-trans transition-opacity duration-300 ${isActive ? 'pointer-events-auto' : 'pointer-events-none'}" 
+            <div id="ringEl_${ringKey}" class="absolute rounded-full ring-trans transition-all duration-300 ${isActive ? 'pointer-events-auto' : 'pointer-events-none'}" 
                  style="width: ${size}px; height: ${size}px; left: ${left}px; top: ${top}px; transform: rotate(${curDeg}deg); opacity: ${isActive ? '1' : '0'}; display: ${isActive ? 'block' : 'none'};">
               
-              <!-- 环道边框线 -->
-              <div class="absolute inset-0 rounded-full border ${
-                isOutermost 
-                  ? `border-2 border-${meta.theme}-500 shadow-sm` 
-                  : `border border-${meta.theme}-300/80`
-              }"></div>
+              <!-- 纯净可靠的环道边界线 (外环实线，内环细实线/虚线) -->
+              <div class="absolute inset-0 rounded-full pointer-events-none" 
+                   style="border: ${isOutermost ? '2px solid ' + meta.color : '1.5px dashed ' + meta.faintColor};"></div>
 
-              <!-- 环名与旋转微调 [+] [-] 按键 -->
-              <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center bg-white border border-slate-300 rounded-full px-1.5 py-0.2 text-[8px] font-mono-sci font-bold text-slate-700 shadow-sm pointer-events-auto">
-                <button onclick="rotateRing('${ringKey}', -1); event.stopPropagation();" class="hover:text-sky-600 px-0.5">◀</button>
-                <span class="mx-0.5 text-${meta.theme}-700">R${t}</span>
-                <button onclick="rotateRing('${ringKey}', 1); event.stopPropagation();" class="hover:text-sky-600 px-0.5">▶</button>
+              <!-- 环名与旋转微调 [◀ R ▶] 按键 -->
+              <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center bg-white border border-slate-300 rounded-full px-1.5 py-0.2 text-[8px] font-mono-sci font-bold text-slate-700 shadow-sm pointer-events-auto z-15">
+                <button onclick="rotateRing('${ringKey}', -1); event.stopPropagation();" class="hover:text-sky-600 px-0.5" title="逆时针旋转5°">◀</button>
+                <span class="mx-0.5 font-bold" style="color: ${meta.color}">R${t}</span>
+                <button onclick="rotateRing('${ringKey}', 1); event.stopPropagation();" class="hover:text-sky-600 px-0.5" title="顺时针旋转5°">▶</button>
               </div>
 
             </div>
@@ -1852,7 +1875,11 @@ const KEYSTONE_TRAITS = {
         if (!ring) continue;
 
         const pos = getSlotWorldPos(slotData.ringKey, slotData.slotIndex);
-        const hasChip = !!slotData.chip;
+        let hasChip = !!slotData.chip;
+        if (hasChip && !CHIP_SPECS[slotData.chip]) {
+          slotData.chip = null;
+          hasChip = false;
+        }
 
         const slotEl = document.createElement('div');
         slotEl.id = `slot_${slotKey}`;
@@ -1917,17 +1944,18 @@ const KEYSTONE_TRAITS = {
             </div>
           `;
         } else {
-          // 空插槽微孔 (z-index: 10)
+          // 空插槽微孔 (z-index: 10，尺寸26px，清晰明了，且颜色严格与盘体主题一致)
+          const discMeta = DISC_META[slotData.discKey] || DISC_META.combat;
           slotEl.setAttribute('data-has-chip', 'false');
           slotEl.style.zIndex = '10';
-          slotEl.style.width = '22px';
-          slotEl.style.height = '22px';
+          slotEl.style.width = '26px';
+          slotEl.style.height = '26px';
           slotEl.innerHTML = `
             <div class="relative w-full h-full flex items-center justify-center group cursor-pointer" title="${ring.name} 第 ${slotData.slotIndex + 1} 槽\n【点击/拖拽】装配芯片">
-              <div class="w-full h-full rounded-full flex items-center justify-center transition-all bg-white border border-dashed border-sky-400 hover:border-sky-600 hover:bg-sky-50 shadow-xs hover:scale-115">
-                <div class="w-1.5 h-1.5 rounded-full bg-sky-500 pointer-events-none"></div>
+              <div class="w-full h-full rounded-full flex items-center justify-center transition-all bg-white border-2 border-dashed ${discMeta.slotBorder} shadow-xs group-hover:scale-115">
+                <div class="w-2 h-2 rounded-full ${discMeta.slotDot} pointer-events-none"></div>
               </div>
-              <span class="pointer-events-none absolute -bottom-2 px-0.5 rounded bg-white text-[6.5px] font-mono-sci text-slate-600 font-bold border border-slate-300 shadow-xs">${slotData.slotIndex + 1}</span>
+              <span class="pointer-events-none absolute -bottom-2.5 px-1 rounded bg-white text-[7px] font-mono-sci text-slate-700 font-bold border border-slate-300 shadow-xs">${slotData.slotIndex + 1}</span>
             </div>
           `;
         }
@@ -1986,6 +2014,8 @@ const KEYSTONE_TRAITS = {
       renderBoardSlots();
       solveStepNetwork();
     }
+    window.rotateRing = rotateRing;
+    window.resetAllRotations = resetAllRotations;
 
     function resetAllRotations() {
       for (const k in DISK_RINGS) {
@@ -1998,6 +2028,8 @@ const KEYSTONE_TRAITS = {
       renderBoardSlots();
       solveStepNetwork();
     }
+    window.rotateRing = rotateRing;
+    window.resetAllRotations = resetAllRotations;
 
     function initRingDirectDragging() {
       const stage = document.getElementById('diskStage');
@@ -2144,6 +2176,9 @@ const KEYSTONE_TRAITS = {
       renderPalette();
       updateSelectedChipIndicator();
     }
+    window.selectPaletteChip = selectPaletteChip;
+    window.filterPalette = filterPalette;
+    window.cancelPaletteSelection = cancelPaletteSelection;
 
     function cancelPaletteSelection() {
       ACTIVE_SELECTED_CHIP = null;
@@ -2263,6 +2298,7 @@ const KEYSTONE_TRAITS = {
       filterPalette('keystone');
       toggleLeftPanel(true);
     }
+    window.openKeystoneSelector = openKeystoneSelector;
 
     /* =========================================================================
        10. 激光光路求解与三盘贯通
@@ -2494,7 +2530,8 @@ const KEYSTONE_TRAITS = {
     window.addEventListener('DOMContentLoaded', () => {
       initDiscRings();
       initBoardSlots();
-      applyDiscRingConfiguration();
+      setRealm(CURRENT_REALM);
+      setSpecialization(SPECIALIZED_DISC);
       renderPalette();
       initRingDirectDragging();
       updateAllKeystoneSocketsDOM();
@@ -2504,8 +2541,8 @@ const KEYSTONE_TRAITS = {
       if (BOARD_SLOTS['support_1_2']) BOARD_SLOTS['support_1_2'].chip = 't0_speed_1';
       if (BOARD_SLOTS['industry_1_0']) BOARD_SLOTS['industry_1_0'].chip = 't0_craft_1';
       if (BOARD_SLOTS['industry_1_3']) BOARD_SLOTS['industry_1_3'].chip = 't0_mine_1';
-      if (BOARD_SLOTS['combat_1_0']) BOARD_SLOTS['combat_1_0'].chip = 't0_atk_2';
-      if (BOARD_SLOTS['combat_1_4']) BOARD_SLOTS['combat_1_4'].chip = 't0_crit_2';
+      if (BOARD_SLOTS['combat_1_0']) BOARD_SLOTS['combat_1_0'].chip = 't1_atk_3';
+      if (BOARD_SLOTS['combat_1_4']) BOARD_SLOTS['combat_1_4'].chip = 't1_crit_3';
 
       renderBoardSlots();
       solveStepNetwork();
