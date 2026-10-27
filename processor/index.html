@@ -193,15 +193,15 @@
     <div class="flex items-center space-x-2">
       <div class="flex items-center bg-slate-100 border border-slate-300 rounded-lg px-2 py-1 shadow-xs space-x-1">
         <span class="text-[10px] font-mono-sci text-slate-600 font-bold">境界:</span>
-        <button onclick="setRealm('qi')" id="btn_realm_qi" class="px-2 py-0.5 rounded bg-slate-900 text-white text-[11px] font-bold font-mono-sci shadow-xs transition" title="练气期：主修盘2环，其余两盘1环">练气(2/1环)</button>
-        <button onclick="setRealm('foundation')" id="btn_realm_foundation" class="px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-300 hover:border-slate-800 text-[11px] font-bold font-mono-sci transition" title="筑基期：主修盘3环，其余两盘2环">筑基(3/2环)</button>
-        <button onclick="setRealm('core')" id="btn_realm_core" class="px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-300 hover:border-slate-800 text-[11px] font-bold font-mono-sci transition" title="金丹期：主修盘4环，其余两盘3环">金丹(4/3环)</button>
+        <button onclick="setRealm('qi')" id="btn_realm_qi" class="px-2 py-0.5 rounded bg-slate-900 text-white text-[11px] font-bold font-mono-sci shadow-xs transition" title="练气期：1个大盘(2环)，其余2个小盘(1环，大小完全对齐)">练气(2/1环)</button>
+        <button onclick="setRealm('foundation')" id="btn_realm_foundation" class="px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-300 hover:border-slate-800 text-[11px] font-bold font-mono-sci transition" title="筑基期：1个大盘(3环)，其余2个小盘(2环，大小完全对齐)">筑基(3/2环)</button>
+        <button onclick="setRealm('core')" id="btn_realm_core" class="px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-300 hover:border-slate-800 text-[11px] font-bold font-mono-sci transition" title="金丹期：1个大盘(4环)，其余2个小盘(3环，大小完全对齐)">金丹(4/3环)</button>
       </div>
       <div class="flex items-center bg-slate-100 border border-slate-300 rounded-lg px-2 py-1 shadow-xs space-x-1">
-        <span class="text-[10px] font-mono-sci text-slate-600 font-bold">主修盘(单选):</span>
-        <button onclick="setSpecDisc('combat')" id="btn_spec_combat" class="px-2 py-0.5 rounded bg-rose-600 text-white text-[11px] font-bold font-mono-sci shadow-xs transition" title="将攻击盘设为主修盘（环数+1）">⚔️攻击盘</button>
-        <button onclick="setSpecDisc('industry')" id="btn_spec_industry" class="px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-300 hover:border-amber-600 text-[11px] font-bold font-mono-sci transition" title="将工厂盘设为主修盘（环数+1）">⚙️工厂盘</button>
-        <button onclick="setSpecDisc('support')" id="btn_spec_support" class="px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-300 hover:border-sky-600 text-[11px] font-bold font-mono-sci transition" title="将辅助盘设为主修盘（环数+1）">🛡️辅助盘</button>
+        <span class="text-[10px] font-mono-sci text-slate-600 font-bold">大盘单选:</span>
+        <button onclick="setSpecDisc('combat')" id="btn_spec_combat" class="px-2 py-0.5 rounded bg-rose-600 text-white text-[11px] font-bold font-mono-sci shadow-xs transition" title="将攻击盘设为大盘（环数+1），其余两盘为等大小盘">⚔️攻击盘</button>
+        <button onclick="setSpecDisc('industry')" id="btn_spec_industry" class="px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-300 hover:border-amber-600 text-[11px] font-bold font-mono-sci transition" title="将工厂盘设为大盘（环数+1），其余两盘为等大小盘">⚙️工厂盘</button>
+        <button onclick="setSpecDisc('support')" id="btn_spec_support" class="px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-300 hover:border-sky-600 text-[11px] font-bold font-mono-sci transition" title="将辅助盘设为大盘（环数+1），其余两盘为等大小盘">🛡️辅助盘</button>
       </div>
     </div>
 
@@ -316,13 +316,19 @@
     <!-- ----------------- 中间：极简天文浑天仪工程制图交互舞台 ----------------- -->
     <section class="flex-1 relative flex flex-col items-center justify-center overflow-hidden blueprint-canvas" id="astrolabeStageSection">
       
-      <!-- 操作小贴士浮窗 -->
-      <div class="absolute top-4 right-6 z-20 flex items-center space-x-3 bg-white/95 border border-slate-300 px-4 py-1.5 rounded-lg text-xs text-slate-700 font-mono-sci shadow-sm">
-        <span class="flex items-center text-sky-700 font-bold"><i class="fa-solid fa-arrow-left mr-1.5"></i>高能光束自右端射入</span>
-        <span class="text-slate-300">•</span>
-        <span class="flex items-center text-slate-900 font-bold"><i class="fa-solid fa-hand-pointer mr-1.5 text-slate-600"></i>拖拽安装构件</span>
-        <span class="text-slate-300">•</span>
-        <span class="flex items-center text-rose-600"><i class="fa-solid fa-rotate-left mr-1"></i>右键取回</span>
+      <!-- 操作小贴士 + 4K/全分辨率自适应缩放控制条 -->
+      <div class="absolute top-3 right-6 z-20 flex items-center space-x-2.5 bg-white/95 border border-slate-300 px-3.5 py-1.5 rounded-lg text-xs text-slate-700 font-mono-sci shadow-sm backdrop-blur">
+        <span class="flex items-center text-amber-700 font-bold"><i class="fa-solid fa-hand-pointer mr-1"></i>点一下盘心取下极核 ➔ 拖拽至它盘外圈连线</span>
+        <span class="text-slate-300">|</span>
+        <span class="flex items-center text-rose-600 font-bold"><i class="fa-solid fa-rotate-left mr-1"></i>右键取回</span>
+        <span class="text-slate-300">|</span>
+        <div class="flex items-center space-x-1 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+          <i class="fa-solid fa-display text-sky-600 text-[10px]"></i>
+          <span id="resolutionBadge" class="text-[10px] font-bold text-slate-700">4K/全屏自适应</span>
+          <button onclick="adjustUserZoom(-0.1)" class="px-1.5 hover:bg-white rounded text-slate-700 font-bold border border-transparent hover:border-slate-300" title="缩小视图">-</button>
+          <button onclick="resetUserZoom()" id="zoomPercentText" class="px-1 text-[10px] font-bold text-sky-700 hover:underline" title="点击重置为屏幕最佳自适应比例">100%</button>
+          <button onclick="adjustUserZoom(0.1)" class="px-1.5 hover:bg-white rounded text-slate-700 font-bold border border-transparent hover:border-slate-300" title="放大视图">+</button>
+        </div>
       </div>
 
       <!-- 1080px x 640px 宽幅极简多盘联动交互舞台 (主盘 + 右上动力从动子盘 + 右端调相末端副盘 + 梳状卡尺 + 排珠母线) -->
@@ -334,10 +340,10 @@
         <button onclick="cancelPaletteSelection()" class="ml-2 px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] text-slate-300 hover:text-white border border-slate-600 transition">取消 (Esc)</button>
       </div>
 
-<div id="diskStage" class="relative w-[1440px] h-[760px] shrink-0 my-auto scale-95 origin-center">
+<div id="diskStage" class="relative w-[1640px] h-[860px] shrink-0 my-auto origin-center transition-transform duration-150">
 
         <!-- ✦ 精密矢量浑天多盘工程背景图层 (完全契合 CYCLICAL & future engineering 设计语言) ✦ -->
-        <svg id="astrolabeVectorBg" class="absolute inset-0 w-full h-full pointer-events-none z-0" viewBox="0 0 1440 760">
+        <svg id="astrolabeVectorBg" class="absolute inset-0 w-full h-full pointer-events-none z-0" viewBox="0 0 1640 860">
 <defs>
             <pattern id="blueprintHatch" width="8" height="8" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
               <line x1="0" y1="0" x2="0" y2="8" stroke="#0f172a" stroke-width="0.8" opacity="0.15" />
@@ -348,7 +354,7 @@
           </defs>
 
           <!-- ==================== 0. 修仙天文星宿玄鉴工程背景图层 ==================== -->
-          <g id="celestialMansionsLayer" opacity="0.45">
+          <g id="celestialMansionsLayer" opacity="0.45" transform="translate(-60, 20)">
             <!-- 浑天周天大星盘外圈 (R=330, R=310, R=290) -->
             <circle cx="450" cy="470" r="330" stroke="#64748b" stroke-width="0.8" stroke-dasharray="2 3" fill="none" />
             <circle cx="450" cy="470" r="310" stroke="#0f172a" stroke-width="1.2" fill="none" opacity="0.6" />
@@ -392,108 +398,49 @@
             <circle cx="450" cy="470" r="320" stroke="#0284c7" stroke-width="0.7" stroke-dasharray="1 7" fill="none" opacity="0.4" />
           </g>
 
-<!-- ==================== 3. 【浑天主大阵 A】(中心 450, 470) ==================== -->
-          <!-- 黄道面刻度椭圆 -->
-          <ellipse cx="450" cy="470" rx="260" ry="92" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="3 4" fill="none" transform="rotate(-21.6 450 470)" opacity="0.75" />
-          <circle cx="450" cy="470" r="260" stroke="#cbd5e1" stroke-width="0.8" fill="none" />
-          <circle cx="450" cy="470" r="250" stroke="#e2e8f0" stroke-width="0.5" fill="none" />
+<!-- ==================== 5. 【太虚中元聚光透镜环】(中心 735, 363，R=34) ==================== -->
+          <!-- 悬浮于动力盘 B 与浑天主盘 A 之间，距两盘外沿各有 70px+ 纯净开阔间隙，承担中继准直与中元特质增幅 -->
+          <circle cx="735" cy="363" r="34" stroke="#0f172a" stroke-width="1.8" fill="#ffffff" />
+          <circle cx="735" cy="363" r="28" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="3 3" fill="none" />
+          <circle cx="735" cy="363" r="7" fill="#0f172a" opacity="0.25" />
+          <!-- 中元环入口受光靶心 (θ: 339.75°, x:766.9, y:351.2) -->
+          <circle cx="766.9" cy="351.2" r="4.5" stroke="#0284c7" stroke-width="1.4" fill="#ffffff" />
+          <circle cx="766.9" cy="351.2" r="1.8" fill="#0284c7" />
+          <!-- 中元环出口准直喷嘴 (θ: 159.42°, x:703.2, y:375.0) -->
+          <polygon points="703.2,375.0 697.5,371.0 697.5,379.0" fill="#0284c7" />
+          <!-- 盘内暗渠连线 (受光 ➔ 聚核 ➔ 出射) -->
+          <line x1="766.9" y1="351.2" x2="735" y2="363" stroke="#94a3b8" stroke-width="1" stroke-dasharray="2 2" opacity="0.6" />
+          <line x1="735" y1="363" x2="703.2" y2="375.0" stroke="#94a3b8" stroke-width="1" stroke-dasharray="2 2" opacity="0.6" />
+          <text x="735" y="414" font-family="'Noto Serif SC', serif" font-size="9" fill="#64748b" text-anchor="middle" font-weight="bold">太虚中元透镜</text>
 
-          <!-- 四极正交分度刻度线 -->
-          <g stroke="#0f172a" stroke-width="1.8">
-            <line x1="450" y1="190" x2="450" y2="205" />
-            <line x1="450" y1="735" x2="450" y2="750" />
-            <line x1="170" y1="470" x2="185" y2="470" />
-            <line x1="715" y1="470" x2="730" y2="470" />
+          <!-- ==================== 4. 【终极释能盘 D】(中心 150, 600，R=55) ==================== -->
+          <g stroke="#0f172a" stroke-width="1.2" opacity="0.75">
+            <line x1="20" y1="570" x2="120" y2="570" />
+            <line x1="30" y1="585" x2="130" y2="585" />
+            <line x1="40" y1="600" x2="140" y2="600" />
+            <line x1="50" y1="615" x2="150" y2="615" />
+            <line x1="60" y1="630" x2="160" y2="630" />
           </g>
+          <circle cx="150" cy="600" r="70" stroke="#0f172a" stroke-width="1.4" fill="none" />
+          <circle cx="150" cy="600" r="55" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="2 2" fill="none" />
+          <!-- 终端受光孔径靶心 (θ: 336.57°, x:200.5, y:578.1) -->
+          <circle cx="200.5" cy="578.1" r="5.5" stroke="#0284c7" stroke-width="1.5" fill="#ffffff" stroke-dasharray="2 2" />
+          <circle cx="200.5" cy="578.1" r="2" fill="#0284c7" />
+          <text x="150" y="688" font-family="'Noto Serif SC', serif" font-size="9.5" fill="#0f172a" font-weight="bold" text-anchor="middle">终端释能盘</text>
 
-          <!-- 主盘同心轨道由动态环层根据境界(1~4环)实时渲染 -->
-
-          <!-- 主盘固定入口靶心 (θ: 339.42°, x:637.2, y:399.7) -->
-          <circle cx="637.2" cy="399.7" r="6" stroke="#0284c7" stroke-width="1.5" fill="#ffffff" stroke-dasharray="2 2" />
-          <circle cx="637.2" cy="399.7" r="2.2" fill="#0284c7" />
-
-          <!-- 主盘出口准直嘴 1 (通往盘 D 终端, θ: 156.57°, x:266.5, y:549.5) -->
-          <polygon points="266.5,549.5 262.5,542.5 258.5,549.5" fill="#0284c7" transform="rotate(66.57 266.5 549.5)" />
-          <!-- 盘底暗渠 1 (天枢极核 450,470 ➔ 盘外缘出口嘴 266.5,549.5) -->
-          <line x1="450" y1="470" x2="266.5" y2="549.5" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="3 3" opacity="0.7" />
-
-          <!-- 主盘出口准直嘴 2 (通往极轨副盘, θ: 237.99°, x:344.0, y:300.4) -->
-          <polygon points="344.0,300.4 340.0,293.4 336.0,300.4" fill="#0284c7" transform="rotate(147.99 344.0 300.4)" />
-          <!-- 盘底暗渠 2 (天枢极核 450,470 ➔ 极轨出口嘴 344.0,300.4) -->
-          <line x1="450" y1="470" x2="344.0" y2="300.4" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="3 3" opacity="0.7" />
-
-          <!-- 主盘辐射指针辐条 -->
-          <line x1="450" y1="470" x2="450" y2="555" stroke="#0f172a" stroke-width="2" />
-          <circle cx="450" cy="555" r="5" fill="#0f172a" />
-          <circle cx="450" cy="470" r="8" fill="#0f172a" stroke="#ffffff" stroke-width="2" />
-          <text x="450" y="715" font-family="'Noto Serif SC', serif" font-size="10" fill="#0f172a" font-weight="bold" text-anchor="middle">⚔️ 攻击盘 (红色节点)</text>
-
-          <!-- ==================== 2. 【动力从动子盘 B】(中心 960, 280) ==================== -->
-          <!-- 45° 精密剖面斜纹底板 -->
-          <rect x="890" y="200" width="140" height="75" fill="url(#blueprintHatch)" stroke="#0f172a" stroke-width="1.2" stroke-dasharray="3 3" />
-          
-          <!-- 90° 梳状精密分度卡尺弧 -->
-          <path d="M 895 390 A 130 130 0 0 1 870 180" fill="none" stroke="#0f172a" stroke-width="1.8" />
-          <path d="M 882 398 A 146 146 0 0 1 854 165" fill="none" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="2 2" />
-          <g stroke="#0f172a" stroke-width="1.2">
-            <line x1="895" y1="390" x2="882" y2="398" stroke-width="2" />
-            <line x1="889" y1="370" x2="876" y2="377" />
-            <line x1="884" y1="350" x2="871" y2="356" />
-            <line x1="880" y1="330" x2="866" y2="335" stroke-width="1.6" />
-            <line x1="877" y1="310" x2="862" y2="314" />
-            <line x1="875" y1="290" x2="859" y2="290" stroke-width="2" />
-            <line x1="876" y1="270" x2="861" y2="266" />
-            <line x1="878" y1="250" x2="863" y2="245" />
-            <line x1="881" y1="230" x2="867" y2="224" stroke-width="1.6" />
-            <line x1="886" y1="210" x2="873" y2="203" />
-            <line x1="870" y1="180" x2="854" y2="165" stroke-width="2" />
-          </g>
-
-          <circle cx="960" cy="280" r="115" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="3 3" fill="#ffffff" fill-opacity="0.7" />
-
-          <!-- 动力盘入口靶心 (θ: 334.36°, x:1032.1, y:245.4) -->
-          <circle cx="1032.1" cy="245.4" r="5.5" stroke="#0284c7" stroke-width="1.5" fill="#ffffff" stroke-dasharray="2 2" />
-          <circle cx="1032.1" cy="245.4" r="2" fill="#0284c7" />
-
-          <!-- 动力盘出口准直嘴 (θ: 159.75°, x:884.9, y:307.7) -->
-          <polygon points="884.9,307.7 879.5,302.7 880.5,311.7" fill="#0284c7" />
-          <!-- 盘底暗渠 (动力轴心 960,280 ➔ 出射嘴 884.9,307.7) -->
-          <line x1="960" y1="280" x2="884.9" y2="307.7" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="3 3" opacity="0.7" />
-
-          <text x="960" y="398" font-family="'Noto Serif SC', serif" font-size="9.5" fill="#0f172a" font-weight="bold" text-anchor="middle">⚙️ 工厂盘 (黄色节点)</text>
-
-          <!-- ==================== 1. 【手表双环盘 C】(同心双环！中心 1210, 160，外 R=48，内 R=24) ==================== -->
-          <circle cx="1210" cy="160" r="76" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="3 3" fill="#ffffff" fill-opacity="0.7" />
-
-          <!-- 表盘入口靶心 (θ: 345.17°, x:1256.4, y:147.7) -->
-          <g id="c1ApertureTargetGroup">
-            <line x1="1256.4" y1="147.7" x2="1380" y2="115" stroke="#0284c7" stroke-width="1" stroke-dasharray="3 3" opacity="0.35" />
-            <circle cx="1256.4" cy="147.7" r="6" stroke="#0284c7" stroke-width="1.5" fill="none" stroke-dasharray="2 2" />
-            <circle cx="1256.4" cy="147.7" r="2" fill="#0284c7" />
-            <line x1="1251" y1="147.7" x2="1262" y2="147.7" stroke="#0f172a" stroke-width="1" />
-            <line x1="1256.4" y1="142.2" x2="1256.4" y2="153.2" stroke="#0f172a" stroke-width="1" />
-            <text id="c1ApertureStatusBadge" x="1270" y="138" font-family="'Share Tech Mono', monospace" font-size="7.5" fill="#0284c7" font-weight="bold">● 靶心准直孔 (θ: 345.2°)</text>
-          </g>
-
-          <!-- 表盘出口准直嘴 (θ: 154.36°, x:1166.7, y:180.8) -->
-          <polygon points="1166.7,180.8 1162.0,174.5 1160.5,183.5" fill="#0284c7" />
-          <!-- 盘底暗渠 (表盘中心 1210,160 ➔ 出射嘴 1166.7,180.8) -->
-          <line x1="1210" y1="160" x2="1166.7" y2="180.8" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="3 3" opacity="0.7" />
-
-          <text x="1210" y="238" font-family="'Noto Serif SC', serif" font-size="9.5" fill="#0f172a" font-weight="bold" text-anchor="middle">🛡️ 辅助盘 (蓝色节点)</text>
-
-          
+                    <!-- 动态渲染三大主盘精密浑天仪工程外框 (大盘 + 两个等大小盘，保持100%第一版黑白青工程制图表现) -->
+          <g id="dynamicSvgDiscCasings"></g>
         </svg>
 
         <!-- ✦ 全局贯穿底板阵脉图层 (1080x640，北斗七星/天衡T字/雷劫Z字/四象方环) ✦ -->
         <div id="floorCrossContainer" class="absolute inset-0 pointer-events-none transition-all duration-300" style="z-index: 1;">
-          <svg id="floorSvgLayer" class="w-full h-full" viewBox="0 0 1440 760">
+          <svg id="floorSvgLayer" class="w-full h-full" viewBox="0 0 1640 860">
             <!-- 动态渲染底板图形 -->
           </svg>
         </div>
 
-        <!-- ✦ 右侧始发高能发射规 (位于主斜轴右上端 x:1380, y:115，沿 θ: 345.2° 固定向量射入) ✦ -->
-        <div id="rightEmitter" class="absolute z-30 flex items-center pointer-events-none" style="left: 1380px; top: 115px; transform: translateY(-50%);">
+        <!-- ✦ 右侧始发高能发射规 (位于主斜轴右上端 x:1542, y:188，沿 θ: 345.2° 固定向量射入辅助盘) ✦ -->
+        <div id="rightEmitter" class="absolute z-30 flex items-center pointer-events-none" style="left: 1542px; top: 188px; transform: translateY(-50%);">
           <div class="flex flex-col items-end mr-2">
             <span class="text-[9px] font-mono-sci font-bold text-slate-800 bg-white/95 px-2 py-0.5 rounded border border-slate-300 shadow-xs whitespace-nowrap">
               <i class="fa-solid fa-crosshairs text-sky-600 mr-1 animate-spin"></i>EMITTER 01 (始发源)
@@ -506,72 +453,90 @@
           <div class="w-5 h-0.5 bg-slate-900"></div>
         </div>
 
-                <!-- ✦ 三大主盘动态同心环 DOM 容器 (盘体保持第一版黑白青精密工程制图原貌) ✦ -->
+        <!-- ✦ 三大主盘动态同心环 DOM 容器 (盘体保持第一版黑白青精密工程制图原貌) ✦ -->
         <div id="dynamicRingsDomContainer" class="absolute inset-0 pointer-events-none" style="z-index: 2;"></div>
 
         <!-- ✦ 最外圈固定方位射出点图层 ✦ -->
         <div id="outerFixedNozzlesLayer" class="absolute inset-0 pointer-events-none" style="z-index: 26;"></div>
 
-        <!-- ✦ 三大主盘可点击切换标牌 ✦ -->
-        <div onclick="setSpecDisc('combat')" class="absolute z-20 cursor-pointer bg-white/95 hover:bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-300 shadow-xs flex items-center space-x-1.5 transition" style="left: 450px; top: 722px; transform: translateX(-50%);" title="点击将【攻击盘】设为主修特化盘">
-          <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-          <span class="text-[11px] font-bold text-slate-900">⚔️ 攻击盘</span>
-          <span id="badge_disc_combat" class="text-[9.5px] font-mono-sci font-bold px-1.5 rounded bg-rose-100 text-rose-700">2环·主修</span>
+        <!-- ✦ 三大主盘可点击切换标牌 (位置随盘体半径自适应调整) ✦ -->
+        <div id="discBadgeWrap_combat" onclick="setSpecDisc('combat')" class="absolute z-20 cursor-pointer bg-white/95 hover:bg-rose-50 px-3 py-1 rounded-full border border-rose-300 shadow-sm flex items-center space-x-1.5 transition" style="left: 390px; top: 730px; transform: translateX(-50%);" title="点击将【攻击盘】设为大盘(主修盘)">
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+          <span class="text-xs font-bold text-slate-900">⚔️ 攻击盘</span>
+          <span id="badge_disc_combat" class="text-[10px] font-mono-sci font-bold px-1.5 rounded bg-slate-900 text-amber-300">2环·大盘</span>
         </div>
 
-        <div onclick="setSpecDisc('industry')" class="absolute z-20 cursor-pointer bg-white/95 hover:bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-300 shadow-xs flex items-center space-x-1.5 transition" style="left: 960px; top: 438px; transform: translateX(-50%);" title="点击将【工厂盘】设为主修特化盘">
-          <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-          <span class="text-[11px] font-bold text-slate-900">⚙️ 工厂盘</span>
-          <span id="badge_disc_industry" class="text-[9.5px] font-mono-sci font-bold px-1.5 rounded bg-slate-100 text-slate-600">1环·次级</span>
+        <div id="discBadgeWrap_industry" onclick="setSpecDisc('industry')" class="absolute z-20 cursor-pointer bg-white/95 hover:bg-amber-50 px-3 py-1 rounded-full border border-amber-300 shadow-sm flex items-center space-x-1.5 transition" style="left: 890px; top: 615px; transform: translateX(-50%);" title="点击将【工厂盘】设为大盘(主修盘)">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+          <span class="text-xs font-bold text-slate-900">⚙️ 工厂盘</span>
+          <span id="badge_disc_industry" class="text-[10px] font-mono-sci font-bold px-1.5 rounded bg-slate-100 text-slate-600">1环·小盘</span>
         </div>
 
-        <div onclick="setSpecDisc('support')" class="absolute z-20 cursor-pointer bg-white/95 hover:bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-300 shadow-xs flex items-center space-x-1.5 transition" style="left: 1210px; top: 282px; transform: translateX(-50%);" title="点击将【辅助盘】设为主修特化盘">
-          <span class="w-2 h-2 rounded-full bg-sky-500"></span>
-          <span class="text-[11px] font-bold text-slate-900">🛡️ 辅助盘</span>
-          <span id="badge_disc_support" class="text-[9.5px] font-mono-sci font-bold px-1.5 rounded bg-slate-100 text-slate-600">1环·次级</span>
+        <div id="discBadgeWrap_support" onclick="setSpecDisc('support')" class="absolute z-20 cursor-pointer bg-white/95 hover:bg-sky-50 px-3 py-1 rounded-full border border-sky-300 shadow-sm flex items-center space-x-1.5 transition" style="left: 1310px; top: 435px; transform: translateX(-50%);" title="点击将【辅助盘】设为大盘(主修盘)">
+          <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+          <span class="text-xs font-bold text-slate-900">🛡️ 辅助盘</span>
+          <span id="badge_disc_support" class="text-[10px] font-mono-sci font-bold px-1.5 rounded bg-slate-100 text-slate-600">1环·小盘</span>
         </div>
 
-        <!-- ✦ 三大主盘中心极核 (当光路射入中心后可取下，放到其他盘外圈插槽里激活跨盘导入线！) ✦ -->
+        <!-- ✦ 三大主盘中心极核基座 (点一下取下极核，然后拖拽到另外盘子的外圈插槽上即可连上导入线！) ✦ -->
 
-        <!-- 1. 🛡️ 辅助盘中心 (1210, 160) -->
-        <div id="hubSocket_support" onclick="handleCenterCoreClick('support', event)" class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group" style="left: 1210px; top: 160px; transform: translate(-50%, -50%);" title="【🛡️ 辅助盘中心】&#10;当光路射入中心后，点击可取下中心极核，放到其他盘子的外圈插槽里以激活导入线！">
-          <div class="relative w-9 h-9 rounded-full bg-white border-2 border-slate-800 flex items-center justify-center shadow-md transition-transform group-hover:scale-115" id="centerCoreBox_support">
+        <!-- 1. 🛡️ 辅助盘中心 (1310, 250) -->
+        <div id="hubSocket_support"
+             onclick="handleCenterCoreClick('support', event)"
+             onmousedown="handleCenterHubMouseDown('support', event)"
+             class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group select-none"
+             style="left: 1310px; top: 250px; transform: translate(-50%, -50%);"
+             title="【🛡️ 辅助盘中心】&#10;1. 光路射入中心后，点一下即可取下中心节点&#10;2. 按住取下的中心节点拖拽到其他盘子的外圈插槽上，即可连上跨盘导入线！">
+          <div class="relative w-11 h-11 rounded-full bg-white border-2 border-slate-800 flex items-center justify-center shadow-md transition-transform group-hover:scale-110" id="centerCoreBox_support">
             <div class="absolute -inset-1 rounded-full border border-dashed border-sky-500/80 animate-spin" style="animation-duration: 15s;"></div>
-            <i id="centerCoreIcon_support" class="fa-solid fa-gem text-sky-600 text-xs relative z-10"></i>
+            <i id="centerCoreIcon_support" class="fa-solid fa-gem text-sky-600 text-sm relative z-10"></i>
           </div>
-          <div class="mt-0.5 px-1.5 py-0.2 rounded bg-white text-[7px] font-mono-sci font-bold text-slate-800 border border-slate-400 whitespace-nowrap shadow-xs flex items-center space-x-0.5" id="centerCoreBadge_support">
+          <div class="mt-0.5 px-1.5 py-0.5 rounded bg-white text-[7.5px] font-mono-sci font-bold text-slate-800 border border-slate-400 whitespace-nowrap shadow-xs flex items-center space-x-0.5" id="centerCoreBadge_support">
             <span id="centerCoreText_support">辅助中心(待射入)</span>
           </div>
         </div>
 
-        <!-- 2. ⚙️ 工厂盘中心 (960, 280) -->
-        <div id="hubSocket_industry" onclick="handleCenterCoreClick('industry', event)" class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group" style="left: 960px; top: 280px; transform: translate(-50%, -50%);" title="【⚙️ 工厂盘中心】&#10;当光路射入中心后，点击可取下中心极核，放到其他盘子的外圈插槽里以激活导入线！">
-          <div class="relative w-10 h-10 rounded-full bg-white border-2 border-slate-800 flex items-center justify-center shadow-md transition-transform group-hover:scale-115" id="centerCoreBox_industry">
+        <!-- 2. ⚙️ 工厂盘中心 (890, 430) -->
+        <div id="hubSocket_industry"
+             onclick="handleCenterCoreClick('industry', event)"
+             onmousedown="handleCenterHubMouseDown('industry', event)"
+             class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group select-none"
+             style="left: 890px; top: 430px; transform: translate(-50%, -50%);"
+             title="【⚙️ 工厂盘中心】&#10;1. 光路射入中心后，点一下即可取下中心节点&#10;2. 按住取下的中心节点拖拽到其他盘子的外圈插槽上，即可连上跨盘导入线！">
+          <div class="relative w-11 h-11 rounded-full bg-white border-2 border-slate-800 flex items-center justify-center shadow-md transition-transform group-hover:scale-110" id="centerCoreBox_industry">
             <div class="absolute -inset-1 rounded-full border border-dashed border-amber-500/80 animate-spin" style="animation-duration: 18s;"></div>
-            <i id="centerCoreIcon_industry" class="fa-solid fa-gear text-amber-600 text-xs relative z-10"></i>
+            <i id="centerCoreIcon_industry" class="fa-solid fa-gear text-amber-600 text-sm relative z-10"></i>
           </div>
-          <div class="mt-0.5 px-1.5 py-0.2 rounded bg-white text-[7px] font-mono-sci font-bold text-slate-800 border border-slate-400 whitespace-nowrap shadow-xs flex items-center space-x-0.5" id="centerCoreBadge_industry">
+          <div class="mt-0.5 px-1.5 py-0.5 rounded bg-white text-[7.5px] font-mono-sci font-bold text-slate-800 border border-slate-400 whitespace-nowrap shadow-xs flex items-center space-x-0.5" id="centerCoreBadge_industry">
             <span id="centerCoreText_industry">工厂中心(待射入)</span>
           </div>
         </div>
 
-        <!-- 3. ⚔️ 攻击盘中心 (450, 470) -->
-        <div id="hubSocket_combat" onclick="handleCenterCoreClick('combat', event)" class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group" style="left: 450px; top: 470px; transform: translate(-50%, -50%);" title="【⚔️ 攻击盘中心】&#10;当光路射入中心后，点击可取下中心极核，放到其他盘子的外圈插槽里以激活导入线！">
-          <div class="relative w-12 h-12 rounded-full bg-white border-2 border-amber-500 flex items-center justify-center shadow-lg transition-transform group-hover:scale-115" id="centerCoreBox_combat">
+        <!-- 3. ⚔️ 攻击盘中心 (390, 490) -->
+        <div id="hubSocket_combat"
+             onclick="handleCenterCoreClick('combat', event)"
+             onmousedown="handleCenterHubMouseDown('combat', event)"
+             class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group select-none"
+             style="left: 390px; top: 490px; transform: translate(-50%, -50%);"
+             title="【⚔️ 攻击盘中心】&#10;1. 光路射入中心后，点一下即可取下中心节点&#10;2. 按住取下的中心节点拖拽到其他盘子的外圈插槽上，即可连上跨盘导入线！">
+          <div class="relative w-12 h-12 rounded-full bg-white border-2 border-amber-500 flex items-center justify-center shadow-lg transition-transform group-hover:scale-110" id="centerCoreBox_combat">
             <div class="absolute -inset-1.5 rounded-full border border-dashed border-amber-400/80 animate-spin" style="animation-duration: 20s;"></div>
             <div class="absolute -inset-0.5 rounded-full bg-amber-400/10 blur-xs"></div>
             <i id="centerCoreIcon_combat" class="fa-solid fa-khanda text-rose-600 text-sm relative z-10"></i>
           </div>
-          <div class="mt-1 px-1.5 py-0.5 rounded bg-white text-[8px] font-mono-sci font-bold text-amber-900 border border-amber-400 whitespace-nowrap shadow-xs flex items-center space-x-1" id="centerCoreBadge_combat">
+          <div class="mt-0.5 px-1.5 py-0.5 rounded bg-white text-[7.5px] font-mono-sci font-bold text-amber-900 border border-amber-400 whitespace-nowrap shadow-xs flex items-center space-x-1" id="centerCoreBadge_combat">
             <span id="centerCoreText_combat">攻击中心(待射入)</span>
           </div>
         </div>
 
-<!-- 全局插槽 DOM 交互层 (包含所有主盘与从动副盘真实可点击/拖拽安装插槽) -->
+        <!-- ✦ 已取下的中心节点悬浮拖拽层 (点击盘心后在此弹出实体节点，按住直接拖拽到其他盘外圈插槽！) ✦ -->
+        <div id="detachedCoresLayer" class="absolute inset-0 pointer-events-none" style="z-index: 45;"></div>
+
+        <!-- 全局插槽 DOM 交互层 (包含所有主盘与从动副盘真实可点击/拖拽安装插槽) -->
         <div id="slotsLayer" class="absolute inset-0 w-full h-full z-20 pointer-events-auto"></div>
 
         <!-- ✦ 全局多盘高能激光与跳格光束绘制层 (置于 slotsLayer 之上，清晰可见，带高亮碧青流光与步数气泡) ✦ -->
-        <svg id="opticalSvgLayer" class="absolute inset-0 w-full h-full pointer-events-none overflow-visible" style="z-index: 25;" viewBox="0 0 1440 760">
+        <svg id="opticalSvgLayer" class="absolute inset-0 w-full h-full pointer-events-none overflow-visible" style="z-index: 25;" viewBox="0 0 1640 860">
           <defs>
             <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
               <polygon points="0 0, 6 3, 0 6" fill="#0284c7" />
@@ -844,63 +809,58 @@
        2. 芯片构件元数据字典 (极简工程制图规范：ATK / DEF / BELT / HERB / SHIFT)
        ========================================================================= */
     const CHIP_SPECS = {
-  "core_support": {
-    "id": "core_support",
-    "sourceDisc": "support",
-    "isCenterCore": true,
-    "step": 1,
-    "tier": 3,
-    "category": "mobility",
-    "name": "【辅助盘·中心导光核】",
-    "tag": "导入线核心 · 步进1格",
-    "type": "step",
-    "shape": "shape-diamond",
-    "matClass": "token-funnel border-sky-400",
-    "buff": { "speed": 25, "flight_battery": 40 },
-    "buffDesc": "激活【辅助盘➔当前盘】跨盘导入线！光线由此插槽导入并顺时针步进 +1 格",
-    "stepDesc": "跨盘光路导入接收器 (+1格)",
-    "icon": "fa-gem",
-    "textColor": "text-sky-300",
-    "badgeColor": "bg-sky-50 text-sky-900 border-sky-400"
-  },
-  "core_industry": {
-    "id": "core_industry",
-    "sourceDisc": "industry",
-    "isCenterCore": true,
-    "step": 1,
-    "tier": 3,
-    "category": "industry",
-    "name": "【工厂盘·中心导光核】",
-    "tag": "导入线核心 · 步进1格",
-    "type": "step",
-    "shape": "shape-diamond",
-    "matClass": "token-belt border-amber-400",
-    "buff": { "craft_speed": 35, "mining_speed": 35 },
-    "buffDesc": "激活【工厂盘➔当前盘】跨盘导入线！光线由此插槽导入并顺时针步进 +1 格",
-    "stepDesc": "跨盘光路导入接收器 (+1格)",
-    "icon": "fa-gear",
-    "textColor": "text-amber-300",
-    "badgeColor": "bg-amber-50 text-amber-900 border-amber-400"
-  },
-  "core_combat": {
-    "id": "core_combat",
-    "sourceDisc": "combat",
-    "isCenterCore": true,
-    "step": 1,
-    "tier": 3,
-    "category": "combat",
-    "name": "【攻击盘·中心导光核】",
-    "tag": "导入线核心 · 步进1格",
-    "type": "step",
-    "shape": "shape-diamond",
-    "matClass": "token-atk border-rose-400",
-    "buff": { "atk": 45, "crit": 25 },
-    "buffDesc": "激活【攻击盘➔当前盘】跨盘导入线！光线由此插槽导入并顺时针步进 +1 格",
-    "stepDesc": "跨盘光路导入接收器 (+1格)",
-    "icon": "fa-khanda",
-    "textColor": "text-rose-300",
-    "badgeColor": "bg-rose-50 text-rose-900 border-rose-400"
-  },
+      // ======================== 【三大主盘·可取下中心导光极核】(点一下盘心取下 ➔ 拖拽到其他盘最外圈插槽激活导入线) ========================
+      core_support: {
+        id: 'core_support',
+        name: '辅助盘·中心极核',
+        tier: 'CORE',
+        category: 'shift',
+        isCenterCore: true,
+        sourceDisc: 'support',
+        type: 'step',
+        step: 1,
+        buff: { speed: 20, stamina: 25 },
+        buffDesc: '【跨盘导入源】引接🛡️辅助盘外圈射出点激光！身法+20% 灵力+25%',
+        stepDesc: '导入后顺时针 +1 格',
+        shape: 'rounded-full',
+        matClass: 'bg-sky-600 text-white border-2 border-amber-300 shadow-lg ring-2 ring-sky-400',
+        icon: 'fa-gem',
+        tag: '蓝盘中心核'
+      },
+      core_industry: {
+        id: 'core_industry',
+        name: '工厂盘·中心极核',
+        tier: 'CORE',
+        category: 'shift',
+        isCenterCore: true,
+        sourceDisc: 'industry',
+        type: 'step',
+        step: 1,
+        buff: { craft_speed: 35, mining_speed: 35 },
+        buffDesc: '【跨盘导入源】引接⚙️工厂盘外圈射出点激光！制造+35% 采矿+35%',
+        stepDesc: '导入后顺时针 +1 格',
+        shape: 'rounded-full',
+        matClass: 'bg-amber-500 text-slate-950 border-2 border-white shadow-lg ring-2 ring-amber-400',
+        icon: 'fa-gear',
+        tag: '黄盘中心核'
+      },
+      core_combat: {
+        id: 'core_combat',
+        name: '攻击盘·中心极核',
+        tier: 'CORE',
+        category: 'shift',
+        isCenterCore: true,
+        sourceDisc: 'combat',
+        type: 'step',
+        step: 1,
+        buff: { atk: 45, crit: 20 },
+        buffDesc: '【跨盘导入源】引接⚔️攻击盘外圈射出点激光！攻击+45% 暴击+20%',
+        stepDesc: '导入后顺时针 +1 格',
+        shape: 'rounded-full',
+        matClass: 'bg-rose-600 text-white border-2 border-amber-300 shadow-lg ring-2 ring-rose-400',
+        icon: 'fa-khanda',
+        tag: '红盘中心核'
+      },
 
   "t0_atk_1": {
     "id": "t0_atk_1",
@@ -2141,59 +2101,104 @@
 
     /* =========================================================================
        3. 三大主盘结构定义 + 境界环数配比 (练气:2/1环 | 筑基:3/2环 | 金丹:4/3环)
+          ★ 核心要求：除了1个大盘子(主修盘)，另外两个小盘子大小100%对齐！
+          ★ 全屏 / 2K / 4K 分辨率自适应缩放支持
        ========================================================================= */
-    let CURRENT_REALM = 'qi';      // 'qi' | 'foundation' | 'core'
-    let SPEC_DISC = 'combat';      // 'combat' | 'industry' | 'support' (单选主修盘)
+    const STAGE_LOGICAL_W = 1640;
+    const STAGE_LOGICAL_H = 860;
+    let USER_ZOOM_FACTOR = 1.0;
 
-    // 中心核状态：记录各盘中心是否已被射入充能、是否已被取下、安放在哪个外圈插槽
+    function fitStageToViewport() {
+      const section = document.getElementById('astrolabeStageSection');
+      const stage = document.getElementById('diskStage');
+      if (!section || !stage) return;
+      const availW = section.clientWidth || window.innerWidth;
+      const availH = section.clientHeight || (window.innerHeight - 64);
+      const baseScale = Math.min((availW - 16) / STAGE_LOGICAL_W, (availH - 16) / STAGE_LOGICAL_H);
+      const finalScale = Math.max(0.45, Math.min(3.5, baseScale * USER_ZOOM_FACTOR));
+      stage.style.transform = `scale(${finalScale.toFixed(4)})`;
+
+      const pctEl = document.getElementById('zoomPercentText');
+      if (pctEl) pctEl.textContent = `${Math.round(finalScale * 100)}%`;
+      const resBadge = document.getElementById('resolutionBadge');
+      if (resBadge) {
+        const w = window.screen.width * (window.devicePixelRatio || 1);
+        resBadge.textContent = w >= 3000 ? '4K超清自适应' : (w >= 2000 ? '2K高清自适应' : '全屏自适应');
+      }
+    }
+    window.fitStageToViewport = fitStageToViewport;
+
+    function adjustUserZoom(delta) {
+      USER_ZOOM_FACTOR = Math.max(0.6, Math.min(2.2, Number((USER_ZOOM_FACTOR + delta).toFixed(2))));
+      fitStageToViewport();
+    }
+    window.adjustUserZoom = adjustUserZoom;
+
+    function resetUserZoom() {
+      USER_ZOOM_FACTOR = 1.0;
+      fitStageToViewport();
+    }
+    window.resetUserZoom = resetUserZoom;
+
+    window.addEventListener('resize', fitStageToViewport);
+
+    let CURRENT_REALM = 'qi';      // 'qi' | 'foundation' | 'core'
+    let SPEC_DISC = 'combat';      // 'combat' | 'industry' | 'support' (单选大盘)
+
+    // 中心核状态：记录各盘中心是否已被射入充能、是否已被点一下取下(detached)、安放在哪个外圈插槽(placedAtSlot)
     const CENTER_CORE_STATE = {
       support:  { charged: false, detached: false, placedAtSlot: null },
       industry: { charged: false, detached: false, placedAtSlot: null },
       combat:   { charged: false, detached: false, placedAtSlot: null }
     };
 
+    // ★ 三大主盘采用完全统一的同心环半径规制 (1环R=72, 2环R=115, 3环R=158, 4环R=200)
+    // 确保任何时候：1个大盘(N+1环)尺寸突出，另外2个小盘(N环)大小100%对齐，且每环宽敞不拥挤！
     const DISC_CONFIG = {
       support: {
         key: 'support',
         name: '🛡️ 辅助盘',
         shortTag: '辅',
-        cx: 1210, cy: 160,
-        emitAngleDeg: 154.36, // 最外圈固定方位射出角
+        cx: 1310, cy: 250,
+        emitAngleDeg: 155, // 最外圈固定方位射出角
         nodeBorder: 'border-sky-500 hover:border-sky-700 bg-sky-50/95 hover:bg-sky-100',
         nodeDot: 'bg-sky-500',
         nodeBadge: 'bg-sky-600 text-white border-sky-300',
+        coreColorHex: '#0284c7',
         rings: [
-          { tier: 1, id: 'support_1', name: '辅助盘·1环(内)', radius: 26, slotCount: 4 },
-          { tier: 2, id: 'support_2', name: '辅助盘·2环',     radius: 48, slotCount: 6 },
-          { tier: 3, id: 'support_3', name: '辅助盘·3环',     radius: 70, slotCount: 8 },
-          { tier: 4, id: 'support_4', name: '辅助盘·4环(外)', radius: 92, slotCount: 10 }
+          { tier: 1, id: 'support_1', name: '辅助盘·1环(内)', radius: 72,  slotCount: 6 },
+          { tier: 2, id: 'support_2', name: '辅助盘·2环',     radius: 115, slotCount: 8 },
+          { tier: 3, id: 'support_3', name: '辅助盘·3环',     radius: 158, slotCount: 10 },
+          { tier: 4, id: 'support_4', name: '辅助盘·4环(外)', radius: 200, slotCount: 16 }
         ]
       },
       industry: {
         key: 'industry',
         name: '⚙️ 工厂盘',
         shortTag: '工',
-        cx: 960, cy: 280,
-        emitAngleDeg: 159.75, // 最外圈固定方位射出角
+        cx: 890, cy: 430,
+        emitAngleDeg: 162, // 最外圈固定方位射出角
         nodeBorder: 'border-amber-500 hover:border-amber-700 bg-amber-50/95 hover:bg-amber-100',
         nodeDot: 'bg-amber-500',
         nodeBadge: 'bg-amber-600 text-white border-amber-300',
+        coreColorHex: '#d97706',
         rings: [
-          { tier: 1, id: 'industry_1', name: '工厂盘·1环(内)', radius: 44,  slotCount: 4 },
-          { tier: 2, id: 'industry_2', name: '工厂盘·2环',     radius: 80,  slotCount: 8 },
-          { tier: 3, id: 'industry_3', name: '工厂盘·3环',     radius: 112, slotCount: 10 },
-          { tier: 4, id: 'industry_4', name: '工厂盘·4环(外)', radius: 144, slotCount: 12 }
+          { tier: 1, id: 'industry_1', name: '工厂盘·1环(内)', radius: 72,  slotCount: 6 },
+          { tier: 2, id: 'industry_2', name: '工厂盘·2环',     radius: 115, slotCount: 8 },
+          { tier: 3, id: 'industry_3', name: '工厂盘·3环',     radius: 158, slotCount: 10 },
+          { tier: 4, id: 'industry_4', name: '工厂盘·4环(外)', radius: 200, slotCount: 16 }
         ]
       },
       combat: {
         key: 'combat',
         name: '⚔️ 攻击盘',
         shortTag: '攻',
-        cx: 450, cy: 470,
-        emitAngleDeg: 156.57, // 最外圈固定方位射出角
+        cx: 390, cy: 490,
+        emitAngleDeg: 342, // 最外圈固定方位射出角
         nodeBorder: 'border-rose-500 hover:border-rose-700 bg-rose-50/95 hover:bg-rose-100',
         nodeDot: 'bg-rose-500',
         nodeBadge: 'bg-rose-600 text-white border-rose-300',
+        coreColorHex: '#e11d48',
         rings: [
           { tier: 1, id: 'combat_1', name: '攻击盘·1环(内)', radius: 72,  slotCount: 6 },
           { tier: 2, id: 'combat_2', name: '攻击盘·2环',     radius: 115, slotCount: 8 },
@@ -2289,6 +2294,109 @@
     }
     window.setSpecDisc = setSpecDisc;
 
+    // ★ 动态绘制三大主盘 SVG 精密工程外框 (保持第一版黑白青浑天仪卡尺制图风格，且两个小盘尺寸100%对齐！)
+    function renderDynamicSvgDiscCasings() {
+      const g = document.getElementById('dynamicSvgDiscCasings');
+      if (!g) return;
+      const counts = getActiveRingCounts();
+      let svgHtml = '';
+
+      for (const [dKey, dMeta] of Object.entries(DISC_CONFIG)) {
+        const maxTier = counts[dKey];
+        const outR = dMeta.rings[maxTier - 1].radius; // 1环72, 2环115, 3环158, 4环200
+        const bezelR = outR + 24;
+        const caliperR = outR + 38;
+        const caliperOuterR = outR + 50;
+        const cx = dMeta.cx;
+        const cy = dMeta.cy;
+
+        // 梳状精密分度卡尺弧 (位于盘体左上侧 145° ~ 225°)
+        const a1 = 145 * Math.PI / 180;
+        const a2 = 225 * Math.PI / 180;
+        const c1x = (cx + caliperR * Math.cos(a1)).toFixed(1);
+        const c1y = (cy + caliperR * Math.sin(a1)).toFixed(1);
+        const c2x = (cx + caliperR * Math.cos(a2)).toFixed(1);
+        const c2y = (cy + caliperR * Math.sin(a2)).toFixed(1);
+
+        const o1x = (cx + caliperOuterR * Math.cos(a1)).toFixed(1);
+        const o1y = (cy + caliperOuterR * Math.sin(a1)).toFixed(1);
+        const o2x = (cx + caliperOuterR * Math.cos(a2)).toFixed(1);
+        const o2y = (cy + caliperOuterR * Math.sin(a2)).toFixed(1);
+
+        let ticksHtml = '';
+        for (let deg = 145; deg <= 225; deg += 8) {
+          const rad = deg * Math.PI / 180;
+          const ix = (cx + caliperR * Math.cos(rad)).toFixed(1);
+          const iy = (cy + caliperR * Math.sin(rad)).toFixed(1);
+          const ox = (cx + caliperOuterR * Math.cos(rad)).toFixed(1);
+          const oy = (cy + caliperOuterR * Math.sin(rad)).toFixed(1);
+          const sw = (deg % 16 === 1) ? '1.8' : '1.1';
+          ticksHtml += `<line x1="${ix}" y1="${iy}" x2="${ox}" y2="${oy}" stroke="#0f172a" stroke-width="${sw}" />`;
+        }
+
+        // 盘底暗渠 (盘心 -> 最外圈固定射出点)
+        const emitRad = (dMeta.emitAngleDeg * Math.PI) / 180;
+        const emitX = (cx + outR * Math.cos(emitRad)).toFixed(1);
+        const emitY = (cy + outR * Math.sin(emitRad)).toFixed(1);
+
+        // 45° 剖面斜纹工程铭牌底框
+        const hatchW = Math.round(outR * 1.15);
+        const hatchH = 46;
+        const hatchX = Math.round(cx - hatchW / 2);
+        const hatchY = Math.round(cy - bezelR - 22);
+
+        svgHtml += `
+          <g id="svgDiscCasing_${dKey}">
+            <!-- 45° 精密剖面斜纹工程底框 -->
+            <rect x="${hatchX}" y="${hatchY}" width="${hatchW}" height="${hatchH}" fill="url(#blueprintHatch)" stroke="#0f172a" stroke-width="1.1" stroke-dasharray="3 3" opacity="0.85" />
+            <!-- 盘体纯白工程底盘与外圈分度环 (保持第一版黑白青精密工程风，不改盘体颜色) -->
+            <circle cx="${cx}" cy="${cy}" r="${bezelR + 8}" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="3 4" fill="none" />
+            <circle cx="${cx}" cy="${cy}" r="${bezelR}" stroke="#0f172a" stroke-width="1.6" fill="#ffffff" />
+            <circle cx="${cx}" cy="${cy}" r="${outR + 11}" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="2 2" fill="none" />
+            <!-- 黄道面刻度椭圆 -->
+            <ellipse cx="${cx}" cy="${cy}" rx="${bezelR + 6}" ry="${Math.round(bezelR * 0.36)}" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="3 4" fill="none" transform="rotate(-21.6 ${cx} ${cy})" opacity="0.7" />
+            <!-- 四极正交分度刻度线 -->
+            <g stroke="#0f172a" stroke-width="1.6">
+              <line x1="${cx}" y1="${cy - bezelR - 6}" x2="${cx}" y2="${cy - bezelR + 6}" />
+              <line x1="${cx}" y1="${cy + bezelR - 6}" x2="${cx}" y2="${cy + bezelR + 6}" />
+              <line x1="${cx - bezelR - 6}" y1="${cy}" x2="${cx - bezelR + 6}" y2="${cy}" />
+              <line x1="${cx + bezelR - 6}" y1="${cy}" x2="${cx + bezelR + 6}" y2="${cy}" />
+            </g>
+            <!-- 90° 梳状精密分度卡尺弧 -->
+            <path d="M ${c1x} ${c1y} A ${caliperR} ${caliperR} 0 0 1 ${c2x} ${c2y}" fill="none" stroke="#0f172a" stroke-width="1.8" />
+            <path d="M ${o1x} ${o1y} A ${caliperOuterR} ${caliperOuterR} 0 0 1 ${o2x} ${o2y}" fill="none" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="2 2" />
+            <g>${ticksHtml}</g>
+            <!-- 盘底暗渠虚线 (盘心 ➔ 最外圈射出点) -->
+            <line x1="${cx}" y1="${cy}" x2="${emitX}" y2="${emitY}" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="3 3" opacity="0.75" />
+          </g>
+        `;
+
+        // 同步更新该盘下方标牌的位置，使其紧贴外框底部
+        const badgeWrap = document.getElementById('discBadgeWrap_' + dKey);
+        if (badgeWrap) {
+          badgeWrap.style.left = `${cx}px`;
+          badgeWrap.style.top = `${cy + bezelR + 18}px`;
+        }
+      }
+
+      // 辅助盘右侧始发准直虚线与状态标签
+      const supMaxTier = counts.support;
+      const supOutR = DISC_CONFIG.support.rings[supMaxTier - 1].radius;
+      const entryRad = (345.17 * Math.PI) / 180;
+      const tapX = (DISC_CONFIG.support.cx + supOutR * Math.cos(entryRad)).toFixed(1);
+      const tapY = (DISC_CONFIG.support.cy + supOutR * Math.sin(entryRad)).toFixed(1);
+      svgHtml += `
+        <g id="c1ApertureTargetGroup">
+          <line x1="${tapX}" y1="${tapY}" x2="1542" y2="188" stroke="#0284c7" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.45" />
+          <circle cx="${tapX}" cy="${tapY}" r="6.5" stroke="#0284c7" stroke-width="1.5" fill="none" stroke-dasharray="2 2" />
+          <circle cx="${tapX}" cy="${tapY}" r="2.2" fill="#0284c7" />
+          <text id="c1ApertureStatusBadge" x="${Number(tapX) + 12}" y="${Number(tapY) - 10}" font-family="'Share Tech Mono', monospace" font-size="8.5" fill="#0284c7" font-weight="bold">● 靶心准直孔 (θ: 345.2°)</text>
+        </g>
+      `;
+
+      g.innerHTML = svgHtml;
+    }
+
     // 渲染三盘动态环体 (100%保持第一版黑白青精密工程样式，不改盘体颜色)
     function renderDynamicRingsDOM() {
       const container = document.getElementById('dynamicRingsDomContainer');
@@ -2301,10 +2409,10 @@
         const badgeEl = document.getElementById('badge_disc_' + dKey);
         if (badgeEl) {
           const isSpec = (SPEC_DISC === dKey);
-          badgeEl.textContent = `${maxTier}环·${isSpec ? '主修' : '次级'}`;
+          badgeEl.textContent = `${maxTier}环·${isSpec ? '大盘(主修)' : '小盘(对齐)'}`;
           badgeEl.className = isSpec
-            ? 'text-[9.5px] font-mono-sci font-bold px-1.5 rounded bg-slate-900 text-amber-300'
-            : 'text-[9.5px] font-mono-sci font-bold px-1.5 rounded bg-slate-100 text-slate-600';
+            ? 'text-[10px] font-mono-sci font-bold px-1.5 rounded bg-slate-900 text-amber-300'
+            : 'text-[10px] font-mono-sci font-bold px-1.5 rounded bg-slate-100 text-slate-600';
         }
 
         dMeta.rings.forEach(r => {
@@ -2319,7 +2427,7 @@
             <div id="${ringObj.elId}" class="absolute rounded-full ${borderClass} ring-trans pointer-events-none"
                  style="width: ${size}px; height: ${size}px; left: ${left}px; top: ${top}px; transform: rotate(${ringObj.currentAngle}deg);">
               <div class="absolute inset-0 rounded-full border border-dashed border-sky-400/70"></div>
-              <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[7.5px] font-mono-sci text-slate-800 font-bold bg-white px-1.5 rounded border border-slate-300 shadow-xs whitespace-nowrap">
+              <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[8px] font-mono-sci text-slate-800 font-bold bg-white px-1.5 rounded border border-slate-300 shadow-xs whitespace-nowrap">
                 ${r.tier}环·${r.slotCount}槽
               </div>
             </div>
@@ -2351,7 +2459,7 @@
             <div class="w-4 h-4 rounded-full bg-slate-900 border-2 border-sky-400 shadow flex items-center justify-center">
               <div class="w-1.5 h-1.5 rounded-full bg-sky-300 animate-ping"></div>
             </div>
-            <span class="absolute -bottom-3.5 px-1 rounded bg-slate-900 text-sky-300 text-[6.5px] font-mono-sci font-bold whitespace-nowrap border border-sky-500/60 shadow-xs">
+            <span class="absolute -bottom-3.5 px-1 rounded bg-slate-900 text-sky-300 text-[7px] font-mono-sci font-bold whitespace-nowrap border border-sky-500/60 shadow-xs">
               射出点
             </span>
           </div>
@@ -2360,68 +2468,290 @@
       layer.innerHTML = htmlStr;
     }
 
-    // 点击盘心极核：当光路射入中心后，可取下中心核放到其他盘外圈插槽以激活导入线！
+    /* =========================================================================
+       ★ 核心交互：点一下盘心取下中心节点 ➔ 按住拖拽到另外盘子的外圈插槽连上导入线！
+       ========================================================================= */
+    let IS_DRAGGING_CORE = false;
+    let DRAGGING_CORE_DISC = null;
+    let LAST_CORE_DRAG_TIMESTAMP = 0;
+
+    // 1. 点击盘心：点一下就把中心节点取下来（弹出悬浮可拖拽极核）！
     function handleCenterCoreClick(discKey, e) {
       if (e) e.stopPropagation();
+      if (Date.now() - LAST_CORE_DRAG_TIMESTAMP < 250) return; // 刚刚完成拖拽释放，不重复触发click
+
       const state = CENTER_CORE_STATE[discKey];
       const coreChipId = 'core_' + discKey;
 
-      // 如果该核心已经被安放在某个外圈插槽上，点击原盘心可将其召回
+      // 如果该中心核此前已经插在其他盘的外圈插槽上，点一下原盘心 ➔ 立即取下回到盘心旁待拖拽状态！
       if (state.placedAtSlot && BOARD_SLOTS[state.placedAtSlot]) {
         BOARD_SLOTS[state.placedAtSlot].chip = null;
         state.placedAtSlot = null;
-        state.detached = false;
-        ACTIVE_SELECTED_CHIP = null;
+        state.detached = true;
+        ACTIVE_SELECTED_CHIP = coreChipId;
         updateSelectedChipIndicator();
-        if (audio) audio.playRemove();
+        if (audio) audio.playSelect();
         refreshDiscRingsAndSlots();
         return;
       }
 
       if (!state.charged) {
-        alert(`【${DISC_CONFIG[discKey].name}中心尚未激活】\n请先将该盘光路向心射入中心（在环上放置「🔺 变轨三角」折向中心），中心充能后即可点击取下并放到其他盘外圈插槽激活导入线！`);
+        alert(`【${DISC_CONFIG[discKey].name}中心尚未充能】\n请先让光路射入本盘中心（在1环放置「🔺 变轨三角」折向中心），中心激活后点一下即可取下，并拖拽到其他盘的外圈插槽！`);
         return;
       }
 
-      // 已射入中心！取下中心核到鼠标选中状态
-      state.detached = true;
-      ACTIVE_SELECTED_CHIP = coreChipId;
-      if (audio) audio.playSelect();
+      // 切换“取下(detached)”与“归位”状态：点一下取下来！
+      if (!state.detached) {
+        state.detached = true;
+        ACTIVE_SELECTED_CHIP = coreChipId;
+        if (audio) audio.playSelect();
+      } else {
+        state.detached = false;
+        if (ACTIVE_SELECTED_CHIP === coreChipId) ACTIVE_SELECTED_CHIP = null;
+        if (audio) audio.playRemove();
+      }
       updateSelectedChipIndicator();
-      updateCenterHubsDOM();
-      renderPalette();
+      refreshDiscRingsAndSlots();
     }
     window.handleCenterCoreClick = handleCenterCoreClick;
 
+    // 2. 在盘心上按下鼠标并拖动：支持直接从盘心拖出中心节点！
+    function handleCenterHubMouseDown(discKey, e) {
+      if (e.button !== 0) return;
+      const state = CENTER_CORE_STATE[discKey];
+      if (!state.charged && !state.placedAtSlot) return;
+
+      const startX = e.clientX;
+      const startY = e.clientY;
+
+      const onCheckMove = (me) => {
+        if (Math.hypot(me.clientX - startX, me.clientY - startY) > 5) {
+          window.removeEventListener('mousemove', onCheckMove);
+          window.removeEventListener('mouseup', onCancelCheck);
+          // 如果原先插在某外圈槽，先拔出并进入拖拽
+          if (state.placedAtSlot && BOARD_SLOTS[state.placedAtSlot]) {
+            BOARD_SLOTS[state.placedAtSlot].chip = null;
+            state.placedAtSlot = null;
+          }
+          state.detached = true;
+          refreshDiscRingsAndSlots();
+          startCorePointerDrag(discKey, me);
+        }
+      };
+      const onCancelCheck = () => {
+        window.removeEventListener('mousemove', onCheckMove);
+        window.removeEventListener('mouseup', onCancelCheck);
+      };
+      window.addEventListener('mousemove', onCheckMove);
+      window.addEventListener('mouseup', onCancelCheck);
+    }
+    window.handleCenterHubMouseDown = handleCenterHubMouseDown;
+
+    // 3. 按住已取下的中心节点（或已插在外圈的中心核）进行丝滑拖拽 + 实时预览导入线 + 自动吸附目标盘外圈插槽！
+    function startCorePointerDrag(discKey, startEvent) {
+      if (startEvent) {
+        startEvent.preventDefault();
+        startEvent.stopPropagation();
+      }
+      const dMeta = DISC_CONFIG[discKey];
+      const coreChipId = 'core_' + discKey;
+      const spec = CHIP_SPECS[coreChipId];
+      const stage = document.getElementById('diskStage');
+      const svgBeams = document.getElementById('svgBeamsGroup');
+      if (!stage || !spec) return;
+
+      IS_DRAGGING_CORE = true;
+      DRAGGING_CORE_DISC = discKey;
+      CENTER_CORE_STATE[discKey].detached = true;
+      ACTIVE_SELECTED_CHIP = coreChipId;
+      updateSelectedChipIndicator();
+
+      // 高亮所有其他盘的最外圈插槽，提示玩家拖到这里！
+      const counts = getActiveRingCounts();
+      for (const [sKey, sData] of Object.entries(BOARD_SLOTS)) {
+        if (sData.discKey !== discKey && sData.tier === counts[sData.discKey]) {
+          const el = document.getElementById('slot_' + sKey);
+          if (el) el.classList.add('ring-4', 'ring-sky-400', 'scale-125', 'z-40');
+        }
+      }
+
+      // 创建跟随鼠标的实体极核拖拽浮标
+      let ghost = document.getElementById('coreDragGhostEl');
+      if (ghost) ghost.remove();
+      ghost = document.createElement('div');
+      ghost.id = 'coreDragGhostEl';
+      ghost.className = 'fixed pointer-events-none z-[9999] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center';
+      ghost.innerHTML = `
+        <div class="w-11 h-11 rounded-full ${spec.matClass} flex items-center justify-center shadow-2xl scale-115 animate-pulse">
+          <i class="fa-solid ${spec.icon} text-sm"></i>
+        </div>
+        <span class="mt-1 px-2 py-0.5 rounded-full bg-slate-900/95 text-amber-300 border border-sky-400 text-[10px] font-mono-sci font-bold shadow-lg whitespace-nowrap">
+          ⚡ 拖拽至其他盘【最外圈插槽】松开即连上！
+        </span>
+      `;
+      document.body.appendChild(ghost);
+
+      // 创建 SVG 动态预览导入线
+      let previewLine = document.getElementById('coreDragPreviewBeam');
+      if (previewLine) previewLine.remove();
+      previewLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      previewLine.setAttribute('id', 'coreDragPreviewBeam');
+      previewLine.setAttribute('stroke', '#00f0ff');
+      previewLine.setAttribute('stroke-width', '3.5');
+      previewLine.setAttribute('stroke-dasharray', '8 5');
+      previewLine.setAttribute('opacity', '0.9');
+      if (svgBeams) svgBeams.appendChild(previewLine);
+
+      const srcOutTier = counts[discKey];
+      const srcOutRing = DISK_RINGS[`${discKey}_${srcOutTier}`];
+      const emitRad = (dMeta.emitAngleDeg * Math.PI) / 180;
+      const emitX = dMeta.cx + srcOutRing.radius * Math.cos(emitRad);
+      const emitY = dMeta.cy + srcOutRing.radius * Math.sin(emitRad);
+      previewLine.setAttribute('x1', emitX);
+      previewLine.setAttribute('y1', emitY);
+
+      let hoveredTargetSlotKey = null;
+
+      function updateDragPos(clientX, clientY) {
+        ghost.style.left = `${clientX}px`;
+        ghost.style.top = `${clientY}px`;
+
+        const rect = stage.getBoundingClientRect();
+        const scale = rect.width / STAGE_LOGICAL_W;
+        const stageX = (clientX - rect.left) / scale;
+        const stageY = (clientY - rect.top) / scale;
+
+        // 寻找距离鼠标最近的其他盘最外圈插槽 (吸附半径 48px)
+        let bestKey = null;
+        let minDist = 48;
+        for (const [sKey, sData] of Object.entries(BOARD_SLOTS)) {
+          if (sData.discKey === discKey) continue;
+          if (sData.tier !== counts[sData.discKey]) continue;
+          const pos = getSlotWorldPos(sData.ringId, sData.slotIndex);
+          const d = Math.hypot(stageX - pos.x, stageY - pos.y);
+          if (d < minDist) {
+            minDist = d;
+            bestKey = sKey;
+          }
+        }
+
+        if (hoveredTargetSlotKey && hoveredTargetSlotKey !== bestKey) {
+          const prevEl = document.getElementById('slot_' + hoveredTargetSlotKey);
+          if (prevEl) prevEl.classList.remove('scale-150', 'ring-amber-400');
+        }
+        hoveredTargetSlotKey = bestKey;
+
+        if (bestKey) {
+          const targetSlotData = BOARD_SLOTS[bestKey];
+          const snapPos = getSlotWorldPos(targetSlotData.ringId, targetSlotData.slotIndex);
+          previewLine.setAttribute('x2', snapPos.x);
+          previewLine.setAttribute('y2', snapPos.y);
+          previewLine.setAttribute('stroke', '#fbbf24');
+          const curEl = document.getElementById('slot_' + bestKey);
+          if (curEl) curEl.classList.add('scale-150', 'ring-amber-400');
+        } else {
+          previewLine.setAttribute('x2', stageX);
+          previewLine.setAttribute('y2', stageY);
+          previewLine.setAttribute('stroke', '#00f0ff');
+        }
+      }
+
+      updateDragPos(startEvent.clientX, startEvent.clientY);
+
+      const onMouseMove = (me) => {
+        updateDragPos(me.clientX, me.clientY);
+      };
+
+      const onMouseUp = (ue) => {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+        IS_DRAGGING_CORE = false;
+        DRAGGING_CORE_DISC = null;
+        LAST_CORE_DRAG_TIMESTAMP = Date.now();
+
+        if (ghost) ghost.remove();
+        if (previewLine) previewLine.remove();
+
+        // 清除所有外圈插槽高亮
+        for (const sKey of Object.keys(BOARD_SLOTS)) {
+          const el = document.getElementById('slot_' + sKey);
+          if (el) el.classList.remove('ring-4', 'ring-sky-400', 'ring-amber-400', 'scale-125', 'scale-150', 'z-40');
+        }
+
+        if (hoveredTargetSlotKey) {
+          // 成功拖入目标盘外圈插槽 ➔ 立即连上跨盘导入线！
+          placeChip(hoveredTargetSlotKey, coreChipId);
+          if (audio) audio.playConnect();
+        } else {
+          refreshDiscRingsAndSlots();
+        }
+      };
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+    window.startCorePointerDrag = startCorePointerDrag;
+
+    // 4. 更新三大盘心与“已取下悬浮极核节点”的 DOM 表现
     function updateCenterHubsDOM() {
+      const detachedLayer = document.getElementById('detachedCoresLayer');
+      let detachedHtml = '';
+
       for (const [dKey, dMeta] of Object.entries(DISC_CONFIG)) {
         const state = CENTER_CORE_STATE[dKey];
         const boxEl = document.getElementById('centerCoreBox_' + dKey);
         const textEl = document.getElementById('centerCoreText_' + dKey);
         const badgeEl = document.getElementById('centerCoreBadge_' + dKey);
+        const spec = CHIP_SPECS['core_' + dKey];
         if (!boxEl || !textEl || !badgeEl) continue;
 
-        if (state.placedAtSlot) {
-          boxEl.className = 'relative w-10 h-10 rounded-full bg-slate-100 border-2 border-dashed border-slate-400 flex items-center justify-center shadow-inner transition-transform group-hover:scale-110';
-          textEl.textContent = '已外置(点击召回)';
-          badgeEl.className = 'mt-0.5 px-1.5 py-0.2 rounded bg-slate-800 text-[7px] font-mono-sci font-bold text-sky-300 border border-sky-400 whitespace-nowrap shadow-xs';
-        } else if (ACTIVE_SELECTED_CHIP === 'core_' + dKey) {
-          boxEl.className = 'relative w-10 h-10 rounded-full bg-amber-50 border-2 border-amber-500 ring-4 ring-amber-300/60 flex items-center justify-center shadow-lg animate-bounce';
-          textEl.textContent = '👉请点它盘外圈槽放置';
-          badgeEl.className = 'mt-0.5 px-1.5 py-0.2 rounded bg-amber-500 text-[7px] font-mono-sci font-bold text-slate-950 border border-slate-900 whitespace-nowrap shadow';
+        if (state.placedAtSlot && BOARD_SLOTS[state.placedAtSlot]) {
+          const targetSlot = BOARD_SLOTS[state.placedAtSlot];
+          const targetDiscName = DISC_CONFIG[targetSlot.discKey].shortTag;
+          boxEl.className = 'relative w-11 h-11 rounded-full bg-slate-100 border-2 border-dashed border-sky-500 flex items-center justify-center shadow-inner transition-transform group-hover:scale-110';
+          textEl.textContent = `🔗已连入[${targetDiscName}${targetSlot.tier}·${targetSlot.slotIndex + 1}](点此取下)`;
+          badgeEl.className = 'mt-0.5 px-1.5 py-0.5 rounded bg-slate-900 text-[7.5px] font-mono-sci font-bold text-sky-300 border border-sky-400 whitespace-nowrap shadow-xs';
+        } else if (state.detached) {
+          // ★ 已点一下取下！盘心显示空槽，旁边弹出可按住拖拽的实体中心节点！
+          boxEl.className = 'relative w-10 h-10 rounded-full bg-slate-200/80 border-2 border-dashed border-slate-500 flex items-center justify-center shadow-inner opacity-75';
+          textEl.textContent = '⭕ 已取下(点此归位)';
+          badgeEl.className = 'mt-0.5 px-1.5 py-0.5 rounded bg-slate-700 text-[7.5px] font-mono-sci font-bold text-slate-200 border border-slate-500 whitespace-nowrap';
+
+          // 在盘心右上方弹出醒目的“已取下中心核”，玩家可直接按住它拖拽到其他盘外圈！
+          const popX = dMeta.cx + 38;
+          const popY = dMeta.cy - 38;
+          detachedHtml += `
+            <div id="detachedCore_${dKey}"
+                 onmousedown="startCorePointerDrag('${dKey}', event)"
+                 class="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing flex flex-col items-center group z-50"
+                 style="left: ${popX}px; top: ${popY}px;"
+                 title="【已取下的${dMeta.name}中心节点】&#10;按住鼠标左键将它拖拽到其他盘子的最外圈插槽上，松开即可连上导入线！">
+              <div class="relative w-11 h-11 rounded-full ${spec.matClass} flex items-center justify-center shadow-2xl ring-4 ring-amber-300/80 animate-bounce group-hover:scale-125 transition-transform">
+                <i class="fa-solid ${spec.icon} text-sm pointer-events-none"></i>
+              </div>
+              <span class="mt-0.5 px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 border border-slate-900 text-[8px] font-mono-sci font-black whitespace-nowrap shadow-md">
+                🖐️已取下! 按住拖至它盘外圈
+              </span>
+            </div>
+          `;
         } else if (state.charged) {
-          boxEl.className = 'relative w-11 h-11 rounded-full bg-amber-50 border-2 border-amber-500 ring-4 ring-sky-400/50 flex items-center justify-center shadow-lg transition-transform group-hover:scale-125';
-          textEl.textContent = '⚡已射入·点击取下!';
-          badgeEl.className = 'mt-0.5 px-1.5 py-0.2 rounded bg-slate-900 text-[7.5px] font-mono-sci font-bold text-amber-300 border border-amber-400 whitespace-nowrap shadow-md';
+          boxEl.className = 'relative w-12 h-12 rounded-full bg-amber-50 border-2 border-amber-500 ring-4 ring-sky-400/60 flex items-center justify-center shadow-lg transition-transform group-hover:scale-125';
+          textEl.textContent = '⚡已射入·点一下取下!';
+          badgeEl.className = 'mt-0.5 px-1.5 py-0.5 rounded bg-slate-900 text-[8px] font-mono-sci font-bold text-amber-300 border border-amber-400 whitespace-nowrap shadow-md';
         } else {
-          boxEl.className = 'relative w-10 h-10 rounded-full bg-white border-2 border-slate-800 flex items-center justify-center shadow-md transition-transform group-hover:scale-110';
+          boxEl.className = 'relative w-11 h-11 rounded-full bg-white border-2 border-slate-800 flex items-center justify-center shadow-md transition-transform group-hover:scale-110';
           textEl.textContent = dMeta.name.slice(2).trim() + '中心(待射入)';
-          badgeEl.className = 'mt-0.5 px-1.5 py-0.2 rounded bg-white text-[7px] font-mono-sci font-bold text-slate-700 border border-slate-400 whitespace-nowrap shadow-xs';
+          badgeEl.className = 'mt-0.5 px-1.5 py-0.5 rounded bg-white text-[7.5px] font-mono-sci font-bold text-slate-700 border border-slate-400 whitespace-nowrap shadow-xs';
         }
+      }
+
+      if (detachedLayer) {
+        detachedLayer.innerHTML = detachedHtml;
       }
     }
 
     function refreshDiscRingsAndSlots() {
+      renderDynamicSvgDiscCasings();
       renderDynamicRingsDOM();
       renderOuterFixedNozzles();
       renderBoardSlots();
@@ -2429,7 +2759,6 @@
       solveStepNetwork();
       updateCenterHubsDOM();
     }
-
 
     /* =========================================================================
        4. 左侧芯片调色板渲染 (极简现代工程制图风格)
@@ -2735,8 +3064,36 @@ function renderPalette() {
             placeChip(slotKey, typeId);
           });
 
+          slotEl.addEventListener("mousedown", (e) => {
+            if (e.button !== 0) return;
+            const curChip = BOARD_SLOTS[slotKey] ? BOARD_SLOTS[slotKey].chip : null;
+            if (curChip && CHIP_SPECS[curChip] && CHIP_SPECS[curChip].isCenterCore) {
+              const srcDisc = CHIP_SPECS[curChip].sourceDisc;
+              const startX = e.clientX;
+              const startY = e.clientY;
+              const onMove = (me) => {
+                if (Math.hypot(me.clientX - startX, me.clientY - startY) > 5) {
+                  window.removeEventListener("mousemove", onMove);
+                  window.removeEventListener("mouseup", onUp);
+                  BOARD_SLOTS[slotKey].chip = null;
+                  CENTER_CORE_STATE[srcDisc].placedAtSlot = null;
+                  CENTER_CORE_STATE[srcDisc].detached = true;
+                  refreshDiscRingsAndSlots();
+                  startCorePointerDrag(srcDisc, me);
+                }
+              };
+              const onUp = () => {
+                window.removeEventListener("mousemove", onMove);
+                window.removeEventListener("mouseup", onUp);
+              };
+              window.addEventListener("mousemove", onMove);
+              window.addEventListener("mouseup", onUp);
+            }
+          });
+
           slotEl.addEventListener("click", (e) => {
             e.stopPropagation();
+            if (Date.now() - LAST_CORE_DRAG_TIMESTAMP < 250) return;
             if (ACTIVE_SELECTED_CHIP) {
               placeChip(slotKey, ACTIVE_SELECTED_CHIP);
             } else if (BOARD_SLOTS[slotKey] && BOARD_SLOTS[slotKey].chip) {
@@ -2781,19 +3138,19 @@ function renderPalette() {
           slotEl.style.opacity = "1";
           slotEl.style.pointerEvents = "auto";
           slotEl.style.zIndex = "35";
-          slotEl.style.width = "32px";
-          slotEl.style.height = "32px";
+          slotEl.style.width = "34px";
+          slotEl.style.height = "34px";
           slotEl.setAttribute("data-has-chip", "true");
           slotEl.innerHTML = `
-            <div class="relative w-full h-full flex items-center justify-center cursor-pointer group" title="${spec.name} (${spec.tag})\n${spec.buffDesc}\n${spec.stepDesc}\n【点击/右键】取回">
+            <div class="relative w-full h-full flex items-center justify-center cursor-pointer group" title="${spec.name} (${spec.tag})\n${spec.buffDesc}\n${spec.stepDesc}\n【按住可拖拽换槽 / 点击或右键取回】">
               <div class="absolute -inset-1 rounded-full border-2 ${discMeta.nodeBorder} pointer-events-none"></div>
               <div class="w-7 h-7 ${spec.shape} ${spec.matClass} flex items-center justify-center relative z-10 transition-transform group-hover:scale-110 shadow-md">
                 <i class="fa-solid ${spec.icon} text-xs pointer-events-none"></i>
               </div>
-              <div class="pointer-events-none absolute -bottom-2 -right-2 px-1 rounded text-[7px] font-mono-sci font-bold border shadow-xs z-20 ${discMeta.nodeBadge}">
+              <div class="pointer-events-none absolute -bottom-2 -right-2 px-1 rounded text-[7.5px] font-mono-sci font-bold border shadow-xs z-20 ${discMeta.nodeBadge}">
                 ${runeTag}
               </div>
-              <button onclick="removeChip('${slotKey}'); event.stopPropagation();" class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[9px] font-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-xs z-30" title="移除芯片">×</button>
+              <button onclick="removeChip('${slotKey}'); event.stopPropagation();" class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[9px] font-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-xs z-30" title="移除构件">×</button>
             </div>
           `;
         } else {
@@ -2803,15 +3160,14 @@ function renderPalette() {
           slotEl.style.opacity = "1";
           slotEl.style.pointerEvents = "auto";
           slotEl.style.zIndex = "10";
-          const isInnerSmall = (slotData.ringId === "support_1");
-          slotEl.style.width = isInnerSmall ? "20px" : "24px";
-          slotEl.style.height = isInnerSmall ? "20px" : "24px";
+          slotEl.style.width = "26px";
+          slotEl.style.height = "26px";
           slotEl.innerHTML = `
-            <div class="relative w-full h-full flex items-center justify-center group cursor-pointer" title="${discMeta.name} ${slotData.tier}环 第${slotData.slotIndex + 1}号节点 (${runeTag})\n【点击/拖拽】装配芯片或外置中心极核">
+            <div class="relative w-full h-full flex items-center justify-center group cursor-pointer" title="${discMeta.name} ${slotData.tier}环 第${slotData.slotIndex + 1}号节点 (${runeTag})\n【支持将取下的中心极核拖拽至此插槽】">
               <div class="w-full h-full rounded-full flex items-center justify-center transition-all border-2 border-dashed ${discMeta.nodeBorder} shadow-xs hover:scale-115">
-                <div class="w-2 h-2 rounded-full ${discMeta.nodeDot} pointer-events-none"></div>
+                <div class="w-2.5 h-2.5 rounded-full ${discMeta.nodeDot} pointer-events-none"></div>
               </div>
-              <span class="pointer-events-none absolute -bottom-2 px-0.5 rounded text-[6.5px] font-mono-sci font-bold border shadow-xs ${discMeta.nodeBadge}">${slotData.slotIndex + 1}</span>
+              <span class="pointer-events-none absolute -bottom-2 px-0.5 rounded text-[7px] font-mono-sci font-bold border shadow-xs ${discMeta.nodeBadge}">${slotData.slotIndex + 1}</span>
             </div>
           `;
         }
@@ -2828,13 +3184,13 @@ function renderPalette() {
       if (spec.isCenterCore) {
         const srcDisc = spec.sourceDisc;
         if (targetSlot.discKey === srcDisc) {
-          alert(`【${spec.name}】是从${DISC_CONFIG[srcDisc].name}取下的中心核，请将它放到【其他盘子的最外圈插槽】中以激活跨盘导入线！`);
+          alert(`【${spec.name}】是从${DISC_CONFIG[srcDisc].name}取下的中心核，请将它拖拽到【其他盘子的外圈插槽】中以激活跨盘导入线！`);
           return;
         }
         const counts = getActiveRingCounts();
         const targetOutermostTier = counts[targetSlot.discKey];
         if (targetSlot.tier !== targetOutermostTier) {
-          alert(`请将【${spec.name}】放入${DISC_CONFIG[targetSlot.discKey].name}的【最外圈 (${targetOutermostTier}环) 插槽】中，以引接跨盘导入线！`);
+          alert(`请将【${spec.name}】拖拽到${DISC_CONFIG[targetSlot.discKey].name}的【最外圈 (${targetOutermostTier}环) 插槽】中，以连上跨盘导入线！`);
           return;
         }
         // 清理该核心之前的放置记录
@@ -2848,12 +3204,12 @@ function renderPalette() {
         updateSelectedChipIndicator();
       }
 
-      // 如果覆盖了某个旧的中心核，恢复原中心核状态
+      // 如果覆盖了某个旧的中心核，恢复原中心核为已取下待拖拽状态
       const oldChip = targetSlot.chip;
       if (oldChip && CHIP_SPECS[oldChip] && CHIP_SPECS[oldChip].isCenterCore && oldChip !== typeId) {
         const oldSrc = CHIP_SPECS[oldChip].sourceDisc;
         CENTER_CORE_STATE[oldSrc].placedAtSlot = null;
-        CENTER_CORE_STATE[oldSrc].detached = false;
+        CENTER_CORE_STATE[oldSrc].detached = true;
       }
 
       targetSlot.chip = typeId;
@@ -2868,7 +3224,8 @@ function renderPalette() {
       if (spec && spec.isCenterCore) {
         const srcDisc = spec.sourceDisc;
         CENTER_CORE_STATE[srcDisc].placedAtSlot = null;
-        CENTER_CORE_STATE[srcDisc].detached = false;
+        // 从外圈取回时保留已取下悬浮状态，方便立即重新拖拽
+        CENTER_CORE_STATE[srcDisc].detached = true;
       }
       slotData.chip = null;
       if (audio) audio.playRemove();
@@ -2917,8 +3274,8 @@ function renderPalette() {
       for (const [dKey, dMeta] of Object.entries(DISC_CONFIG)) {
         const dist = Math.hypot(mouseX - dMeta.cx, mouseY - dMeta.cy);
         const maxTier = counts[dKey];
-        const maxRadius = dMeta.rings[maxTier - 1].radius + 26;
-        if (dist <= maxRadius && dist >= 14) {
+        const maxRadius = dMeta.rings[maxTier - 1].radius + 28;
+        if (dist <= maxRadius && dist >= 22) {
           let bestRingId = null;
           let minDiff = 9999;
           for (let t = 1; t <= maxTier; t++) {
@@ -2942,7 +3299,7 @@ function renderPalette() {
       stage.addEventListener('wheel', (e) => {
         e.preventDefault();
         const rect = stage.getBoundingClientRect();
-        const scale = rect.width / 1440;
+        const scale = rect.width / STAGE_LOGICAL_W;
         const mouseX = (e.clientX - rect.left) / scale;
         const mouseY = (e.clientY - rect.top) / scale;
 
@@ -2973,11 +3330,13 @@ function renderPalette() {
 
       stage.addEventListener('mousedown', (e) => {
         if (e.button !== 0) return;
+        if (IS_DRAGGING_CORE) return;
         if (e.target.closest('.keystone-hub-socket')) return;
+        if (e.target.closest('#detachedCoresLayer')) return;
         if (e.target.closest('#slotsLayer > div')) return;
 
         const rect = stage.getBoundingClientRect();
-        const scale = rect.width / 1440;
+        const scale = rect.width / STAGE_LOGICAL_W;
         const mouseX = (e.clientX - rect.left) / scale;
         const mouseY = (e.clientY - rect.top) / scale;
 
@@ -2994,7 +3353,7 @@ function renderPalette() {
         ringStartAngle = ring.currentAngle;
 
         const onMouseMove = (me) => {
-          if (!isDragging || !activeRingKey) return;
+          if (!isDragging || !activeRingKey || IS_DRAGGING_CORE) return;
           hasMoved = true;
           const curMouseX = (me.clientX - rect.left) / scale;
           const curMouseY = (me.clientY - rect.top) / scale;
@@ -3060,7 +3419,7 @@ function renderPalette() {
     }
 
     /* =========================================================================
-       7. 三大主盘光路解算 + 中心核取下外置激活【跨盘导入线】机制
+       7. 三大主盘光路解算 + 中心核取下拖拽至它盘外圈激活【跨盘导入线】机制
        ========================================================================= */
     function solveStepNetwork() {
       const svgBeams = document.getElementById('svgBeamsGroup');
@@ -3170,7 +3529,7 @@ function renderPalette() {
               const emitY = dMeta.cy + outRing.radius * Math.sin(emitRad);
               drawBeamLine(svgBeams, dMeta.cx, dMeta.cy, emitX, emitY, 'gold', false);
 
-              logSteps.push(`👑 【${dMeta.name}中心射入成功！】盘心极核已充能！可点击盘心将其取下，放入其他盘外圈插槽以激活跨盘导入线！`);
+              logSteps.push(`👑 【${dMeta.name}中心射入成功！】点一下盘心即可取下中心节点，拖拽至其他盘外圈插槽即可连上导入线！`);
               break;
             }
           } else {
@@ -3187,9 +3546,9 @@ function renderPalette() {
       }
 
       // =========================================================================
-      // 第一阶段：右侧始发源 (1380, 115) 射入 🛡️ 辅助盘 当前最外圈
+      // 第一阶段：右侧始发源 (1542, 188) 射入 🛡️ 辅助盘 当前最外圈
       // =========================================================================
-      const rightEmitterPos = { x: 1380, y: 115 };
+      const rightEmitterPos = { x: 1542, y: 188 };
       const supOutTier = counts.support;
       const supOutRingId = `support_${supOutTier}`;
       const supOutRing = DISK_RINGS[supOutRingId];
@@ -3221,8 +3580,7 @@ function renderPalette() {
       }
 
       // =========================================================================
-      // 第二阶段：检查各盘中心核是否已被取下并放入其他盘最外圈插槽 ➔ 激活跨盘【导入线】！
-      // 支持多级串联（如：辅助盘中心核 ➔ 工厂盘外圈 ➔ 工厂盘中心核 ➔ 攻击盘外圈）
+      // 第二阶段：检查各盘中心核是否已被取下并拖入其他盘最外圈插槽 ➔ 激活跨盘【导入线】！
       // =========================================================================
       const triggeredDiscs = new Set(['support']);
       for (let pass = 0; pass < 3; pass++) {
@@ -3277,7 +3635,6 @@ function renderPalette() {
       updatePanels(chainNodes, totalBuff, constellationMultiplier, crossActivated, logSteps, hitFloorNodesSet, activeKeystones);
       updateCenterHubsDOM();
     }
-
 
     /* =========================================================================
        8. SVG 精密工程绘制辅助
@@ -3818,34 +4175,54 @@ function renderPalette() {
 
       if (type === 'multi_disc_overdrive') {
         switchFloorShape('dipper');
-        // 预设为练气期（攻击盘主修2环，工厂盘1环，辅助盘1环）
+        // 预设为练气期（1个大盘：攻击盘2环；2个等大小盘：工厂盘1环、辅助盘1环）
         CURRENT_REALM = 'qi';
         SPEC_DISC = 'combat';
 
-        // 1. 辅助盘 1环 (4槽)：旋转 75.2° 使第1槽对准 345.2° 始发源
-        DISK_RINGS['support_1'].currentAngle = 75.2;
-        BOARD_SLOTS['support_1_0'].chip = 't0_speed_1';      // 0 ➔ 1
-        BOARD_SLOTS['support_1_1'].chip = 't0_atk_1';        // 1 ➔ 2
-        BOARD_SLOTS['support_1_2'].chip = 'chip_triangle_in'; // 2 ➔ 射入辅助盘中心！
+        // 1. 辅助盘 1环 (6槽，R=72)：旋转 15.2° 使第2槽(索引1)精准对准 345.2° 始发源
+        DISK_RINGS['support_1'].currentAngle = 15.2;
+        BOARD_SLOTS['support_1_1'].chip = 't0_speed_1';      // 1 ➔ 2
+        BOARD_SLOTS['support_1_2'].chip = 't0_atk_1';        // 2 ➔ 3
+        BOARD_SLOTS['support_1_3'].chip = 'chip_triangle_in'; // 3 ➔ 射入辅助盘中心！
 
-        // 2. 将【辅助盘中心核 (core_support)】取下并放入【工厂盘 1环 第 1 槽】，激活辅助盘➔工厂盘导入线！
+        // 2. 工厂盘 1环 (6槽，R=72)：预装好后续芯片；辅助盘中心核连入第2槽(索引1)
         BOARD_SLOTS['industry_1_1'].chip = 'core_support';   // 1 ➔ 2 (导入线入口!)
         CENTER_CORE_STATE.support.detached = true;
         CENTER_CORE_STATE.support.placedAtSlot = 'industry_1_1';
         BOARD_SLOTS['industry_1_2'].chip = 't0_craft_1';     // 2 ➔ 3
         BOARD_SLOTS['industry_1_3'].chip = 'chip_triangle_in'; // 3 ➔ 射入工厂盘中心！
 
-        // 3. 将【工厂盘中心核 (core_industry)】取下并放入【攻击盘 2环(外圈) 第 2 槽】，激活工厂盘➔攻击盘导入线！
+        // 3. 攻击盘 2环(外圈, 8槽, R=115)：工厂盘中心核连入第3槽(索引2)
         BOARD_SLOTS['combat_2_2'].chip = 'core_industry';    // 2 ➔ 3 (导入线入口!)
         CENTER_CORE_STATE.industry.detached = true;
         CENTER_CORE_STATE.industry.placedAtSlot = 'combat_2_2';
         BOARD_SLOTS['combat_2_3'].chip = 't1_atk_3';         // 3 + 3 = 6
         BOARD_SLOTS['combat_2_6'].chip = 'chip_triangle_in'; // 6 ➔ 向心折射入攻击盘 1环！
 
-        // 4. 攻击盘 1环 (6槽)：接收入射并射入攻击盘中心！
+        // 4. 攻击盘 1环 (6槽, R=72)：接收入射并射入攻击盘中心！
         DISK_RINGS['combat_1'].currentAngle = 30;
         BOARD_SLOTS['combat_1_4'].chip = 't0_def_2';         // 4 + 2 = 0
         BOARD_SLOTS['combat_1_0'].chip = 'chip_triangle_in'; // 0 ➔ 射入攻击盘中心！
+      } else if (type === 'outer_chain') {
+        switchFloorShape('dipper');
+        CURRENT_REALM = 'qi';
+        SPEC_DISC = 'combat';
+
+        // 演示“点一下取下中心节点 ➔ 拖拽到另外盘子外圈连上”的待连线工况：
+        // 辅助盘已射入中心！工厂盘与攻击盘内部芯片已就绪，等待玩家点一下辅助盘中心取下并拖到工厂盘外圈第2槽！
+        DISK_RINGS['support_1'].currentAngle = 15.2;
+        BOARD_SLOTS['support_1_1'].chip = 't0_speed_1';
+        BOARD_SLOTS['support_1_2'].chip = 't0_atk_1';
+        BOARD_SLOTS['support_1_3'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['industry_1_2'].chip = 't0_craft_1';
+        BOARD_SLOTS['industry_1_3'].chip = 'chip_triangle_in';
+
+        BOARD_SLOTS['combat_2_3'].chip = 't1_atk_3';
+        BOARD_SLOTS['combat_2_6'].chip = 'chip_triangle_in';
+        DISK_RINGS['combat_1'].currentAngle = 30;
+        BOARD_SLOTS['combat_1_4'].chip = 't0_def_2';
+        BOARD_SLOTS['combat_1_0'].chip = 'chip_triangle_in';
       }
 
       setRealm(CURRENT_REALM);
@@ -3874,6 +4251,8 @@ function renderPalette() {
       renderPalette();
       initRingDirectDragging();
       loadScenario('multi_disc_overdrive');
+      fitStageToViewport();
+      setTimeout(fitStageToViewport, 120);
     });
   </script>
 </body>
