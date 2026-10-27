@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>中央处理器 · 三才光路阵盘系统 (攻击/工厂/辅助)</title>
+  <title>中央处理器 · 三大主盘系统 (攻击/工厂/辅助)</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -13,8 +13,8 @@
 
     body {
       font-family: 'Noto Sans SC', sans-serif;
-      background-color: #0b1120;
-      color: #e2e8f0;
+      background-color: #f8fafc;
+      color: #0f172a;
       overflow: hidden;
       user-select: none;
     }
@@ -22,13 +22,16 @@
     .font-mono-sci { font-family: 'Share Tech Mono', monospace; }
     .font-cinzel { font-family: 'Cinzel', serif; }
 
+    /* 纯净浅白工程图纸网格底纹 */
     .blueprint-canvas {
-      background-color: #0b1120;
+      background-color: #f8fafc;
       background-image: 
-        radial-gradient(circle at 50% 50%, rgba(30, 58, 138, 0.25) 0%, rgba(11, 17, 32, 0.95) 100%),
-        linear-gradient(to right, rgba(51, 65, 85, 0.2) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(51, 65, 85, 0.2) 1px, transparent 1px);
-      background-size: 100% 100%, 30px 30px, 30px 30px;
+        linear-gradient(to right, rgba(148, 163, 184, 0.15) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.15) 1px, transparent 1px),
+        linear-gradient(to right, rgba(148, 163, 184, 0.3) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.3) 1px, transparent 1px);
+      background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+      background-position: -1px -1px;
     }
 
     .ring-trans {
@@ -37,7 +40,7 @@
     }
 
     .laser-glow {
-      filter: drop-shadow(0 0 6px #00f0ff) drop-shadow(0 0 14px rgba(2, 132, 199, 0.8));
+      filter: drop-shadow(0 0 5px #0284c7) drop-shadow(0 0 10px rgba(14, 165, 233, 0.6));
     }
 
     .laser-core {
@@ -61,98 +64,98 @@
       border: none !important;
     }
 
-    /* 绚丽芯片阶梯配色 */
+    /* 绚丽彩色芯片视觉 */
     .chip-bg-combat {
-      background: radial-gradient(circle, #f43f5e 0%, #9f1239 100%);
-      box-shadow: 0 0 10px rgba(244, 63, 94, 0.6), inset 0 0 4px rgba(255, 255, 255, 0.5);
-      border: 1.5px solid #fecdd3;
+      background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+      box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+      border: 1.5px solid #fecaca;
     }
     .chip-bg-industry {
-      background: radial-gradient(circle, #f59e0b 0%, #b45309 100%);
-      box-shadow: 0 0 10px rgba(245, 158, 11, 0.6), inset 0 0 4px rgba(255, 255, 255, 0.5);
+      background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
       border: 1.5px solid #fef3c7;
     }
     .chip-bg-mobility {
-      background: radial-gradient(circle, #0ea5e9 0%, #0369a1 100%);
-      box-shadow: 0 0 10px rgba(14, 165, 233, 0.6), inset 0 0 4px rgba(255, 255, 255, 0.5);
-      border: 1.5px solid #e0f2fe;
+      background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+      box-shadow: 0 2px 6px rgba(14, 165, 233, 0.4);
+      border: 1.5px solid #bae6fd;
     }
     .chip-bg-shift {
-      background: radial-gradient(circle, #a855f7 0%, #6b21a8 100%);
-      box-shadow: 0 0 10px rgba(168, 85, 247, 0.6), inset 0 0 4px rgba(255, 255, 255, 0.5);
+      background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+      box-shadow: 0 2px 6px rgba(168, 85, 247, 0.4);
       border: 1.5px solid #f3e8ff;
     }
     .chip-bg-keystone {
-      background: radial-gradient(circle, #10b981 0%, #064e3b 100%);
-      box-shadow: 0 0 12px rgba(16, 185, 129, 0.8), inset 0 0 6px rgba(255, 255, 255, 0.7);
+      background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+      box-shadow: 0 3px 8px rgba(16, 185, 129, 0.5);
       border: 2px solid #a7f3d0;
     }
   </style>
 </head>
-<body class="w-screen h-screen flex flex-col antialiased">
+<body class="w-screen h-screen flex flex-col antialiased bg-slate-50 text-slate-800">
 
-  <!-- 侧边栏折叠按键 -->
-  <button id="btnOpenLeft" onclick="toggleLeftPanel()" class="fixed left-0 top-1/2 -translate-y-1/2 z-50 bg-slate-900/90 border border-slate-700 hover:border-sky-500 text-sky-400 py-4 px-2.5 rounded-r-2xl shadow-2xl flex flex-col items-center space-y-2 text-xs font-mono-sci font-bold backdrop-blur transition" title="展开/收起芯片库">
-    <i class="fa-solid fa-microchip"></i>
-    <span class="text-[10px] tracking-widest" style="writing-mode: vertical-rl;">芯片库</span>
-    <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
+  <!-- 侧边栏折叠浮动按键 -->
+  <button id="btnOpenLeft" onclick="toggleLeftPanel()" class="fixed left-0 top-1/2 -translate-y-1/2 z-50 bg-white border border-slate-300 hover:border-sky-500 text-slate-800 py-4 px-2.5 rounded-r-2xl shadow-xl flex flex-col items-center space-y-2 text-xs font-mono-sci font-bold transition group" title="展开/收起芯片库">
+    <i class="fa-solid fa-microchip text-sky-600 group-hover:scale-125 transition-transform"></i>
+    <span class="text-[10px] tracking-widest text-slate-700" style="writing-mode: vertical-rl;">芯片库</span>
+    <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
   </button>
 
-  <button id="btnOpenRight" onclick="toggleRightPanel()" class="fixed right-0 top-1/2 -translate-y-1/2 z-50 bg-slate-900/90 border border-slate-700 hover:border-amber-500 text-amber-400 py-4 px-2.5 rounded-l-2xl shadow-2xl flex flex-col items-center space-y-2 text-xs font-mono-sci font-bold backdrop-blur transition" title="展开/收起动力看板">
-    <i class="fa-solid fa-bolt"></i>
-    <span class="text-[10px] tracking-widest" style="writing-mode: vertical-rl;">动力看板</span>
-    <i class="fa-solid fa-chevron-left text-[10px] text-slate-500"></i>
+  <button id="btnOpenRight" onclick="toggleRightPanel()" class="fixed right-0 top-1/2 -translate-y-1/2 z-50 bg-white border border-slate-300 hover:border-amber-500 text-slate-800 py-4 px-2.5 rounded-l-2xl shadow-xl flex flex-col items-center space-y-2 text-xs font-mono-sci font-bold transition group" title="展开/收起动力看板">
+    <i class="fa-solid fa-bolt text-amber-500 group-hover:scale-125 transition-transform"></i>
+    <span class="text-[10px] tracking-widest text-slate-700" style="writing-mode: vertical-rl;">动力看板</span>
+    <i class="fa-solid fa-chevron-left text-[10px] text-slate-400"></i>
   </button>
 
-  <!-- 顶部导航栏 -->
-  <header class="h-16 bg-slate-900/90 border-b border-slate-800 px-6 flex items-center justify-between z-30 shrink-0 shadow-lg backdrop-blur-md">
+  <!-- 顶部导航栏 (清爽工程白色) -->
+  <header class="h-16 bg-white/95 border-b border-slate-200 px-6 flex items-center justify-between z-30 shrink-0 shadow-xs backdrop-blur-md">
     
-    <!-- 左：标题 -->
+    <!-- 左：纯净标题 -->
     <div class="flex items-center space-x-3.5">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-sky-600 flex items-center justify-center text-white shadow-md border border-sky-400/30">
-        <i class="fa-solid fa-circle-nodes text-lg"></i>
+      <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm border border-slate-700">
+        <i class="fa-solid fa-circle-nodes text-lg text-sky-400"></i>
       </div>
       <div>
         <div class="flex items-center space-x-2">
-          <h1 class="text-base font-black tracking-widest text-white font-cinzel">
-            中央处理器 · 三才光路阵盘
+          <h1 class="text-base font-black tracking-widest text-slate-900 font-cinzel">
+            中央处理器
           </h1>
-          <span class="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/30 font-mono-sci font-bold">
-            TRI-ARRAY MATRIX
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-300 font-mono-sci font-bold">
+            三大主盘系统
           </span>
         </div>
-        <p class="text-[10px] text-slate-400 font-mono-sci">离火攻击盘 · 辰土工厂盘 · 碧水辅助盘</p>
+        <p class="text-[10px] text-slate-500 font-mono-sci">攻击盘 · 工厂盘 · 辅助盘</p>
       </div>
     </div>
 
     <!-- 中：境界选择 & 主特化盘单选 -->
     <div class="flex items-center space-x-4">
       <!-- 境界切换 -->
-      <div class="flex items-center bg-slate-950/80 border border-slate-800 rounded-xl p-1 space-x-1 text-xs font-bold shadow-inner">
-        <span class="text-[10px] text-slate-400 px-2 font-mono-sci">境界:</span>
-        <button onclick="setRealm('qi')" id="btn_realm_qi" class="px-2.5 py-1 rounded-lg bg-sky-600 text-white font-mono-sci shadow-xs transition" title="练气期：最大1个2环，其余2个1环">
-          练气期 <span class="text-[10px] text-sky-200 font-normal">(主2环/次1环)</span>
+      <div class="flex items-center bg-slate-100 border border-slate-200 rounded-xl p-1 space-x-1 text-xs font-bold shadow-inner">
+        <span class="text-[10px] text-slate-500 px-2 font-mono-sci">境界:</span>
+        <button onclick="setRealm('qi')" id="btn_realm_qi" class="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-mono-sci shadow-xs transition" title="练气期：最大1个2环，其余2个1环">
+          练气期 <span class="text-[10px] text-sky-300 font-normal">(主2环/次1环)</span>
         </button>
-        <button onclick="setRealm('foundation')" id="btn_realm_foundation" class="px-2.5 py-1 rounded-lg bg-transparent text-slate-400 hover:text-white font-mono-sci transition" title="筑基期：最大1个3环，其余2个2环">
-          筑基期 <span class="text-[10px] text-amber-400 font-normal">(主3环/次2环)</span>
+        <button onclick="setRealm('foundation')" id="btn_realm_foundation" class="px-2.5 py-1 rounded-lg bg-white text-slate-700 hover:text-slate-900 font-mono-sci transition border border-slate-200" title="筑基期：最大1个3环，其余2个2环">
+          筑基期 <span class="text-[10px] text-amber-600 font-normal">(主3环/次2环)</span>
         </button>
-        <button onclick="setRealm('core')" id="btn_realm_core" class="px-2.5 py-1 rounded-lg bg-transparent text-slate-400 hover:text-white font-mono-sci transition" title="金丹期：最大1个4环，其余2个3环">
-          金丹期 <span class="text-[10px] text-purple-400 font-normal">(主4环/次3环)</span>
+        <button onclick="setRealm('core')" id="btn_realm_core" class="px-2.5 py-1 rounded-lg bg-white text-slate-700 hover:text-slate-900 font-mono-sci transition border border-slate-200" title="金丹期：最大1个4环，其余2个3环">
+          金丹期 <span class="text-[10px] text-purple-600 font-normal">(主4环/次3环)</span>
         </button>
       </div>
 
-      <!-- 主特化盘单选项 -->
-      <div class="flex items-center bg-slate-950/80 border border-slate-800 rounded-xl p-1 space-x-1 text-xs font-bold shadow-inner">
-        <span class="text-[10px] text-slate-400 px-2 font-mono-sci">主特化:</span>
-        <button onclick="setSpecialization('combat')" id="btn_spec_combat" class="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-mono-sci shadow-xs transition flex items-center space-x-1.5" title="主攻特化：攻击盘享有当前境界最大环数">
+      <!-- 主特化盘单选 -->
+      <div class="flex items-center bg-slate-100 border border-slate-200 rounded-xl p-1 space-x-1 text-xs font-bold shadow-inner">
+        <span class="text-[10px] text-slate-500 px-2 font-mono-sci">主修特化:</span>
+        <button onclick="setSpecialization('combat')" id="btn_spec_combat" class="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-mono-sci shadow-xs transition flex items-center space-x-1.5" title="主修攻击盘：攻击盘享有当前境界最大环数">
           <i class="fa-solid fa-swords text-xs"></i>
           <span>主修攻击盘</span>
         </button>
-        <button onclick="setSpecialization('industry')" id="btn_spec_industry" class="px-2.5 py-1 rounded-lg bg-transparent text-slate-400 hover:text-amber-400 font-mono-sci transition flex items-center space-x-1.5" title="主工特化：工厂盘享有当前境界最大环数">
+        <button onclick="setSpecialization('industry')" id="btn_spec_industry" class="px-2.5 py-1 rounded-lg bg-white text-slate-700 hover:text-amber-700 font-mono-sci transition border border-slate-200 flex items-center space-x-1.5" title="主修工厂盘：工厂盘享有当前境界最大环数">
           <i class="fa-solid fa-industry text-xs"></i>
           <span>主修工厂盘</span>
         </button>
-        <button onclick="setSpecialization('support')" id="btn_spec_support" class="px-2.5 py-1 rounded-lg bg-transparent text-slate-400 hover:text-sky-400 font-mono-sci transition flex items-center space-x-1.5" title="主辅特化：辅助盘享有当前境界最大环数">
+        <button onclick="setSpecialization('support')" id="btn_spec_support" class="px-2.5 py-1 rounded-lg bg-white text-slate-700 hover:text-sky-700 font-mono-sci transition border border-slate-200 flex items-center space-x-1.5" title="主修辅助盘：辅助盘享有当前境界最大环数">
           <i class="fa-solid fa-shield-halved text-xs"></i>
           <span>主修辅助盘</span>
         </button>
@@ -161,12 +164,12 @@
 
     <!-- 右：重置角度 + 清空 -->
     <div class="flex items-center space-x-2 shrink-0">
-      <button onclick="resetAllRotations()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 transition flex items-center space-x-1.5" title="重置各环旋转角度为 0°">
-        <i class="fa-solid fa-compass text-sky-400"></i>
+      <button onclick="resetAllRotations()" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-300 text-xs font-bold text-slate-700 transition shadow-xs flex items-center space-x-1.5" title="重置各环旋转角度为 0°">
+        <i class="fa-solid fa-compass text-slate-500"></i>
         <span>重置角度</span>
       </button>
 
-      <button onclick="clearBoard()" class="px-3 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/80 text-xs font-bold text-rose-300 transition flex items-center space-x-1.5" title="清空盘面所有芯片">
+      <button onclick="clearBoard()" class="px-3 py-1.5 rounded-lg bg-white hover:bg-rose-50 border border-slate-300 hover:border-rose-400 text-xs font-bold text-slate-700 hover:text-rose-600 transition shadow-xs flex items-center space-x-1.5" title="清空盘面所有芯片">
         <i class="fa-solid fa-trash-can"></i>
         <span>清空</span>
       </button>
@@ -177,136 +180,152 @@
   <!-- 主体区域 -->
   <main class="flex-1 flex overflow-hidden relative">
     
-    <!-- 左侧构件库 -->
-    <aside id="leftPanel" class="w-80 bg-slate-900 border-r border-slate-800 flex flex-col z-20 shrink-0 shadow-2xl collapsible-sidebar collapsed">
-      <div class="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+    <!-- 左侧构件库 (纯白工程风) -->
+    <aside id="leftPanel" class="w-80 bg-white border-r border-slate-200 flex flex-col z-20 shrink-0 shadow-lg collapsible-sidebar collapsed">
+      <div class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
         <div class="flex items-center space-x-2">
-          <i class="fa-solid fa-shapes text-sky-400 text-sm"></i>
-          <span class="text-xs font-bold text-slate-200 tracking-wider font-mono-sci uppercase">芯片与光路构件库</span>
+          <i class="fa-solid fa-shapes text-sky-600 text-sm"></i>
+          <span class="text-xs font-bold text-slate-800 tracking-wider font-mono-sci uppercase">芯片与构件库</span>
         </div>
-        <button onclick="toggleLeftPanel()" class="w-7 h-7 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+        <button onclick="toggleLeftPanel()" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition">
           <i class="fa-solid fa-chevron-left text-xs"></i>
         </button>
       </div>
 
       <!-- 分类标签 -->
-      <div class="p-2 border-b border-slate-800 flex items-center space-x-1 overflow-x-auto text-[11px] font-mono-sci no-scrollbar">
-        <button onclick="filterPalette('all')" id="tab_all" class="px-2 py-0.5 rounded bg-sky-600 text-white font-bold shrink-0">全部</button>
-        <button onclick="filterPalette('combat')" id="tab_combat" class="px-2 py-0.5 rounded bg-slate-800 text-rose-400 hover:bg-slate-700 shrink-0 font-bold">⚔️ 战斗</button>
-        <button onclick="filterPalette('industry')" id="tab_industry" class="px-2 py-0.5 rounded bg-slate-800 text-amber-400 hover:bg-slate-700 shrink-0 font-bold">⚙️ 工业</button>
-        <button onclick="filterPalette('mobility')" id="tab_mobility" class="px-2 py-0.5 rounded bg-slate-800 text-sky-400 hover:bg-slate-700 shrink-0 font-bold">🛡️ 辅助</button>
-        <button onclick="filterPalette('shift')" id="tab_shift" class="px-2 py-0.5 rounded bg-slate-800 text-purple-400 hover:bg-slate-700 shrink-0 font-bold">🪞 变轨</button>
-        <button onclick="filterPalette('keystone')" id="tab_keystone" class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-900/60 shrink-0 font-bold">💎 核心</button>
+      <div class="p-2 border-b border-slate-200 flex items-center space-x-1 overflow-x-auto text-[11px] font-mono-sci no-scrollbar">
+        <button onclick="filterPalette('all')" id="tab_all" class="px-2 py-0.5 rounded bg-slate-900 text-white font-bold shrink-0">全部</button>
+        <button onclick="filterPalette('combat')" id="tab_combat" class="px-2 py-0.5 rounded bg-white text-rose-700 border border-rose-200 hover:border-rose-500 shrink-0 font-bold">⚔️ 战斗</button>
+        <button onclick="filterPalette('industry')" id="tab_industry" class="px-2 py-0.5 rounded bg-white text-amber-700 border border-amber-200 hover:border-amber-500 shrink-0 font-bold">⚙️ 工业</button>
+        <button onclick="filterPalette('mobility')" id="tab_mobility" class="px-2 py-0.5 rounded bg-white text-sky-700 border border-sky-200 hover:border-sky-500 shrink-0 font-bold">🛡️ 辅助</button>
+        <button onclick="filterPalette('shift')" id="tab_shift" class="px-2 py-0.5 rounded bg-white text-purple-700 border border-purple-200 hover:border-purple-500 shrink-0 font-bold">🪞 变轨</button>
+        <button onclick="filterPalette('keystone')" id="tab_keystone" class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 shrink-0 font-bold">💎 核心</button>
       </div>
 
-      <!-- 芯片列表 -->
+      <!-- 芯片列表容器 -->
       <div class="flex-1 overflow-y-auto p-3 space-y-2" id="paletteListContainer"></div>
     </aside>
 
-    <!-- 中间：三才三角动态星盘舞台 -->
+    <!-- 中间：交互舞台 (白色工程制图底纹) -->
     <section class="flex-1 relative flex flex-col items-center justify-center overflow-hidden blueprint-canvas" id="astrolabeStageSection">
       
       <!-- 点选装配状态悬浮条 -->
       <div id="quickPlacementBanner" class="hidden absolute top-4 left-6 z-30 flex items-center space-x-3 bg-slate-900/95 text-white px-4 py-1.5 rounded-xl text-xs font-mono-sci shadow-xl border border-sky-400 backdrop-blur-md">
         <span class="text-sky-300 font-bold flex items-center"><i class="fa-solid fa-crosshairs mr-1.5 text-sky-400 animate-spin"></i>已选构件：</span>
         <span id="quickPlacementChipName" class="font-bold text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30"></span>
-        <span class="text-slate-300 text-[11px]">👉 点击任意插槽即可秒速放置 (支持连续点击快速布置)</span>
+        <span class="text-slate-300 text-[11px]">👉 点击任意插槽即可秒速放置</span>
         <button onclick="cancelPaletteSelection()" class="ml-2 px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] text-slate-300 hover:text-white border border-slate-600 transition">取消 (Esc)</button>
       </div>
 
       <!-- 操作小贴士 -->
-      <div class="absolute top-4 right-6 z-20 flex items-center space-x-3 bg-slate-900/90 border border-slate-800 px-4 py-1.5 rounded-xl text-xs text-slate-300 font-mono-sci shadow-lg backdrop-blur">
-        <span class="flex items-center text-sky-400 font-bold"><i class="fa-solid fa-arrow-left mr-1.5"></i>激光始发自右侧辅助盘</span>
-        <span class="text-slate-600">•</span>
-        <span class="flex items-center text-slate-200 font-bold"><i class="fa-solid fa-hand-pointer mr-1.5 text-sky-400"></i>点击/拖拽安装</span>
-        <span class="text-slate-600">•</span>
-        <span class="flex items-center text-rose-400"><i class="fa-solid fa-rotate-left mr-1"></i>拖拽圆盘或滚轮旋转</span>
+      <div class="absolute top-4 right-6 z-20 flex items-center space-x-3 bg-white/95 border border-slate-300 px-4 py-1.5 rounded-xl text-xs text-slate-700 font-mono-sci shadow-sm backdrop-blur">
+        <span class="flex items-center text-sky-700 font-bold"><i class="fa-solid fa-arrow-left mr-1.5"></i>激光始发自右侧辅助盘</span>
+        <span class="text-slate-300">•</span>
+        <span class="flex items-center text-slate-900 font-bold"><i class="fa-solid fa-hand-pointer mr-1.5 text-sky-600"></i>点击/拖拽安装</span>
+        <span class="text-slate-300">•</span>
+        <span class="flex items-center text-slate-600"><i class="fa-solid fa-rotate-left mr-1"></i>按住圆盘直接旋转</span>
       </div>
 
       <!-- 1440x760 交互舞台 -->
       <div id="diskStage" class="relative w-[1440px] h-[760px] shrink-0 my-auto scale-95 origin-center">
         
-        <!-- 背景矢量层 (三足鼎立三才法阵背景大图) -->
+        <!-- 背景矢量绘图层 (三盘工程轮廓) -->
         <svg id="astrolabeVectorBg" class="absolute inset-0 w-full h-full pointer-events-none z-0" viewBox="0 0 1440 760">
-          <defs>
-            <filter id="glowGold" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="8" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
+          <!-- 静态导轨连接线 (辅助盘 ➔ 工厂盘 ➔ 攻击盘) -->
+          <line x1="880" y1="520" x2="560" y2="520" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4" />
+          <line x1="510" y1="410" x2="610" y2="330" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4" />
 
-          <!-- 三才大三角连接脉络光带 (顶: 720,195 - 左下: 380,515 - 右下: 1060,515) -->
-          <polygon points="720,195 380,515 1060,515" fill="none" stroke="#1e293b" stroke-width="2" stroke-dasharray="6 4" />
-          <polygon points="720,195 380,515 1060,515" fill="#0f172a" fill-opacity="0.35" />
+          <!-- 1. 顶部：攻击盘背景 (cx: 720, cy: 220, R=165) -->
+          <circle cx="720" cy="220" r="168" stroke="#f43f5e" stroke-width="1.5" stroke-dasharray="4 3" fill="#fff1f2" fill-opacity="0.25"/>
 
-          <!-- 中央三才共鸣台 (720, 408) -->
-          <circle cx="720" cy="408" r="54" fill="#0b1120" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.8"/>
-          <circle cx="720" cy="408" r="32" fill="#0f172a" stroke="#fbbf24" stroke-width="1" />
-          <text x="720" y="412" font-family="'Noto Sans SC', sans-serif" font-size="10" font-weight="900" fill="#38bdf8" text-anchor="middle">三才归元</text>
+          <!-- 2. 左下：工厂盘背景 (cx: 400, cy: 520, R=165) -->
+          <circle cx="400" cy="520" r="168" stroke="#d97706" stroke-width="1.5" stroke-dasharray="4 3" fill="#fffbeb" fill-opacity="0.25"/>
 
-          <!-- 1. 顶部：攻击盘背景 (cx: 720, cy: 195, R=165) -->
-          <circle cx="720" cy="195" r="168" stroke="#e11d48" stroke-width="1.5" stroke-dasharray="4 3" fill="#e11d48" fill-opacity="0.04"/>
-          <text x="720" y="16" font-family="'Noto Sans SC', sans-serif" font-size="12" font-weight="900" fill="#f43f5e" text-anchor="middle">⚔️ 离火攻击盘 (COMBAT DISC)</text>
-
-          <!-- 2. 左下：工厂盘背景 (cx: 380, cy: 515, R=165) -->
-          <circle cx="380" cy="515" r="168" stroke="#d97706" stroke-width="1.5" stroke-dasharray="4 3" fill="#d97706" fill-opacity="0.04"/>
-          <text x="380" y="715" font-family="'Noto Sans SC', sans-serif" font-size="12" font-weight="900" fill="#fbbf24" text-anchor="middle">⚙️ 辰土工厂盘 (INDUSTRY DISC)</text>
-
-          <!-- 3. 右下：辅助盘背景 (cx: 1060, cy: 515, R=165) -->
-          <circle cx="1060" cy="515" r="168" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="4 3" fill="#0284c7" fill-opacity="0.04"/>
-          <text x="1060" y="715" font-family="'Noto Sans SC', sans-serif" font-size="12" font-weight="900" fill="#38bdf8" text-anchor="middle">🛡️ 碧水辅助盘 (SUPPORT DISC)</text>
+          <!-- 3. 右下：辅助盘背景 (cx: 1040, cy: 520, R=165) -->
+          <circle cx="1040" cy="520" r="168" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="4 3" fill="#f0f9ff" fill-opacity="0.25"/>
         </svg>
 
-        <!-- 始发激光源 (右侧 x: 1380, y: 515) -->
-        <div id="rightEmitter" class="absolute z-30 flex items-center pointer-events-none" style="left: 1380px; top: 515px; transform: translateY(-50%);">
+        <!-- 三大盘醒目状态卡片 (点击可直接设为主修盘) -->
+        <!-- 攻击盘标牌 (720, 35) -->
+        <div class="absolute z-20 flex flex-col items-center cursor-pointer pointer-events-auto" style="left: 720px; top: 32px; transform: translateX(-50%);" onclick="setSpecialization('combat')" title="点击将攻击盘设为主修盘">
+          <div class="flex items-center space-x-2 bg-white px-3 py-1 rounded-full border border-rose-300 shadow-sm hover:shadow transition">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+            <span class="text-xs font-black text-rose-700">⚔️ 攻击盘</span>
+            <span id="badge_combat_status" class="text-[9px] font-mono-sci font-bold px-1.5 py-0.2 rounded bg-rose-100 text-rose-800">2环 · 主修</span>
+          </div>
+        </div>
+
+        <!-- 工厂盘标牌 (400, 700) -->
+        <div class="absolute z-20 flex flex-col items-center cursor-pointer pointer-events-auto" style="left: 400px; top: 698px; transform: translateX(-50%);" onclick="setSpecialization('industry')" title="点击将工厂盘设为主修盘">
+          <div class="flex items-center space-x-2 bg-white px-3 py-1 rounded-full border border-amber-300 shadow-sm hover:shadow transition">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+            <span class="text-xs font-black text-amber-700">⚙️ 工厂盘</span>
+            <span id="badge_industry_status" class="text-[9px] font-mono-sci font-bold px-1.5 py-0.2 rounded bg-slate-100 text-slate-600">1环 · 次级</span>
+          </div>
+        </div>
+
+        <!-- 辅助盘标牌 (1040, 700) -->
+        <div class="absolute z-20 flex flex-col items-center cursor-pointer pointer-events-auto" style="left: 1040px; top: 698px; transform: translateX(-50%);" onclick="setSpecialization('support')" title="点击将辅助盘设为主修盘">
+          <div class="flex items-center space-x-2 bg-white px-3 py-1 rounded-full border border-sky-300 shadow-sm hover:shadow transition">
+            <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+            <span class="text-xs font-black text-sky-700">🛡️ 辅助盘</span>
+            <span id="badge_support_status" class="text-[9px] font-mono-sci font-bold px-1.5 py-0.2 rounded bg-slate-100 text-slate-600">1环 · 次级</span>
+          </div>
+        </div>
+
+        <!-- 始发激光源 (右侧 x: 1380, y: 520) -->
+        <div id="rightEmitter" class="absolute z-30 flex items-center pointer-events-none" style="left: 1380px; top: 520px; transform: translateY(-50%);">
           <div class="flex flex-col items-end mr-2">
-            <span class="text-[9px] font-mono-sci font-bold text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-700 shadow-md whitespace-nowrap">
-              <i class="fa-solid fa-crosshairs text-sky-400 mr-1 animate-spin"></i>EMITTER 01 (始发源)
+            <span class="text-[9px] font-mono-sci font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-300 shadow-sm whitespace-nowrap">
+              <i class="fa-solid fa-crosshairs text-sky-600 mr-1 animate-spin"></i>EMITTER 01 (始发源)
             </span>
-            <span class="text-[8px] font-mono-sci text-sky-400 font-bold">180° WEST ➔</span>
+            <span class="text-[8px] font-mono-sci text-sky-600 font-bold">180° WEST ➔</span>
           </div>
-          <div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-sky-400 shadow-lg flex items-center justify-center pulse-emitter-modern">
-            <div class="w-3.5 h-3.5 rounded-full bg-cyan-400"></div>
+          <div class="w-9 h-9 rounded-full bg-slate-900 border-2 border-white shadow-md flex items-center justify-center pulse-emitter-modern">
+            <div class="w-3 h-3 rounded-full bg-sky-400"></div>
           </div>
-          <div class="w-6 h-0.5 bg-cyan-400 shadow"></div>
+          <div class="w-6 h-0.5 bg-slate-900 shadow"></div>
         </div>
 
         <!-- ✦ 核心极核插槽 (三大盘心) ✦ -->
-        <!-- 攻击盘极核 (720, 195) -->
-        <div id="hubSocket_combat" onclick="openKeystoneSelector('combat')" class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group" style="left: 720px; top: 195px; transform: translate(-50%, -50%);" title="【攻击极核插槽】点击配置核心特质插件">
-          <div class="relative w-11 h-11 rounded-full bg-slate-900 border-2 border-rose-500 flex items-center justify-center shadow-lg transition-transform group-hover:scale-115">
+        <!-- 攻击盘极核 (720, 220) -->
+        <div id="hubSocket_combat" onclick="openKeystoneSelector('combat')" class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group" style="left: 720px; top: 220px; transform: translate(-50%, -50%);" title="【攻击极核插槽】点击配置核心特质插件">
+          <div class="relative w-11 h-11 rounded-full bg-white border-2 border-rose-500 flex items-center justify-center shadow-md transition-transform group-hover:scale-115">
             <div class="absolute -inset-1 rounded-full border border-dashed border-rose-400/80 animate-spin" style="animation-duration: 18s;"></div>
-            <i id="crossCoreIcon_combat" class="fa-solid fa-swords text-rose-400 text-sm relative z-10"></i>
+            <i id="crossCoreIcon_combat" class="fa-solid fa-swords text-rose-600 text-sm relative z-10"></i>
           </div>
-          <div class="mt-1 px-1.5 py-0.5 rounded bg-slate-900/90 text-[8px] font-mono-sci font-bold text-rose-300 border border-rose-500 shadow-xs flex items-center space-x-1" id="crossCoreBadge_combat">
-            <i class="fa-solid fa-plus text-[7px] text-rose-400"></i>
+          <div class="mt-1 px-1.5 py-0.5 rounded bg-white text-[8px] font-mono-sci font-bold text-rose-900 border border-rose-400 shadow-xs flex items-center space-x-1" id="crossCoreBadge_combat">
+            <i class="fa-solid fa-plus text-[7px] text-rose-500"></i>
             <span id="crossCoreNameText_combat">攻击极核</span>
           </div>
         </div>
 
-        <!-- 工厂盘极核 (380, 515) -->
-        <div id="hubSocket_industry" onclick="openKeystoneSelector('industry')" class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group" style="left: 380px; top: 515px; transform: translate(-50%, -50%);" title="【工厂极核插槽】点击配置核心特质插件">
-          <div class="relative w-11 h-11 rounded-full bg-slate-900 border-2 border-amber-500 flex items-center justify-center shadow-lg transition-transform group-hover:scale-115">
+        <!-- 工厂盘极核 (400, 520) -->
+        <div id="hubSocket_industry" onclick="openKeystoneSelector('industry')" class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group" style="left: 400px; top: 520px; transform: translate(-50%, -50%);" title="【工厂极核插槽】点击配置核心特质插件">
+          <div class="relative w-11 h-11 rounded-full bg-white border-2 border-amber-500 flex items-center justify-center shadow-md transition-transform group-hover:scale-115">
             <div class="absolute -inset-1 rounded-full border border-dashed border-amber-400/80 animate-spin" style="animation-duration: 20s;"></div>
-            <i id="crossCoreIcon_industry" class="fa-solid fa-industry text-amber-400 text-sm relative z-10"></i>
+            <i id="crossCoreIcon_industry" class="fa-solid fa-industry text-amber-600 text-sm relative z-10"></i>
           </div>
-          <div class="mt-1 px-1.5 py-0.5 rounded bg-slate-900/90 text-[8px] font-mono-sci font-bold text-amber-300 border border-amber-500 shadow-xs flex items-center space-x-1" id="crossCoreBadge_industry">
-            <i class="fa-solid fa-plus text-[7px] text-amber-400"></i>
+          <div class="mt-1 px-1.5 py-0.5 rounded bg-white text-[8px] font-mono-sci font-bold text-amber-900 border border-amber-400 shadow-xs flex items-center space-x-1" id="crossCoreBadge_industry">
+            <i class="fa-solid fa-plus text-[7px] text-amber-500"></i>
             <span id="crossCoreNameText_industry">工厂极核</span>
           </div>
         </div>
 
-        <!-- 辅助盘极核 (1060, 515) -->
-        <div id="hubSocket_support" onclick="openKeystoneSelector('support')" class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group" style="left: 1060px; top: 515px; transform: translate(-50%, -50%);" title="【辅助极核插槽】点击配置核心特质插件">
-          <div class="relative w-11 h-11 rounded-full bg-slate-900 border-2 border-sky-500 flex items-center justify-center shadow-lg transition-transform group-hover:scale-115">
+        <!-- 辅助盘极核 (1040, 520) -->
+        <div id="hubSocket_support" onclick="openKeystoneSelector('support')" class="keystone-hub-socket absolute z-30 flex flex-col items-center justify-center cursor-pointer group" style="left: 1040px; top: 520px; transform: translate(-50%, -50%);" title="【辅助极核插槽】点击配置核心特质插件">
+          <div class="relative w-11 h-11 rounded-full bg-white border-2 border-sky-500 flex items-center justify-center shadow-md transition-transform group-hover:scale-115">
             <div class="absolute -inset-1 rounded-full border border-dashed border-sky-400/80 animate-spin" style="animation-duration: 22s;"></div>
-            <i id="crossCoreIcon_support" class="fa-solid fa-shield-halved text-sky-400 text-sm relative z-10"></i>
+            <i id="crossCoreIcon_support" class="fa-solid fa-shield-halved text-sky-600 text-sm relative z-10"></i>
           </div>
-          <div class="mt-1 px-1.5 py-0.5 rounded bg-slate-900/90 text-[8px] font-mono-sci font-bold text-sky-300 border border-sky-500 shadow-xs flex items-center space-x-1" id="crossCoreBadge_support">
-            <i class="fa-solid fa-plus text-[7px] text-sky-400"></i>
+          <div class="mt-1 px-1.5 py-0.5 rounded bg-white text-[8px] font-mono-sci font-bold text-sky-900 border border-sky-400 shadow-xs flex items-center space-x-1" id="crossCoreBadge_support">
+            <i class="fa-solid fa-plus text-[7px] text-sky-500"></i>
             <span id="crossCoreNameText_support">辅助极核</span>
           </div>
         </div>
+
+        <!-- ✦ 最外围固定方位射出点组件层 ✦ -->
+        <div id="fixedEmissionPortsLayer" class="absolute inset-0 pointer-events-none z-25"></div>
 
         <!-- 动态圆盘 DOM 环体 -->
         <div id="ringsDomLayer" class="absolute inset-0 pointer-events-none z-10"></div>
@@ -325,128 +344,128 @@
 
     </section>
 
-    <!-- 右侧：动力加成看板 -->
-    <aside id="rightPanel" class="w-80 bg-slate-900 border-l border-slate-800 flex flex-col z-20 shrink-0 shadow-2xl collapsible-sidebar collapsed">
-      <div class="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+    <!-- 右侧：动力加成看板 (清爽白卡) -->
+    <aside id="rightPanel" class="w-80 bg-white border-l border-slate-200 flex flex-col z-20 shrink-0 shadow-lg collapsible-sidebar collapsed">
+      <div class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
         <div class="flex items-center space-x-2">
-          <i class="fa-solid fa-chart-line text-amber-400 text-sm"></i>
-          <span class="text-xs font-bold text-slate-200 tracking-wider font-mono-sci uppercase">三才大阵 · 动力看板</span>
+          <i class="fa-solid fa-chart-line text-amber-500 text-sm"></i>
+          <span class="text-xs font-bold text-slate-800 tracking-wider font-mono-sci uppercase">三大阵盘 · 动力看板</span>
         </div>
-        <button onclick="toggleRightPanel()" class="w-7 h-7 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+        <button onclick="toggleRightPanel()" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition">
           <i class="fa-solid fa-chevron-right text-xs"></i>
         </button>
       </div>
 
       <div class="flex-1 overflow-y-auto p-4 space-y-4">
         
-        <!-- 三才阵联动共鸣状态卡 -->
+        <!-- 三盘联动贯通状态卡 -->
         <div class="p-3.5 rounded-xl border transition-all" id="triResonanceCard">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-bold flex items-center text-slate-200">
-              <i class="fa-solid fa-circle-nodes mr-1.5 text-sky-400"></i>三盘贯通联动状态
+            <span class="text-xs font-bold flex items-center text-slate-800">
+              <i class="fa-solid fa-circle-nodes mr-1.5 text-sky-600"></i>三盘贯通联动状态
             </span>
-            <span id="triResonanceBadge" class="text-[9px] px-2 py-0.5 rounded font-mono-sci font-bold bg-slate-800 text-slate-400">
+            <span id="triResonanceBadge" class="text-[9px] px-2 py-0.5 rounded font-mono-sci font-bold bg-slate-100 text-slate-600">
               待导通
             </span>
           </div>
-          <p id="triResonanceDesc" class="text-[10px] text-slate-400 leading-relaxed">
-            激光自辅助盘射入，经外圈射出点贯通工厂盘与攻击盘，全盘属性享 <b>×1.5倍</b> 终极加成。
+          <p id="triResonanceDesc" class="text-[10px] text-slate-500 leading-relaxed">
+            激光自辅助盘射入，经外圈固定射出点贯通工厂盘与攻击盘，全盘属性享 <b>×1.5倍</b> 终极加成。
           </p>
         </div>
 
         <!-- 1. 攻击盘属性统计 -->
-        <div class="p-3 rounded-xl bg-slate-950/60 border border-rose-900/60 space-y-2">
+        <div class="p-3 rounded-xl bg-rose-50/50 border border-rose-200/80 space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-rose-300 flex items-center">
-              <i class="fa-solid fa-swords text-rose-500 mr-1.5"></i>攻击盘总加成
+            <span class="text-xs font-bold text-rose-950 flex items-center">
+              <i class="fa-solid fa-swords text-rose-600 mr-1.5"></i>攻击盘总加成
             </span>
-            <span id="combatActiveSlotCount" class="text-[9px] font-mono-sci bg-rose-950 text-rose-300 px-1.5 py-0.2 rounded border border-rose-800 font-bold">
+            <span id="combatActiveSlotCount" class="text-[9px] font-mono-sci bg-rose-100 text-rose-800 px-1.5 py-0.2 rounded font-bold">
               0 槽激活
             </span>
           </div>
           <div class="grid grid-cols-2 gap-2 text-[11px] font-mono-sci">
-            <div class="p-2 bg-slate-900/80 rounded-lg border border-slate-800">
-              <div class="text-slate-400 text-[9px]">攻击加成</div>
-              <div id="stat_atk" class="text-rose-400 font-bold text-sm">+0%</div>
+            <div class="p-2 bg-white rounded-lg border border-rose-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">攻击加成</div>
+              <div id="stat_atk" class="text-rose-600 font-bold text-sm">+0%</div>
             </div>
-            <div class="p-2 bg-slate-900/80 rounded-lg border border-slate-800">
-              <div class="text-slate-400 text-[9px]">暴击率</div>
-              <div id="stat_crit" class="text-rose-400 font-bold text-sm">+0%</div>
+            <div class="p-2 bg-white rounded-lg border border-rose-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">暴击率</div>
+              <div id="stat_crit" class="text-rose-600 font-bold text-sm">+0%</div>
             </div>
-            <div class="p-2 bg-slate-900/80 rounded-lg border border-slate-800">
-              <div class="text-slate-400 text-[9px]">穿透破甲</div>
-              <div id="stat_penetration" class="text-rose-400 font-bold text-sm">+0%</div>
+            <div class="p-2 bg-white rounded-lg border border-rose-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">穿透破甲</div>
+              <div id="stat_penetration" class="text-rose-600 font-bold text-sm">+0%</div>
             </div>
-            <div class="p-2 bg-slate-900/80 rounded-lg border border-slate-800">
-              <div class="text-slate-400 text-[9px]">巡航飞剑</div>
-              <div id="stat_sword_funnel" class="text-rose-400 font-bold text-sm">+0把</div>
+            <div class="p-2 bg-white rounded-lg border border-rose-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">巡航飞剑</div>
+              <div id="stat_sword_funnel" class="text-rose-600 font-bold text-sm">+0把</div>
             </div>
           </div>
         </div>
 
         <!-- 2. 工厂盘属性统计 -->
-        <div class="p-3 rounded-xl bg-slate-950/60 border border-amber-900/60 space-y-2">
+        <div class="p-3 rounded-xl bg-amber-50/50 border border-amber-200/80 space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-amber-300 flex items-center">
-              <i class="fa-solid fa-industry text-amber-500 mr-1.5"></i>工厂盘总加成
+            <span class="text-xs font-bold text-amber-950 flex items-center">
+              <i class="fa-solid fa-industry text-amber-600 mr-1.5"></i>工厂盘总加成
             </span>
-            <span id="industryActiveSlotCount" class="text-[9px] font-mono-sci bg-amber-950 text-amber-300 px-1.5 py-0.2 rounded border border-amber-800 font-bold">
+            <span id="industryActiveSlotCount" class="text-[9px] font-mono-sci bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold">
               0 槽激活
             </span>
           </div>
           <div class="grid grid-cols-2 gap-2 text-[11px] font-mono-sci">
-            <div class="p-2 bg-slate-900/80 rounded-lg border border-slate-800">
-              <div class="text-slate-400 text-[9px]">制造速度</div>
-              <div id="stat_craft_speed" class="text-amber-400 font-bold text-sm">+0%</div>
+            <div class="p-2 bg-white rounded-lg border border-amber-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">制造速度</div>
+              <div id="stat_craft_speed" class="text-amber-600 font-bold text-sm">+0%</div>
             </div>
-            <div class="p-2 bg-slate-900/80 rounded-lg border border-slate-800">
-              <div class="text-slate-400 text-[9px]">开采增效</div>
-              <div id="stat_mining_speed" class="text-amber-400 font-bold text-sm">+0%</div>
+            <div class="p-2 bg-white rounded-lg border border-amber-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">开采增效</div>
+              <div id="stat_mining_speed" class="text-amber-600 font-bold text-sm">+0%</div>
             </div>
-            <div class="p-2 bg-slate-900/80 rounded-lg border border-slate-800">
-              <div class="text-slate-400 text-[9px]">能耗减免</div>
-              <div id="stat_power_cut" class="text-amber-400 font-bold text-sm">-0%</div>
+            <div class="p-2 bg-white rounded-lg border border-amber-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">能耗减免</div>
+              <div id="stat_power_cut" class="text-amber-600 font-bold text-sm">-0%</div>
             </div>
-            <div class="p-2 bg-slate-900/80 rounded-lg border border-slate-800">
-              <div class="text-slate-400 text-[9px]">传送带速</div>
-              <div id="stat_belt_speed" class="text-amber-400 font-bold text-sm">+0%</div>
+            <div class="p-2 bg-white rounded-lg border border-amber-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">传送带速</div>
+              <div id="stat_belt_speed" class="text-amber-600 font-bold text-sm">+0%</div>
             </div>
           </div>
         </div>
 
         <!-- 3. 辅助盘属性统计 -->
-        <div class="p-3 rounded-xl bg-slate-950/60 border border-sky-900/60 space-y-2">
+        <div class="p-3 rounded-xl bg-sky-50/50 border border-sky-200/80 space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-sky-300 flex items-center">
-              <i class="fa-solid fa-shield-halved text-sky-500 mr-1.5"></i>辅助盘总加成
+            <span class="text-xs font-bold text-sky-950 flex items-center">
+              <i class="fa-solid fa-shield-halved text-sky-600 mr-1.5"></i>辅助盘总加成
             </span>
-            <span id="supportActiveSlotCount" class="text-[9px] font-mono-sci bg-sky-950 text-sky-300 px-1.5 py-0.2 rounded border border-sky-800 font-bold">
+            <span id="supportActiveSlotCount" class="text-[9px] font-mono-sci bg-sky-100 text-sky-800 px-1.5 py-0.2 rounded font-bold">
               0 槽激活
             </span>
           </div>
           <div class="grid grid-cols-2 gap-2 text-[11px] font-mono-sci">
-            <div class="p-2 bg-slate-900/80 rounded-lg border border-slate-800">
-              <div class="text-slate-400 text-[9px]">防御提升</div>
-              <div id="stat_def" class="text-sky-400 font-bold text-sm">+0%</div>
+            <div class="p-2 bg-white rounded-lg border border-sky-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">防御提升</div>
+              <div id="stat_def" class="text-sky-600 font-bold text-sm">+0%</div>
             </div>
-            <div class="p-2 bg-slate-900/80 rounded-lg border border-slate-800">
-              <div class="text-slate-400 text-[9px]">移动速度</div>
-              <div id="stat_speed" class="text-sky-400 font-bold text-sm">+0%</div>
+            <div class="p-2 bg-white rounded-lg border border-sky-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">移动速度</div>
+              <div id="stat_speed" class="text-sky-600 font-bold text-sm">+0%</div>
             </div>
-            <div class="p-2 bg-slate-900/80 rounded-lg border border-slate-800">
-              <div class="text-slate-400 text-[9px]">气血生命</div>
-              <div id="stat_hp" class="text-sky-400 font-bold text-sm">+0</div>
+            <div class="p-2 bg-white rounded-lg border border-sky-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">气血生命</div>
+              <div id="stat_hp" class="text-sky-600 font-bold text-sm">+0</div>
             </div>
-            <div class="p-2 bg-slate-900/80 rounded-lg border border-slate-800">
-              <div class="text-slate-400 text-[9px]">飞行电池</div>
-              <div id="stat_flight_battery" class="text-sky-400 font-bold text-sm">+0%</div>
+            <div class="p-2 bg-white rounded-lg border border-sky-100 shadow-xs">
+              <div class="text-slate-500 text-[9px]">飞行电池</div>
+              <div id="stat_flight_battery" class="text-sky-600 font-bold text-sm">+0%</div>
             </div>
           </div>
         </div>
 
         <!-- 导通日志 -->
-        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[10px] font-mono-sci space-y-1">
-          <div class="text-slate-400 font-bold mb-1 border-b border-slate-800 pb-1 flex items-center justify-between">
+        <div class="p-3 rounded-xl bg-slate-900 text-slate-100 text-[10px] font-mono-sci space-y-1">
+          <div class="text-slate-400 font-bold mb-1 border-b border-slate-700 pb-1 flex items-center justify-between">
             <span>● 光路导通状态</span>
             <span id="logStepCount">0 节点</span>
           </div>
@@ -1534,43 +1553,43 @@ const KEYSTONE_TRAITS = {
 };
 
     /* =========================================================================
-       3. 三才阵盘空间几何 (离火攻击盘·顶 / 辰土工厂盘·左下 / 碧水辅助盘·右下)
+       3. 三大主盘空间几何 (攻击盘·顶 / 工厂盘·左下 / 辅助盘·右下)
        ========================================================================= */
     const DISC_META = {
       combat: {
         id: 'combat',
-        name: '离火攻击盘',
+        name: '攻击盘',
         cx: 720,
-        cy: 195,
-        color: '#f43f5e',
+        cy: 220,
+        color: '#e11d48',
         theme: 'rose',
-        outAngleDeg: 120 // 射向工厂盘或三才台
+        outAngleRad: Math.PI * 0.25 // 固定射出方位 (南东 45°)
       },
       industry: {
         id: 'industry',
-        name: '辰土工厂盘',
-        cx: 380,
-        cy: 515,
-        color: '#f59e0b',
+        name: '工厂盘',
+        cx: 400,
+        cy: 520,
+        color: '#d97706',
         theme: 'amber',
-        outAngleDeg: 45 // 射向攻击盘
+        outAngleRad: -Math.PI * 0.25 // 固定射出方位 (北东 -45° 射向攻击盘)
       },
       support: {
         id: 'support',
-        name: '碧水辅助盘',
-        cx: 1060,
-        cy: 515,
-        color: '#0ea5e9',
+        name: '辅助盘',
+        cx: 1040,
+        cy: 520,
+        color: '#0284c7',
         theme: 'sky',
-        outAngleDeg: 180 // 射向工厂盘
+        outAngleRad: Math.PI // 固定射出方位 (西向 180° 直射工厂盘)
       }
     };
 
     const RING_TIER_DEFS = [
-      { tier: 1, radius: 48,  slotCount: 6,  stepAngle: 60,   label: '1环 (内宿6位)' },
-      { tier: 2, radius: 84,  slotCount: 8,  stepAngle: 45,   label: '2环 (中宿8位)' },
-      { tier: 3, radius: 120, slotCount: 12, stepAngle: 30,   label: '3环 (外宿12位)' },
-      { tier: 4, radius: 156, slotCount: 16, stepAngle: 22.5, label: '4环 (绝顶16位)' }
+      { tier: 1, radius: 48,  slotCount: 6,  label: '1环' },
+      { tier: 2, radius: 84,  slotCount: 8,  label: '2环' },
+      { tier: 3, radius: 120, slotCount: 12, label: '3环' },
+      { tier: 4, radius: 156, slotCount: 16, label: '4环' }
     ];
 
     /* =========================================================================
@@ -1600,9 +1619,9 @@ const KEYSTONE_TRAITS = {
           const btn = document.getElementById('btn_realm_' + k);
           if (!btn) return;
           if (k === realmKey) {
-            btn.className = 'px-2.5 py-1 rounded-lg bg-sky-600 text-white font-mono-sci shadow-xs transition';
+            btn.className = 'px-2.5 py-1 rounded-lg bg-slate-900 text-white font-mono-sci shadow-xs transition';
           } else {
-            btn.className = 'px-2.5 py-1 rounded-lg bg-transparent text-slate-400 hover:text-white font-mono-sci transition';
+            btn.className = 'px-2.5 py-1 rounded-lg bg-white text-slate-700 hover:text-slate-900 font-mono-sci transition border border-slate-200';
           }
         });
         audio.playSelect();
@@ -1624,7 +1643,7 @@ const KEYSTONE_TRAITS = {
           if (k === discKey) {
             btn.className = `px-2.5 py-1 rounded-lg ${colorMap[k]} font-mono-sci shadow-xs transition flex items-center space-x-1.5`;
           } else {
-            btn.className = 'px-2.5 py-1 rounded-lg bg-transparent text-slate-400 hover:text-white font-mono-sci transition flex items-center space-x-1.5';
+            btn.className = 'px-2.5 py-1 rounded-lg bg-white text-slate-700 hover:text-slate-900 font-mono-sci transition border border-slate-200 flex items-center space-x-1.5';
           }
         });
         audio.playSelect();
@@ -1680,6 +1699,7 @@ const KEYSTONE_TRAITS = {
       }
     }
 
+    // 切换主修盘或境界后：动态更新活跃环与插槽
     function applyDiscRingConfiguration() {
       const counts = getDiscRingCounts();
 
@@ -1687,7 +1707,25 @@ const KEYSTONE_TRAITS = {
         ring.isActive = (ring.tier <= counts[ring.discKey]);
       }
 
+      // 实时更新三大盘状态角标
+      const updateBadge = (id, count, isSpec, color) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (isSpec) {
+          el.className = `text-[9px] font-mono-sci font-bold px-1.5 py-0.2 rounded bg-${color}-100 text-${color}-800 border border-${color}-300`;
+          el.textContent = `${count}环 · 主修`;
+        } else {
+          el.className = 'text-[9px] font-mono-sci font-bold px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200';
+          el.textContent = `${count}环 · 次级`;
+        }
+      };
+
+      updateBadge('badge_combat_status', counts.combat, SPECIALIZED_DISC === 'combat', 'rose');
+      updateBadge('badge_industry_status', counts.industry, SPECIALIZED_DISC === 'industry', 'amber');
+      updateBadge('badge_support_status', counts.support, SPECIALIZED_DISC === 'support', 'sky');
+
       renderRingsDOM();
+      renderFixedEmissionPorts();
       renderBoardSlots();
       solveStepNetwork();
     }
@@ -1708,7 +1746,7 @@ const KEYSTONE_TRAITS = {
     }
 
     /* =========================================================================
-       5. 动态圆盘 DOM 渲染与外圈射出点
+       5. 动态圆盘 DOM 渲染与固定外围射出点
        ========================================================================= */
     function renderRingsDOM() {
       const container = document.getElementById('ringsDomLayer');
@@ -1732,38 +1770,22 @@ const KEYSTONE_TRAITS = {
           const curDeg = ring ? ring.currentAngle : 0;
 
           html += `
-            <div id="ringEl_${ringKey}" class="absolute rounded-full ring-trans transition-opacity duration-300" 
-                 style="width: ${size}px; height: ${size}px; left: ${left}px; top: ${top}px; transform: rotate(${curDeg}deg); opacity: ${isActive ? '1' : '0.15'};">
+            <div id="ringEl_${ringKey}" class="absolute rounded-full ring-trans transition-opacity duration-300 ${isActive ? 'pointer-events-auto' : 'pointer-events-none'}" 
+                 style="width: ${size}px; height: ${size}px; left: ${left}px; top: ${top}px; transform: rotate(${curDeg}deg); opacity: ${isActive ? '1' : '0'}; display: ${isActive ? 'block' : 'none'};">
               
               <!-- 环道边框线 -->
               <div class="absolute inset-0 rounded-full border ${
-                isActive 
-                  ? (isOutermost ? `border-2 border-${meta.theme}-400 shadow-md` : `border border-${meta.theme}-500/70`)
-                  : 'border border-dashed border-slate-700'
+                isOutermost 
+                  ? `border-2 border-${meta.theme}-500 shadow-sm` 
+                  : `border border-${meta.theme}-300/80`
               }"></div>
 
               <!-- 环名与旋转微调 [+] [-] 按键 -->
-              <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center bg-slate-900 border border-slate-700 rounded-full px-1.5 py-0.2 text-[8px] font-mono-sci font-bold text-slate-300 shadow-md pointer-events-auto">
-                <button onclick="rotateRing('${ringKey}', -1); event.stopPropagation();" class="hover:text-sky-400 px-0.5">◀</button>
-                <span class="mx-0.5 text-${meta.theme}-400">R${t}</span>
-                <button onclick="rotateRing('${ringKey}', 1); event.stopPropagation();" class="hover:text-sky-400 px-0.5">▶</button>
+              <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center bg-white border border-slate-300 rounded-full px-1.5 py-0.2 text-[8px] font-mono-sci font-bold text-slate-700 shadow-sm pointer-events-auto">
+                <button onclick="rotateRing('${ringKey}', -1); event.stopPropagation();" class="hover:text-sky-600 px-0.5">◀</button>
+                <span class="mx-0.5 text-${meta.theme}-700">R${t}</span>
+                <button onclick="rotateRing('${ringKey}', 1); event.stopPropagation();" class="hover:text-sky-600 px-0.5">▶</button>
               </div>
-
-              <!-- ✦ 核心：环的外圈射出点 (仅在该盘当前活跃最外环展示) ✦ -->
-              ${isOutermost ? `
-                <div class="absolute z-30 flex items-center" 
-                     style="left: ${discKey === 'combat' ? size * 0.25 : (discKey === 'industry' ? size * 0.85 : 0)}px; 
-                            top: ${discKey === 'combat' ? size * 0.85 : size / 2}px; 
-                            transform: translate(-50%, -50%);"
-                     title="【${meta.name} · 外圈射出端口】">
-                  <div class="w-6 h-6 rounded-full bg-slate-950 border-2 border-cyan-400 shadow-lg flex items-center justify-center">
-                    <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></div>
-                  </div>
-                  <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-1 rounded bg-slate-950 text-cyan-300 text-[7px] font-mono-sci font-bold whitespace-nowrap border border-cyan-500/80 shadow">
-                    射出点
-                  </div>
-                </div>
-              ` : ''}
 
             </div>
           `;
@@ -1773,78 +1795,104 @@ const KEYSTONE_TRAITS = {
       container.innerHTML = html;
     }
 
-    /* =========================================================================
-       6. 炫彩芯片与插槽层级渲染 (芯片永不被遮挡)
-       ========================================================================= */
-    let SLOTS_DOM_INITIALIZED = false;
+    // ✦ 核心实现：射出点在最外围的那个固定方位射出 ✦
+    function renderFixedEmissionPorts() {
+      const container = document.getElementById('fixedEmissionPortsLayer');
+      if (!container) return;
 
+      const counts = getDiscRingCounts();
+      let html = '';
+
+      for (const [discKey, meta] of Object.entries(DISC_META)) {
+        const outTier = counts[discKey];
+        const outTierDef = RING_TIER_DEFS[outTier - 1];
+        const r = outTierDef.radius;
+        const rad = meta.outAngleRad;
+
+        // 固定空间坐标点 (随最外环半径变化，但方位角严格固定)
+        const portX = meta.cx + r * Math.cos(rad);
+        const portY = meta.cy + r * Math.sin(rad);
+
+        html += `
+          <div class="absolute z-25 flex items-center pointer-events-none" 
+               style="left: ${portX}px; top: ${portY}px; transform: translate(-50%, -50%);"
+               title="【${meta.name} · 最外圈固定方位射出端口】">
+            <div class="w-6 h-6 rounded-full bg-slate-900 border-2 border-white shadow-md flex items-center justify-center">
+              <div class="w-2.5 h-2.5 rounded-full bg-sky-400 animate-ping"></div>
+            </div>
+            <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-1 rounded bg-slate-900 text-white text-[7px] font-mono-sci font-bold whitespace-nowrap border border-sky-400 shadow">
+              固定射出点
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    }
+
+    /* =========================================================================
+       6. 绚丽芯片与插槽层级渲染 (彻底消除遮挡，插槽随主修盘即刻响应)
+       ========================================================================= */
     function renderBoardSlots() {
       const container = document.getElementById('slotsLayer');
       if (!container) return;
 
-      if (!SLOTS_DOM_INITIALIZED) {
-        container.innerHTML = '';
-        for (const [slotKey, slotData] of Object.entries(BOARD_SLOTS)) {
-          const slotEl = document.createElement('div');
-          slotEl.id = `slot_${slotKey}`;
-          slotEl.setAttribute('data-has-chip', 'false');
-          slotEl.className = 'absolute -translate-x-1/2 -translate-y-1/2 rounded-full transition-transform duration-150';
-
-          // 拖拽
-          slotEl.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            slotEl.classList.add('scale-125');
-          });
-          slotEl.addEventListener('dragleave', () => {
-            slotEl.classList.remove('scale-125');
-          });
-          slotEl.addEventListener('drop', (e) => {
-            e.preventDefault();
-            slotEl.classList.remove('scale-125');
-            const typeId = e.dataTransfer.getData('text/plain');
-            placeChip(slotKey, typeId);
-          });
-
-          // 点击交互
-          slotEl.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (ACTIVE_SELECTED_CHIP) {
-              placeChip(slotKey, ACTIVE_SELECTED_CHIP);
-            } else if (BOARD_SLOTS[slotKey] && BOARD_SLOTS[slotKey].chip) {
-              removeChip(slotKey);
-            }
-          });
-
-          slotEl.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            removeChip(slotKey);
-          });
-
-          container.appendChild(slotEl);
-        }
-        SLOTS_DOM_INITIALIZED = true;
-      }
+      // 每次直接清空重绘以保证完全响应活跃环变化
+      container.innerHTML = '';
+      const counts = getDiscRingCounts();
 
       for (const [slotKey, slotData] of Object.entries(BOARD_SLOTS)) {
-        const slotEl = document.getElementById(`slot_${slotKey}`);
-        if (!slotEl) continue;
-
-        const ring = DISK_RINGS[slotData.ringKey];
-        if (!ring || !ring.isActive) {
-          slotEl.style.display = 'none';
-          slotEl.style.pointerEvents = 'none';
+        const activeTiers = counts[slotData.discKey];
+        if (slotData.tier > activeTiers) {
+          // 当前环未激活，彻底不渲染
           continue;
         }
 
+        const ring = DISK_RINGS[slotData.ringKey];
+        if (!ring) continue;
+
         const pos = getSlotWorldPos(slotData.ringKey, slotData.slotIndex);
+        const hasChip = !!slotData.chip;
+
+        const slotEl = document.createElement('div');
+        slotEl.id = `slot_${slotKey}`;
+        slotEl.className = 'absolute -translate-x-1/2 -translate-y-1/2 rounded-full transition-transform duration-150';
         slotEl.style.left = `${pos.x}px`;
         slotEl.style.top = `${pos.y}px`;
 
-        const hasChip = !!slotData.chip;
+        // 拖拽
+        slotEl.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          slotEl.classList.add('scale-125');
+        });
+        slotEl.addEventListener('dragleave', () => {
+          slotEl.classList.remove('scale-125');
+        });
+        slotEl.addEventListener('drop', (e) => {
+          e.preventDefault();
+          slotEl.classList.remove('scale-125');
+          const typeId = e.dataTransfer.getData('text/plain');
+          placeChip(slotKey, typeId);
+        });
+
+        // 点击
+        slotEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (ACTIVE_SELECTED_CHIP) {
+            placeChip(slotKey, ACTIVE_SELECTED_CHIP);
+          } else if (BOARD_SLOTS[slotKey] && BOARD_SLOTS[slotKey].chip) {
+            removeChip(slotKey);
+          }
+        });
+
+        slotEl.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          removeChip(slotKey);
+        });
 
         if (hasChip) {
-          // ✦ 绚丽芯片配色与置顶层级 (z-index: 35) ✦
+          // 芯片处于最高层级 (z-index: 35)
           const spec = CHIP_SPECS[slotData.chip];
           
           let bgClass = 'chip-bg-combat';
@@ -1853,9 +1901,6 @@ const KEYSTONE_TRAITS = {
           else if (spec.type === 'direction' || spec.type === 'split') bgClass = 'chip-bg-shift';
           else if (spec.type === 'keystone') bgClass = 'chip-bg-keystone';
 
-          slotEl.style.display = 'block';
-          slotEl.style.opacity = '1';
-          slotEl.style.pointerEvents = 'auto';
           slotEl.style.zIndex = '35';
           slotEl.style.width = '32px';
           slotEl.style.height = '32px';
@@ -1865,31 +1910,29 @@ const KEYSTONE_TRAITS = {
               <div class="w-7 h-7 ${bgClass} rounded-lg flex items-center justify-center relative z-10 transition-transform group-hover:scale-115 text-white">
                 <i class="fa-solid ${spec.icon} text-xs pointer-events-none drop-shadow"></i>
               </div>
-              <div class="pointer-events-none absolute -bottom-2 -right-2 px-1 rounded bg-slate-950 text-[7px] font-mono-sci text-white font-bold border border-sky-400 shadow z-20">
+              <div class="pointer-events-none absolute -bottom-2 -right-2 px-1 rounded bg-slate-900 text-[7px] font-mono-sci text-white font-bold border border-sky-400 shadow z-20">
                 ${slotData.slotIndex + 1}
               </div>
-              <!-- 悬浮一键取回按钮 -->
               <button onclick="removeChip('${slotKey}'); event.stopPropagation();" class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-[9px] font-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow z-30" title="移除芯片">×</button>
             </div>
           `;
         } else {
           // 空插槽微孔 (z-index: 10)
           slotEl.setAttribute('data-has-chip', 'false');
-          slotEl.style.display = 'block';
-          slotEl.style.opacity = '1';
-          slotEl.style.pointerEvents = 'auto';
           slotEl.style.zIndex = '10';
           slotEl.style.width = '22px';
           slotEl.style.height = '22px';
           slotEl.innerHTML = `
             <div class="relative w-full h-full flex items-center justify-center group cursor-pointer" title="${ring.name} 第 ${slotData.slotIndex + 1} 槽\n【点击/拖拽】装配芯片">
-              <div class="w-full h-full rounded-full flex items-center justify-center transition-all bg-slate-900/80 border border-dashed border-sky-500/80 hover:border-sky-400 hover:bg-sky-950/60 shadow hover:scale-115">
-                <div class="w-1.5 h-1.5 rounded-full bg-sky-400 pointer-events-none"></div>
+              <div class="w-full h-full rounded-full flex items-center justify-center transition-all bg-white border border-dashed border-sky-400 hover:border-sky-600 hover:bg-sky-50 shadow-xs hover:scale-115">
+                <div class="w-1.5 h-1.5 rounded-full bg-sky-500 pointer-events-none"></div>
               </div>
-              <span class="pointer-events-none absolute -bottom-2 px-0.5 rounded bg-slate-950 text-[6.5px] font-mono-sci text-slate-400 font-bold border border-slate-800 shadow">${slotData.slotIndex + 1}</span>
+              <span class="pointer-events-none absolute -bottom-2 px-0.5 rounded bg-white text-[6.5px] font-mono-sci text-slate-600 font-bold border border-slate-300 shadow-xs">${slotData.slotIndex + 1}</span>
             </div>
           `;
         }
+
+        container.appendChild(slotEl);
       }
     }
 
@@ -2083,9 +2126,9 @@ const KEYSTONE_TRAITS = {
         const tab = document.getElementById('tab_' + k);
         if (!tab) return;
         if (k === filterKey) {
-          tab.className = 'px-2 py-0.5 rounded bg-sky-600 text-white font-bold shrink-0';
+          tab.className = 'px-2 py-0.5 rounded bg-slate-900 text-white font-bold shrink-0';
         } else {
-          tab.className = 'px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0 font-bold';
+          tab.className = 'px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200 hover:border-slate-800 shrink-0 font-bold';
         }
       });
       renderPalette();
@@ -2155,10 +2198,10 @@ const KEYSTONE_TRAITS = {
         else if (spec.type === 'direction' || spec.type === 'split') bgClass = 'chip-bg-shift';
 
         html += `
-          <div class="p-2.5 rounded-xl transition cursor-pointer flex items-center space-x-3 group shadow-md ${
+          <div class="p-2.5 rounded-xl transition cursor-pointer flex items-center space-x-3 group shadow-xs hover:shadow-sm ${
             isSelected
-              ? 'bg-slate-800 border-2 border-sky-400 ring-2 ring-sky-400/40 shadow-lg'
-              : 'bg-slate-950/80 border border-slate-800 hover:border-slate-700'
+              ? 'bg-sky-50 border-2 border-sky-500 ring-2 ring-sky-300/50 shadow-md'
+              : 'bg-white border border-slate-200 hover:border-slate-800'
           }"
                draggable="true"
                ondragstart="onPaletteDragStart(event, '${typeId}')"
@@ -2171,15 +2214,15 @@ const KEYSTONE_TRAITS = {
 
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-white truncate">${spec.name}</span>
+                <span class="text-xs font-bold text-slate-800 truncate">${spec.name}</span>
                 <span class="text-[9px] font-mono-sci px-1.5 py-0.2 rounded font-bold ${spec.badgeColor}">
                   ${stepBadge}
                 </span>
                 ${isSelected ? '<span class="text-[8.5px] font-mono-sci px-1.5 py-0.2 rounded font-bold bg-sky-500 text-white ml-1">待放置</span>' : ''}
               </div>
-              <div class="flex items-center justify-between text-[10px] text-slate-400 mt-1">
+              <div class="flex items-center justify-between text-[10px] text-slate-500 mt-1">
                 <span>${spec.buffDesc}</span>
-                <span class="text-slate-500 font-mono-sci">${spec.stepDesc}</span>
+                <span class="text-slate-400 font-mono-sci">${spec.stepDesc}</span>
               </div>
             </div>
           </div>
@@ -2222,7 +2265,7 @@ const KEYSTONE_TRAITS = {
     }
 
     /* =========================================================================
-       10. 光路追踪与三才阵跨盘贯通拓扑求解引擎
+       10. 激光光路求解与三盘贯通
        ========================================================================= */
     function solveStepNetwork() {
       const svgBeams = document.getElementById('svgBeamsGroup');
@@ -2246,17 +2289,16 @@ const KEYSTONE_TRAITS = {
 
       const counts = getDiscRingCounts();
 
-      // 1. 始发激光自右端 (1380, 515) 射向辅助盘 (1060, 515)
+      // 1. 始发激光射向辅助盘 (1040, 520) 最外活跃环
       const sTier = counts.support;
       const sRing = DISK_RINGS[`support_${sTier}`];
       const sEntryX = DISC_META.support.cx + sRing.radius;
       const sEntryY = DISC_META.support.cy;
 
-      drawLaserLine(svgBridge, 1380, 515, sEntryX, sEntryY, '#00f0ff', true);
-      drawImpactPoint(svgImpacts, sEntryX, sEntryY, '#00f0ff');
-      logSteps.push(`⚡ 始发激光射入辅助盘最外环 (R${sTier}) 入口`);
+      drawLaserLine(svgBridge, 1380, 520, sEntryX, sEntryY, '#0284c7', true);
+      drawImpactPoint(svgImpacts, sEntryX, sEntryY, '#0284c7');
+      logSteps.push(`⚡ 始发激光射入辅助盘最外环 (R${sTier}) 入瞳`);
 
-      // 辅助盘芯片步数拓扑连线计算
       let sActiveCount = 0;
       for (let t = 1; t <= counts.support; t++) {
         for (let s = 0; s < RING_TIER_DEFS[t - 1].slotCount; s++) {
@@ -2264,17 +2306,16 @@ const KEYSTONE_TRAITS = {
           if (slot && slot.chip) {
             sActiveCount++;
             accumulateBuff(totalBuff, CHIP_SPECS[slot.chip].buff);
-            // 环内高亮弧线
             const p1 = getSlotWorldPos(`support_${t}`, s);
             const nextSlotIdx = (s + 1) % RING_TIER_DEFS[t - 1].slotCount;
             const p2 = getSlotWorldPos(`support_${t}`, nextSlotIdx);
-            drawLaserLine(svgBeams, p1.x, p1.y, p2.x, p2.y, '#38bdf8', false);
+            drawLaserLine(svgBeams, p1.x, p1.y, p2.x, p2.y, '#0ea5e9', false);
           }
         }
       }
       const supportConductive = (sActiveCount > 0);
 
-      // 2. 辅助盘外圈射出点 ➔ 工厂盘 (380, 515)
+      // 2. 辅助盘固定外圈射出点 (西向 180°) ➔ 工厂盘 (400, 520)
       const sEmitX = DISC_META.support.cx - sRing.radius;
       const sEmitY = DISC_META.support.cy;
 
@@ -2287,9 +2328,9 @@ const KEYSTONE_TRAITS = {
       let industryConductive = false;
 
       if (supportConductive) {
-        drawLaserLine(svgBridge, sEmitX, sEmitY, iEntryX, iEntryY, '#00f0ff', true);
-        drawImpactPoint(svgImpacts, iEntryX, iEntryY, '#f59e0b');
-        logSteps.push('✨ 辅助盘射出点准直导通 ➔ 激光水平注入工厂盘！');
+        drawLaserLine(svgBridge, sEmitX, sEmitY, iEntryX, iEntryY, '#0284c7', true);
+        drawImpactPoint(svgImpacts, iEntryX, iEntryY, '#d97706');
+        logSteps.push('✨ 辅助盘固定射出点导通 ➔ 激光注入工厂盘！');
 
         for (let t = 1; t <= counts.industry; t++) {
           for (let s = 0; s < RING_TIER_DEFS[t - 1].slotCount; s++) {
@@ -2306,25 +2347,25 @@ const KEYSTONE_TRAITS = {
         }
         industryConductive = (iActiveCount > 0);
       } else {
-        logSteps.push('▲ 辅助盘未放置芯片或未导通，待激活后射向工厂盘');
+        logSteps.push('▲ 辅助盘未放置芯片，待激活后射向工厂盘');
       }
 
-      // 3. 工厂盘外圈射出点 ➔ 攻击盘 (720, 195)
-      const iEmitX = DISC_META.industry.cx + iRing.radius * 0.7;
-      const iEmitY = DISC_META.industry.cy - iRing.radius * 0.7;
+      // 3. 工厂盘固定外圈射出点 (北东 -45°) ➔ 攻击盘 (720, 220)
+      const iEmitX = DISC_META.industry.cx + iRing.radius * 0.707;
+      const iEmitY = DISC_META.industry.cy - iRing.radius * 0.707;
 
       const cTier = counts.combat;
       const cRing = DISK_RINGS[`combat_${cTier}`];
-      const cEntryX = DISC_META.combat.cx - cRing.radius * 0.7;
-      const cEntryY = DISC_META.combat.cy + cRing.radius * 0.7;
+      const cEntryX = DISC_META.combat.cx - cRing.radius * 0.707;
+      const cEntryY = DISC_META.combat.cy + cRing.radius * 0.707;
 
       let cActiveCount = 0;
       let combatConductive = false;
 
       if (industryConductive) {
-        drawLaserLine(svgBridge, iEmitX, iEmitY, cEntryX, cEntryY, '#00f0ff', true);
-        drawImpactPoint(svgImpacts, cEntryX, cEntryY, '#f43f5e');
-        logSteps.push('🔥 工厂盘射出点准直导通 ➔ 激光斜向跃升注入离火攻击盘！');
+        drawLaserLine(svgBridge, iEmitX, iEmitY, cEntryX, cEntryY, '#0284c7', true);
+        drawImpactPoint(svgImpacts, cEntryX, cEntryY, '#e11d48');
+        logSteps.push('🔥 工厂盘固定射出点导通 ➔ 激光注入攻击盘！');
 
         for (let t = 1; t <= counts.combat; t++) {
           for (let s = 0; s < RING_TIER_DEFS[t - 1].slotCount; s++) {
@@ -2335,7 +2376,7 @@ const KEYSTONE_TRAITS = {
               const p1 = getSlotWorldPos(`combat_${t}`, s);
               const nextSlotIdx = (s + 1) % RING_TIER_DEFS[t - 1].slotCount;
               const p2 = getSlotWorldPos(`combat_${t}`, nextSlotIdx);
-              drawLaserLine(svgBeams, p1.x, p1.y, p2.x, p2.y, '#f43f5e', false);
+              drawLaserLine(svgBeams, p1.x, p1.y, p2.x, p2.y, '#e11d48', false);
             }
           }
         }
@@ -2344,15 +2385,10 @@ const KEYSTONE_TRAITS = {
         logSteps.push('▲ 工厂盘未导通，能量未能注入攻击盘');
       }
 
-      // 4. 三才全贯通大共鸣判定
+      // 4. 三盘全贯通共鸣判定
       const isTri = (supportConductive && industryConductive && combatConductive);
       if (isTri) {
-        logSteps.push('🌟 【三大阵盘全贯通】天地人三才归元！触发全局 ×1.5倍 狂暴共鸣！');
-        // 绘制中央三才共鸣台聚光束
-        drawLaserLine(svgBridge, DISC_META.combat.cx, DISC_META.combat.cy + cRing.radius, 720, 408, '#38bdf8', true);
-        drawLaserLine(svgBridge, DISC_META.industry.cx + iRing.radius * 0.7, DISC_META.industry.cy - iRing.radius * 0.7, 720, 408, '#fbbf24', true);
-        drawLaserLine(svgBridge, DISC_META.support.cx - sRing.radius * 0.7, DISC_META.support.cy - sRing.radius * 0.7, 720, 408, '#38bdf8', true);
-
+        logSteps.push('🌟 【三大阵盘全贯通】三盘全部激活！触发全局 ×1.5倍 最终倍率！');
         for (const k in totalBuff) {
           totalBuff[k] = Math.round(totalBuff[k] * 1.5);
         }
@@ -2368,7 +2404,7 @@ const KEYSTONE_TRAITS = {
       }
     }
 
-    function drawLaserLine(svg, x1, y1, x2, y2, color = '#00f0ff', animated = true) {
+    function drawLaserLine(svg, x1, y1, x2, y2, color = '#0284c7', animated = true) {
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
       line.setAttribute('x1', x1);
       line.setAttribute('y1', y1);
@@ -2380,7 +2416,7 @@ const KEYSTONE_TRAITS = {
       svg.appendChild(line);
     }
 
-    function drawImpactPoint(svg, cx, cy, color = '#00f0ff') {
+    function drawImpactPoint(svg, cx, cy, color = '#0284c7') {
       const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       circle.setAttribute('cx', cx);
       circle.setAttribute('cy', cy);
@@ -2419,12 +2455,12 @@ const KEYSTONE_TRAITS = {
       const badge = document.getElementById('triResonanceBadge');
       if (card && badge) {
         if (isTri) {
-          card.className = 'p-3.5 rounded-xl border border-cyan-400 bg-cyan-950/40 shadow-xl ring-2 ring-cyan-400/40';
-          badge.className = 'text-[9px] px-2 py-0.5 rounded font-mono-sci font-bold bg-cyan-500 text-white animate-pulse';
+          card.className = 'p-3.5 rounded-xl border border-sky-400 bg-sky-50 shadow-md ring-2 ring-sky-300/40';
+          badge.className = 'text-[9px] px-2 py-0.5 rounded font-mono-sci font-bold bg-sky-600 text-white animate-pulse';
           badge.textContent = '● 三盘贯通 ×1.5倍';
         } else {
-          card.className = 'p-3.5 rounded-xl border border-slate-800 bg-slate-950/60';
-          badge.className = 'text-[9px] px-2 py-0.5 rounded font-mono-sci font-bold bg-slate-800 text-slate-400';
+          card.className = 'p-3.5 rounded-xl border border-slate-200 bg-slate-50';
+          badge.className = 'text-[9px] px-2 py-0.5 rounded font-mono-sci font-bold bg-slate-100 text-slate-600';
           badge.textContent = '待导通';
         }
       }
@@ -2463,7 +2499,7 @@ const KEYSTONE_TRAITS = {
       initRingDirectDragging();
       updateAllKeystoneSocketsDOM();
 
-      // 默认初始预设：在三盘各安插芯片展示初次通电状态
+      // 默认初始预设：在三盘各安插初始芯片展示通电效果
       if (BOARD_SLOTS['support_1_0']) BOARD_SLOTS['support_1_0'].chip = 't0_atk_1';
       if (BOARD_SLOTS['support_1_2']) BOARD_SLOTS['support_1_2'].chip = 't0_speed_1';
       if (BOARD_SLOTS['industry_1_0']) BOARD_SLOTS['industry_1_0'].chip = 't0_craft_1';
