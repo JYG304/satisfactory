@@ -196,14 +196,14 @@ let worldBuildings = [
     width: 240,
     height: 235,
     refund: [
-      { code: 'iron_plate', name: '玄铁板', count: 12, icon: 'fa-sheet-plastic' },
-      { code: 'copper_wire', name: '铜线', count: 8, icon: 'fa-plug' }
+      { code: 'iron_plate', name: '工业玄铁板', count: 12, icon: 'fa-sheet-plastic' },
+      { code: 'copper_wire', name: '赤铜线圈', count: 8, icon: 'fa-ring' }
     ]
   },
   {
     id: 'bld_miner_init',
     type: 'miner',
-    name: '采矿机 (BD_101)',
+    name: '1级采矿机',
     tagTitle: '采矿机 (BD_101) [被动开采]',
     power: '5 MW',
     x: 26, // 屏幕坐标百分比
@@ -211,14 +211,14 @@ let worldBuildings = [
     width: 200,
     height: 200,
     refund: [
-      { code: 'iron_plate', name: '玄铁板', count: 10, icon: 'fa-sheet-plastic' },
-      { code: 'iron_gear', name: '玄铁齿轮', count: 5, icon: 'fa-gear' }
+      { code: 'iron_rod', name: '玄铁棒', count: 10, icon: 'fa-bars' },
+      { code: 'concrete', name: '玄武岩砖', count: 10, icon: 'fa-cubes-stacked' }
     ]
   },
   {
     id: 'bld_smelter_init',
     type: 'smelter',
-    name: '精炼炉 (BD_102)',
+    name: '精炼炉 (冶炼站)',
     tagTitle: '精炼炉 (BD_102)',
     power: '10 MW',
     x: 40,
@@ -226,14 +226,14 @@ let worldBuildings = [
     width: 170,
     height: 190,
     refund: [
-      { code: 'iron_plate', name: '玄铁板', count: 8, icon: 'fa-sheet-plastic' },
-      { code: 'refractory_core', name: '耐火炉芯', count: 2, icon: 'fa-fire-burner' }
+      { code: 'iron_rod', name: '玄铁棒', count: 5, icon: 'fa-bars' },
+      { code: 'iron_plate', name: '工业玄铁板', count: 8, icon: 'fa-sheet-plastic' }
     ]
   },
   {
     id: 'bld_cutter_init',
     type: 'constructor',
-    name: '切割机 (BD_105)',
+    name: '切割机 (构筑站)',
     tagTitle: '切割机 (BD_105)',
     power: '12 MW',
     x: 60,
@@ -241,22 +241,22 @@ let worldBuildings = [
     width: 210,
     height: 200,
     refund: [
-      { code: 'iron_plate', name: '玄铁板', count: 10, icon: 'fa-sheet-plastic' },
-      { code: 'iron_gear', name: '玄铁齿轮', count: 6, icon: 'fa-gear' }
+      { code: 'reinforced_plate', name: '强化玄铁板', count: 2, icon: 'fa-shield' },
+      { code: 'iron_rod', name: '玄铁棒', count: 10, icon: 'fa-bars' }
     ]
   },
   {
     id: 'bld_box_init',
     type: 'storage_box',
-    name: '个人储物箱 (BD_115)',
-    tagTitle: '个人储物箱 (BD_115)',
+    name: '储物盒',
+    tagTitle: '储物盒 (BD_115)',
     power: '0 MW',
     x: 80,
     y: 56,
     width: 150,
     height: 150,
     refund: [
-      { code: 'iron_plate', name: '玄铁板', count: 4, icon: 'fa-sheet-plastic' }
+      { code: 'iron_plate', name: '工业玄铁板', count: 4, icon: 'fa-sheet-plastic' }
     ]
   }
 ];
@@ -687,8 +687,8 @@ function completeDismantleSuccess() {
 
   // 2. 100% 物料全额无损回收至背包
   const refundList = bld.refund || [
-    { code: 'iron_beam', name: '玄铁梁', count: 2 },
-    { code: 'iron_plate', name: '玄铁板', count: 5 }
+    { code: 'concrete', name: '混凝土', count: 5 },
+    { code: 'iron_plate', name: '工业铁板', count: 2 }
   ];
 
   refundList.forEach(r => {
@@ -715,68 +715,368 @@ function completeDismantleSuccess() {
 }
 
 // ---------------------------------------------------------------------
-// 4. 建造模式 HUD 与实时全息部署 (完全由官方策划表 XIUXIAN_BUILDINGS 驱动，消除硬编码)
+// 4. 建造模式 HUD 与实时全息部署 (1:1 还原 media_1790442748700.png)
 // ---------------------------------------------------------------------
-function getBuildableDatabaseFromTable() {
-  const db = {};
-  if (typeof XIUXIAN_BUILDINGS !== 'undefined') {
-    Object.entries(XIUXIAN_BUILDINGS).forEach(([key, b]) => {
-      const w = 180 + ((b.dimX || 2) * 15);
-      const h = 170 + ((b.dimY || 2) * 15);
-
-      const costs = (b.costs || []).map(c => {
-        const item = (typeof XIUXIAN_ITEMS !== 'undefined' && XIUXIAN_ITEMS[c.code]) ? XIUXIAN_ITEMS[c.code] : null;
-        let iconCls = 'fa-cube';
-        if (item && item.icon) {
-          const match = item.icon.match(/fa-[a-z0-9-]+/g);
-          if (match && match.length > 0) iconCls = match[match.length - 1];
-        }
-        return {
-          code: c.code,
-          name: item ? item.name : (c.name || c.code),
-          need: c.need,
-          icon: iconCls
-        };
-      });
-
-      let powerStr = '0 MW';
-      if (b.power !== undefined) {
-        if (b.power > 0) powerStr = `${b.power} MW`;
-        else if (b.power < 0) powerStr = `+${Math.abs(b.power)} MW`;
-      }
-
-      const itemData = {
-        key: key,
-        title: `${b.name} (${b.code || key})`,
-        name: b.name,
-        code: b.code || key,
-        subMode: '默认',
-        power: powerStr,
-        width: w,
-        height: h,
-        costs: costs
-      };
-      db[key] = itemData;
-
-      // 常见别名映射 (兼容旧版调用)
-      if (key === 'foundation_4x4') db['foundation'] = itemData;
-      if (key === 'furnace') db['smelter'] = itemData;
-      if (key === 'cutter') db['constructor'] = itemData;
-      if (key === 'teleporter') db['portal'] = itemData;
-    });
+const buildableDatabase = {
+  foundation: {
+    key: 'foundation',
+    title: '地基 (4米)',
+    name: '地基 (4米)',
+    subMode: '默认',
+    power: '0 MW',
+    width: 220,
+    height: 170,
+    costs: [
+      { code: 'concrete', name: '混凝土', need: 5, icon: 'fa-cubes-stacked' },
+      { code: 'iron_plate', name: '工业铁板', need: 2, icon: 'fa-sheet-plastic' }
+    ]
+  },
+  miner: {
+    key: 'miner',
+    title: '1级采矿机',
+    name: '1级采矿机',
+    subMode: '默认',
+    power: '5 MW',
+    width: 200,
+    height: 200,
+    costs: [
+      { code: 'iron_rod', name: '标准铁棒', need: 10, icon: 'fa-bars' },
+      { code: 'concrete', name: '混凝土', need: 10, icon: 'fa-cubes-stacked' }
+    ]
+  },
+  smelter: {
+    key: 'smelter',
+    title: '精炼炉 (冶炼站)',
+    name: '精炼炉 (冶炼站)',
+    subMode: '默认',
+    power: '10 MW',
+    width: 170,
+    height: 190,
+    costs: [
+      { code: 'iron_rod', name: '标准铁棒', need: 5, icon: 'fa-bars' },
+      { code: 'iron_plate', name: '工业铁板', need: 8, icon: 'fa-sheet-plastic' }
+    ]
+  },
+  constructor: {
+    key: 'constructor',
+    title: '构筑站 (切割机)',
+    name: '构筑站 (切割机)',
+    subMode: '默认',
+    power: '12 MW',
+    width: 210,
+    height: 200,
+    costs: [
+      { code: 'reinforced_plate', name: '增强铁板', need: 2, icon: 'fa-shield' },
+      { code: 'iron_rod', name: '标准铁棒', need: 10, icon: 'fa-bars' }
+    ]
+  },
+  storage_box: {
+    key: 'storage_box',
+    title: '个人储物箱 (BD_115)',
+    name: '个人储物箱',
+    subMode: '默认',
+    power: '0 MW',
+    width: 160,
+    height: 160,
+    costs: [
+      { code: 'iron_plate', name: '玄铁板', need: 2, icon: 'fa-sheet-plastic' },
+      { code: 'iron_ingot', name: '玄铁锭', need: 2, icon: 'fa-cube' }
+    ]
+  },
+  storage_box_large: {
+    key: 'storage_box_large',
+    title: '大储物箱 (BD_115_L)',
+    name: '大储物箱',
+    subMode: '默认',
+    power: '0 MW',
+    width: 180,
+    height: 180,
+    costs: [
+      { code: 'iron_plate', name: '玄铁板', need: 4, icon: 'fa-sheet-plastic' },
+      { code: 'iron_ingot', name: '玄铁锭', need: 4, icon: 'fa-cube' }
+    ]
+  },
+  conveyor: {
+    key: 'conveyor',
+    title: '传送带 (BD_125)',
+    name: '传送带',
+    subMode: '双向传输',
+    power: '0 MW',
+    width: 160,
+    height: 140,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 2, icon: 'fa-cube' }
+    ]
+  },
+  splitter: {
+    key: 'splitter',
+    title: '分流器 (BD_124)',
+    name: '分流器',
+    subMode: '1进3出',
+    power: '0 MW',
+    width: 160,
+    height: 140,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 3, icon: 'fa-cube' },
+      { code: 'iron_gear', name: '玄铁齿轮', need: 1, icon: 'fa-gear' }
+    ]
+  },
+  pipe: {
+    key: 'pipe',
+    title: '水管 (BD_127)',
+    name: '水管',
+    subMode: '流体导管',
+    power: '0 MW',
+    width: 160,
+    height: 140,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 2, icon: 'fa-cube' }
+    ]
+  },
+  vert_conveyor: {
+    key: 'vert_conveyor',
+    title: '垂直传送带 (BD_129)',
+    name: '垂直传送带',
+    subMode: 'Z轴立体运输',
+    power: '0 MW',
+    width: 160,
+    height: 180,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 4, icon: 'fa-cube' },
+      { code: 'iron_gear', name: '玄铁齿轮', need: 2, icon: 'fa-gear' }
+    ]
+  },
+  foundation_1x1: {
+    key: 'foundation_1x1',
+    title: '地基 1x1 (BD_119)',
+    name: '地基 1x1',
+    subMode: '平整承重',
+    power: '0 MW',
+    width: 140,
+    height: 140,
+    costs: [
+      { code: 'iron_plate', name: '玄铁板', need: 1, icon: 'fa-sheet-plastic' }
+    ]
+  },
+  foundation_16x16: {
+    key: 'foundation_16x16',
+    title: '地基 16x16 (BD_121)',
+    name: '地基 16x16',
+    subMode: '巨型平台',
+    power: '0 MW',
+    width: 280,
+    height: 200,
+    costs: [
+      { code: 'iron_plate', name: '玄铁板', need: 8, icon: 'fa-sheet-plastic' }
+    ]
+  },
+  iron_beam_bld: {
+    key: 'iron_beam_bld',
+    title: '玄铁梁 (BD_122)',
+    name: '玄铁梁',
+    subMode: '8米桥架',
+    power: '0 MW',
+    width: 200,
+    height: 120,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 2, icon: 'fa-cube' }
+    ]
+  },
+  storage_desk: {
+    key: 'storage_desk',
+    title: '置物桌 (BD_123)',
+    name: '置物桌',
+    subMode: '操作台面',
+    power: '0 MW',
+    width: 140,
+    height: 120,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 1, icon: 'fa-cube' }
+    ]
+  },
+  power_burner: {
+    key: 'power_burner',
+    title: '供能机 (BD_117)',
+    name: '供能机',
+    subMode: '魂火发电',
+    power: '无线50米',
+    width: 180,
+    height: 180,
+    costs: [
+      { code: 'iron_plate', name: '玄铁板', need: 3, icon: 'fa-sheet-plastic' },
+      { code: 'iron_ingot', name: '玄铁锭', need: 5, icon: 'fa-cube' }
+    ]
+  },
+  power_engine: {
+    key: 'power_engine',
+    title: '灵力引擎 (BD_112)',
+    name: '灵力引擎',
+    subMode: '无线供热',
+    power: '无线50米',
+    width: 200,
+    height: 180,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 8, icon: 'fa-cube' },
+      { code: 'copper_ingot', name: '赤铜锭', need: 6, icon: 'fa-square' }
+    ]
+  },
+  water_pump: {
+    key: 'water_pump',
+    title: '抽水机 (BD_116)',
+    name: '抽水机',
+    subMode: '流体抽取',
+    power: '5 MW',
+    width: 160,
+    height: 160,
+    costs: [
+      { code: 'iron_plate', name: '玄铁板', need: 2, icon: 'fa-sheet-plastic' },
+      { code: 'iron_ingot', name: '玄铁锭', need: 3, icon: 'fa-cube' }
+    ]
+  },
+  purifier: {
+    key: 'purifier',
+    title: '净化塔 (BD_118)',
+    name: '净化塔',
+    subMode: '煞气净化',
+    power: '10 MW',
+    width: 160,
+    height: 180,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 6, icon: 'fa-cube' },
+      { code: 'copper_ingot', name: '赤铜锭', need: 4, icon: 'fa-square' }
+    ]
+  },
+  portal: {
+    key: 'portal',
+    title: '传送门 (BD_114)',
+    name: '传送门',
+    subMode: '空间跃迁',
+    power: '50 MW',
+    width: 180,
+    height: 180,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 8, icon: 'fa-cube' },
+      { code: 'iron_plate', name: '玄铁板', need: 4, icon: 'fa-sheet-plastic' }
+    ]
+  },
+  crusher: {
+    key: 'crusher',
+    title: '粉碎机 (BD_103)',
+    name: '粉碎机',
+    subMode: '材料粉碎',
+    power: '8 MW',
+    width: 160,
+    height: 160,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 2, icon: 'fa-cube' },
+      { code: 'iron_plate', name: '玄铁板', need: 1, icon: 'fa-sheet-plastic' }
+    ]
+  },
+  assembler: {
+    key: 'assembler',
+    title: '加工台 (BD_104)',
+    name: '加工台',
+    subMode: '机械零件',
+    power: '6 MW',
+    width: 200,
+    height: 190,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 4, icon: 'fa-cube' },
+      { code: 'iron_plate', name: '玄铁板', need: 2, icon: 'fa-sheet-plastic' }
+    ]
+  },
+  centrifuge: {
+    key: 'centrifuge',
+    title: '离心机 (BD_106)',
+    name: '离心机',
+    subMode: '单进多出',
+    power: '15 MW',
+    width: 180,
+    height: 180,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 5, icon: 'fa-cube' },
+      { code: 'copper_ingot', name: '赤铜锭', need: 3, icon: 'fa-square' }
+    ]
+  },
+  deconstructor: {
+    key: 'deconstructor',
+    title: '解构机 (BD_107)',
+    name: '解构机',
+    subMode: '生物单进多出',
+    power: '20 MW',
+    width: 180,
+    height: 180,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 8, icon: 'fa-cube' },
+      { code: 'iron_plate', name: '玄铁板', need: 4, icon: 'fa-sheet-plastic' }
+    ]
+  },
+  incubator: {
+    key: 'incubator',
+    title: '培育仓 (BD_108)',
+    name: '培育仓',
+    subMode: '流固混合',
+    power: '8 MW',
+    width: 200,
+    height: 180,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 6, icon: 'fa-cube' },
+      { code: 'copper_ingot', name: '赤铜锭', need: 4, icon: 'fa-square' }
+    ]
+  },
+  extractor: {
+    key: 'extractor',
+    title: '提取器 (BD_109)',
+    name: '提取器',
+    subMode: '单进多出',
+    power: '10 MW',
+    width: 180,
+    height: 160,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 3, icon: 'fa-cube' },
+      { code: 'copper_ingot', name: '赤铜锭', need: 2, icon: 'fa-square' }
+    ]
+  },
+  mixer: {
+    key: 'mixer',
+    title: '搅拌机 (BD_110)',
+    name: '搅拌机',
+    subMode: '多进单出',
+    power: '14 MW',
+    width: 180,
+    height: 180,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 4, icon: 'fa-cube' },
+      { code: 'iron_gear', name: '玄铁齿轮', need: 2, icon: 'fa-gear' }
+    ]
+  },
+  assembler_heavy: {
+    key: 'assembler_heavy',
+    title: '组装机 (BD_111)',
+    name: '组装机',
+    subMode: '多轨校验',
+    power: '25 MW',
+    width: 220,
+    height: 200,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 8, icon: 'fa-cube' },
+      { code: 'copper_ingot', name: '赤铜锭', need: 6, icon: 'fa-square' }
+    ]
+  },
+  smelt_chamber: {
+    key: 'smelt_chamber',
+    title: '冶炼舱 (BD_113)',
+    name: '冶炼舱',
+    subMode: '插件式高温',
+    power: '需父级热力',
+    width: 170,
+    height: 170,
+    costs: [
+      { code: 'iron_ingot', name: '玄铁锭', need: 4, icon: 'fa-cube' },
+      { code: 'copper_ingot', name: '赤铜锭', need: 2, icon: 'fa-square' }
+    ]
   }
-  return db;
-}
-
-// 动态读表代理对象
-const buildableDatabase = new Proxy({}, {
-  get(target, prop) {
-    const tableDb = getBuildableDatabaseFromTable();
-    return tableDb[prop] || target[prop] || tableDb['foundation'] || tableDb['furnace'];
-  }
-});
-window.buildableDatabase = buildableDatabase;
-window.getBuildableDatabaseFromTable = getBuildableDatabaseFromTable;
+};
 
 // 启动建造模式
 function enterBuildPlacingMode(buildingKey = 'foundation') {
@@ -932,13 +1232,10 @@ document.addEventListener('wheel', (e) => {
   }
 }, { passive: false });
 
-// 鼠标按下：左键放置 / 右键或左键拆除长按 (严格 HUD 模态互斥，防止穿透)
+// 鼠标按下：左键放置 / 右键或左键拆除长按
 document.addEventListener('mousedown', (e) => {
-  // 如果当前有任何模态弹窗打开，或者点击的是弹窗UI/按钮，绝对不响应世界长按与放置！
-  if (typeof isAnyModalOpen === 'function' && isAnyModalOpen()) {
-    return;
-  }
-  if (e.target.closest('#buildModal') || e.target.closest('#craftModal') || e.target.closest('#invModal') || e.target.closest('#machineModal') || e.target.closest('#hubMilestoneModal') || e.target.closest('#swordCasketModal') || e.target.closest('#codexModal') || e.target.closest('#cpuProcessorModal') || e.target.closest('#jinShenModal') || e.target.closest('#fabaoModal') || e.target.closest('button')) {
+  // 如果点击的是弹窗UI或按钮，不拦截
+  if (e.target.closest('#buildModal') || e.target.closest('#craftModal') || e.target.closest('#invModal') || e.target.closest('#machineModal') || e.target.closest('#hubMilestoneModal') || e.target.closest('#swordCasketModal') || e.target.closest('button')) {
     return;
   }
 

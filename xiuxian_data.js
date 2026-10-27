@@ -25,7 +25,7 @@ const XIUXIAN_ITEMS = {
   },
   "coal": {
     "id": "coal",
-    "matId": "MAT_004",
+    "matId": "MAT_003",
     "name": "煤炭",
     "category": "基础燃料",
     "form": "实体",
@@ -35,7 +35,7 @@ const XIUXIAN_ITEMS = {
   },
   "iron_ingot": {
     "id": "iron_ingot",
-    "matId": "MAT_006",
+    "matId": "MAT_004",
     "name": "玄铁锭",
     "category": "金属中间件",
     "form": "实体",
@@ -45,7 +45,7 @@ const XIUXIAN_ITEMS = {
   },
   "copper_ingot": {
     "id": "copper_ingot",
-    "matId": "MAT_007",
+    "matId": "MAT_005",
     "name": "赤铜锭",
     "category": "金属中间件",
     "form": "实体",
@@ -55,7 +55,7 @@ const XIUXIAN_ITEMS = {
   },
   "iron_plate": {
     "id": "iron_plate",
-    "matId": "MAT_008",
+    "matId": "MAT_006",
     "name": "玄铁板",
     "category": "建筑与机器材料",
     "form": "实体",
@@ -65,7 +65,7 @@ const XIUXIAN_ITEMS = {
   },
   "iron_powder": {
     "id": "iron_powder",
-    "matId": "MAT_009",
+    "matId": "MAT_007",
     "name": "玄铁粉",
     "category": "金属中间件",
     "form": "实体",
@@ -75,7 +75,7 @@ const XIUXIAN_ITEMS = {
   },
   "iron_gear": {
     "id": "iron_gear",
-    "matId": "MAT_011",
+    "matId": "MAT_008",
     "name": "玄铁齿轮",
     "category": "机器零件",
     "form": "实体",
@@ -83,9 +83,9 @@ const XIUXIAN_ITEMS = {
     "desc": "基础物流、采矿/精炼/粉碎/加工设备、设备管件、设备框架和灵磁齿轮生产",
     "stack": 100
   },
-  "lingci_gear": {
-    "id": "lingci_gear",
-    "matId": "MAT_012",
+  "ling_magnetic_gear": {
+    "id": "ling_magnetic_gear",
+    "matId": "MAT_009",
     "name": "灵磁齿轮",
     "category": "机器零件",
     "form": "实体",
@@ -95,7 +95,7 @@ const XIUXIAN_ITEMS = {
   },
   "ling_copper_sheet": {
     "id": "ling_copper_sheet",
-    "matId": "MAT_013",
+    "matId": "MAT_010",
     "name": "导灵铜片",
     "category": "精密/导灵材料",
     "form": "实体",
@@ -105,7 +105,7 @@ const XIUXIAN_ITEMS = {
   },
   "iron_beam": {
     "id": "iron_beam",
-    "matId": "MAT_014",
+    "matId": "MAT_011",
     "name": "玄铁梁",
     "category": "建筑结构件",
     "form": "实体",
@@ -115,7 +115,7 @@ const XIUXIAN_ITEMS = {
   },
   "device_interface": {
     "id": "device_interface",
-    "matId": "MAT_015",
+    "matId": "MAT_012",
     "name": "设备接口件",
     "category": "建筑通用零件",
     "form": "实体",
@@ -125,7 +125,7 @@ const XIUXIAN_ITEMS = {
   },
   "electric_coil": {
     "id": "electric_coil",
-    "matId": "MAT_016",
+    "matId": "MAT_013",
     "name": "导电线圈",
     "category": "电力零件",
     "form": "实体",
@@ -135,7 +135,7 @@ const XIUXIAN_ITEMS = {
   },
   "basic_control_module": {
     "id": "basic_control_module",
-    "matId": "MAT_017",
+    "matId": "MAT_014",
     "name": "基础控制模块",
     "category": "控制零件",
     "form": "实体",
@@ -145,7 +145,7 @@ const XIUXIAN_ITEMS = {
   },
   "bio_chip": {
     "id": "bio_chip",
-    "matId": "MAT_018",
+    "matId": "MAT_015",
     "name": "电子生物芯片",
     "category": "生物电子零件",
     "form": "实体",
@@ -155,7 +155,7 @@ const XIUXIAN_ITEMS = {
   },
   "copper_wire": {
     "id": "copper_wire",
-    "matId": "MAT_019",
+    "matId": "MAT_016",
     "name": "铜线",
     "category": "基础机器零件",
     "form": "实体",
@@ -165,9 +165,9 @@ const XIUXIAN_ITEMS = {
   },
   "cultivator_corpse": {
     "id": "cultivator_corpse",
-    "matId": "MAT_020",
+    "matId": "MAT_017",
     "name": "练气修士尸体",
-    "category": "生物原料",
+    "category": "生物资源",
     "form": "实体",
     "icon": "fa-solid fa-user-injured text-rose-400",
     "desc": "BD_140解构机输入；装箱和转运不消耗尸体；当前版不开放养殖",
@@ -175,9 +175,9 @@ const XIUXIAN_ITEMS = {
   },
   "foundation_corpse": {
     "id": "foundation_corpse",
-    "matId": "MAT_055",
+    "matId": "MAT_018",
     "name": "筑基修士尸体",
-    "category": "生物原料",
+    "category": "生物资源",
     "form": "实体",
     "icon": "fa-solid fa-user-shield text-indigo-400",
     "desc": "BD_140解构机输入；筑基阶段提高生物材料产量；当前版不开放养殖",
@@ -185,9 +185,9 @@ const XIUXIAN_ITEMS = {
   },
   "jindan_corpse": {
     "id": "jindan_corpse",
-    "matId": "MAT_056",
+    "matId": "MAT_019",
     "name": "金丹修士尸体",
-    "category": "剧情生物原料",
+    "category": "生物资源",
     "form": "实体",
     "icon": "fa-solid fa-user-astronaut text-amber-300",
     "desc": "触发世界观解析、取得剑匣并提供第一批生物材料",
@@ -195,7 +195,7 @@ const XIUXIAN_ITEMS = {
   },
   "living_tissue": {
     "id": "living_tissue",
-    "matId": "MAT_021",
+    "matId": "MAT_020",
     "name": "鲜活生物组织",
     "category": "生物中间件",
     "form": "实体",
@@ -205,7 +205,7 @@ const XIUXIAN_ITEMS = {
   },
   "neural_bundle": {
     "id": "neural_bundle",
-    "matId": "MAT_022",
+    "matId": "MAT_021",
     "name": "神经束",
     "category": "生物中间件",
     "form": "实体",
@@ -215,9 +215,9 @@ const XIUXIAN_ITEMS = {
   },
   "analysis_data": {
     "id": "analysis_data",
-    "matId": "MAT_023",
+    "matId": "MAT_022",
     "name": "解析数据",
-    "category": "研究产物",
+    "category": "研究资源",
     "form": "数字记录",
     "icon": "fa-solid fa-database text-sky-300",
     "desc": "解析数据提交中央处理器后转研究点，用于里程碑和配方解锁；不是背包物料",
@@ -225,7 +225,7 @@ const XIUXIAN_ITEMS = {
   },
   "dry_tissue": {
     "id": "dry_tissue",
-    "matId": "MAT_024",
+    "matId": "MAT_023",
     "name": "脱水生物组织",
     "category": "生物中间件",
     "form": "实体",
@@ -235,7 +235,7 @@ const XIUXIAN_ITEMS = {
   },
   "tissue_essence": {
     "id": "tissue_essence",
-    "matId": "MAT_025",
+    "matId": "MAT_024",
     "name": "组织精华液",
     "category": "生物液体",
     "form": "液体",
@@ -245,7 +245,7 @@ const XIUXIAN_ITEMS = {
   },
   "protein_fluid": {
     "id": "protein_fluid",
-    "matId": "MAT_026",
+    "matId": "MAT_025",
     "name": "组织蛋白液",
     "category": "生物液体",
     "form": "液体",
@@ -255,7 +255,7 @@ const XIUXIAN_ITEMS = {
   },
   "basic_nutrient": {
     "id": "basic_nutrient",
-    "matId": "MAT_027",
+    "matId": "MAT_026",
     "name": "基础营养液",
     "category": "生物液体",
     "form": "液体",
@@ -265,9 +265,9 @@ const XIUXIAN_ITEMS = {
   },
   "ling_grass_seed": {
     "id": "ling_grass_seed",
-    "matId": "MAT_028",
+    "matId": "MAT_027",
     "name": "灵草种子",
-    "category": "种植原料",
+    "category": "生物原料",
     "form": "实体",
     "icon": "fa-solid fa-seedling text-emerald-300",
     "desc": "BD_141培养皿；只在首次投产或补损时需要外部种子",
@@ -275,9 +275,9 @@ const XIUXIAN_ITEMS = {
   },
   "mature_ling_grass": {
     "id": "mature_ling_grass",
-    "matId": "MAT_029",
+    "matId": "MAT_028",
     "name": "成熟灵草",
-    "category": "生物原料",
+    "category": "生物产物",
     "form": "实体",
     "icon": "fa-solid fa-spa text-emerald-400",
     "desc": "后续生物加工与培养循环；供提取器制作灵草萃取液",
@@ -285,7 +285,7 @@ const XIUXIAN_ITEMS = {
   },
   "nutrient_sediment": {
     "id": "nutrient_sediment",
-    "matId": "MAT_030",
+    "matId": "MAT_029",
     "name": "营养沉淀物",
     "category": "生物中间件",
     "form": "实体",
@@ -295,7 +295,7 @@ const XIUXIAN_ITEMS = {
   },
   "ling_grass_extract": {
     "id": "ling_grass_extract",
-    "matId": "MAT_031",
+    "matId": "MAT_030",
     "name": "灵草萃取液",
     "category": "生物液体",
     "form": "液体",
@@ -305,7 +305,7 @@ const XIUXIAN_ITEMS = {
   },
   "bio_mix_liquid": {
     "id": "bio_mix_liquid",
-    "matId": "MAT_032",
+    "matId": "MAT_031",
     "name": "活性生物混合液",
     "category": "生物液体",
     "form": "液体",
@@ -315,49 +315,49 @@ const XIUXIAN_ITEMS = {
   },
   "raw_water": {
     "id": "raw_water",
-    "matId": "MAT_033",
-    "name": "水源",
-    "category": "基础流体",
+    "matId": "MAT_032",
+    "name": "原水",
+    "category": "基础液体",
     "form": "液体",
     "icon": "fa-solid fa-droplet text-blue-400",
-    "desc": "基础水体，供液冷、稀释与溶液配制",
+    "desc": "练气4组织蛋白液和灵草萃取液；练气5基础营养液；与回用净化水分开显示",
     "stack": 50
   },
   "bio_turbid_waste": {
     "id": "bio_turbid_waste",
-    "matId": "MAT_034",
+    "matId": "MAT_033",
     "name": "生物浑浊废液",
-    "category": "废液",
+    "category": "液体副产物",
     "form": "液体",
     "icon": "fa-solid fa-triangle-exclamation text-amber-600",
-    "desc": "生物反应产出的浊性废液，需过滤净化",
+    "desc": "生物提取副产；不进入主线，筑基4由回收处理塔处理",
     "stack": 50
   },
   "active_cell_cluster": {
     "id": "active_cell_cluster",
-    "matId": "MAT_035",
+    "matId": "MAT_034",
     "name": "活性细胞团",
-    "category": "生物材料",
+    "category": "生物中间件",
     "form": "实体",
     "icon": "fa-solid fa-viruses text-pink-400",
-    "desc": "生物复合胚料与人造灵根的核心载体",
+    "desc": "组装机制作生物胚料",
     "stack": 100
   },
   "sha_corrupt_liquid": {
     "id": "sha_corrupt_liquid",
-    "matId": "MAT_036",
+    "matId": "MAT_035",
     "name": "煞气腐化废液",
-    "category": "废液",
+    "category": "环保处理原料",
     "form": "液体",
     "icon": "fa-solid fa-skull text-violet-500",
-    "desc": "含煞废液，需由净化台进行固液分离",
+    "desc": "煞气分离副产；回到回收处理塔，不进入人造灵根主线",
     "stack": 50
   },
   "waste_purify_powder": {
     "id": "waste_purify_powder",
-    "matId": "MAT_037",
+    "matId": "MAT_036",
     "name": "废液净化粉",
-    "category": "环保中间件",
+    "category": "废料回收材料",
     "form": "实体",
     "icon": "fa-solid fa-broom text-teal-200",
     "desc": "固体处理剂；当前本版只使用电能",
@@ -365,9 +365,9 @@ const XIUXIAN_ITEMS = {
   },
   "recycled_pure_water": {
     "id": "recycled_pure_water",
-    "matId": "MAT_038",
+    "matId": "MAT_037",
     "name": "回用净化水",
-    "category": "循环水",
+    "category": "回收液体",
     "form": "液体",
     "icon": "fa-solid fa-droplet text-cyan-300",
     "desc": "可回用工艺水；不与地图原水混名；不作为回收处理塔自身输入",
@@ -375,9 +375,9 @@ const XIUXIAN_ITEMS = {
   },
   "purify_residue": {
     "id": "purify_residue",
-    "matId": "MAT_040",
+    "matId": "MAT_038",
     "name": "净化残渣",
-    "category": "环保副产物",
+    "category": "废料回收材料",
     "form": "实体",
     "icon": "fa-solid fa-trash-can text-stone-500",
     "desc": "加工台回收为废液净化粉；也可作为后续灵能建筑（本版不启用）当前燃料；不作为燃料发电机输入",
@@ -385,9 +385,9 @@ const XIUXIAN_ITEMS = {
   },
   "device_control_plugin": {
     "id": "device_control_plugin",
-    "matId": "MAT_041",
+    "matId": "MAT_039",
     "name": "设备控制插件",
-    "category": "高级控制件",
+    "category": "控制零件",
     "form": "实体",
     "icon": "fa-solid fa-plug-circle-check text-cyan-300",
     "desc": "设备控制插件；不是一次性剧情组件",
@@ -395,9 +395,9 @@ const XIUXIAN_ITEMS = {
   },
   "bio_composite_plate": {
     "id": "bio_composite_plate",
-    "matId": "MAT_042",
+    "matId": "MAT_040",
     "name": "生物复合板",
-    "category": "高级材料",
+    "category": "高级生物原料",
     "form": "实体",
     "icon": "fa-solid fa-shield text-purple-300",
     "desc": "人造灵根与法宝阵图胚共用的生物结构材料",
@@ -405,9 +405,9 @@ const XIUXIAN_ITEMS = {
   },
   "high_temp_alloy_ingot": {
     "id": "high_temp_alloy_ingot",
-    "matId": "MAT_043",
+    "matId": "MAT_041",
     "name": "高温合金锭",
-    "category": "高级金属",
+    "category": "高级金属材料",
     "form": "实体",
     "icon": "fa-solid fa-fire text-orange-400",
     "desc": "筑基高温冶炼材料；当前用电能提供热量；供动力核心、炼宝台和渡劫台使用",
@@ -415,9 +415,9 @@ const XIUXIAN_ITEMS = {
   },
   "device_frame": {
     "id": "device_frame",
-    "matId": "MAT_044",
+    "matId": "MAT_042",
     "name": "设备框架",
-    "category": "建筑材料",
+    "category": "机器建造材料",
     "form": "实体",
     "icon": "fa-solid fa-box text-blue-300",
     "desc": "各加工建筑建造；人造灵根产线设备建造",
@@ -425,9 +425,9 @@ const XIUXIAN_ITEMS = {
   },
   "refractory_core": {
     "id": "refractory_core",
-    "matId": "MAT_045",
+    "matId": "MAT_043",
     "name": "耐火炉芯",
-    "category": "炉体构件",
+    "category": "高温设备零件",
     "form": "实体",
     "icon": "fa-solid fa-fire-burner text-orange-500",
     "desc": "精炼炉、冶炼舱、燃料发电机的通用高温核心件",
@@ -435,9 +435,9 @@ const XIUXIAN_ITEMS = {
   },
   "device_pipe": {
     "id": "device_pipe",
-    "matId": "MAT_046",
+    "matId": "MAT_044",
     "name": "设备管件",
-    "category": "通用机械零件",
+    "category": "通用流体设备零件",
     "form": "实体",
     "icon": "fa-solid fa-faucet text-sky-300",
     "desc": "水管、抽水机和流体建筑的通用管件",
@@ -445,9 +445,9 @@ const XIUXIAN_ITEMS = {
   },
   "circulating_pump": {
     "id": "circulating_pump",
-    "matId": "MAT_047",
+    "matId": "MAT_045",
     "name": "循环水泵",
-    "category": "流体机械",
+    "category": "生物设备材料",
     "form": "实体",
     "icon": "fa-solid fa-arrows-spin text-blue-400",
     "desc": "培育仓的循环水路通用泵件",
@@ -455,9 +455,9 @@ const XIUXIAN_ITEMS = {
   },
   "bio_filter_core": {
     "id": "bio_filter_core",
-    "matId": "MAT_048",
+    "matId": "MAT_046",
     "name": "生物蛋白滤芯",
-    "category": "过滤元件",
+    "category": "生物/环保设备材料",
     "form": "实体",
     "icon": "fa-solid fa-filter text-rose-300",
     "desc": "提取器×2、回收处理塔×3；先满足首台提取器建造，再持续补充净化设备滤芯",
@@ -465,9 +465,9 @@ const XIUXIAN_ITEMS = {
   },
   "general_purify_core": {
     "id": "general_purify_core",
-    "matId": "MAT_049",
+    "matId": "MAT_047",
     "name": "通用净化核心",
-    "category": "环保构件",
+    "category": "通用设备材料",
     "form": "实体",
     "icon": "fa-solid fa-sun text-yellow-300",
     "desc": "通用净化与稳定核心；本版只使用电能",
@@ -475,9 +475,9 @@ const XIUXIAN_ITEMS = {
   },
   "power_core": {
     "id": "power_core",
-    "matId": "MAT_050",
+    "matId": "MAT_048",
     "name": "电能核心",
-    "category": "电力构件",
+    "category": "能源设备材料",
     "form": "实体",
     "icon": "fa-solid fa-bolt text-yellow-400",
     "desc": "当前电网稳压组件；不储电，不消耗灵石",
@@ -485,9 +485,9 @@ const XIUXIAN_ITEMS = {
   },
   "refined_iron_ingot": {
     "id": "refined_iron_ingot",
-    "matId": "MAT_051",
+    "matId": "MAT_049",
     "name": "精炼玄铁锭",
-    "category": "高级金属",
+    "category": "高级金属锭",
     "form": "实体",
     "icon": "fa-solid fa-cube text-slate-100",
     "desc": "高温加工前置；BD_148制作高温合金锭和导脉合金",
@@ -495,9 +495,9 @@ const XIUXIAN_ITEMS = {
   },
   "log": {
     "id": "log",
-    "matId": "MAT_052",
+    "matId": "MAT_050",
     "name": "原木",
-    "category": "基础材料",
+    "category": "基础建材",
     "form": "实体",
     "icon": "fa-solid fa-tree text-amber-700",
     "desc": "楼梯、操作台、置物桌建造；可加工为木板和木结构件；可作为低阶燃料",
@@ -505,9 +505,9 @@ const XIUXIAN_ITEMS = {
   },
   "device_drive_part": {
     "id": "device_drive_part",
-    "matId": "MAT_053",
+    "matId": "MAT_051",
     "name": "设备传动件",
-    "category": "机械零件",
+    "category": "通用物流设备零件",
     "form": "实体",
     "icon": "fa-solid fa-cog text-stone-300",
     "desc": "传送带、交叉器、合流/分流和限速设备的通用传动件",
@@ -515,19 +515,19 @@ const XIUXIAN_ITEMS = {
   },
   "artificial_linggen": {
     "id": "artificial_linggen",
-    "matId": "MAT_054",
-    "name": "人造灵根原型",
-    "category": "终极构件",
+    "matId": "MAT_052",
+    "name": "人造灵根",
+    "category": "筑基期最终物品",
     "form": "实体",
     "icon": "fa-solid fa-atom text-yellow-300 animate-spin",
-    "desc": "造化金身供料与筑基突破的终极成果",
+    "desc": "Demo唯一主线最终交付物；人工灵力转换接口，让中央处理器读取、稳定并调用灵力；不是电池或生物器官",
     "stack": 100
   },
   "bio_embryo": {
     "id": "bio_embryo",
-    "matId": "MAT_057",
+    "matId": "MAT_053",
     "name": "生物胚料",
-    "category": "高级生物",
+    "category": "生物加工中间件",
     "form": "实体",
     "icon": "fa-solid fa-egg text-pink-300",
     "desc": "生物复合板的前置固体材料",
@@ -535,9 +535,9 @@ const XIUXIAN_ITEMS = {
   },
   "bio_control_core": {
     "id": "bio_control_core",
-    "matId": "MAT_058",
+    "matId": "MAT_054",
     "name": "生物控制芯",
-    "category": "高级构件",
+    "category": "控制零件",
     "form": "实体",
     "icon": "fa-solid fa-brain text-purple-300",
     "desc": "设备控制插件和主控核心的控制链中间件",
@@ -545,9 +545,9 @@ const XIUXIAN_ITEMS = {
   },
   "purify_filter_set": {
     "id": "purify_filter_set",
-    "matId": "MAT_059",
+    "matId": "MAT_055",
     "name": "净化滤芯组",
-    "category": "过滤元件",
+    "category": "环保设备中间件",
     "form": "实体",
     "icon": "fa-solid fa-boxes-stacked text-teal-300",
     "desc": "通用净化核心的固体前置；当前本版只使用电能",
@@ -555,9 +555,9 @@ const XIUXIAN_ITEMS = {
   },
   "linggen_core_material": {
     "id": "linggen_core_material",
-    "matId": "MAT_060",
+    "matId": "MAT_056",
     "name": "灵根芯材",
-    "category": "灵根构件",
+    "category": "终局组装中间件",
     "form": "实体",
     "icon": "fa-solid fa-cubes text-yellow-200",
     "desc": "人造灵根的生物/电子复合核心",
@@ -565,9 +565,9 @@ const XIUXIAN_ITEMS = {
   },
   "power_drive_core": {
     "id": "power_drive_core",
-    "matId": "MAT_061",
+    "matId": "MAT_057",
     "name": "动力核心",
-    "category": "动力构件",
+    "category": "高阶动力中间件",
     "form": "实体",
     "icon": "fa-solid fa-gauge-high text-red-400",
     "desc": "电力版高负载动力组件，不使用灵石",
@@ -575,9 +575,9 @@ const XIUXIAN_ITEMS = {
   },
   "main_control_core": {
     "id": "main_control_core",
-    "matId": "MAT_062",
+    "matId": "MAT_058",
     "name": "主控核心",
-    "category": "核心构件",
+    "category": "高阶控制中间件",
     "form": "实体",
     "icon": "fa-solid fa-microchip text-indigo-400",
     "desc": "人造灵根终配的控制核心",
@@ -585,9 +585,9 @@ const XIUXIAN_ITEMS = {
   },
   "linggen_embryo": {
     "id": "linggen_embryo",
-    "matId": "MAT_063",
+    "matId": "MAT_059",
     "name": "灵根胚体",
-    "category": "灵根构件",
+    "category": "终局组装中间件",
     "form": "实体",
     "icon": "fa-solid fa-certificate text-amber-200",
     "desc": "人造灵根最终组装前置",
@@ -595,9 +595,9 @@ const XIUXIAN_ITEMS = {
   },
   "device_skeleton": {
     "id": "device_skeleton",
-    "matId": "MAT_064",
+    "matId": "MAT_060",
     "name": "设备骨架",
-    "category": "基础框架",
+    "category": "设备建造中间件",
     "form": "实体",
     "icon": "fa-solid fa-border-all text-stone-400",
     "desc": "BD_138加工台→设备框架",
@@ -605,9 +605,9 @@ const XIUXIAN_ITEMS = {
   },
   "drive_skeleton": {
     "id": "drive_skeleton",
-    "matId": "MAT_065",
+    "matId": "MAT_061",
     "name": "传动骨架",
-    "category": "基础传动",
+    "category": "物流建造中间件",
     "form": "实体",
     "icon": "fa-solid fa-sitemap text-stone-400",
     "desc": "BD_138加工台→设备传动件",
@@ -615,39 +615,39 @@ const XIUXIAN_ITEMS = {
   },
   "wood_plank": {
     "id": "wood_plank",
-    "matId": "MAT_066",
+    "matId": "MAT_062",
     "name": "木板",
-    "category": "木质建材",
+    "category": "基础建材",
     "form": "实体",
     "icon": "fa-solid fa-bars text-amber-600",
-    "desc": "原木切割出的工程平整木板",
+    "desc": "建材支线",
     "stack": 100
   },
   "wood_structural_part": {
     "id": "wood_structural_part",
-    "matId": "MAT_067",
+    "matId": "MAT_063",
     "name": "木结构件",
-    "category": "木质构件",
+    "category": "建筑建造材料",
     "form": "实体",
     "icon": "fa-solid fa-hammer text-amber-700",
-    "desc": "建材支线；榫卯木构件，用于木构支撑",
+    "desc": "建材支线；BD_156/BD_157建造",
     "stack": 100
   },
   "charcoal_ash": {
     "id": "charcoal_ash",
-    "matId": "MAT_068",
+    "matId": "MAT_064",
     "name": "木炭灰",
-    "category": "燃烧副产物",
+    "category": "培养辅助材料",
     "form": "实体",
     "icon": "fa-solid fa-volcano text-zinc-500",
-    "desc": "燃料发电机木燃料模式副产；用于培养与催化，不是灵力材料",
+    "desc": "燃料发电机木燃料模式副产；用于培养皿改良，不是灵力材料",
     "stack": 100
   },
   "wiring_assembly": {
     "id": "wiring_assembly",
-    "matId": "MAT_069",
+    "matId": "MAT_065",
     "name": "接线组件",
-    "category": "电气构件",
+    "category": "设备连接材料",
     "form": "实体",
     "icon": "fa-solid fa-diagram-project text-blue-400",
     "desc": "接线和维修用组件；不负责储能",
@@ -655,9 +655,9 @@ const XIUXIAN_ITEMS = {
   },
   "power_supply_module": {
     "id": "power_supply_module",
-    "matId": "MAT_070",
+    "matId": "MAT_066",
     "name": "电源模块",
-    "category": "电气构件",
+    "category": "能源设备材料",
     "form": "实体",
     "icon": "fa-solid fa-car-battery text-amber-400",
     "desc": "电网接入和设备供电用模块；不储存电能",
@@ -665,19 +665,19 @@ const XIUXIAN_ITEMS = {
   },
   "sha_crystal": {
     "id": "sha_crystal",
-    "matId": "MAT_071",
+    "matId": "MAT_067",
     "name": "煞气结晶",
-    "category": "煞气资源",
+    "category": "法宝支线材料",
     "form": "实体",
     "icon": "fa-solid fa-gem text-violet-400",
-    "desc": "煞气浓缩固化后的高能晶体，用于高阶法宝合成，不是灵石",
+    "desc": "煞气浓缩液的稳定固态，不是灵石",
     "stack": 100
   },
   "daomai_alloy": {
     "id": "daomai_alloy",
-    "matId": "MAT_072",
+    "matId": "MAT_068",
     "name": "导脉合金",
-    "category": "法宝合金",
+    "category": "法宝加工材料",
     "form": "实体",
     "icon": "fa-solid fa-square text-violet-300",
     "desc": "法宝内部导流合金；与矿脉定位件不是同一类材料",
@@ -685,9 +685,9 @@ const XIUXIAN_ITEMS = {
   },
   "daomai_sheet": {
     "id": "daomai_sheet",
-    "matId": "MAT_073",
+    "matId": "MAT_069",
     "name": "导脉薄片",
-    "category": "法宝材料",
+    "category": "法宝加工材料",
     "form": "实体",
     "icon": "fa-solid fa-layer-group text-violet-200",
     "desc": "导脉合金切割后的法宝导流薄片",
@@ -695,9 +695,9 @@ const XIUXIAN_ITEMS = {
   },
   "fabao_pulse_liquid": {
     "id": "fabao_pulse_liquid",
-    "matId": "MAT_074",
+    "matId": "MAT_070",
     "name": "法宝稳脉液",
-    "category": "法宝流体",
+    "category": "法宝加工液体",
     "form": "液体",
     "icon": "fa-solid fa-flask text-violet-400",
     "desc": "高级液体；只进入法宝阵图胚配方",
@@ -705,9 +705,9 @@ const XIUXIAN_ITEMS = {
   },
   "ore_vein_locator": {
     "id": "ore_vein_locator",
-    "matId": "MAT_075",
+    "matId": "MAT_071",
     "name": "矿脉定位件",
-    "category": "空间定位",
+    "category": "通用空间组件",
     "form": "实体",
     "icon": "fa-solid fa-compass text-sky-400",
     "desc": "定位已发现矿脉节点，不复制资源",
@@ -715,9 +715,9 @@ const XIUXIAN_ITEMS = {
   },
   "fabao_array_embryo": {
     "id": "fabao_array_embryo",
-    "matId": "MAT_076",
+    "matId": "MAT_072",
     "name": "法宝阵图胚",
-    "category": "法宝中间件",
+    "category": "法宝中间态",
     "form": "实体",
     "icon": "fa-solid fa-scroll text-yellow-400",
     "desc": "绑定前可运输的法宝中间态",
@@ -725,147 +725,35 @@ const XIUXIAN_ITEMS = {
   },
   "sha_concentrate_liquid": {
     "id": "sha_concentrate_liquid",
-    "matId": "MAT_077",
+    "matId": "MAT_073",
     "name": "煞气浓缩液",
-    "category": "煞气物流",
+    "category": "煞气物流材料",
     "form": "液体",
     "icon": "fa-solid fa-skull-crossbones text-purple-600",
     "desc": "地图产生的环境煞气经回收处理塔浓缩后的液体；可走水管",
     "stack": 50
   },
-
-  // --- 法宝状态件 (严格对照 sheet003.htm) ---
-  "artifact_state_001": {
-    "id": "artifact_state_001",
-    "matId": "ART_STATE_001",
-    "name": "山河社稷图·渡劫前置态",
-    "category": "法宝状态件",
+  "mycelium_embryo": {
+    "id": "mycelium_embryo",
+    "matId": "MAT_074",
+    "name": "活性菌丝胚",
+    "category": "生物微培",
     "form": "实体",
-    "icon": "fa-solid fa-scroll text-yellow-300",
-    "desc": "完成三阶注灵，注入1000煞气浓缩液后的渡劫前置态法宝",
-    "stack": 1
+    "icon": "fa-solid fa-bacteria text-emerald-400",
+    "desc": "在培养皿中以基础营养液与木炭灰培植的活性菌丝，供人造生物灵根复合使用",
+    "stack": 100
   },
-  "artifact_001": {
-    "id": "artifact_001",
-    "matId": "ART_001",
-    "name": "山河社稷图完成态",
-    "category": "本命法宝",
+  "herb_seedling": {
+    "id": "herb_seedling",
+    "matId": "MAT_075",
+    "name": "灵草幼胚",
+    "category": "生物微培",
     "form": "实体",
-    "icon": "fa-solid fa-crown text-amber-400",
-    "desc": "历经九重天劫洗礼，完美度100%的极品后天灵宝",
-    "stack": 1
+    "icon": "fa-solid fa-spa text-teal-300",
+    "desc": "在培养皿中精密温育的灵草幼胚，大幅提高后续成熟产率",
+    "stack": 100
   }
 };
-
-// 注入官方程序键与官方MAT编码双向映射，确保全项目任意键名索引均 100% 准确
-(function setupOfficialItemAliases() {
-  const aliases = {
-    // 官方程序键与旧键映射
-    "xuantie_ore": "iron_ore",
-    "chitong_ore": "copper_ore",
-    "xuantie_ingot": "iron_ingot",
-    "chitong_ingot": "copper_ingot",
-    "xuantie_plate": "iron_plate",
-    "xuantie_powder": "iron_powder",
-    "xuantie_gear": "iron_gear",
-    "spirit_magnetic_gear": "lingci_gear",
-    "spirit_guiding_copper_sheet": "ling_copper_sheet",
-    "xuantie_beam": "iron_beam",
-    "mat_universal_interface": "device_interface",
-    "spirit_coil": "electric_coil",
-    "ling_coil": "electric_coil",
-    "control_module": "basic_control_module",
-    "cultivator_corpse_qi": "cultivator_corpse",
-    "cultivator_corpse_foundation": "foundation_corpse",
-    "cultivator_corpse_core": "jindan_corpse",
-    "neural_tissue": "neural_bundle",
-    "mat_research_sample": "analysis_data",
-    "bio_tissue_material": "dry_tissue",
-    "bio_essence": "tissue_essence",
-    "bio_protein_fluid": "protein_fluid",
-    "tissue_protein_fluid": "protein_fluid",
-    "nutrient_culture_fluid": "basic_nutrient",
-    "basic_nutrient_fluid": "basic_nutrient",
-    "spirit_herb_seed": "ling_grass_seed",
-    "lingcao_seed": "ling_grass_seed",
-    "active_spirit_plant": "mature_ling_grass",
-    "mature_lingcao": "mature_ling_grass",
-    "centrifuged_biomass": "nutrient_sediment",
-    "spirit_plant_extract": "ling_grass_extract",
-    "lingcao_extract": "ling_grass_extract",
-    "bio_mixture": "bio_mix_liquid",
-    "clean_water": "raw_water",
-    "bio_residue": "bio_turbid_waste",
-    "active_biomass": "active_cell_cluster",
-    "active_cell_mass": "active_cell_cluster",
-    "corrupted_waste_fluid": "sha_corrupt_liquid",
-    "sha_corrupt_waste": "sha_corrupt_liquid",
-    "purification_agent": "waste_purify_powder",
-    "purified_water": "recycled_pure_water",
-    "recycled_purified_water": "recycled_pure_water",
-    "mat_purification_residue": "purify_residue",
-    "spirit_amplifier_plugin": "device_control_plugin",
-    "device_ctrl_plugin": "device_control_plugin",
-    "bio_composite_material": "bio_composite_plate",
-    "spirit_alloy": "high_temp_alloy_ingot",
-    "xuantie_frame": "device_frame",
-    "heat_resistant_furnace_core": "refractory_core",
-    "common_pipe_part": "device_pipe",
-    "circulation_pump": "circulating_pump",
-    "circ_water_pump": "circulating_pump",
-    "bio_filter": "bio_filter_core",
-    "bio_protein_filter": "bio_filter_core",
-    "purification_core": "general_purify_core",
-    "universal_purify_core": "general_purify_core",
-    "spirit_core": "power_core",
-    "electric_core": "power_core",
-    "refined_xuantie_ingot": "refined_iron_ingot",
-    "raw_log": "log",
-    "raw_wood": "log",
-    "common_motion_part": "device_drive_part",
-    "device_trans_part": "device_drive_part",
-    "foundation_component": "artificial_linggen",
-    "bio_composite_base": "bio_embryo",
-    "spirit_control_core": "bio_control_core",
-    "bio_ctrl_core": "bio_control_core",
-    "purification_filter_assembly": "purify_filter_set",
-    "bio_composite_core": "linggen_core_material",
-    "spirit_power_core": "power_drive_core",
-    "composite_control_core": "main_control_core",
-    "main_ctrl_core": "main_control_core",
-    "artificial_spirit_root_preform": "linggen_embryo",
-    "xuantie_frame_base": "device_skeleton",
-    "common_motion_base": "drive_skeleton",
-    "trans_skeleton": "drive_skeleton",
-    "wood_structure_part": "wood_structural_part",
-    "wood_charcoal_ash": "charcoal_ash",
-    "conductive_component": "wiring_assembly",
-    "power_module": "power_supply_module",
-    "sha_energy_crystal": "sha_crystal",
-    "conduction_alloy": "daomai_alloy",
-    "conduction_sheet": "daomai_sheet",
-    "stable_pulse_liquid": "fabao_pulse_liquid",
-    "fabao_pulse_fluid": "fabao_pulse_liquid",
-    "grounding_locator": "ore_vein_locator",
-    "pulse_locator": "ore_vein_locator",
-    "array_blank": "fabao_array_embryo",
-    "shaqi_concentrate_liquid": "sha_concentrate_liquid",
-    "sha_concentrate_fluid": "sha_concentrate_liquid"
-  };
-
-  Object.entries(aliases).forEach(([alias, targetId]) => {
-    if (XIUXIAN_ITEMS[targetId] && !XIUXIAN_ITEMS[alias]) {
-      XIUXIAN_ITEMS[alias] = XIUXIAN_ITEMS[targetId];
-    }
-  });
-
-  // 注入 MAT_XXX 编码直取别名
-  Object.values(XIUXIAN_ITEMS).forEach(item => {
-    if (item.matId && !XIUXIAN_ITEMS[item.matId]) {
-      XIUXIAN_ITEMS[item.matId] = item;
-    }
-  });
-})();
 
 const XIUXIAN_BUILDINGS = {
   "furnace": {
@@ -884,9 +772,7 @@ const XIUXIAN_BUILDINGS = {
       "rcp_copper_ingot",
       "rcp_refractory_core"
     ],
-    "desc": "基础矿石冶炼设备，将玄铁矿/赤铜矿高温熔炼为金属锭。",
-    "group": "prod",
-    "costs": [{ "code": "iron_plate", "need": 4 }, { "code": "iron_ingot", "need": 6 }]
+    "desc": "基础矿石冶炼设备，将玄铁矿/赤铜矿高温熔炼为金属锭。"
   },
   "cutter": {
     "id": "cutter",
@@ -906,9 +792,7 @@ const XIUXIAN_BUILDINGS = {
       "rcp_wood_structural_part",
       "rcp_daomai_sheet"
     ],
-    "desc": "基础精密材料加工设备，将赤铜锭切割为铜线、导灵铜片，加工木板和导脉薄片。",
-    "group": "prod",
-    "costs": [{ "code": "iron_plate", "need": 2 }, { "code": "iron_ingot", "need": 4 }, { "code": "iron_gear", "need": 2 }]
+    "desc": "基础精密材料加工设备，将赤铜锭切割为铜线、导灵铜片，加工木板和导脉薄片。"
   },
   "assembler": {
     "id": "assembler",
@@ -938,9 +822,7 @@ const XIUXIAN_BUILDINGS = {
       "rcp_waste_purify_powder",
       "rcp_ore_vein_locator"
     ],
-    "desc": "制作基础机械零件，加工玄铁板、齿轮、玄铁梁、控制模块与设备框架。",
-    "group": "prod",
-    "costs": [{ "code": "iron_plate", "need": 2 }, { "code": "iron_ingot", "need": 4 }]
+    "desc": "制作基础机械零件，加工玄铁板、齿轮、玄铁梁、控制模块与设备框架。"
   },
   "crusher": {
     "id": "crusher",
@@ -956,9 +838,7 @@ const XIUXIAN_BUILDINGS = {
     "recipes": [
       "rcp_iron_powder"
     ],
-    "desc": "将金属锭粉碎为加工中间件玄铁粉。",
-    "group": "prod",
-    "costs": [{ "code": "iron_plate", "need": 1 }, { "code": "iron_ingot", "need": 2 }]
+    "desc": "将金属锭粉碎为加工中间件玄铁粉。"
   },
   "deconstructor": {
     "id": "deconstructor",
@@ -979,9 +859,7 @@ const XIUXIAN_BUILDINGS = {
       "rcp_decon_lianqi",
       "rcp_decon_zhuji"
     ],
-    "desc": "专门解构生物，只接受修士尸体，解构提取鲜活生物组织、神经束与脱水生物组织。",
-    "group": "prod",
-    "costs": [{ "code": "iron_plate", "need": 4 }, { "code": "iron_ingot", "need": 8 }]
+    "desc": "专门解构生物，只接受修士尸体，解构提取鲜活生物组织、神经束与脱水生物组织。"
   },
   "miner": {
     "id": "miner",
@@ -1002,9 +880,7 @@ const XIUXIAN_BUILDINGS = {
       "rcp_mine_copper",
       "rcp_mine_coal"
     ],
-    "desc": "必须对准矿脉，持续开采地下玄铁矿、赤铜矿与煤炭。",
-    "group": "prod",
-    "costs": [{ "code": "iron_plate", "need": 2 }, { "code": "iron_ingot", "need": 3 }]
+    "desc": "必须对准矿脉，持续开采地下玄铁矿、赤铜矿与煤炭。"
   },
   "centrifuge": {
     "id": "centrifuge",
@@ -1024,9 +900,7 @@ const XIUXIAN_BUILDINGS = {
       "rcp_tissue_essence",
       "rcp_sha_separation"
     ],
-    "desc": "分离生物液体中的不同成分，离心提取组织精华液与煞气分离。",
-    "group": "prod",
-    "costs": [{ "code": "iron_plate", "need": 3 }, { "code": "iron_ingot", "need": 5 }, { "code": "copper_ingot", "need": 3 }]
+    "desc": "分离生物液体中的不同成分，离心提取组织精华液与煞气分离。"
   },
   "extractor": {
     "id": "extractor",
@@ -1046,9 +920,7 @@ const XIUXIAN_BUILDINGS = {
       "rcp_protein_fluid",
       "rcp_ling_grass_extract"
     ],
-    "desc": "从生物材料中提取组织蛋白液与灵草萃取液。",
-    "group": "prod",
-    "costs": [{ "code": "iron_plate", "need": 2 }, { "code": "iron_ingot", "need": 3 }, { "code": "copper_ingot", "need": 2 }]
+    "desc": "从生物材料中提取组织蛋白液与灵草萃取液。"
   },
   "incubator": {
     "id": "incubator",
@@ -1071,9 +943,7 @@ const XIUXIAN_BUILDINGS = {
       "rcp_cell_cultivation",
       "rcp_sediment_nutrient"
     ],
-    "desc": "多用处流固混合培育设备，具备灵草基础培育、催生增产闭环、细胞扩增及养分沉淀发酵四大核心功能，支持时间加速器挂载。",
-    "group": "prod",
-    "costs": [{ "code": "iron_plate", "need": 4 }, { "code": "iron_ingot", "need": 6 }, { "code": "copper_ingot", "need": 4 }]
+    "desc": "多用处流固混合培育设备，具备灵草基础培育、催生增产闭环、细胞扩增及养分沉淀发酵四大核心功能，支持时间加速器挂载。"
   },
   "mixer": {
     "id": "mixer",
@@ -1095,9 +965,7 @@ const XIUXIAN_BUILDINGS = {
       "rcp_bio_mix_liquid",
       "rcp_fabao_pulse_liquid"
     ],
-    "desc": "流体/固体混合处理，合成基础营养液、活性生物混合液与法宝稳脉液。",
-    "group": "prod",
-    "costs": [{ "code": "iron_plate", "need": 3 }, { "code": "iron_ingot", "need": 4 }, { "code": "iron_gear", "need": 2 }]
+    "desc": "流体/固体混合处理，合成基础营养液、活性生物混合液与法宝稳脉液。"
   },
   "assembler_heavy": {
     "id": "assembler_heavy",
@@ -1121,9 +989,7 @@ const XIUXIAN_BUILDINGS = {
       "rcp_artificial_linggen",
       "rcp_fabao_array_embryo"
     ],
-    "desc": "双轨物料校验组装，合成生物胚料、灵根胚体、人造灵根与法宝阵图胚。",
-    "group": "prod",
-    "costs": [{ "code": "iron_plate", "need": 6 }, { "code": "iron_ingot", "need": 10 }, { "code": "copper_ingot", "need": 6 }, { "code": "iron_gear", "need": 4 }]
+    "desc": "双轨物料校验组装，合成生物胚料、灵根胚体、人造灵根与法宝阵图胚。"
   },
   "power_engine": {
     "id": "power_engine",
@@ -1146,9 +1012,7 @@ const XIUXIAN_BUILDINGS = {
       "rcp_engine_thermal_power",
       "rcp_engine_super_steam"
     ],
-    "desc": "复合建筑母机座子，本身为热能转化加工建筑，同时提供顶部3个模型插槽供被动冶炼舱等插件挂载并供能供热。",
-    "group": "power",
-    "costs": [{ "code": "iron_plate", "need": 6 }, { "code": "iron_ingot", "need": 12 }, { "code": "copper_ingot", "need": 8 }]
+    "desc": "复合建筑母机座子，本身为热能转化加工建筑，同时提供顶部3个模型插槽供被动冶炼舱等插件挂载并供能供热。"
   },
   "smelt_chamber": {
     "id": "smelt_chamber",
@@ -1171,9 +1035,7 @@ const XIUXIAN_BUILDINGS = {
       "rcp_daomai_alloy",
       "rcp_power_drive_core"
     ],
-    "desc": "挂载在灵力引擎座子上的被动加工器模型插件，汲取底座高热自动识别放入的材料转化提纯高级金属。",
-    "group": "prod",
-    "costs": [{ "code": "iron_ingot", "need": 4 }, { "code": "copper_ingot", "need": 2 }]
+    "desc": "挂载在灵力引擎座子上的被动加工器模型插件，汲取底座高热自动识别放入的材料转化提纯高级金属。"
   },
   "bio_base": {
     "id": "bio_base",
@@ -1193,9 +1055,7 @@ const XIUXIAN_BUILDINGS = {
     "recipes": [
       "rcp_bio_base_infusion"
     ],
-    "desc": "大型生物复合底座，提供高压营养液内循环管网与恒温生物载台。顶部专设1个标准卡座，承托单个生物设备（培养仓BD_108或培养皿BD_131二选一），直供高纯营养液并强化微培增产。",
-    "group": "prod",
-    "costs": [{ "code": "iron_plate", "need": 6 }, { "code": "iron_beam", "need": 4 }]
+    "desc": "大型生物复合底座，提供高压营养液内循环管网与恒温生物载台。顶部专设1个标准卡座，承托单个生物设备（培养仓BD_108或培养皿BD_131二选一），直供高纯营养液并强化微培增产。"
   },
   "petri_dish": {
     "id": "petri_dish",
@@ -1214,9 +1074,7 @@ const XIUXIAN_BUILDINGS = {
       "rcp_spore_culture",
       "rcp_herb_seedling"
     ],
-    "desc": "精密生物发酵培养皿，插在营养基座上工作，可加入木炭灰改良基质，精密培育活性菌丝胚与灵草幼胚。",
-    "group": "prod",
-    "costs": [{ "code": "iron_plate", "need": 3 }, { "code": "copper_ingot", "need": 2 }]
+    "desc": "精密生物发酵培养皿，插在营养基座上工作，可加入木炭灰改良基质，精密培育活性菌丝胚与灵草幼胚。"
   },
   "fluid_hub": {
     "id": "fluid_hub",
@@ -1236,193 +1094,7 @@ const XIUXIAN_BUILDINGS = {
     "recipes": [
       "rcp_fluid_hub_boost"
     ],
-    "desc": "单设备承载型高压流体复合母座，集成高压离心泵与多相流分配阀室。顶部专设1个标准卡座，只能且必须放置一个加工设备（支持搅拌机BD_110、离心机BD_106或提取器BD_109三选一），提供集中流体输送与增压加成！",
-    "group": "prod",
-    "costs": [{ "code": "iron_beam", "need": 12 }, { "code": "power_supply_module", "need": 4 }]
-  },
-
-  // ================= 传送物流类 (logi) =================
-  "conveyor": {
-    "id": "conveyor",
-    "code": "BD_125",
-    "name": "传送带",
-    "category": "物流",
-    "group": "logi",
-    "typeDesc": "物流 / 标准物料输送",
-    "power": 0,
-    "costs": [{ "code": "iron_plate", "need": 1 }],
-    "desc": "自带供电传输的标准物料传送带，支持建筑间无人化运输。"
-  },
-  "splitter": {
-    "id": "splitter",
-    "code": "BD_124",
-    "name": "分流器",
-    "category": "物流",
-    "group": "logi",
-    "typeDesc": "物流 / 1进3出分流",
-    "power": 0,
-    "costs": [{ "code": "iron_plate", "need": 4 }, { "code": "iron_gear", "need": 2 }],
-    "desc": "1进3出物流分流节点，支持品质过滤与流向分配。"
-  },
-  "merger": {
-    "id": "merger",
-    "code": "BD_128",
-    "name": "合流器",
-    "category": "物流",
-    "group": "logi",
-    "typeDesc": "物流 / 3进1出合流",
-    "power": 0,
-    "costs": [{ "code": "iron_plate", "need": 4 }, { "code": "iron_gear", "need": 2 }],
-    "desc": "3进1出物流汇集节点，实现多产线物料汇流。"
-  },
-  "pipe": {
-    "id": "pipe",
-    "code": "BD_127",
-    "name": "水管",
-    "category": "物流",
-    "group": "logi",
-    "typeDesc": "流体 / 双向导管",
-    "power": 0,
-    "costs": [{ "code": "iron_ingot", "need": 2 }],
-    "desc": "双向流体导管，用于运送原水、营养液及煞气浓缩液。"
-  },
-  "vert_conveyor": {
-    "id": "vert_conveyor",
-    "code": "BD_129",
-    "name": "垂直传送带",
-    "category": "物流",
-    "group": "logi",
-    "typeDesc": "物流 / 立体升降架",
-    "power": 0,
-    "costs": [{ "code": "iron_plate", "need": 4 }, { "code": "iron_gear", "need": 4 }],
-    "desc": "Z轴立体运输升降架，高度可拖拽 3~8 米。"
-  },
-
-  // ================= 能源动力类 (power) =================
-  "power_burner": {
-    "id": "power_burner",
-    "code": "BD_117",
-    "name": "供能机",
-    "category": "电力",
-    "group": "power",
-    "typeDesc": "能源 / 燃烧发电",
-    "power": -20,
-    "costs": [{ "code": "iron_plate", "need": 10 }, { "code": "copper_wire", "need": 10 }],
-    "desc": "燃烧煤炭或木材发电，无线供电覆盖 50 米半径。"
-  },
-  "power_generator": {
-    "id": "power_generator",
-    "code": "BD_118",
-    "name": "灵石发电机",
-    "category": "电力",
-    "group": "power",
-    "typeDesc": "能源 / 灵能高阶发电",
-    "power": -80,
-    "costs": [{ "code": "iron_beam", "need": 10 }, { "code": "power_supply_module", "need": 4 }],
-    "desc": "消耗灵石驱动的高阶发电机组，输出稳定强劲灵能。"
-  },
-
-  // ================= 组织结构与仓储类 (org) =================
-  "storage_box": {
-    "id": "storage_box",
-    "code": "BD_115",
-    "name": "个人储物箱",
-    "category": "仓储",
-    "group": "org",
-    "typeDesc": "仓储 / 随身箱",
-    "power": 0,
-    "costs": [{ "code": "iron_plate", "need": 4 }, { "code": "iron_ingot", "need": 4 }],
-    "desc": "标准随身物品存放箱，具有 24 格储物空间。"
-  },
-  "foundation_1x1": {
-    "id": "foundation_1x1",
-    "code": "BD_119",
-    "name": "地基 1x1",
-    "category": "建筑",
-    "group": "org",
-    "typeDesc": "结构 / 小型基础平整",
-    "power": 0,
-    "costs": [{ "code": "iron_plate", "need": 1 }],
-    "desc": "小型 1x1 基础平整地基。"
-  },
-  "foundation_4x4": {
-    "id": "foundation_4x4",
-    "code": "BD_120",
-    "name": "地基 4x4",
-    "category": "建筑",
-    "group": "org",
-    "typeDesc": "结构 / 标准工业地基",
-    "power": 0,
-    "costs": [{ "code": "iron_plate", "need": 4 }],
-    "desc": "平整施工地基，提供平坦的工业建造表面。"
-  },
-  "foundation_16x16": {
-    "id": "foundation_16x16",
-    "code": "BD_121",
-    "name": "地基 16x16",
-    "category": "建筑",
-    "group": "org",
-    "typeDesc": "结构 / 重型大跨度地基",
-    "power": 0,
-    "costs": [{ "code": "iron_plate", "need": 16 }],
-    "desc": "超大重型平整地基，大面积厂区硬化地面。"
-  },
-  "iron_beam_bld": {
-    "id": "iron_beam_bld",
-    "code": "BD_122",
-    "name": "玄铁梁",
-    "category": "建筑",
-    "group": "org",
-    "typeDesc": "结构 / 承重工字梁",
-    "power": 0,
-    "costs": [{ "code": "iron_beam", "need": 2 }],
-    "desc": "重型承重工字梁，跨越地形障碍架设管线。"
-  },
-  "table": {
-    "id": "table",
-    "code": "BD_123",
-    "name": "置物桌",
-    "category": "建筑",
-    "group": "org",
-    "typeDesc": "结构 / 工坊家具",
-    "power": 0,
-    "costs": [{ "code": "iron_plate", "need": 2 }],
-    "desc": "小型工坊操作与物品整备桌。"
-  },
-
-  // ================= 特殊设施类 (special) =================
-  "refining_bench": {
-    "id": "refining_bench",
-    "code": "BD_148",
-    "name": "炼宝台",
-    "category": "特殊",
-    "group": "special",
-    "typeDesc": "法宝 / 三阶注灵台",
-    "power": 30,
-    "costs": [{ "code": "iron_beam", "need": 12 }, { "code": "daomai_sheet", "need": 6 }],
-    "desc": "三阶注灵法宝淬炼台，完成本命法宝山河社稷图前置态注灵。"
-  },
-  "tribulation_platform": {
-    "id": "tribulation_platform",
-    "code": "BD_150",
-    "name": "渡劫台",
-    "category": "特殊",
-    "group": "special",
-    "typeDesc": "飞升 / 天劫洗礼台",
-    "power": 100,
-    "costs": [{ "code": "iron_beam", "need": 20 }, { "code": "sha_crystal", "need": 10 }],
-    "desc": "接引九重天劫洗礼法宝，渡劫飞升成就极品后天灵宝。"
-  },
-  "teleporter": {
-    "id": "teleporter",
-    "code": "BD_114",
-    "name": "传送门",
-    "category": "特殊",
-    "group": "special",
-    "typeDesc": "空间 / 频段跃迁",
-    "power": 50,
-    "costs": [{ "code": "iron_beam", "need": 15 }, { "code": "power_supply_module", "need": 5 }],
-    "desc": "空间跃迁传输，配对频段瞬移传输。"
+    "desc": "单设备承载型高压流体复合母座，集成高压离心泵与多相流分配阀室。顶部专设1个标准卡座，只能且必须放置一个加工设备（支持搅拌机BD_110、离心机BD_106或提取器BD_109三选一），提供集中流体输送与增压加成！"
   }
 };
 
@@ -3695,74 +3367,13 @@ const INITIAL_PLAYER_INVENTORY = [
   }
 ];
 
-const XIUXIAN_MILESTONES = {
-  1: {
-    id: 1,
-    tier: 'T1',
-    realm: '炼气期',
-    title: '中央处理器研究认证 (炼气 1 层)',
-    subTitle: '天工基建',
-    desc: '交付基础冶炼产物，升级天元中央处理器，全线解锁精炼炉、粉碎机、加工台与分流设施。',
-    requirements: [
-      { code: 'iron_ingot', need: 100 },
-      { code: 'copper_ingot', need: 100 },
-      { code: 'iron_plate', need: 100 }
-    ],
-    rewards: ['BD_102 精炼炉', 'BD_103 粉碎机', 'BD_104 加工台', 'BD_124 分流器']
-  },
-  2: {
-    id: 2,
-    tier: 'T2',
-    realm: '筑基期',
-    title: '精密机械与流体工业 (筑基 1 层)',
-    subTitle: '精密物流',
-    desc: '交付基础机械构件，打通切割、流体中枢与生物培育技术链路。',
-    requirements: [
-      { code: 'iron_gear', need: 150 },
-      { code: 'copper_wire', need: 300 },
-      { code: 'iron_beam', need: 100 }
-    ],
-    rewards: ['BD_105 切割机', 'BD_106 离心机', 'BD_108 培育仓', 'BD_110 搅拌机']
-  },
-  3: {
-    id: 3,
-    tier: 'T3',
-    realm: '金丹期',
-    title: '高阶神机与法脉组装 (金丹 1 层)',
-    subTitle: '灵能矩阵',
-    desc: '交付精密电气与灵能部件，解锁多轨校验重型组装机与空间跃迁传送门。',
-    requirements: [
-      { code: 'ling_copper_sheet', need: 200 },
-      { code: 'power_supply_module', need: 100 },
-      { code: 'wiring_assembly', need: 150 }
-    ],
-    rewards: ['BD_111 组装机', 'BD_114 传送门', 'BD_148 炼宝台']
-  },
-  4: {
-    id: 4,
-    tier: 'T4',
-    realm: '元婴期',
-    title: '元婴化神与通天飞升 (元婴 1 层)',
-    subTitle: '终局飞升',
-    desc: '交付法宝阵图胚与导脉构件，开启通天飞升矩阵与万仙中枢。',
-    requirements: [
-      { code: 'fabao_array_embryo', need: 50 },
-      { code: 'daomai_sheet', need: 100 },
-      { code: 'sha_crystal', need: 100 }
-    ],
-    rewards: ['BD_150 终局飞升矩阵', '万仙中枢全息互联']
-  }
-};
-
 if (typeof window !== "undefined") {
   window.XIUXIAN_ITEMS = XIUXIAN_ITEMS;
   window.XIUXIAN_BUILDINGS = XIUXIAN_BUILDINGS;
   window.XIUXIAN_RECIPES = XIUXIAN_RECIPES;
-  window.XIUXIAN_MILESTONES = XIUXIAN_MILESTONES;
   window.INITIAL_PLAYER_INVENTORY = INITIAL_PLAYER_INVENTORY;
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { XIUXIAN_ITEMS, XIUXIAN_BUILDINGS, XIUXIAN_RECIPES, XIUXIAN_MILESTONES, INITIAL_PLAYER_INVENTORY };
+  module.exports = { XIUXIAN_ITEMS, XIUXIAN_BUILDINGS, XIUXIAN_RECIPES, INITIAL_PLAYER_INVENTORY };
 }
-

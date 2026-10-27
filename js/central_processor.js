@@ -15,52 +15,54 @@ const CPU_BLUEPRINT_STATE = {
   rotation: 0,
   activeZoneId: 'zone1', // 'zone1', 'zone2', 'zone3', 'zone4'
 
-  // 解锁进度：默认开启 'zhuji' 筑基全开状态，方便调试与测试！
-  gameStage: 'zhuji',
+  // 解锁进度：'prologue' | 'lianqi' | 'zhuji'
+  // 序章：只有zone1可用  练气完成：zone1/2/3可用  筑基完成：全部可用
+  gameStage: 'prologue',
 
-  // 节点槽位上限（调试模式放开至99，不再限制）
-  slotCaps: { prologue: 99, lianqi: 99, zhuji: 99 },
+  // 节点槽位上限（随阶段扩展）
+  // prologue: 2槽, lianqi: 4槽, zhuji: 6槽
+  slotCaps: { prologue: 2, lianqi: 4, zhuji: 6 },
 
-  // 已解锁的节点类型：全部开放
-  unlockedNodeTypes: ['input', 'amplifier', 'branch', 'resonator', 'stabilizer', 'converter', 'core'],
+  // 已解锁的节点类型（按阶段累积）
+  // prologue: 输入端口+增幅矩阵  lianqi追加: 分流晶体+稳压储能  zhuji追加: 谐振腔+转化器
+  unlockedNodeTypes: ['input', 'amplifier', 'core'],
 
-  // 四大区域：世界树 (World Tree) 拓扑布局
-  // 1. 物流区 (灵脉西翼 - Top Left)
-  // 2. 生产区 (世界树主冠 - Upper Center Core)
-  // 3. 电力区 (灵脉东翼 - Middle Right)
-  // 4. 研究区 (通天灵根 - Bottom Root)
+  // 四大区域
   zones: {
     zone1: {
       id: 'zone1',
-      name: '1. 物流区',
+      name: '物流区',
       shortName: '物流',
       themeColor: '#38bdf8',
       icon: 'fa-solid fa-conveyor-belt-boxes',
-      rect: { x: 180, y: 220, width: 1000, height: 780 },
+      rect: { x: 50, y: 50, width: 880, height: 500 },
       unlocked: true,
       satisfied: false,
+      // 增益配置
       buffType: 'logistics',
       buffLabel: '传送带吞吐量',
       buffLabel2: '升降机速度',
-      buffValue: 0,
+      buffValue: 0,       // 当前增益（%）
       buffValue2: 0,
+      // 接受的输入材料及其信号强度
       inputMaterials: {
         '玄铁齿轮':   { signal: 60,  rate: 8,  icon: 'fa-solid fa-gear' },
         '灵磁齿轮':   { signal: 100, rate: 6,  icon: 'fa-solid fa-gear' },
         '设备传动件': { signal: 250, rate: 3,  icon: 'fa-solid fa-cog' }
       },
+      // 当前接入的材料（输入端口节点读取）
       activeInput: null,
       activeInput2: null,
-      coreRequirement: '将运算信号传入中央物流核心芯片'
+      coreRequirement: '将信号传入物流核心节点'
     },
     zone2: {
       id: 'zone2',
-      name: '2. 生产区',
+      name: '生产区',
       shortName: '生产',
       themeColor: '#f59e0b',
       icon: 'fa-solid fa-industry',
-      rect: { x: 1300, y: 360, width: 1000, height: 780 },
-      unlocked: true,
+      rect: { x: 1040, y: 50, width: 880, height: 500 },
+      unlocked: false,
       satisfied: false,
       buffType: 'production',
       buffLabel: '设备工作速度',
@@ -75,16 +77,16 @@ const CPU_BLUEPRINT_STATE = {
       activeInput: null,
       activeInput2: null,
       unlockRequirement: '完成练气阶段所有认证后解锁',
-      coreRequirement: '将运算信号传入中央生产核心芯片'
+      coreRequirement: '将信号传入生产核心节点'
     },
     zone3: {
       id: 'zone3',
-      name: '3. 电力区',
+      name: '电力区',
       shortName: '电力',
       themeColor: '#a855f7',
       icon: 'fa-solid fa-bolt',
-      rect: { x: 2420, y: 820, width: 1000, height: 780 },
-      unlocked: true,
+      rect: { x: 1040, y: 620, width: 880, height: 500 },
+      unlocked: false,
       satisfied: false,
       buffType: 'power',
       buffLabel: '全厂耗电降低',
@@ -99,16 +101,16 @@ const CPU_BLUEPRINT_STATE = {
       activeInput: null,
       activeInput2: null,
       unlockRequirement: '完成练气阶段所有认证后解锁',
-      coreRequirement: '将运算信号传入中央电力核心芯片'
+      coreRequirement: '将信号传入电力核心节点'
     },
     zone4: {
       id: 'zone4',
-      name: '4. 研究区',
+      name: '研究区',
       shortName: '研究',
       themeColor: '#10b981',
       icon: 'fa-solid fa-flask',
-      rect: { x: 1300, y: 2360, width: 1000, height: 780 },
-      unlocked: true,
+      rect: { x: 50, y: 620, width: 880, height: 500 },
+      unlocked: false,
       satisfied: false,
       buffType: 'research',
       buffLabel: '解析数据产出',
@@ -122,7 +124,7 @@ const CPU_BLUEPRINT_STATE = {
       activeInput: null,
       activeInput2: null,
       unlockRequirement: '完成筑基阶段所有认证后解锁',
-      coreRequirement: '将运算信号传入中央研究核心芯片'
+      coreRequirement: '将信号传入研究核心节点'
     }
   },
 
@@ -153,110 +155,126 @@ const CPU_BLUEPRINT_STATE = {
 };
 
 // =========================================================================
-// 节点预置：集成电路 PCB 紧凑封装（世界树 4 大母板点位）
+// 节点预置：每区有固定布局，序章只显示物流区节点
+// 节点类型说明：
+//   input     = 输入端口（唯一接受游戏材料的节点）
+//   amplifier = 增幅矩阵（放大信号，耗电）
+//   branch    = 分流晶体（一分二，各得55%）
+//   resonator = 谐振腔（双路输入触发×1.6乘法加成）
+//   stabilizer= 稳压储能（断供保护，储能缓冲）
+//   converter = 转化器（跨区域信号转换，×0.5效率）
+//   core      = 区域核心（终点，输出增益值）
 // =========================================================================
 const CPU_WORLD_NODES_PRESET = [
-  // 1. 物流区 (zone1, x: 180..1180, y: 220..1000)
+  // -----------------------------------------------------------------------
+  // 物流区 (zone1) — 序章即可用，初始已预连
+  // -----------------------------------------------------------------------
   {
     id: 'z1_input_a', zoneId: 'zone1',
-    type: 'input', name: '输入插座 A', category: '物料插槽',
-    x: 250, y: 550, width: 140, themeColor: '#38bdf8', icon: 'fa-solid fa-arrow-right-to-bracket',
-    valText: '物料: 玄铁齿轮', material: '玄铁齿轮', signalOut: 60,
+    type: 'input', name: '输入端口 A', category: '材料输入',
+    x: 80, y: 130, width: 175, themeColor: '#38bdf8', icon: 'fa-solid fa-arrow-right-to-bracket',
+    valText: '未接入材料', material: null, signalOut: 0,
     inPins: [],
-    outPins: [{ id: 'out_a', label: 'OUT', color: '#38bdf8' }]
+    outPins: [{ id: 'out_a', label: '信号 OUT', color: '#38bdf8' }]
   },
   {
     id: 'z1_amp_1', zoneId: 'zone1',
-    type: 'amplifier', name: '增幅芯片 Mk.1', category: 'IC 运算',
-    x: 530, y: 560, width: 130, themeColor: '#f59e0b', icon: 'fa-solid fa-chart-line',
-    valText: '×1.50 | +6MW', ampLevel: 1,
-    inPins:  [{ id: 'in',  label: 'IN',  color: '#f59e0b' }],
-    outPins: [{ id: 'out', label: 'OUT', color: '#f59e0b' }]
+    type: 'amplifier', name: '增幅矩阵', category: 'CPU运算 · 增幅',
+    x: 320, y: 220, width: 185, themeColor: '#f59e0b', icon: 'fa-solid fa-chart-line',
+    valText: '信号 ×1.5 | 耗电 +6 MW', ampLevel: 1,
+    inPins:  [{ id: 'in',  label: '信号 IN',  color: '#f59e0b' }],
+    outPins: [{ id: 'out', label: '信号 OUT', color: '#f59e0b' }]
   },
   {
     id: 'z1_core', zoneId: 'zone1',
-    type: 'core', name: '物流主控 CPU', category: '核心处理器',
-    x: 900, y: 520, width: 160, themeColor: '#38bdf8', icon: 'fa-solid fa-microchip',
-    valText: '待信号注入', signalIn: 0,
-    inPins:  [{ id: 'in', label: 'BUS IN', color: '#38bdf8', isGold: true }],
+    type: 'core', name: '物流核心', category: '区域核心',
+    x: 570, y: 220, width: 190, themeColor: '#38bdf8', icon: 'fa-solid fa-microchip',
+    valText: '等待信号接入…', signalIn: 0,
+    inPins:  [{ id: 'in', label: '信号 IN', color: '#38bdf8', isGold: true }],
     outPins: []
   },
 
-  // 2. 生产区 (zone2, x: 1300..2300, y: 360..1140)
+  // -----------------------------------------------------------------------
+  // 生产区 (zone2) — 练气阶段完成后解锁
+  // -----------------------------------------------------------------------
   {
     id: 'z2_input_a', zoneId: 'zone2',
-    type: 'input', name: '输入插座 A', category: '物料插槽',
-    x: 1370, y: 690, width: 140, themeColor: '#f59e0b', icon: 'fa-solid fa-arrow-right-to-bracket',
-    valText: '未接入物料', material: null, signalOut: 0,
+    type: 'input', name: '输入端口 A', category: '材料输入',
+    x: 1080, y: 130, width: 175, themeColor: '#f59e0b', icon: 'fa-solid fa-arrow-right-to-bracket',
+    valText: '未接入材料', material: null, signalOut: 0,
     inPins: [],
-    outPins: [{ id: 'out_a', label: 'OUT', color: '#f59e0b' }]
+    outPins: [{ id: 'out_a', label: '信号 OUT', color: '#f59e0b' }]
   },
   {
     id: 'z2_amp_1', zoneId: 'zone2',
-    type: 'amplifier', name: '增幅芯片 Mk.1', category: 'IC 运算',
-    x: 1640, y: 700, width: 130, themeColor: '#f59e0b', icon: 'fa-solid fa-chart-line',
-    valText: '×1.50 | +6MW', ampLevel: 1,
-    inPins:  [{ id: 'in',  label: 'IN',  color: '#f59e0b' }],
-    outPins: [{ id: 'out', label: 'OUT', color: '#f59e0b' }]
+    type: 'amplifier', name: '增幅矩阵', category: 'CPU运算 · 增幅',
+    x: 1310, y: 220, width: 185, themeColor: '#f59e0b', icon: 'fa-solid fa-chart-line',
+    valText: '信号 ×1.5 | 耗电 +6 MW', ampLevel: 1,
+    inPins:  [{ id: 'in',  label: '信号 IN',  color: '#f59e0b' }],
+    outPins: [{ id: 'out', label: '信号 OUT', color: '#f59e0b' }]
   },
   {
     id: 'z2_core', zoneId: 'zone2',
-    type: 'core', name: '生产主控 CPU', category: '核心处理器',
-    x: 2020, y: 660, width: 160, themeColor: '#f59e0b', icon: 'fa-solid fa-industry',
-    valText: '待信号注入', signalIn: 0,
-    inPins:  [{ id: 'in', label: 'BUS IN', color: '#f59e0b', isGold: true }],
+    type: 'core', name: '生产核心', category: '区域核心',
+    x: 1560, y: 220, width: 190, themeColor: '#f59e0b', icon: 'fa-solid fa-industry',
+    valText: '等待信号接入…', signalIn: 0,
+    inPins:  [{ id: 'in', label: '信号 IN', color: '#f59e0b', isGold: true }],
     outPins: []
   },
 
-  // 3. 电力区 (zone3, x: 2420..3420, y: 820..1600)
+  // -----------------------------------------------------------------------
+  // 电力区 (zone3) — 练气阶段完成后解锁
+  // -----------------------------------------------------------------------
   {
     id: 'z3_input_a', zoneId: 'zone3',
-    type: 'input', name: '输入插座 A', category: '物料插槽',
-    x: 2490, y: 1150, width: 140, themeColor: '#a855f7', icon: 'fa-solid fa-arrow-right-to-bracket',
-    valText: '未接入物料', material: null, signalOut: 0,
+    type: 'input', name: '输入端口 A', category: '材料输入',
+    x: 1080, y: 700, width: 175, themeColor: '#a855f7', icon: 'fa-solid fa-arrow-right-to-bracket',
+    valText: '未接入材料', material: null, signalOut: 0,
     inPins: [],
-    outPins: [{ id: 'out_a', label: 'OUT', color: '#a855f7' }]
+    outPins: [{ id: 'out_a', label: '信号 OUT', color: '#a855f7' }]
   },
   {
     id: 'z3_amp_1', zoneId: 'zone3',
-    type: 'amplifier', name: '增幅芯片 Mk.1', category: 'IC 运算',
-    x: 2760, y: 1160, width: 130, themeColor: '#f59e0b', icon: 'fa-solid fa-chart-line',
-    valText: '×1.50 | +6MW', ampLevel: 1,
-    inPins:  [{ id: 'in',  label: 'IN',  color: '#f59e0b' }],
-    outPins: [{ id: 'out', label: 'OUT', color: '#f59e0b' }]
+    type: 'amplifier', name: '增幅矩阵', category: 'CPU运算 · 增幅',
+    x: 1310, y: 790, width: 185, themeColor: '#f59e0b', icon: 'fa-solid fa-chart-line',
+    valText: '信号 ×1.5 | 耗电 +6 MW', ampLevel: 1,
+    inPins:  [{ id: 'in',  label: '信号 IN',  color: '#f59e0b' }],
+    outPins: [{ id: 'out', label: '信号 OUT', color: '#f59e0b' }]
   },
   {
     id: 'z3_core', zoneId: 'zone3',
-    type: 'core', name: '电力主控 CPU', category: '核心处理器',
-    x: 3140, y: 1120, width: 160, themeColor: '#a855f7', icon: 'fa-solid fa-bolt',
-    valText: '待信号注入', signalIn: 0,
-    inPins:  [{ id: 'in', label: 'BUS IN', color: '#a855f7', isGold: true }],
+    type: 'core', name: '电力核心', category: '区域核心',
+    x: 1560, y: 790, width: 190, themeColor: '#a855f7', icon: 'fa-solid fa-bolt',
+    valText: '等待信号接入…', signalIn: 0,
+    inPins:  [{ id: 'in', label: '信号 IN', color: '#a855f7', isGold: true }],
     outPins: []
   },
 
-  // 4. 研究区 (zone4, x: 1300..2300, y: 2360..3140)
+  // -----------------------------------------------------------------------
+  // 研究区 (zone4) — 筑基阶段完成后解锁
+  // -----------------------------------------------------------------------
   {
     id: 'z4_input_a', zoneId: 'zone4',
-    type: 'input', name: '输入插座 A', category: '物料插槽',
-    x: 1370, y: 2690, width: 140, themeColor: '#10b981', icon: 'fa-solid fa-arrow-right-to-bracket',
-    valText: '未接入物料', material: null, signalOut: 0,
+    type: 'input', name: '输入端口 A', category: '材料输入',
+    x: 80, y: 700, width: 175, themeColor: '#10b981', icon: 'fa-solid fa-arrow-right-to-bracket',
+    valText: '未接入材料', material: null, signalOut: 0,
     inPins: [],
-    outPins: [{ id: 'out_a', label: 'OUT', color: '#10b981' }]
+    outPins: [{ id: 'out_a', label: '信号 OUT', color: '#10b981' }]
   },
   {
     id: 'z4_amp_1', zoneId: 'zone4',
-    type: 'amplifier', name: '增幅芯片 Mk.1', category: 'IC 运算',
-    x: 1640, y: 2700, width: 130, themeColor: '#f59e0b', icon: 'fa-solid fa-chart-line',
-    valText: '×1.50 | +6MW', ampLevel: 1,
-    inPins:  [{ id: 'in',  label: 'IN',  color: '#f59e0b' }],
-    outPins: [{ id: 'out', label: 'OUT', color: '#f59e0b' }]
+    type: 'amplifier', name: '增幅矩阵', category: 'CPU运算 · 增幅',
+    x: 310, y: 790, width: 185, themeColor: '#f59e0b', icon: 'fa-solid fa-chart-line',
+    valText: '信号 ×1.5 | 耗电 +6 MW', ampLevel: 1,
+    inPins:  [{ id: 'in',  label: '信号 IN',  color: '#f59e0b' }],
+    outPins: [{ id: 'out', label: '信号 OUT', color: '#f59e0b' }]
   },
   {
     id: 'z4_core', zoneId: 'zone4',
-    type: 'core', name: '研究主控 CPU', category: '核心处理器',
-    x: 2020, y: 2660, width: 160, themeColor: '#10b981', icon: 'fa-solid fa-flask',
-    valText: '待信号注入', signalIn: 0,
-    inPins:  [{ id: 'in', label: 'BUS IN', color: '#10b981', isGold: true }],
+    type: 'core', name: '研究核心', category: '区域核心',
+    x: 560, y: 790, width: 190, themeColor: '#10b981', icon: 'fa-solid fa-flask',
+    valText: '等待信号接入…', signalIn: 0,
+    inPins:  [{ id: 'in', label: '信号 IN', color: '#10b981', isGold: true }],
     outPins: []
   }
 ];
@@ -267,45 +285,6 @@ const CPU_INITIAL_WIRES_PRESET = [
   { id: 'w_z1_amp_core', fromNode: 'z1_amp_1', fromPin: 'out', toNode: 'z1_core', toPin: 'in', color: '#f59e0b', isGold: true }
 ];
 
-// 根据世界坐标自动判断落在哪一个母板区域内
-function getZoneByCoords(x, y) {
-  const zones = CPU_BLUEPRINT_STATE.zones;
-  for (const zKey of Object.keys(zones)) {
-    const z = zones[zKey];
-    if (z.rect && 
-        x >= z.rect.x && x <= z.rect.x + z.rect.width &&
-        y >= z.rect.y && y <= z.rect.y + z.rect.height) {
-      return z;
-    }
-  }
-  return null;
-}
-
-// 纠正与保证所有节点坐标 100% 处于合法母板区域内，严禁越界或飞到外面
-function sanitizeAllBlueprintNodePositions() {
-  CPU_BLUEPRINT_STATE.nodes.forEach(node => {
-    if (!node.zoneId) {
-      const detectedZone = getZoneByCoords(node.x + 40, node.y + 30);
-      node.zoneId = detectedZone ? detectedZone.id : 'zone1';
-    }
-
-    const zone = CPU_BLUEPRINT_STATE.zones[node.zoneId] || CPU_BLUEPRINT_STATE.zones.zone1;
-    const isCore = node.type === 'core';
-    const isInput = node.type === 'input';
-    const nodeW = isCore ? 130 : (isInput ? 140 : (node.width || 110));
-    const nodeH = isCore ? 130 : (isInput ? 75 : 60);
-
-    if (zone && zone.rect) {
-      const minX = zone.rect.x + 20;
-      const maxX = zone.rect.x + zone.rect.width - nodeW - 20;
-      const minY = zone.rect.y + 55;
-      const maxY = zone.rect.y + zone.rect.height - nodeH - 35;
-      node.x = Math.max(minX, Math.min(maxX, node.x));
-      node.y = Math.max(minY, Math.min(maxY, node.y));
-    }
-  });
-}
-
 // =========================================================================
 // 初始化
 // =========================================================================
@@ -314,7 +293,6 @@ function initCentralProcessorBlueprint() {
   CPU_BLUEPRINT_STATE.wires = JSON.parse(JSON.stringify(CPU_INITIAL_WIRES_PRESET));
   CPU_BLUEPRINT_STATE.connectingPin = null;
   CPU_BLUEPRINT_STATE.draggingNodeId = null;
-  sanitizeAllBlueprintNodePositions();
 
   // 根据游戏阶段设置区域解锁状态
   const stage = CPU_BLUEPRINT_STATE.gameStage;
@@ -334,12 +312,10 @@ function initCentralProcessorBlueprint() {
 
   updateCanvasTransform();
   renderBlueprintPhaseTabs();
-  renderWorldTreeBackgroundSvg();
   renderBlueprintZonesHtml();
   renderBlueprintNodesHtml();
   renderBlueprintWiresSvg();
   updateBlueprintMonitorStats();
-  updatePaletteTargetZoneBadge();
 
   requestAnimationFrame(() => {
     renderBlueprintWiresSvg();
@@ -399,10 +375,9 @@ function handleZoomCanvas(delta) {
   renderBlueprintWiresSvg();
 }
 
-// 鼠标滚轮平滑缩放 (以鼠标指针为中心，绝不向外冒泡干扰大视界)
+// 鼠标滚轮平滑缩放 (以鼠标指针为中心)
 function handleCanvasWheel(e) {
   e.preventDefault();
-  e.stopPropagation();
   const vp = document.getElementById('paragonViewport');
   if (!vp) return;
 
@@ -423,35 +398,20 @@ function handleCanvasWheel(e) {
   renderBlueprintWiresSvg();
 }
 
-// 画布桌布空白处按住鼠标拖拽平移 (彻底隔离外部大视界)
+// 画布空白处按住鼠标拖拽平移
 function handleCanvasMouseDown(e) {
-  // 如果点击的是节点、引脚、按钮或输入框，绝不触发画布桌布平移
-  if (e.target.closest('.bp-node-card') || e.target.closest('.bp-pin') || e.target.closest('button') || e.target.closest('input')) {
+  // 如果点击的是节点、引脚、按钮或滑块，不触发画布平移
+  if (e.target.closest('.bp-node-card') || e.target.closest('button') || e.target.closest('input')) {
     return;
   }
 
-  e.preventDefault();
-  e.stopPropagation();
-
-  // 点击桌布空白时，自动识别鼠标所在区域并高亮该区域作为投放目标
-  const vp = document.getElementById('paragonViewport');
-  if (vp) {
-    const vpRect = vp.getBoundingClientRect();
-    const clickWorldX = (e.clientX - vpRect.left - CPU_BLUEPRINT_STATE.panX) / CPU_BLUEPRINT_STATE.zoom;
-    const clickWorldY = (e.clientY - vpRect.top - CPU_BLUEPRINT_STATE.panY) / CPU_BLUEPRINT_STATE.zoom;
-    const hitZone = getZoneByCoords(clickWorldX, clickWorldY);
-    if (hitZone && hitZone.id !== CPU_BLUEPRINT_STATE.activeZoneId) {
-      selectBlueprintZone(hitZone.id, false);
-    }
-  }
-
   CPU_BLUEPRINT_STATE.isPanning = true;
-  CPU_BLUEPRINT_STATE.draggingNodeId = null; // 确保不产生拖拽冲突
   CPU_BLUEPRINT_STATE.panStartMouse.x = e.clientX;
   CPU_BLUEPRINT_STATE.panStartMouse.y = e.clientY;
   CPU_BLUEPRINT_STATE.initialPanPos.x = CPU_BLUEPRINT_STATE.panX;
   CPU_BLUEPRINT_STATE.initialPanPos.y = CPU_BLUEPRINT_STATE.panY;
 
+  const vp = document.getElementById('paragonViewport');
   if (vp) vp.classList.add('bp-viewport-panning');
 }
 
@@ -466,111 +426,62 @@ function resetCanvasView() {
   showNotification('视角已重置至 100% 原始标称尺寸');
 }
 
-// 全景俯瞰四区 (自动居中完整容纳 3600x3500 世界树全貌)
+// 全景俯瞰四区 (自动居中完整容纳 2200x1300 大世界)
 function fitAllZonesCanvasView() {
   playUiSound('toggle');
   const vp = document.getElementById('paragonViewport');
-  const vpRect = vp ? vp.getBoundingClientRect() : { width: 1280, height: 750 };
+  const vpRect = vp ? vp.getBoundingClientRect() : { width: 880, height: 500 };
 
-  // 计算全景适配缩放比 (对应 3600x3500 全板图)
-  const scaleX = vpRect.width / 3700;
-  const scaleY = vpRect.height / 3550;
-  const fitZoom = Math.max(0.18, Math.min(0.38, Math.min(scaleX, scaleY) * 0.95));
+  // 计算适配缩放比
+  const scaleX = vpRect.width / 2150;
+  const scaleY = vpRect.height / 1250;
+  const fitZoom = Math.max(0.34, Math.min(0.55, Math.min(scaleX, scaleY) * 0.95));
 
   CPU_BLUEPRINT_STATE.zoom = fitZoom;
-  CPU_BLUEPRINT_STATE.panX = Math.round((vpRect.width - 3600 * fitZoom) / 2);
-  CPU_BLUEPRINT_STATE.panY = Math.round((vpRect.height - 3400 * fitZoom) / 2);
+  CPU_BLUEPRINT_STATE.panX = Math.round((vpRect.width - 2000 * fitZoom) / 2);
+  CPU_BLUEPRINT_STATE.panY = Math.round((vpRect.height - 1200 * fitZoom) / 2);
 
   updateCanvasTransform();
   renderBlueprintWiresSvg();
-  showNotification('已切换至【世界树全景俯瞰】：中央通天主干与四大灵脉母板尽收眼底！');
+  showNotification('已切换至【全景俯瞰模式】：四大区域与跨区导灵光缆尽收眼底！');
 }
 
-// 激活并选中指定区域 (更新边框高亮、顶栏Tabs、导航按钮及底部节点投放目标提示)
-function selectBlueprintZone(zoneId, shouldCenter = false) {
+// 快速平移跳至指定区域
+function jumpToZone(zoneId) {
+  playUiSound('click');
   const zone = CPU_BLUEPRINT_STATE.zones[zoneId];
   if (!zone) return;
 
   CPU_BLUEPRINT_STATE.activeZoneId = zoneId;
 
-  // 1. 更新四大区域卡片的视觉高亮 (选中区域有金黄色光晕)
-  Object.keys(CPU_BLUEPRINT_STATE.zones).forEach(zKey => {
-    const card = document.getElementById(`zoneCard_${zKey}`);
-    const badge = document.getElementById(`zoneActiveBadge_${zKey}`);
-    if (card) {
-      if (zKey === zoneId) {
-        card.classList.add('zone-active-selected');
-        card.style.zIndex = '15';
-      } else {
-        card.classList.remove('zone-active-selected');
-        card.style.zIndex = '5';
-      }
-    }
-    if (badge) {
-      if (zKey === zoneId) {
-        badge.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
-      }
-    }
-  });
+  const vp = document.getElementById('paragonViewport');
+  const vpRect = vp ? vp.getBoundingClientRect() : { width: 880, height: 500 };
+  const targetZoom = 0.85;
 
-  // 2. 更新底部节点库的目标投放区徽章
-  updatePaletteTargetZoneBadge();
+  // 将区域中心平移至视口中心
+  const zoneCenterX = zone.rect.x + zone.rect.width / 2;
+  const zoneCenterY = zone.rect.y + zone.rect.height / 2;
 
-  // 3. 更新顶栏阶段 Tabs 与快速导航按钮
-  renderBlueprintPhaseTabs();
+  CPU_BLUEPRINT_STATE.zoom = targetZoom;
+  CPU_BLUEPRINT_STATE.panX = Math.round(vpRect.width / 2 - zoneCenterX * targetZoom);
+  CPU_BLUEPRINT_STATE.panY = Math.round(vpRect.height / 2 - zoneCenterY * targetZoom);
+
+  // 更新顶部导航高亮
   ['zone1', 'zone2', 'zone3', 'zone4'].forEach(z => {
     const btn = document.getElementById(`jumpBtn_${z}`);
     if (btn) {
       if (z === zoneId) {
-        btn.className = 'px-2 py-0.5 rounded bg-amber-500/30 text-amber-200 border border-amber-400 font-bold transition cursor-pointer shadow-[0_0_8px_rgba(245,146,30,0.5)]';
+        btn.className = 'px-2 py-0.5 rounded bg-cyan-500/30 text-cyan-200 border border-cyan-400 font-bold transition cursor-pointer shadow-[0_0_8px_rgba(0,240,255,0.4)]';
       } else {
         btn.className = 'px-2 py-0.5 rounded bg-white/5 text-white/60 border border-white/10 hover:text-white font-bold transition cursor-pointer';
       }
     }
   });
 
-  // 4. 如需平移居中 (例如从导航按钮或跨区跳转时)
-  if (shouldCenter) {
-    const vp = document.getElementById('paragonViewport');
-    const vpRect = vp ? vp.getBoundingClientRect() : { width: 1280, height: 750 };
-    const targetZoom = Math.min(0.85, Math.min(vpRect.width / 1150, vpRect.height / 900) * 0.95);
-    const zoneCenterX = zone.rect.x + zone.rect.width / 2;
-    const zoneCenterY = zone.rect.y + zone.rect.height / 2;
-
-    CPU_BLUEPRINT_STATE.zoom = targetZoom;
-    CPU_BLUEPRINT_STATE.panX = Math.round(vpRect.width / 2 - zoneCenterX * targetZoom);
-    CPU_BLUEPRINT_STATE.panY = Math.round(vpRect.height / 2 - zoneCenterY * targetZoom);
-
-    updateCanvasTransform();
-    renderBlueprintWiresSvg();
-  }
-}
-
-// 快速平移跳至指定区域 (单区大视界自适应居中)
-function jumpToZone(zoneId) {
-  playUiSound('click');
-  selectBlueprintZone(zoneId, true);
-  const zone = CPU_BLUEPRINT_STATE.zones[zoneId];
-  if (zone) {
-    showNotification(`已平移聚焦至：【${zone.name}】！`);
-  }
-}
-
-// 更新底部节点库的目标投放区徽章
-function updatePaletteTargetZoneBadge() {
-  const badge = document.getElementById('cpuPaletteTargetZoneBadge');
-  const nameEl = document.getElementById('cpuPaletteTargetZoneName');
-  const activeZone = CPU_BLUEPRINT_STATE.zones[CPU_BLUEPRINT_STATE.activeZoneId || 'zone1'];
-  if (nameEl && activeZone) {
-    nameEl.textContent = activeZone.name;
-  }
-  if (badge && activeZone) {
-    badge.style.borderColor = activeZone.themeColor;
-    badge.style.color = activeZone.themeColor;
-    badge.title = `当前新建节点将直接部署至【${activeZone.name}】母板内部`;
-  }
+  renderBlueprintPhaseTabs();
+  updateCanvasTransform();
+  renderBlueprintWiresSvg();
+  showNotification(`已平移聚焦至：【${zone.name}】！`);
 }
 
 // 渲染顶栏阶段 Tabs (同步高亮与锁定图标)
@@ -611,7 +522,27 @@ function renderBlueprintPhaseTabs() {
 }
 
 
+  let html = '';
+  zones.forEach(z => {
+    const isCur = z.key === CPU_BLUEPRINT_STATE.activeZoneId;
+    const isUn = CPU_BLUEPRINT_STATE.zones[z.key]?.unlocked;
+    html += `
+      <button onclick="jumpToZone('${z.key}');"
+              id="topTabBtn_${z.key}"
+              class="px-2.5 py-1 rounded text-xs font-bold transition cursor-pointer flex items-center space-x-1.5 border ${
+                isCur 
+                  ? 'bg-amber-500 text-black border-amber-400 shadow-[0_0_12px_rgba(245,146,30,0.6)]' 
+                  : (isUn ? 'bg-black/50 text-white/80 border-white/10 hover:border-amber-400/50 hover:text-white' : 'bg-black/40 text-white/40 border-white/5 cursor-pointer')
+              }">
+        <i class="${z.icon} text-xs"></i>
+        <span>${z.name}</span>
+        ${isUn ? '' : '<i class="fa-solid fa-lock text-[9px] text-red-400 ml-0.5"></i>'}
+      </button>
+    `;
+  });
 
+  container.innerHTML = html;
+}
 
 // 顺时针旋转拓扑 90°
 function rotateCpuBlueprintTopology() {
@@ -635,230 +566,8 @@ function attachNextCpuCircuitPage() {
   jumpToZone(zoneOrder[nextIdx]);
 }
 
-// 调试工具：一键解锁四大区域、所有运算节点类型、解除槽位限制
-function debugUnlockAllCpuSystem() {
-  playUiSound('zap');
-  CPU_BLUEPRINT_STATE.gameStage = 'zhuji';
-
-  // 1. 解锁所有四大区域
-  Object.keys(CPU_BLUEPRINT_STATE.zones).forEach(zKey => {
-    CPU_BLUEPRINT_STATE.zones[zKey].unlocked = true;
-  });
-
-  // 2. 解锁所有 6 类运算节点
-  CPU_BLUEPRINT_STATE.unlockedNodeTypes = ['input', 'amplifier', 'branch', 'resonator', 'stabilizer', 'converter', 'core'];
-
-  // 3. 解除槽位上限 (设为99)
-  CPU_BLUEPRINT_STATE.slotCaps = { prologue: 99, lianqi: 99, zhuji: 99 };
-
-  renderBlueprintZonesHtml();
-  renderBlueprintPhaseTabs();
-  renderBlueprintNodesHtml();
-  renderBlueprintWiresSvg();
-  updateBlueprintMonitorStats();
-
-  showNotification('⚡【测试特权已激活】：四大区域已全开！全部节点类型已解锁！槽位上限已解除！');
-}
-
-
 // =========================================================================
-// 1.5 渲染世界树电路背景灵脉网络 (高保真还原参考图 media_1790653316876.png)
-// 包含：中央通天主干、扼流块滤波磁珠、45°/90°折线分支、过孔焊盘、接地排线、菱形测试焊盘与动态流光
-// =========================================================================
-function renderWorldTreeBackgroundSvg() {
-  const svg = document.getElementById('cpuWorldTreeSvg');
-  if (!svg) return;
-
-  let html = `
-    <defs>
-      <!-- 高能流光渐变 -->
-      <linearGradient id="treeTrunkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.9" />
-        <stop offset="35%" stop-color="#00f0ff" stop-opacity="0.9" />
-        <stop offset="80%" stop-color="#10b981" stop-opacity="0.9" />
-        <stop offset="100%" stop-color="#10b981" stop-opacity="0.4" />
-      </linearGradient>
-
-      <!-- 扼流块/磁珠渐变 -->
-      <linearGradient id="chokeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="#00f0ff" />
-        <stop offset="50%" stop-color="#ffffff" />
-        <stop offset="100%" stop-color="#00f0ff" />
-      </linearGradient>
-
-      <!-- 滤镜光晕 -->
-      <filter id="trunkGlow" x="-20%" y="-20%" width="140%" height="140%">
-        <feGaussianBlur stdDeviation="8" result="blur" />
-        <feMerge>
-          <feMergeNode in="blur" />
-          <feMergeNode in="SourceGraphic" />
-        </feMerge>
-      </filter>
-    </defs>
-  `;
-
-  // 1. 【中央通天主干】(Zone 2 生产主冠 ➔ Zone 4 通天灵根, X=1800, Y=1140..2360)
-  html += `
-    <!-- 背景粗铜发光光晕 -->
-    <path d="M 1800 1140 L 1800 2360" stroke="#00f0ff" stroke-width="16" opacity="0.12" filter="url(#trunkGlow)" />
-    <!-- 实体粗铜母线 -->
-    <path d="M 1800 1140 L 1800 2360" stroke="url(#treeTrunkGrad)" stroke-width="6" opacity="0.85" />
-    <!-- 核心超导白亮脉冲线 -->
-    <path d="M 1800 1140 L 1800 2360" stroke="#ffffff" stroke-width="2" opacity="0.9" />
-    <!-- 动态脉冲流动虚线 -->
-    <path d="M 1800 1140 L 1800 2360" stroke="#00f0ff" stroke-width="2.5" class="world-tree-pulse-line" />
-  `;
-
-  // 1.1 主干核心扼流阻抗块 (参考图中央长条形外凸稳流磁珠, Y=1720..1840)
-  html += `
-    <!-- 扼流圈主体 -->
-    <polygon points="1786,1720 1814,1720 1818,1840 1782,1840" fill="#08101a" stroke="#00f0ff" stroke-width="3" />
-    <polygon points="1790,1725 1810,1725 1813,1835 1787,1835" fill="url(#chokeGrad)" opacity="0.8" />
-    <!-- 两侧高能导热鳍片 (参考图两侧黑色细斜角小翼) -->
-    <polygon points="1776,1740 1768,1755 1768,1815 1776,1830" fill="#00f0ff" opacity="0.85" />
-    <polygon points="1824,1740 1832,1755 1832,1815 1824,1830" fill="#00f0ff" opacity="0.85" />
-    <!-- 扼流圈下方的菱形探针焊盘 (参考图黑色菱形) -->
-    <polygon points="1800,1875 1808,1885 1800,1895 1792,1885" fill="#070b13" stroke="#00f0ff" stroke-width="2" />
-    <polygon points="1800,1878 1805,1885 1800,1892 1795,1885" fill="#00f0ff" />
-  `;
-
-  // 1.2 主干过孔端子 (参考图主干下方的两个同心圆过孔, Y=2180, Y=2280)
-  html += `
-    <!-- 节点过孔 A -->
-    <circle cx="1800" cy="2180" r="14" fill="#070b13" stroke="#00f0ff" stroke-width="3.5" />
-    <circle cx="1800" cy="2180" r="6" fill="#00f0ff" />
-    <circle cx="1800" cy="2180" r="2.5" fill="#ffffff" />
-    <!-- 节点过孔 B (通往 4 区入口) -->
-    <circle cx="1800" cy="2290" r="9" fill="#070b13" stroke="#10b981" stroke-width="2.5" />
-    <circle cx="1800" cy="2290" r="3.5" fill="#10b981" />
-  `;
-
-  // 1.3 主干左侧并行灵脉回路 (参考图左侧向下走折线、阶梯下探、三道接地横线)
-  html += `
-    <!-- 左侧伴随干线：从 2 区左下引出，向左折 45° 再直下 -->
-    <path d="M 1620 1140 L 1620 1480 L 1520 1580 L 1520 2020 L 1600 2100 L 1600 2360" 
-          fill="none" stroke="#00f0ff" stroke-width="4.5" opacity="0.8" />
-    <path d="M 1620 1140 L 1620 1480 L 1520 1580 L 1520 2020 L 1600 2100 L 1600 2360" 
-          fill="none" stroke="#ffffff" stroke-width="1.2" stroke-dasharray="8 6" opacity="0.9" class="world-tree-branch-flow" />
-
-    <!-- 左侧次级分支：更外层折线与垂直下降导线 -->
-    <path d="M 1480 1140 L 1480 1350 L 1400 1430 L 1400 1980" 
-          fill="none" stroke="#38bdf8" stroke-width="3" opacity="0.75" />
-    <!-- 伴随端子圆孔 (参考图左侧两个空心圆孔) -->
-    <circle cx="1400" cy="1980" r="7" fill="#070b13" stroke="#38bdf8" stroke-width="2.5" />
-    <circle cx="1400" cy="1980" r="2.5" fill="#38bdf8" />
-    <circle cx="1400" cy="2020" r="7" fill="#070b13" stroke="#38bdf8" stroke-width="2.5" />
-    <circle cx="1400" cy="2020" r="2.5" fill="#38bdf8" />
-
-    <!-- 参考图左侧经典【三道水平接地排线】(GND Symbol) -->
-    <path d="M 1520 1800 L 1420 1800 L 1420 1920" fill="none" stroke="#00f0ff" stroke-width="2" />
-    <line x1="1380" y1="1920" x2="1460" y2="1920" stroke="#00f0ff" stroke-width="3.5" />
-    <line x1="1395" y1="1930" x2="1445" y2="1930" stroke="#00f0ff" stroke-width="2.5" />
-    <line x1="1410" y1="1940" x2="1430" y2="1940" stroke="#00f0ff" stroke-width="1.5" />
-  `;
-
-  // 1.4 主干右侧并行灵脉回路 (参考图右侧向下折线并向右引出)
-  html += `
-    <!-- 右侧伴随干线：从 2 区右下引出，向右折 45° -->
-    <path d="M 1980 1140 L 1980 1520 L 2080 1620 L 2080 1820 L 2180 1820" 
-          fill="none" stroke="#f59e0b" stroke-width="4.5" opacity="0.8" />
-    <circle cx="2180" cy="1820" r="9" fill="#070b13" stroke="#f59e0b" stroke-width="3" />
-    <circle cx="2180" cy="1820" r="3.5" fill="#f59e0b" />
-
-    <!-- 虚线伴随走线 (参考图右侧虚线通道) -->
-    <path d="M 1880 1180 L 1880 1900" 
-          fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="10 8" opacity="0.6" />
-    
-    <!-- 右侧折角探针与斜向导通线 -->
-    <path d="M 2080 1480 L 2160 1400 L 2220 1400" fill="none" stroke="#f59e0b" stroke-width="2" />
-    <circle cx="2220" cy="1400" r="5" fill="#070b13" stroke="#f59e0b" stroke-width="2" />
-  `;
-
-  // 2. 【西北翼灵脉分支】(Zone 2 主冠 ➔ Zone 1 物流区，45° 倒角走向)
-  html += `
-    <!-- 主贯通铜带：从 Zone 2 左侧 45° 斜上通往 Zone 1 -->
-    <path d="M 1300 520 L 1220 440 L 1180 440" 
-          fill="none" stroke="#38bdf8" stroke-width="6" opacity="0.85" />
-    <path d="M 1300 520 L 1220 440 L 1180 440" 
-          fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.9" />
-    <path d="M 1300 520 L 1220 440 L 1180 440" 
-          fill="none" stroke="#00f0ff" stroke-width="2.5" class="world-tree-pulse-line" />
-
-    <!-- 次级 45° 阶梯回路 (参考图左上角复杂折线群) -->
-    <path d="M 1300 660 L 1250 660 L 1190 600 L 1180 600" 
-          fill="none" stroke="#38bdf8" stroke-width="3.5" opacity="0.75" />
-    <path d="M 1300 780 L 1240 780 L 1200 740 L 1180 740" 
-          fill="none" stroke="#38bdf8" stroke-width="2.5" opacity="0.6" />
-    
-    <!-- 菱形焊盘与引线节点 (参考图左上方 probe 点) -->
-    <polygon points="1220,432 1228,440 1220,448 1212,440" fill="#070b13" stroke="#38bdf8" stroke-width="2" />
-    <polygon points="1220,435 1225,440 1220,445 1215,440" fill="#38bdf8" />
-
-    <!-- 顶部延伸天线折线 (参考图左上角探向天空的高压线路) -->
-    <path d="M 1180 340 L 1180 180 L 1120 120 L 1050 120" 
-          fill="none" stroke="#38bdf8" stroke-width="2" opacity="0.7" />
-    <circle cx="1050" cy="120" r="5" fill="#070b13" stroke="#38bdf8" stroke-width="2" />
-  `;
-
-  // 3. 【东北翼灵脉分支】(Zone 2 主冠 ➔ Zone 3 电力区，45°/90° 倒角走向)
-  html += `
-    <!-- 主贯通铜带：从 Zone 2 右侧斜下连通 Zone 3 -->
-    <path d="M 2300 780 L 2360 840 L 2420 840" 
-          fill="none" stroke="#a855f7" stroke-width="5" opacity="0.85" />
-    <path d="M 2300 780 L 2360 840 L 2420 840" 
-          fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.9" />
-
-    <!-- 次级下沉母线 (参考图右侧阶梯式下落回路) -->
-    <path d="M 2300 880 L 2350 930 L 2350 1020 L 2420 1090" 
-          fill="none" stroke="#a855f7" stroke-width="4" opacity="0.8" />
-    <path d="M 2300 880 L 2350 930 L 2350 1020 L 2420 1090" 
-          fill="none" stroke="#c084fc" stroke-width="2" class="world-tree-pulse-line" />
-
-    <!-- 辅助虚线与测试过孔 -->
-    <path d="M 2300 980 L 2360 1040 L 2420 1040" 
-          fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="8 6" opacity="0.6" />
-    <circle cx="2350" cy="930" r="6" fill="#070b13" stroke="#a855f7" stroke-width="2" />
-    <circle cx="2350" cy="1020" r="6" fill="#070b13" stroke="#a855f7" stroke-width="2" />
-    
-    <!-- 右上方天空探针引线 (参考图右上角折线与双圆环) -->
-    <path d="M 2300 500 L 2380 420 L 2480 420" fill="none" stroke="#a855f7" stroke-width="2" opacity="0.6" />
-    <circle cx="2480" cy="420" r="5" fill="#070b13" stroke="#a855f7" stroke-width="2" />
-    <path d="M 2420 380 L 2500 380 L 2540 420" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.6" />
-  `;
-
-  // 4. 【顶部苍穹灵脉探针】(Zone 2 主冠上方直插苍穹的引导线)
-  html += `
-    <path d="M 1800 360 L 1800 140" fill="none" stroke="#f59e0b" stroke-width="3" opacity="0.8" />
-    <circle cx="1800" cy="140" r="7" fill="#070b13" stroke="#f59e0b" stroke-width="2.5" />
-    <circle cx="1800" cy="140" r="2.5" fill="#f59e0b" />
-
-    <path d="M 1720 360 L 1720 220 L 1650 150 L 1650 90" fill="none" stroke="#38bdf8" stroke-width="2" opacity="0.7" />
-    <circle cx="1650" cy="90" r="4.5" fill="#38bdf8" />
-
-    <path d="M 1880 360 L 1880 220 L 1950 150 L 1950 90" fill="none" stroke="#f59e0b" stroke-width="2" opacity="0.7" />
-    <polygon points="1950,84 1956,90 1950,96 1944,90" fill="#f59e0b" />
-  `;
-
-  // 5. 【通天灵根底座延伸】(Zone 4 底部的深层地脉接地导电根须)
-  html += `
-    <path d="M 1800 3140 L 1800 3380" fill="none" stroke="#10b981" stroke-width="5" opacity="0.85" />
-    <path d="M 1800 3140 L 1800 3380" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="10 6" class="world-tree-pulse-line" />
-    <!-- 根须左分支 -->
-    <path d="M 1740 3140 L 1740 3260 L 1670 3330" fill="none" stroke="#10b981" stroke-width="3" opacity="0.75" />
-    <polygon points="1670,3323 1677,3330 1670,3337 1663,3330" fill="#070b13" stroke="#10b981" stroke-width="2" />
-    <!-- 根须右分支 -->
-    <path d="M 1860 3140 L 1860 3260 L 1930 3330" fill="none" stroke="#10b981" stroke-width="3" opacity="0.75" />
-    <circle cx="1930" cy="3330" r="7" fill="#070b13" stroke="#10b981" stroke-width="2" />
-    <!-- 灵根末梢菱形终端 -->
-    <polygon points="1800,3372 1810,3382 1800,3392 1790,3382" fill="#070b13" stroke="#10b981" stroke-width="3" />
-    <polygon points="1800,3375 1807,3382 1800,3389 1793,3382" fill="#10b981" />
-  `;
-
-  svg.innerHTML = html;
-}
-
-// =========================================================================
-// 2. 渲染四大区域底板、锁定遮罩与跨区引线指引 (世界树母板封装)
+// 2. 渲染四大区域底板、锁定遮罩与跨区引线指引 (HTML Layer)
 // =========================================================================
 function renderBlueprintZonesHtml() {
   const container = document.getElementById('cpuWiringZonesLayer');
@@ -899,53 +608,16 @@ function renderBlueprintZonesHtml() {
       `;
     }
 
-    const isCur = z.id === CPU_BLUEPRINT_STATE.activeZoneId;
     html += `
       <div id="zoneCard_${z.id}" 
-           onclick="selectBlueprintZone('${z.id}');"
-           style="left: ${z.rect.x}px; top: ${z.rect.y}px; width: ${z.rect.width}px; height: ${z.rect.height}px; z-index: ${isCur ? 15 : 5};" 
-           class="bp-zone-card ${isUnlocked ? 'zone-unlocked' : ''} ${isSatisfied ? 'zone-satisfied' : ''} ${isCur ? 'zone-active-selected' : ''} cursor-pointer pointer-events-auto">
+           style="left: ${z.rect.x}px; top: ${z.rect.y}px; width: ${z.rect.width}px; height: ${z.rect.height}px;" 
+           class="bp-zone-card ${isUnlocked ? 'zone-unlocked' : ''} ${isSatisfied ? 'zone-satisfied' : ''}">
         
-        <!-- 四角固定焊盘螺栓 (参考图芯片四角螺孔与过孔圆环) -->
-        <div class="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 rounded-full border border-white/60 bg-[#070b13] flex items-center justify-center pointer-events-none shadow-[0_0_6px_rgba(0,240,255,0.4)]">
-          <span class="w-1 h-1 rounded-full bg-cyan-400"></span>
-        </div>
-        <div class="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full border border-white/60 bg-[#070b13] flex items-center justify-center pointer-events-none shadow-[0_0_6px_rgba(0,240,255,0.4)]">
-          <span class="w-1 h-1 rounded-full bg-cyan-400"></span>
-        </div>
-        <div class="absolute -bottom-1.5 -left-1.5 w-3.5 h-3.5 rounded-full border border-white/60 bg-[#070b13] flex items-center justify-center pointer-events-none shadow-[0_0_6px_rgba(0,240,255,0.4)]">
-          <span class="w-1 h-1 rounded-full bg-cyan-400"></span>
-        </div>
-        <div class="absolute -bottom-1.5 -right-1.5 w-3.5 h-3.5 rounded-full border border-white/60 bg-[#070b13] flex items-center justify-center pointer-events-none shadow-[0_0_6px_rgba(0,240,255,0.4)]">
-          <span class="w-1 h-1 rounded-full bg-cyan-400"></span>
-        </div>
-
-        <!-- 上方金属排针排梳 (参考图外露引脚) -->
-        <div class="absolute -top-2 left-24 right-24 h-2 flex justify-between px-2 pointer-events-none opacity-60">
-          <span class="w-1 h-full bg-slate-400 shadow-[0_0_4px_#38bdf8]"></span>
-          <span class="w-1 h-full bg-slate-400"></span>
-          <span class="w-1 h-full bg-slate-400 shadow-[0_0_4px_#38bdf8]"></span>
-          <span class="w-1 h-full bg-slate-400"></span>
-          <span class="w-1 h-full bg-slate-400 shadow-[0_0_4px_#38bdf8]"></span>
-        </div>
-        <!-- 下方金属排针排梳 -->
-        <div class="absolute -bottom-2 left-24 right-24 h-2 flex justify-between px-2 pointer-events-none opacity-60">
-          <span class="w-1 h-full bg-slate-400"></span>
-          <span class="w-1 h-full bg-slate-400 shadow-[0_0_4px_#38bdf8]"></span>
-          <span class="w-1 h-full bg-slate-400"></span>
-          <span class="w-1 h-full bg-slate-400 shadow-[0_0_4px_#38bdf8]"></span>
-          <span class="w-1 h-full bg-slate-400"></span>
-        </div>
-
-        <!-- 区域顶栏信息 (点击可直接选中此区域作为节点投放目标) -->
-        <div class="p-3 border-b border-white/10 flex items-center justify-between pointer-events-auto"
-             onclick="selectBlueprintZone('${z.id}');">
+        <!-- 区域顶栏信息 -->
+        <div class="p-3 border-b border-white/10 flex items-center justify-between pointer-events-auto">
           <div class="flex items-center space-x-2">
             <i class="${z.icon} text-sm" style="color: ${z.themeColor};"></i>
             <span class="text-xs font-black text-white font-mono tracking-wider">${z.name}</span>
-            <span id="zoneActiveBadge_${z.id}" class="text-[9px] font-mono bg-amber-500 text-black font-bold px-1.5 py-0.5 rounded shadow ${isCur ? '' : 'hidden'}">
-              ★ 当前投放区
-            </span>
           </div>
           <div class="flex items-center space-x-2">
             ${statusBadge}
@@ -988,382 +660,193 @@ function renderBlueprintNodesHtml() {
 
   let html = '';
   CPU_BLUEPRINT_STATE.nodes.forEach(node => {
-    // 1:1 参考图集成电路 PCB 芯片封装渲染
-    if (node.type === 'core') {
-      // 中央主控 CPU 芯片 (参考图核心方块芯片，四周带有密集的金属引脚梳齿)
-      const coreSize = 130;
-      html += `
-        <div id="node_${node.id}" 
-             style="left: ${node.x}px; top: ${node.y}px; width: ${coreSize}px; height: ${coreSize}px;" 
-             onmousedown="startDragBlueprintNode('${node.id}', event);"
-             class="bp-node-card pcb-ic-package pcb-core-diamond border-2 border-amber-400/80 group cursor-move">
-          
-          <!-- 上方金属引脚排梳 -->
-          <div class="absolute -top-2.5 left-4 right-4 h-2.5 flex justify-between px-1 pointer-events-none">
-            <span class="w-1 h-full bg-slate-400 shadow-[0_0_4px_#ffd700]"></span>
-            <span class="w-1 h-full bg-slate-400"></span>
-            <span class="w-1 h-full bg-slate-400 shadow-[0_0_4px_#ffd700]"></span>
-            <span class="w-1 h-full bg-slate-400"></span>
-            <span class="w-1 h-full bg-slate-400 shadow-[0_0_4px_#ffd700]"></span>
-          </div>
-
-          <!-- 下方金属引脚排梳 -->
-          <div class="absolute -bottom-2.5 left-4 right-4 h-2.5 flex justify-between px-1 pointer-events-none">
-            <span class="w-1 h-full bg-slate-400"></span>
-            <span class="w-1 h-full bg-slate-400 shadow-[0_0_4px_#ffd700]"></span>
-            <span class="w-1 h-full bg-slate-400"></span>
-            <span class="w-1 h-full bg-slate-400 shadow-[0_0_4px_#ffd700]"></span>
-            <span class="w-1 h-full bg-slate-400"></span>
-          </div>
-
-          <!-- 四角固定焊盘螺钉 -->
-          <div class="absolute top-1 left-1 w-2 h-2 rounded-full border border-white/40 bg-black"></div>
-          <div class="absolute top-1 right-1 w-2 h-2 rounded-full border border-white/40 bg-black"></div>
-          <div class="absolute bottom-1 left-1 w-2 h-2 rounded-full border border-white/40 bg-black"></div>
-          <div class="absolute bottom-1 right-1 w-2 h-2 rounded-full border border-white/40 bg-black"></div>
-
-          <!-- 拖动顶栏提示 -->
-          <div class="w-full h-5 flex items-center justify-between px-2 pt-1 border-b border-white/10 pointer-events-none">
-            <span class="text-[8px] font-mono text-amber-300 font-bold tracking-wider">CPU_CORE</span>
-            <i class="fa-solid fa-microchip text-[9px] text-amber-400"></i>
-          </div>
-
-          <!-- 芯片正中央发光内核 (高能符文微处理器) -->
-          <div class="flex-1 flex flex-col items-center justify-center p-2 text-center pointer-events-none">
-            <div class="w-12 h-12 rounded border border-amber-400/60 bg-amber-950/40 flex items-center justify-center shadow-[inset_0_0_12px_rgba(245,158,11,0.5)]">
-              <i class="${node.icon} text-lg text-amber-300 animate-pulse"></i>
-            </div>
-            <span class="text-[10px] font-bold text-white mt-1 leading-none tracking-wide">${node.name}</span>
-            <span class="text-[8.5px] font-mono text-cyan-300 mt-1">${node.valText || '就绪'}</span>
-          </div>
-
-          <!-- 输入引脚 (位于芯片左侧中轴线) -->
-          <div class="absolute left-[-10px] top-1/2 -translate-y-1/2 z-30" onmousedown="event.stopPropagation();">
-            <div id="pin_${node.id}_in" 
+    // 输入引脚 (左侧)
+    let inPinsHtml = '';
+    if (node.inPins && node.inPins.length > 0) {
+      inPinsHtml = '<div class="flex flex-col space-y-2 py-1">';
+      node.inPins.forEach(pin => {
+        inPinsHtml += `
+          <div class="flex items-center space-x-1.5 group cursor-pointer" 
+               onclick="handleBlueprintPinClick('${node.id}', '${pin.id}', 'in', event);"
+               title="点击连接至该输入引脚 [IN]">
+            <div id="pin_${node.id}_${pin.id}" 
                  class="bp-pin bp-pin-in" 
-                 onclick="handleBlueprintPinClick('${node.id}', 'in', 'in', event);"
-                 title="点击将信号线路接入主控核心 [BUS IN]">
+                 style="border-color: ${pin.color || '#00f0ff'};">
               <span class="w-1.5 h-1.5 rounded-full bg-cyan-300"></span>
             </div>
+            <span class="text-[9px] font-mono text-white/80 group-hover:text-cyan-300 transition whitespace-nowrap leading-none">${pin.label}</span>
           </div>
-
-          <!-- 悬停弹出的精细工况 HUD -->
-          <div class="absolute -bottom-14 left-1/2 -translate-x-1/2 w-44 bg-black/90 border border-amber-400/60 rounded px-2 py-1 text-[9px] font-mono text-amber-200 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-2xl backdrop-blur-sm text-center">
-            ${node.buffText || '待接入运算回路'}
-          </div>
-
-        </div>
-      `;
-    } else if (node.type === 'input') {
-      // 输入插座 (主板金手指排针插座)
-      const zone = CPU_BLUEPRINT_STATE.zones[node.zoneId || 'zone1'];
-      const materials = zone ? zone.inputMaterials : {};
-      let matButtonsHtml = '';
-      Object.keys(materials).forEach(mName => {
-        const isSel = node.material === mName;
-        matButtonsHtml += `
-          <button onmousedown="event.stopPropagation();" 
-                  onclick="selectInputNodeMaterial('${node.id}', '${mName}');" 
-                  class="px-1.5 py-0.5 text-[8px] rounded font-mono transition border cursor-pointer ${
-                    isSel 
-                      ? 'bg-cyan-500/40 text-cyan-200 border-cyan-400 font-bold' 
-                      : 'bg-black/50 text-white/50 border-white/10 hover:border-white/40 hover:text-white'
-                  }">
-            ${mName}
-          </button>
         `;
       });
+      inPinsHtml += '</div>';
+    }
 
-      html += `
-        <div id="node_${node.id}" 
-             style="left: ${node.x}px; top: ${node.y}px; width: 140px;" 
-             onmousedown="startDragBlueprintNode('${node.id}', event);"
-             class="bp-node-card pcb-ic-package border border-cyan-400/60 cursor-move">
-          
-          <!-- 金手指插口装饰 (左侧金属触点) -->
-          <div class="absolute -left-2 top-2 bottom-2 w-2 flex flex-col justify-between py-1 pointer-events-none">
-            <span class="w-full h-1 bg-amber-400 rounded-xs shadow-[0_0_4px_#ffd700]"></span>
-            <span class="w-full h-1 bg-amber-400 rounded-xs"></span>
-            <span class="w-full h-1 bg-amber-400 rounded-xs shadow-[0_0_4px_#ffd700]"></span>
-          </div>
-
-          <div class="w-full h-5 flex items-center justify-between px-2 pt-0.5 border-b border-white/10 pointer-events-none">
-            <div class="flex items-center space-x-1">
-              <i class="${node.icon} text-[9px] text-cyan-400"></i>
-              <span class="text-[9px] font-bold text-white">${node.name}</span>
-            </div>
-            <span class="text-[7.5px] font-mono text-cyan-300 font-bold">${node.signalOut || 0}S</span>
-          </div>
-
-          <div class="p-1.5 flex flex-col space-y-1">
-            <div class="flex items-center justify-between text-[8px] font-mono text-white/60 pointer-events-none">
-              <span>物料插槽:</span>
-              <span class="text-cyan-300 font-bold">${node.material || '空置'}</span>
-            </div>
-            <div class="grid grid-cols-2 gap-1 pt-0.5">
-              ${matButtonsHtml}
-            </div>
-          </div>
-
-          <!-- 输出引脚 (位于右侧中轴线) -->
-          <div class="absolute right-[-10px] top-1/2 -translate-y-1/2 z-30" onmousedown="event.stopPropagation();">
-            <div id="pin_${node.id}_out_a" 
+    // 输出引脚 (右侧)
+    let outPinsHtml = '';
+    if (node.outPins && node.outPins.length > 0) {
+      outPinsHtml = '<div class="flex flex-col space-y-2 py-1 items-end">';
+      node.outPins.forEach(pin => {
+        outPinsHtml += `
+          <div class="flex items-center space-x-1.5 group cursor-pointer justify-end" 
+               onclick="handleBlueprintPinClick('${node.id}', '${pin.id}', 'out', event);"
+               title="点击引脚拉出导灵光缆 [OUT]">
+            <span class="text-[9px] font-mono text-white/80 group-hover:text-amber-300 transition whitespace-nowrap leading-none">${pin.label}</span>
+            <div id="pin_${node.id}_${pin.id}" 
                  class="bp-pin bp-pin-out" 
-                 onclick="handleBlueprintPinClick('${node.id}', 'out_a', 'out', event);"
-                 title="从输入端引出信号走线 [OUT]">
+                 style="border-color: ${pin.color || '#f59e0b'};">
               <span class="w-1.5 h-1.5 rounded-full bg-amber-300"></span>
             </div>
           </div>
+        `;
+      });
+      outPinsHtml += '</div>';
+    }
+
+    // 中间微调控件（若是分流器或限流阀，内嵌交互滑块）
+    let customWidgetHtml = '';
+    if (node.type === 'splitter') {
+      customWidgetHtml = `
+        <div class="my-1.5 px-2 py-1 bg-black/40 rounded border border-white/5 flex flex-col space-y-1">
+          <div class="flex justify-between text-[9px] font-mono text-white/60">
+            <span>分流比:</span>
+            <span class="text-cyan-300 font-bold" id="sliderVal_${node.id}">${node.ratio || 50} : ${100 - (node.ratio || 50)}</span>
+          </div>
+          <input type="range" min="10" max="90" value="${node.ratio || 50}" 
+                 oninput="handleNodeRatioChange('${node.id}', this.value);"
+                 class="w-full h-1 bg-cyan-950 rounded appearance-none cursor-pointer accent-cyan-400">
         </div>
       `;
-    } else {
-      // 标准贴片微运算芯片 (增幅、分流、谐振、稳压、转化)
-      const isAmp = node.type === 'amplifier';
-      const isBranch = node.type === 'branch';
-      const isResonator = node.type === 'resonator';
-
-      // 紧凑尺寸设计
-      const chipW = isBranch || isResonator ? 120 : 110;
-
-      // 输入引脚列表
-      let inPinsEl = '';
-      if (node.inPins && node.inPins.length > 0) {
-        inPinsEl = '<div class="absolute left-[-10px] top-0 bottom-0 flex flex-col justify-around py-2 z-30" onmousedown="event.stopPropagation();">';
-        node.inPins.forEach(p => {
-          inPinsEl += `
-            <div id="pin_${node.id}_${p.id}" 
-                 class="bp-pin bp-pin-in" 
-                 onclick="handleBlueprintPinClick('${node.id}', '${p.id}', 'in', event);"
-                 title="接入该引脚 [${p.label}]">
-              <span class="w-1.5 h-1.5 rounded-full bg-cyan-300"></span>
-            </div>
-          `;
-        });
-        inPinsEl += '</div>';
-      }
-
-      // 输出引脚列表
-      let outPinsEl = '';
-      if (node.outPins && node.outPins.length > 0) {
-        outPinsEl = '<div class="absolute right-[-10px] top-0 bottom-0 flex flex-col justify-around py-2 z-30" onmousedown="event.stopPropagation();">';
-        node.outPins.forEach(p => {
-          outPinsEl += `
-            <div id="pin_${node.id}_${p.id}" 
-                 class="bp-pin bp-pin-out" 
-                 onclick="handleBlueprintPinClick('${node.id}', '${p.id}', 'out', event);"
-                 title="从引脚拉出PCB铜箔线路 [${p.label}]">
-              <span class="w-1.5 h-1.5 rounded-full bg-amber-300"></span>
-            </div>
-          `;
-        });
-        outPinsEl += '</div>';
-      }
-
-      html += `
-        <div id="node_${node.id}" 
-             style="left: ${node.x}px; top: ${node.y}px; width: ${chipW}px;" 
-             onmousedown="startDragBlueprintNode('${node.id}', event);"
-             class="bp-node-card pcb-ic-package border ${node.type === 'resonator' ? 'border-purple-400/70' : 'border-slate-500/70'} group cursor-move">
-          
-          <!-- 上方针脚梳 -->
-          <div class="absolute -top-1.5 left-3 right-3 h-1.5 flex justify-between px-0.5 pointer-events-none">
-            <span class="w-1 h-full bg-slate-500"></span>
-            <span class="w-1 h-full bg-slate-500"></span>
-            <span class="w-1 h-full bg-slate-500"></span>
+    } else if (node.type === 'valve') {
+      customWidgetHtml = `
+        <div class="my-1.5 px-2 py-1 bg-black/40 rounded border border-white/5 flex flex-col space-y-1">
+          <div class="flex justify-between text-[9px] font-mono text-white/60">
+            <span>主路截留:</span>
+            <span class="text-amber-300 font-bold" id="sliderVal_${node.id}">${node.limit || 75}%</span>
           </div>
-          <!-- 下方针脚梳 -->
-          <div class="absolute -bottom-1.5 left-3 right-3 h-1.5 flex justify-between px-0.5 pointer-events-none">
-            <span class="w-1 h-full bg-slate-500"></span>
-            <span class="w-1 h-full bg-slate-500"></span>
-            <span class="w-1 h-full bg-slate-500"></span>
-          </div>
-
-          <!-- 芯片顶栏 -->
-          <div class="w-full h-4.5 flex items-center justify-between px-2 pt-0.5 border-b border-white/10 pointer-events-none">
-            <div class="flex items-center space-x-1">
-              <i class="${node.icon} text-[8px]" style="color: ${node.themeColor || '#00f0ff'};"></i>
-              <span class="text-[8.5px] font-bold text-white whitespace-nowrap">${node.name}</span>
-            </div>
-            <i class="fa-solid fa-circle-dot text-[6px] text-white/30"></i>
-          </div>
-
-          <!-- 芯片主体铭牌 (极简微电子标记) -->
-          <div class="p-1.5 text-center flex flex-col items-center justify-center pointer-events-none">
-            <span class="text-[9px] font-mono font-bold" style="color: ${node.themeColor || '#00f0ff'};">${node.valText || '就绪'}</span>
-          </div>
-
-          ${inPinsEl}
-          ${outPinsEl}
-
+          <input type="range" min="20" max="95" value="${node.limit || 75}" 
+                 oninput="handleNodeRatioChange('${node.id}', this.value);"
+                 class="w-full h-1 bg-amber-950 rounded appearance-none cursor-pointer accent-amber-400">
         </div>
       `;
     }
+
+    html += `
+      <div id="node_${node.id}" 
+           style="left: ${node.x}px; top: ${node.y}px; width: ${node.width || 180}px;" 
+           class="bp-node-card">
+        
+        <!-- 节点顶栏 (鼠标按住可全画布拖拽) -->
+        <div class="bp-node-header" 
+             onmousedown="startDragBlueprintNode('${node.id}', event);">
+          <div class="flex items-center space-x-1.5">
+            <i class="${node.icon} text-xs" style="color: ${node.themeColor || '#00f0ff'};"></i>
+            <span class="text-xs font-bold text-white whitespace-nowrap">${node.name}</span>
+          </div>
+          <i class="fa-solid fa-grip-lines text-white/30 text-[10px]"></i>
+        </div>
+
+        <!-- 节点主体数据 -->
+        <div class="p-2 space-y-1">
+          <div class="flex items-center justify-between text-[10px] font-mono text-white/50">
+            <span>${node.category}</span>
+            <span class="font-bold" style="color: ${node.themeColor || '#00f0ff'};">${node.valText || '就绪'}</span>
+          </div>
+
+          ${customWidgetHtml}
+
+          <!-- 引脚出入口横排分布 -->
+          <div class="flex items-center justify-between pt-1 border-t border-white/5">
+            ${inPinsHtml || '<div class="w-1"></div>'}
+            ${outPinsHtml || '<div class="w-1"></div>'}
+          </div>
+        </div>
+
+      </div>
+    `;
   });
 
   layer.innerHTML = html;
 }
 
 // =========================================================================
-// 4. 标准 45°/90° PCB 刚性铜箔走线生成算法 (曼哈顿倒角布线与电路过孔)
+// 4. 计算引脚精确绝对坐标 (世界坐标系，与 SVG 1:1 对齐)
 // =========================================================================
-function generatePcbWirePath(x1, y1, x2, y2) {
-  x1 = Number(x1) || 0;
-  y1 = Number(y1) || 0;
-  x2 = Number(x2) || 0;
-  y2 = Number(y2) || 0;
-
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  const absDx = Math.abs(dx);
-  const absDy = Math.abs(dy);
-
-  // 1. 如果起点在终点左边 (顺流走线)
-  if (dx >= 20) {
-    if (absDy < 4) {
-      return { path: `M ${x1} ${y1} L ${x2} ${y2}`, vias: [] };
-    }
-
-    // 45° 倒角走线：水平延伸 stub -> 45° 倾斜过渡 -> 水平进站
-    if (dx > absDy + 20) {
-      const stub = Math.max(16, (dx - absDy) * 0.5);
-      const c1x = Math.round(x1 + stub);
-      const c1y = y1;
-      const c2x = Math.round(c1x + absDy);
-      const c2y = y2;
-      return {
-        path: `M ${x1} ${y1} L ${c1x} ${c1y} L ${c2x} ${c2y} L ${x2} ${y2}`,
-        vias: [{ x: c1x, y: c1y }, { x: c2x, y: c2y }]
-      };
-    } else {
-      // 间距不足放 45° 倒角，采用标准正交 90° 阶梯走线
-      const midX = Math.round(x1 + dx * 0.5);
-      return {
-        path: `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`,
-        vias: [{ x: midX, y: y1 }, { x: midX, y: y2 }]
-      };
-    }
-  } else {
-    // 逆向或跨区拐弯回路：正交 U 型回环走线
-    const stubX = 28;
-    const midY = Math.round((y1 + y2) * 0.5);
-    const p1x = Math.round(x1 + stubX);
-    const p2x = Math.round(x2 - stubX);
-    return {
-      path: `M ${x1} ${y1} L ${p1x} ${y1} L ${p1x} ${midY} L ${p2x} ${midY} L ${p2x} ${y2} L ${x2} ${y2}`,
-      vias: [
-        { x: p1x, y: y1 },
-        { x: p1x, y: midY },
-        { x: p2x, y: midY },
-        { x: p2x, y: y2 }
-      ]
-    };
-  }
-}
-
-// 计算引脚精确绝对坐标 (100% 贴合 DOM 真实像素位置，无论是静态还是拖拽中)
 function getBlueprintPinCoords(nodeId, pinId) {
-  // 1. 优先从真实 DOM 元素读取像素级世界坐标，无论是拖拽中还是静止状态，100% 精准对齐引脚中心
-  const pinEl = document.getElementById(`pin_${nodeId}_${pinId}`);
-  const container = document.getElementById('cpuWorldContainer');
-  if (pinEl && container) {
-    const pinRect = pinEl.getBoundingClientRect();
-    const contRect = container.getBoundingClientRect();
-    if (pinRect.width > 0 && contRect.width > 0) {
-      const zoom = CPU_BLUEPRINT_STATE.zoom || 1;
-      const realX = (pinRect.left + pinRect.width * 0.5 - contRect.left) / zoom;
-      const realY = (pinRect.top + pinRect.height * 0.5 - contRect.top) / zoom;
-      if (!isNaN(realX) && !isNaN(realY)) {
-        return { x: Math.round(realX), y: Math.round(realY) };
-      }
-    }
-  }
-
-  // 2. 备用数学推导 (在 DOM 未渲染完毕或隐藏时计算)
   const node = CPU_BLUEPRINT_STATE.nodes.find(n => n.id === nodeId);
   if (!node) return { x: 100, y: 100 };
 
-  const isCore = node.type === 'core';
-  const isInput = node.type === 'input';
-  const nodeWidth = isCore ? 130 : (isInput ? 140 : (node.type === 'branch' || node.type === 'resonator' ? 120 : 110));
-  const cardEl = document.getElementById(`node_${nodeId}`);
-  const cardHeight = cardEl && cardEl.offsetHeight > 0 ? cardEl.offsetHeight : (isCore ? 130 : (isInput ? 80 : 54));
+  const nodeWidth = node.width || 180;
+  const inPins = node.inPins || [];
+  const inIdx = inPins.findIndex(p => p.id === pinId);
+  const hasSlider = (node.type === 'splitter' || node.type === 'valve');
+  const basePinY = node.y + (hasSlider ? 95 : 62);
 
-  if (pinId.startsWith('in')) {
-    const inPins = node.inPins || [];
-    const inIdx = Math.max(0, inPins.findIndex(p => p.id === pinId));
-    const py = inPins.length <= 1 
-      ? node.y + cardHeight * 0.5 
-      : node.y + 12 + (inIdx + 0.5) * ((cardHeight - 24) / Math.max(1, inPins.length));
-    return { x: node.x - 4, y: Math.round(py) };
-  } else {
-    const outPins = node.outPins || [];
-    const outIdx = Math.max(0, outPins.findIndex(p => p.id === pinId));
-    const py = outPins.length <= 1 
-      ? node.y + cardHeight * 0.5 
-      : node.y + 12 + (outIdx + 0.5) * ((cardHeight - 24) / Math.max(1, outPins.length));
-    return { x: node.x + nodeWidth + 4, y: Math.round(py) };
+  if (inIdx !== -1) {
+    return {
+      x: node.x + 14,
+      y: basePinY + inIdx * 24
+    };
   }
+
+  const outPins = node.outPins || [];
+  const outIdx = outPins.findIndex(p => p.id === pinId);
+  if (outIdx !== -1) {
+    return {
+      x: node.x + nodeWidth - 14,
+      y: basePinY + outIdx * 24
+    };
+  }
+
+  return { x: node.x + nodeWidth / 2, y: node.y + 50 };
 }
 
-
-// 渲染 45°/90° PCB 刚性导电铜箔走线与过孔焊盘 (SVG 层)
+// 渲染发光贝塞尔曲线光缆 (SVG 层)
 function renderBlueprintWiresSvg() {
   const svg = document.getElementById('cpuWiringSvg');
   if (!svg) return;
 
   let wiresHtml = '';
 
-  // 1. 渲染已连接的 PCB 线路
+  // 1. 渲染已连接电缆
   CPU_BLUEPRINT_STATE.wires.forEach((wire, wIdx) => {
     const p1 = getBlueprintPinCoords(wire.fromNode, wire.fromPin);
     const p2 = getBlueprintPinCoords(wire.toNode, wire.toPin);
-    const trace = generatePcbWirePath(p1.x, p1.y, p2.x, p2.y);
-    const d = trace.path;
+    const x1 = p1.x, y1 = p1.y, x2 = p2.x, y2 = p2.y;
 
-    const isGoldWire = wire.isGold || wire.toNode.includes('core');
-    const wireColor = isGoldWire ? '#ffd700' : (wire.color || '#00f0ff');
-    const flowClass = isGoldWire ? 'flowing-wire-gold' : 'flowing-wire';
+    // 贝塞尔控制点计算 (流畅 S 弯曲线)
+    const dx = Math.max(50, Math.abs(x2 - x1) * 0.55);
+    const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
 
-    // 过孔焊盘 (Via Pads) HTML
-    let viasHtml = '';
-    trace.vias.forEach(v => {
-      viasHtml += `
-        <circle cx="${v.x}" cy="${v.y}" r="3.2" fill="#070b13" stroke="${wireColor}" stroke-width="1.8" />
-        <circle cx="${v.x}" cy="${v.y}" r="1.2" fill="${wireColor}" opacity="0.9" />
-      `;
-    });
+    const isInterZone = wire.fromPin.includes('zone') || wire.toPin.includes('zone') || wire.isGold;
+    const wireColor = isInterZone ? '#ffd700' : (wire.color || '#00f0ff');
+    const flowClass = isInterZone ? 'flowing-wire-gold inter-zone-wire' : 'flowing-wire';
 
     wiresHtml += `
-      <!-- 背景粗铜箔光晕 -->
-      <path d="${d}" fill="none" stroke="${wireColor}" stroke-width="6" opacity="0.25" filter="drop-shadow(0 0 10px ${wireColor})" />
+      <!-- 背景粗光晕线 -->
+      <path d="${d}" fill="none" stroke="${wireColor}" stroke-width="${isInterZone ? '7' : '5'}" opacity="0.35" 
+            filter="drop-shadow(0 0 12px ${wireColor})" />
       
-      <!-- 实体主铜箔走线 (45° 倒角刚性线路) -->
-      <path d="${d}" fill="none" stroke="${wireColor}" stroke-width="3" 
+      <!-- 动态流水光斑导线 -->
+      <path d="${d}" fill="none" stroke="${wireColor}" stroke-width="${isInterZone ? '3.5' : '2.8'}" 
             class="${flowClass} bp-wire-path" 
             onclick="removeBlueprintWire(${wIdx});"
-            title="点击剪断/拆除此段 PCB 线路" />
+            title="点击剪断/拆除此连线" />
 
-      <!-- 导线核心白亮高导光斑 -->
+      <!-- 导线核心白炽光流 -->
       <path d="${d}" fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.85" pointer-events="none" />
-
-      <!-- 起点与终点焊盘圆环 -->
-      <circle cx="${p1.x}" cy="${p1.y}" r="4" fill="#070b13" stroke="${wireColor}" stroke-width="2" pointer-events="none" />
-      <circle cx="${p2.x}" cy="${p2.y}" r="4" fill="#070b13" stroke="${wireColor}" stroke-width="2" pointer-events="none" />
-
-      <!-- 拐角电路过孔焊盘 (PCB Vias) -->
-      ${viasHtml}
     `;
   });
 
-  // 2. 渲染正在拉伸中的临时连线 (支持 45° 实时吸附)
+  // 2. 渲染正在拉伸的临时连线 (Rubber-band wire)
   if (CPU_BLUEPRINT_STATE.connectingPin) {
     const pin = CPU_BLUEPRINT_STATE.connectingPin;
     const x1 = pin.x, y1 = pin.y;
     const x2 = pin.curX || (x1 + 60), y2 = pin.curY || y1;
-    const trace = generatePcbWirePath(x1, y1, x2, y2);
+    const dx = Math.max(30, Math.abs(x2 - x1) * 0.5);
+    const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
 
     wiresHtml += `
-      <path d="${trace.path}" fill="none" stroke="#f5921e" stroke-width="3" stroke-dasharray="5 3" class="flowing-wire" />
+      <path d="${d}" fill="none" stroke="#f5921e" stroke-width="3.5" stroke-dasharray="6 4" class="flowing-wire" />
       <circle cx="${x2}" cy="${y2}" r="5" fill="#f5921e" filter="drop-shadow(0 0 8px #f5921e)" />
     `;
   }
@@ -1371,9 +854,8 @@ function renderBlueprintWiresSvg() {
   svg.innerHTML = wiresHtml;
 }
 
-
 // =========================================================================
-// 5. 节点拖拽与画布平移交互 (受 zoom 缩放比精确变换，带严密边界保护)
+// 5. 节点拖拽与画布平移交互 (受 zoom 缩放比精确变换)
 // =========================================================================
 function startDragBlueprintNode(nodeId, e) {
   e.stopPropagation();
@@ -1382,77 +864,41 @@ function startDragBlueprintNode(nodeId, e) {
   const node = CPU_BLUEPRINT_STATE.nodes.find(n => n.id === nodeId);
   if (!node) return;
 
-  // 点击或拖拽该节点时，自动将活动投放区同步为该节点所在区域
-  if (node.zoneId && node.zoneId !== CPU_BLUEPRINT_STATE.activeZoneId) {
-    selectBlueprintZone(node.zoneId, false);
-  }
-
-  CPU_BLUEPRINT_STATE.isPanning = false; // 拖动节点时坚决关闭平移
   CPU_BLUEPRINT_STATE.draggingNodeId = nodeId;
   CPU_BLUEPRINT_STATE.dragStartMouse.x = e.clientX;
   CPU_BLUEPRINT_STATE.dragStartMouse.y = e.clientY;
   CPU_BLUEPRINT_STATE.initialNodePos.x = node.x;
   CPU_BLUEPRINT_STATE.initialNodePos.y = node.y;
 
-  // 高亮该节点并置顶层级
-  document.querySelectorAll('.bp-node-card').forEach(c => {
-    c.classList.remove('bp-node-active');
-    c.style.zIndex = '25';
-  });
+  // 高亮该节点
+  document.querySelectorAll('.bp-node-card').forEach(c => c.classList.remove('bp-node-active'));
   const card = document.getElementById(`node_${nodeId}`);
-  if (card) {
-    card.classList.add('bp-node-active');
-    card.style.zIndex = '50';
-  }
+  if (card) card.classList.add('bp-node-active');
 
   inspectBlueprintNode(node);
 }
 
 // 全局鼠标移动监听 (驱动画布平移、节点拖拽与拉线实时跟随)
 document.addEventListener('mousemove', (e) => {
-  const modal = document.getElementById('cpuProcessorModal');
-  if (!modal || modal.classList.contains('hidden')) return;
-
-  // 1. 画布平移 (桌布平移)
+  // 1. 画布平移
   if (CPU_BLUEPRINT_STATE.isPanning) {
     const dx = e.clientX - CPU_BLUEPRINT_STATE.panStartMouse.x;
     const dy = e.clientY - CPU_BLUEPRINT_STATE.panStartMouse.y;
-    CPU_BLUEPRINT_STATE.panX = Math.round(CPU_BLUEPRINT_STATE.initialPanPos.x + dx);
-    CPU_BLUEPRINT_STATE.panY = Math.round(CPU_BLUEPRINT_STATE.initialPanPos.y + dy);
+    CPU_BLUEPRINT_STATE.panX = CPU_BLUEPRINT_STATE.initialPanPos.x + dx;
+    CPU_BLUEPRINT_STATE.panY = CPU_BLUEPRINT_STATE.initialPanPos.y + dy;
     updateCanvasTransform();
     return;
   }
 
-  // 2. 拖动节点 (带严密边界保护，严禁飞出区域或画布)
+  // 2. 拖动节点 (精确除以 zoom 缩放比)
   if (CPU_BLUEPRINT_STATE.draggingNodeId) {
     const node = CPU_BLUEPRINT_STATE.nodes.find(n => n.id === CPU_BLUEPRINT_STATE.draggingNodeId);
     if (node) {
       const dx = (e.clientX - CPU_BLUEPRINT_STATE.dragStartMouse.x) / CPU_BLUEPRINT_STATE.zoom;
       const dy = (e.clientY - CPU_BLUEPRINT_STATE.dragStartMouse.y) / CPU_BLUEPRINT_STATE.zoom;
 
-      let nextX = Math.round(CPU_BLUEPRINT_STATE.initialNodePos.x + dx);
-      let nextY = Math.round(CPU_BLUEPRINT_STATE.initialNodePos.y + dy);
-
-      // 严格限制在当前所属母板内部！绝不跑到外面或窜到其他区！
-      const zone = CPU_BLUEPRINT_STATE.zones[node.zoneId] || CPU_BLUEPRINT_STATE.zones.zone1;
-      const isCore = node.type === 'core';
-      const nodeW = isCore ? 130 : (node.type === 'input' ? 140 : (node.width || 110));
-      const nodeH = isCore ? 130 : (node.type === 'input' ? 75 : 60);
-
-      if (zone && zone.rect) {
-        const minX = zone.rect.x + 15;
-        const maxX = zone.rect.x + zone.rect.width - nodeW - 15;
-        const minY = zone.rect.y + 50;
-        const maxY = zone.rect.y + zone.rect.height - nodeH - 35;
-        nextX = Math.max(minX, Math.min(maxX, nextX));
-        nextY = Math.max(minY, Math.min(maxY, nextY));
-      } else {
-        nextX = Math.max(60, Math.min(3500 - nodeW, nextX));
-        nextY = Math.max(60, Math.min(3400 - nodeH, nextY));
-      }
-
-      node.x = nextX;
-      node.y = nextY;
+      node.x = Math.round(CPU_BLUEPRINT_STATE.initialNodePos.x + dx);
+      node.y = Math.round(CPU_BLUEPRINT_STATE.initialNodePos.y + dy);
 
       const card = document.getElementById(`node_${node.id}`);
       if (card) {
@@ -1462,7 +908,6 @@ document.addEventListener('mousemove', (e) => {
 
       renderBlueprintWiresSvg();
     }
-    return;
   }
 
   // 3. 正在拉动临时连线 (转换至世界坐标)
@@ -1489,12 +934,11 @@ document.addEventListener('mouseup', () => {
   if (CPU_BLUEPRINT_STATE.draggingNodeId) {
     CPU_BLUEPRINT_STATE.draggingNodeId = null;
     playUiSound('click');
-    renderBlueprintWiresSvg();
   }
 });
 
 // =========================================================================
-// 6. 引脚交互：点击出线与跨区引线吸附 (支持双向连线: IN-OUT 或 OUT-IN 均可无缝闭合)
+// 6. 引脚交互：点击出线与跨区引线吸附
 // =========================================================================
 function handleBlueprintPinClick(nodeId, pinId, pinType, e) {
   e.stopPropagation();
@@ -1504,86 +948,69 @@ function handleBlueprintPinClick(nodeId, pinId, pinType, e) {
   const py = coords.y;
   const pinEl = document.getElementById(`pin_${nodeId}_${pinId}`);
 
-  // 1. 如果尚未处于连线状态，点击任意引脚 (OUT 或 IN 均可) 开启拉线
+  // 1. 如果尚未处于连线状态，点击输出引脚 [OUT]，开启拉线
   if (!CPU_BLUEPRINT_STATE.connectingPin) {
-    playUiSound('click');
-    CPU_BLUEPRINT_STATE.connectingPin = {
-      nodeId: nodeId,
-      pinId: pinId,
-      pinType: pinType, // 'out' 或 'in'
-      x: px, y: py,
-      curX: px, curY: py
-    };
-    if (pinEl) pinEl.classList.add('bp-pin-connecting');
-    renderBlueprintWiresSvg();
-    const promptTarget = pinType === 'out' ? '目标输入引脚 [IN]' : '目标输出引脚 [OUT]';
-    showNotification(`已拉出导线，请点击【${promptTarget}】闭合回路！`);
+    if (pinType === 'out') {
+      playUiSound('click');
+      CPU_BLUEPRINT_STATE.connectingPin = {
+        nodeId: nodeId,
+        pinId: pinId,
+        pinType: 'out',
+        x: px, y: py,
+        curX: px, curY: py
+      };
+      if (pinEl) pinEl.classList.add('bp-pin-connecting');
+      renderBlueprintWiresSvg();
+      showNotification('正在拉出导灵光缆... 请点击目标节点的输入引脚 [IN] 闭合回路！');
+    } else {
+      showNotification('提示：请先点击左侧节点的输出引脚 [OUT]，再连接到目标输入引脚！');
+    }
     return;
   }
 
-  // 2. 如果已有正在拉动的线
+  // 2. 如果已经有正在拉动的线
   const source = CPU_BLUEPRINT_STATE.connectingPin;
 
   // 若点击同一个引脚，取消拉线
   if (source.nodeId === nodeId && source.pinId === pinId) {
     cancelBlueprintConnecting();
-    showNotification('已取消导灵光缆铺设');
     return;
   }
 
   // 不能连接同一节点的出入口
   if (source.nodeId === nodeId) {
-    showNotification('无法芯片自连！必须连接到不同功能节点');
+    showNotification('无法自连！必须连接到不同逻辑节点的输入引脚');
+    cancelBlueprintConnecting();
     return;
   }
 
-  // 若点击了同类型引脚 (如连续点击两个 OUT 或两个 IN)，智能切换拉线起点
-  if (source.pinType === pinType) {
-    playUiSound('click');
-    document.querySelectorAll('.bp-pin').forEach(p => p.classList.remove('bp-pin-connecting'));
-    CPU_BLUEPRINT_STATE.connectingPin = {
-      nodeId: nodeId,
-      pinId: pinId,
-      pinType: pinType,
-      x: px, y: py,
-      curX: px, curY: py
-    };
-    if (pinEl) pinEl.classList.add('bp-pin-connecting');
-    renderBlueprintWiresSvg();
-    const promptTarget = pinType === 'out' ? '目标输入引脚 [IN]' : '目标输出引脚 [OUT]';
-    showNotification(`已切换回路起点，请点击【${promptTarget}】闭合回路！`);
+  // 必须连接到输入引脚 [IN]
+  if (pinType !== 'in') {
+    showNotification('连线必须接入输入引脚 [IN]！');
+    cancelBlueprintConnecting();
     return;
   }
-
-  // 3. 双向闭合：确定哪一端是 OUT，哪一端是 IN
-  const fromNodeId = source.pinType === 'out' ? source.nodeId : nodeId;
-  const fromPinId  = source.pinType === 'out' ? source.pinId  : pinId;
-  const toNodeId   = source.pinType === 'in'  ? source.nodeId : nodeId;
-  const toPinId    = source.pinType === 'in'  ? source.pinId  : pinId;
 
   // 检查是否已经存在该连线
-  const exists = CPU_BLUEPRINT_STATE.wires.some(w => 
-    w.fromNode === fromNodeId && w.fromPin === fromPinId && 
-    w.toNode === toNodeId && w.toPin === toPinId
-  );
+  const exists = CPU_BLUEPRINT_STATE.wires.some(w => w.fromNode === source.nodeId && w.fromPin === source.pinId && w.toNode === nodeId && w.toPin === pinId);
   if (exists) {
-    showNotification('该 PCB 线路回路已存在！');
+    showNotification('该连线回路已存在');
     cancelBlueprintConnecting();
     return;
   }
 
   // 创建新连线
-  const fromNode = CPU_BLUEPRINT_STATE.nodes.find(n => n.id === fromNodeId);
-  const outPinDef = fromNode && fromNode.outPins ? fromNode.outPins.find(p => p.id === fromPinId) : null;
-  const isGoldWire = (outPinDef && outPinDef.isGold) || fromPinId.includes('zone') || toPinId.includes('zone') || toNodeId.includes('core');
+  const fromNode = CPU_BLUEPRINT_STATE.nodes.find(n => n.id === source.nodeId);
+  const outPinDef = fromNode ? fromNode.outPins.find(p => p.id === source.pinId) : null;
+  const isGoldWire = (outPinDef && outPinDef.isGold) || source.pinId.includes('zone') || pinId.includes('zone') || nodeId.includes('core');
 
   CPU_BLUEPRINT_STATE.wires.push({
     id: `wire_${Date.now()}`,
-    fromNode: fromNodeId,
-    fromPin: fromPinId,
-    toNode: toNodeId,
-    toPin: toPinId,
-    color: outPinDef ? outPinDef.color : (fromNode?.themeColor || '#00f0ff'),
+    fromNode: source.nodeId,
+    fromPin: source.pinId,
+    toNode: nodeId,
+    toPin: pinId,
+    color: outPinDef ? outPinDef.color : '#00f0ff',
     isGold: isGoldWire
   });
 
@@ -1613,141 +1040,61 @@ function removeBlueprintWire(wireIdx) {
 }
 
 // =========================================================================
-// 7. 输入端口物料选择与节点快捷生成
+// 7. 快捷生成节点、一键贯通全部回路与重置
 // =========================================================================
-function selectInputNodeMaterial(nodeId, matName) {
-  playUiSound('click');
-  const node = CPU_BLUEPRINT_STATE.nodes.find(n => n.id === nodeId);
-  if (!node) return;
-
-  const zone = CPU_BLUEPRINT_STATE.zones[node.zoneId || 'zone1'];
-  if (!zone || !zone.inputMaterials[matName]) return;
-
-  const matData = zone.inputMaterials[matName];
-  node.material = matName;
-  node.signalOut = matData.signal;
-  node.valText = `物料: ${matName} (${matData.signal} 强)`;
-
-  renderBlueprintNodesHtml();
-  updateBlueprintMonitorStats();
-  showNotification(`已向【${node.name}】投入【${matName}】，激发信号基准: ${matData.signal}！`);
-}
-
 function spawnBlueprintNode(nodeType) {
   playUiSound('click');
-  const activeZoneId = CPU_BLUEPRINT_STATE.activeZoneId || 'zone1';
-  const activeZone = CPU_BLUEPRINT_STATE.zones[activeZoneId];
-
-  // 1. 检查区域是否解锁
-  if (!activeZone || !activeZone.unlocked) {
-    showNotification(`【${activeZone ? activeZone.name : activeZoneId}】尚未解锁，无法部署新节点！`);
-    return;
-  }
-
-  // 2. 检查节点类型是否在当前阶段解锁
-  if (!CPU_BLUEPRINT_STATE.unlockedNodeTypes.includes(nodeType)) {
-    const stageName = CPU_BLUEPRINT_STATE.gameStage === 'prologue' ? '练气阶段' : '筑基阶段';
-    showNotification(`【${nodeType}】运算模块尚未研发！需完成【${stageName}】认证升级后解锁！`);
-    return;
-  }
-
-  // 3. 检查当前区域的运算槽位上限
-  const currentCap = CPU_BLUEPRINT_STATE.slotCaps[CPU_BLUEPRINT_STATE.gameStage] || 99;
-  const currentZoneMidNodes = CPU_BLUEPRINT_STATE.nodes.filter(n => n.zoneId === activeZoneId && n.type !== 'input' && n.type !== 'core');
-  if (currentZoneMidNodes.length >= currentCap && nodeType !== 'input') {
-    showNotification(`⚠ 区域算力槽位已满！当前阶段上限为 ${currentCap} 槽！`);
-    return;
-  }
-
   const count = CPU_BLUEPRINT_STATE.nodes.length + 1;
   const newId = `node_${nodeType}_${Date.now()}`;
 
-  // 4. 精准计算在【当前选中的活动区域】内部的生成位置 (栅格排列，严格在母板开阔地带，绝不飞出母板或飞到其他区域)
-  const existingMidCount = currentZoneMidNodes.length;
-  const col = existingMidCount % 3;
-  const row = Math.floor(existingMidCount / 3);
-
-  const nodeW = nodeType === 'input' ? 140 : (nodeType === 'branch' || nodeType === 'resonator' ? 120 : 110);
-  const nodeH = nodeType === 'input' ? 75 : 60;
-
-  // 基础位置放在该区域输入端口右侧、核心左侧的中部开阔地带 (相对坐标 x: 260..580, y: 180..620)
-  let spawnX = activeZone.rect.x + 260 + col * 150;
-  let spawnY = activeZone.rect.y + 180 + row * 120;
-
-  // 严格钳制在活动区域边界内
-  const minX = activeZone.rect.x + 25;
-  const maxX = activeZone.rect.x + activeZone.rect.width - nodeW - 25;
-  const minY = activeZone.rect.y + 55;
-  const maxY = activeZone.rect.y + activeZone.rect.height - nodeH - 35;
-  spawnX = Math.max(minX, Math.min(maxX, spawnX));
-  spawnY = Math.max(minY, Math.min(maxY, spawnY));
+  // 在当前视野中心生成
+  const vp = document.getElementById('paragonViewport');
+  const vpRect = vp ? vp.getBoundingClientRect() : { width: 880, height: 500 };
+  const spawnX = Math.round((vpRect.width / 2 - CPU_BLUEPRINT_STATE.panX) / CPU_BLUEPRINT_STATE.zoom - 90);
+  const spawnY = Math.round((vpRect.height / 2 - CPU_BLUEPRINT_STATE.panY) / CPU_BLUEPRINT_STATE.zoom - 40);
 
   let newNode = null;
-  if (nodeType === 'amplifier') {
+  if (nodeType === 'splitter') {
     newNode = {
-      id: newId, zoneId: activeZoneId,
-      type: 'amplifier', name: `增幅芯片 Mk.${count}`, category: 'IC 运算',
-      x: spawnX, y: spawnY, width: 110,
-      themeColor: '#f59e0b', icon: 'fa-solid fa-chart-line',
-      valText: '×1.50 | +6MW', ampLevel: 1,
-      inPins:  [{ id: 'in',  label: 'IN',  color: '#f59e0b' }],
-      outPins: [{ id: 'out', label: 'OUT', color: '#f59e0b' }]
-    };
-  } else if (nodeType === 'branch') {
-    newNode = {
-      id: newId, zoneId: activeZoneId,
-      type: 'branch', name: `分流晶体 Mk.${count}`, category: 'IC 分流',
-      x: spawnX, y: spawnY, width: 120,
+      id: newId, zoneId: CPU_BLUEPRINT_STATE.activeZoneId,
+      type: 'splitter', name: `分流器 Mk.${count}`, category: '逻辑分流',
+      x: spawnX, y: spawnY, width: 180,
       themeColor: '#38bdf8', icon: 'fa-solid fa-code-branch',
-      valText: '55% / 55%',
-      inPins: [{ id: 'in', label: 'IN', color: '#38bdf8' }],
+      valText: '分流比: 50 : 50', ratio: 50,
+      inPins: [{ id: 'in_split', label: '输入 IN', color: '#00f0ff' }],
       outPins: [
-        { id: 'out_a', label: 'A(55%)', color: '#38bdf8' },
-        { id: 'out_b', label: 'B(55%)', color: '#38bdf8' }
+        { id: 'out_a', label: '支路 A', color: '#00f0ff', flow: 50 },
+        { id: 'out_b', label: '支路 B', color: '#00f0ff', flow: 50 }
       ]
     };
-  } else if (nodeType === 'resonator') {
+  } else if (nodeType === 'valve') {
     newNode = {
-      id: newId, zoneId: activeZoneId,
-      type: 'resonator', name: `谐振蜂窝 Mk.${count}`, category: 'IC 谐振',
-      x: spawnX, y: spawnY, width: 120,
-      themeColor: '#c084fc', icon: 'fa-solid fa-wave-square',
-      valText: '双路加乘 ×1.6',
+      id: newId, zoneId: CPU_BLUEPRINT_STATE.activeZoneId,
+      type: 'valve', name: `限流阀 Mk.${count}`, category: '流量调校',
+      x: spawnX, y: spawnY, width: 180,
+      themeColor: '#fbbf24', icon: 'fa-solid fa-sliders',
+      valText: '限流比: 75 : 25', limit: 75,
+      inPins: [{ id: 'in_valve', label: '入口 IN', color: '#fbbf24' }],
+      outPins: [
+        { id: 'out_main', label: '主路 (75)', color: '#fbbf24', flow: 75 },
+        { id: 'out_bypass', label: '旁路 (25)', color: '#fbbf24', flow: 25 }
+      ]
+    };
+  } else if (nodeType === 'fuser') {
+    newNode = {
+      id: newId, zoneId: CPU_BLUEPRINT_STATE.activeZoneId,
+      type: 'fuser', name: `三元融合编译台`, category: '总线聚合',
+      x: spawnX, y: spawnY, width: 190,
+      themeColor: '#c084fc', icon: 'fa-solid fa-network-wired',
+      valText: '融合中',
       inPins: [
-        { id: 'in_1', label: '路 1', color: '#ef4444' },
-        { id: 'in_2', label: '路 2', color: '#38bdf8' }
+        { id: 'in_1', label: '输入 A', color: '#ef4444' },
+        { id: 'in_2', label: '输入 B', color: '#00f0ff' },
+        { id: 'in_3', label: '输入 C', color: '#10b981' }
       ],
-      outPins: [{ id: 'out', label: '谐振OUT', color: '#c084fc' }]
-    };
-  } else if (nodeType === 'stabilizer') {
-    newNode = {
-      id: newId, zoneId: activeZoneId,
-      type: 'stabilizer', name: `稳压储能 Mk.${count}`, category: '滤波储能',
-      x: spawnX, y: spawnY, width: 110,
-      themeColor: '#10b981', icon: 'fa-solid fa-battery-full',
-      valText: '断供蓄能',
-      inPins:  [{ id: 'in',  label: 'IN',  color: '#10b981' }],
-      outPins: [{ id: 'out', label: 'OUT', color: '#10b981' }]
-    };
-  } else if (nodeType === 'converter') {
-    newNode = {
-      id: newId, zoneId: activeZoneId,
-      type: 'converter', name: `转化芯片 Mk.${count}`, category: '频谱调制',
-      x: spawnX, y: spawnY, width: 110,
-      themeColor: '#f97316', icon: 'fa-solid fa-shuffle',
-      valText: '调制 50%',
-      inPins:  [{ id: 'in',  label: 'IN',  color: '#f97316' }],
-      outPins: [{ id: 'out', label: 'OUT', color: '#f97316' }]
-    };
-  } else if (nodeType === 'input') {
-    newNode = {
-      id: newId, zoneId: activeZoneId,
-      type: 'input', name: `输入插座 B`, category: '物料插槽',
-      x: spawnX, y: spawnY, width: 140,
-      themeColor: activeZone.themeColor, icon: 'fa-solid fa-arrow-right-to-bracket',
-      valText: '未接入物料', material: null, signalOut: 0,
-      inPins: [],
-      outPins: [{ id: 'out_a', label: 'OUT', color: activeZone.themeColor }]
+      outPins: [
+        { id: 'out_gold', label: '真理金光', color: '#ffd700', flow: 100, isGold: true }
+      ]
     };
   }
 
@@ -1755,78 +1102,69 @@ function spawnBlueprintNode(nodeType) {
     CPU_BLUEPRINT_STATE.nodes.push(newNode);
     renderBlueprintNodesHtml();
     renderBlueprintWiresSvg();
-
-    // 检查视口是否正在显示活动区域，若未在视野内则顺滑聚焦至该区域
-    const vp = document.getElementById('paragonViewport');
-    const vpRect = vp ? vp.getBoundingClientRect() : { width: 1280, height: 750 };
-    const vpWorldLeft = -CPU_BLUEPRINT_STATE.panX / CPU_BLUEPRINT_STATE.zoom;
-    const vpWorldRight = (vpRect.width - CPU_BLUEPRINT_STATE.panX) / CPU_BLUEPRINT_STATE.zoom;
-    const vpWorldTop = -CPU_BLUEPRINT_STATE.panY / CPU_BLUEPRINT_STATE.zoom;
-    const vpWorldBottom = (vpRect.height - CPU_BLUEPRINT_STATE.panY) / CPU_BLUEPRINT_STATE.zoom;
-    const isVisibleInView = spawnX >= vpWorldLeft && spawnX <= vpWorldRight && spawnY >= vpWorldTop && spawnY <= vpWorldBottom;
-
-    if (!isVisibleInView) {
-      jumpToZone(activeZoneId);
-    }
-
-    showNotification(`已向【${activeZone.name}】部署【${newNode.name}】！`);
+    showNotification(`已在当前视野中央部署【${newNode.name}】！`);
   }
 }
 
-// 一键贯通回路 (根据已解锁区域铺设最佳配置并投料)
+// 一键贯通全部回路 (解锁四大区域并全线串联)
 function autoConnectBlueprintOptimal() {
   playUiSound('zap');
 
-  // 重置节点为预设基础
-  CPU_BLUEPRINT_STATE.nodes = JSON.parse(JSON.stringify(CPU_WORLD_NODES_PRESET));
-  CPU_BLUEPRINT_STATE.wires = [];
-
-  // 为每个解锁区域配置初始材料和连线
+  // 解锁全部四大区域
   Object.keys(CPU_BLUEPRINT_STATE.zones).forEach(zKey => {
-    const zone = CPU_BLUEPRINT_STATE.zones[zKey];
-    if (zone.unlocked) {
-      // 找到该区的 input 节点并投料最高级物料
-      const inNode = CPU_BLUEPRINT_STATE.nodes.find(n => n.zoneId === zKey && n.type === 'input');
-      const ampNode = CPU_BLUEPRINT_STATE.nodes.find(n => n.zoneId === zKey && n.type === 'amplifier');
-      const coreNode = CPU_BLUEPRINT_STATE.nodes.find(n => n.zoneId === zKey && n.type === 'core');
-
-      if (inNode && zone.inputMaterials) {
-        const matKeys = Object.keys(zone.inputMaterials);
-        const bestMat = matKeys[matKeys.length - 1]; // 选最高级物料
-        inNode.material = bestMat;
-        inNode.signalOut = zone.inputMaterials[bestMat].signal;
-        inNode.valText = `物料: ${bestMat} (${inNode.signalOut} 强)`;
-
-        if (ampNode && coreNode) {
-          CPU_BLUEPRINT_STATE.wires.push({
-            id: `wire_${zKey}_1`,
-            fromNode: inNode.id,
-            fromPin: 'out_a',
-            toNode: ampNode.id,
-            toPin: 'in',
-            color: zone.themeColor
-          });
-          CPU_BLUEPRINT_STATE.wires.push({
-            id: `wire_${zKey}_2`,
-            fromNode: ampNode.id,
-            fromPin: 'out',
-            toNode: coreNode.id,
-            toPin: 'in',
-            color: '#f59e0b',
-            isGold: true
-          });
-        }
-      }
-    }
+    CPU_BLUEPRINT_STATE.zones[zKey].unlocked = true;
+    CPU_BLUEPRINT_STATE.zones[zKey].satisfied = true;
   });
+
+  // 全量重置节点位置
+  CPU_BLUEPRINT_STATE.nodes = JSON.parse(JSON.stringify(CPU_WORLD_NODES_PRESET));
+
+  // 铺设全域最佳连线回路 (包括内部工控与三大跨区大总线)
+  CPU_BLUEPRINT_STATE.wires = [
+    // 区域 1: 启道物流
+    { id: 'w_coal_split', fromNode: 'logi_src_coal', fromPin: 'out_coal', toNode: 'logi_splitter', toPin: 'in_split', color: '#ef4444' },
+    { id: 'w_power_fuser', fromNode: 'logi_src_power', fromPin: 'out_power', toNode: 'logi_fuser', toPin: 'in_fuser_blue', color: '#00f0ff' },
+    { id: 'w_fluid_valve', fromNode: 'logi_src_fluid', fromPin: 'out_fluid', toNode: 'logi_valve', toPin: 'in_valve', color: '#10b981' },
+    { id: 'w_split_fuser', fromNode: 'logi_splitter', fromPin: 'out_split_a', toNode: 'logi_fuser', toPin: 'in_fuser_red', color: '#ef4444' },
+    { id: 'w_valve_fuser', fromNode: 'logi_valve', fromPin: 'out_valve_main', toNode: 'logi_fuser', toPin: 'in_fuser_green', color: '#10b981' },
+    { id: 'w_fuser_core', fromNode: 'logi_fuser', fromPin: 'out_fuser_gold', toNode: 'logi_core', toPin: 'in_core_gold', color: '#ffd700', isGold: true },
+
+    // ★ 跨区引线 1 ➔ 2 (启道运算核心 ➔ 乾元高能受能闸门)
+    { id: 'w_cross_1_2', fromNode: 'logi_core', fromPin: 'out_zone1_bus', toNode: 'heat_intake_gate', toPin: 'in_zone2_gate', color: '#ffd700', isGold: true },
+
+    // 区域 2: 乾元炉温
+    { id: 'w_gate_pwr_ex', fromNode: 'heat_intake_gate', fromPin: 'out_zone2_pwr', toNode: 'heat_exchanger', toPin: 'in_exchanger_cold', color: '#00f0ff' },
+    { id: 'w_magma_ex', fromNode: 'heat_src_magma', fromPin: 'out_magma', toNode: 'heat_exchanger', toPin: 'in_exchanger_hot', color: '#ef4444' },
+    { id: 'w_ex_tank', fromNode: 'heat_exchanger', fromPin: 'out_exchanger_equil', toNode: 'heat_tank', toPin: 'in_tank_flow', color: '#fbbf24' },
+    { id: 'w_tank_smelter', fromNode: 'heat_tank', fromPin: 'out_tank_safe', toNode: 'heat_smelter_core', toPin: 'in_smelter_heat', color: '#10b981', isGold: true },
+
+    // ★ 跨区引线 2 ➔ 3 (乾元精炼核心 ➔ 坎离相位受能闸门)
+    { id: 'w_cross_2_3', fromNode: 'heat_smelter_core', fromPin: 'out_zone2_bus', toNode: 'grid_intake_gate', toPin: 'in_zone3_gate', color: '#ffd700', isGold: true },
+
+    // 区域 3: 坎离电网
+    { id: 'w_gate_bridge', fromNode: 'grid_intake_gate', fromPin: 'out_zone3_pwr', toNode: 'grid_bridge', toPin: 'in_bridge_noise', color: '#c084fc' },
+    { id: 'w_base_cap', fromNode: 'grid_src_base', fromPin: 'out_base_wave', toNode: 'grid_cap', toPin: 'in_cap_base', color: '#ffffff' },
+    { id: 'w_bridge_cap', fromNode: 'grid_bridge', fromPin: 'out_bridge_inv', toNode: 'grid_cap', toPin: 'in_cap_inv', color: '#a855f7' },
+    { id: 'w_cap_core', fromNode: 'grid_cap', fromPin: 'out_cap_flat', toNode: 'grid_bus_core', toPin: 'in_bus_core', color: '#ffd700', isGold: true },
+
+    // ★ 跨区引线 3 ➔ 4 (坎离超导核心 ➔ 太虚极阳受能闸门)
+    { id: 'w_cross_3_4', fromNode: 'grid_bus_core', fromPin: 'out_zone3_bus', toNode: 'pulse_intake_gate', toPin: 'in_zone4_gate', color: '#ffd700', isGold: true },
+
+    // 区域 4: 太虚极阳脉冲
+    { id: 'w_gate_mult', fromNode: 'pulse_intake_gate', fromPin: 'out_zone4_pwr', toNode: 'pulse_multiplier', toPin: 'in_mult_ion', color: '#ef4444' },
+    { id: 'w_tank_mult', fromNode: 'pulse_src_tank', fromPin: 'out_tank', toNode: 'pulse_multiplier', toPin: 'in_mult_energy', color: '#fbbf24' },
+    { id: 'w_mult_gate', fromNode: 'pulse_multiplier', fromPin: 'out_mult_high', toNode: 'pulse_vacuum_gate', toPin: 'in_gate_high', color: '#ff2222' },
+    { id: 'w_gate_emitter', fromNode: 'pulse_vacuum_gate', fromPin: 'out_gate_ready', toNode: 'pulse_emitter_core', toPin: 'in_emitter_ready', color: '#ffd700', isGold: true }
+  ];
 
   renderBlueprintZonesHtml();
   renderBlueprintPhaseTabs();
   renderBlueprintNodesHtml();
   renderBlueprintWiresSvg();
+  requestAnimationFrame(() => renderBlueprintWiresSvg());
   updateBlueprintMonitorStats();
 
-  showNotification('★ 已自动调配并接通所有已解锁区域的最佳工控回路！');
+  showNotification('★ 已一键贯通四大区域！高能真理超导大环网全面闭合！');
 }
 
 // 清空当前回路
@@ -1835,11 +1173,24 @@ function resetCurrentBlueprintCircuit() {
   CPU_BLUEPRINT_STATE.wires = [];
   renderBlueprintWiresSvg();
   updateBlueprintMonitorStats();
-  showNotification('全部回路连线已清空，可从各区输入端口重新引线调配');
+  showNotification('全部回路连线已清空，可从各区输入源重新引线调配');
 }
 
-// 调节滑块 (保留兼容)
+// 调节滑块
 function handleNodeRatioChange(nodeId, val) {
+  const node = CPU_BLUEPRINT_STATE.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+
+  const num = parseInt(val, 10);
+  if (node.type === 'splitter') {
+    node.ratio = num;
+    const label = document.getElementById(`sliderVal_${nodeId}`);
+    if (label) label.textContent = `${num} : ${100 - num}`;
+  } else if (node.type === 'valve') {
+    node.limit = num;
+    const label = document.getElementById(`sliderVal_${nodeId}`);
+    if (label) label.textContent = `${num}%`;
+  }
   updateBlueprintMonitorStats();
 }
 
@@ -1852,138 +1203,63 @@ function inspectBlueprintNode(node) {
 
   if (titleEl) titleEl.textContent = node.name;
   if (labelEl) labelEl.textContent = `${node.category} · 坐标 [${node.x}, ${node.y}]`;
-  if (buffEl) buffEl.textContent = `实时工况: ${node.valText || '就绪'}；已连接 ${CPU_BLUEPRINT_STATE.wires.filter(w=>w.fromNode===node.id||w.toNode===node.id).length} 根导灵光缆。`;
+  if (buffEl) buffEl.textContent = `实时工况: ${node.valText || '满负荷稳定运转'}；已连接 ${CPU_BLUEPRINT_STATE.wires.filter(w=>w.fromNode===node.id||w.toNode===node.id).length} 根导灵光缆。`;
   if (iconEl) iconEl.className = `${node.icon} text-sm text-cyan-300`;
 }
 
 // =========================================================================
-// 8. 真实信号流拓扑模拟、衰减与全厂增益计算
+// 8. 核心要求判定、跨区引线检测与宏观增益监控
 // =========================================================================
 function updateBlueprintMonitorStats() {
   const wires = CPU_BLUEPRINT_STATE.wires;
-  const nodes = CPU_BLUEPRINT_STATE.nodes;
 
-  // 1. 重置各节点运行态信号
-  nodes.forEach(n => {
-    if (n.type === 'core') {
-      n.signalIn = 0;
-      n.buffText = '未接入信号';
-    } else if (n.type === 'resonator') {
-      n.isResonating = false;
-    }
-  });
+  // 1. 区域 1 (启道区) 满足判定：运算核心已被连入
+  const z1Satisfied = wires.some(w => w.toNode === 'logi_core');
+  CPU_BLUEPRINT_STATE.zones.zone1.satisfied = z1Satisfied;
 
-  // 2. 针对每个区域进行信号模拟
-  Object.keys(CPU_BLUEPRINT_STATE.zones).forEach(zKey => {
-    const zone = CPU_BLUEPRINT_STATE.zones[zKey];
-    if (!zone.unlocked) {
-      zone.satisfied = false;
-      zone.buffValue = 0;
-      zone.buffValue2 = 0;
-      return;
-    }
+  // 2. 跨区引线检测：Zone 1 ➔ Zone 2 (解锁 Zone 2)
+  const wire1To2 = wires.some(w => w.fromNode === 'logi_core' && w.toNode === 'heat_intake_gate');
+  if (wire1To2 && !CPU_BLUEPRINT_STATE.zones.zone2.unlocked) {
+    CPU_BLUEPRINT_STATE.zones.zone2.unlocked = true;
+    renderBlueprintZonesHtml();
+    renderBlueprintPhaseTabs();
+    playUiSound('zap');
+    showNotification('🎉【乾元区 · 炉温导热精炼核】已解锁并通电！可开始调配地火与玄阴导热！');
+  }
 
-    // 寻找本区所有输入节点
-    const inputNodes = nodes.filter(n => n.zoneId === zKey && n.type === 'input');
-    let zoneCoreSignal = 0;
+  // 3. 区域 2 (乾元区) 满足判定：冶炼核心已被连入
+  const z2Satisfied = CPU_BLUEPRINT_STATE.zones.zone2.unlocked && wires.some(w => w.toNode === 'heat_smelter_core');
+  CPU_BLUEPRINT_STATE.zones.zone2.satisfied = z2Satisfied;
 
-    // 从每个 input 出发广度优先/深度优先模拟信号传递
-    inputNodes.forEach(inNode => {
-      const baseSignal = inNode.signalOut || 0;
-      if (baseSignal <= 0) return;
+  // 4. 跨区引线检测：Zone 2 ➔ Zone 3 (解锁 Zone 3)
+  const wire2To3 = wires.some(w => w.fromNode === 'heat_smelter_core' && w.toNode === 'grid_intake_gate');
+  if (wire2To3 && !CPU_BLUEPRINT_STATE.zones.zone3.unlocked) {
+    CPU_BLUEPRINT_STATE.zones.zone3.unlocked = true;
+    renderBlueprintZonesHtml();
+    renderBlueprintPhaseTabs();
+    playUiSound('zap');
+    showNotification('🎉【坎离区 · 电网相位超导核】已解锁！可开始对冲因果杂波！');
+  }
 
-      // 广度遍历队列: { nodeId, currentSignal, pathLen }
-      const queue = [{ nodeId: inNode.id, signal: baseSignal, pathLen: 0 }];
-      const visited = new Set();
+  // 5. 区域 3 (坎离区) 满足判定：超导母排核心已被连入
+  const z3Satisfied = CPU_BLUEPRINT_STATE.zones.zone3.unlocked && wires.some(w => w.toNode === 'grid_bus_core');
+  CPU_BLUEPRINT_STATE.zones.zone3.satisfied = z3Satisfied;
 
-      while (queue.length > 0) {
-        const curr = queue.shift();
-        const outgoingWires = wires.filter(w => w.fromNode === curr.nodeId);
+  // 6. 跨区引线检测：Zone 3 ➔ Zone 4 (解锁 Zone 4)
+  const wire3To4 = wires.some(w => w.fromNode === 'grid_bus_core' && w.toNode === 'pulse_intake_gate');
+  if (wire3To4 && !CPU_BLUEPRINT_STATE.zones.zone4.unlocked) {
+    CPU_BLUEPRINT_STATE.zones.zone4.unlocked = true;
+    renderBlueprintZonesHtml();
+    renderBlueprintPhaseTabs();
+    playUiSound('zap');
+    showNotification('🎉【太虚区 · 焚天极阳脉冲核】终极封印已解除！');
+  }
 
-        outgoingWires.forEach(w => {
-          const targetNode = nodes.find(n => n.id === w.toNode);
-          if (!targetNode) return;
+  // 7. 区域 4 (太虚区) 满足判定：脉冲发射极已连接
+  const z4Satisfied = CPU_BLUEPRINT_STATE.zones.zone4.unlocked && wires.some(w => w.toNode === 'pulse_emitter_core');
+  CPU_BLUEPRINT_STATE.zones.zone4.satisfied = z4Satisfied;
 
-          // 核心衰减规则：每经过一条中间连线/节点，损耗 12%
-          let outSignal = curr.signal * 0.88;
-
-          // 节点特性计算
-          if (targetNode.type === 'amplifier') {
-            outSignal = outSignal * 1.5;
-            targetNode.valText = `信号: ${outSignal.toFixed(1)} (×1.50) | +6 MW`;
-          } else if (targetNode.type === 'branch') {
-            outSignal = outSignal * 0.55;
-            targetNode.valText = `分支流: ${outSignal.toFixed(1)}`;
-          } else if (targetNode.type === 'resonator') {
-            const incomingWires = wires.filter(iw => iw.toNode === targetNode.id);
-            if (incomingWires.length >= 2) {
-              outSignal = outSignal * 1.6;
-              targetNode.isResonating = true;
-              targetNode.valText = `★ 谐振暴增 ×1.6 (${outSignal.toFixed(1)})`;
-            } else {
-              targetNode.valText = `单路通过: ${outSignal.toFixed(1)}`;
-            }
-          } else if (targetNode.type === 'stabilizer') {
-            targetNode.valText = `恒压通过: ${outSignal.toFixed(1)}`;
-          } else if (targetNode.type === 'converter') {
-            outSignal = outSignal * 0.5;
-            targetNode.valText = `降频转换: ${outSignal.toFixed(1)}`;
-          } else if (targetNode.type === 'core') {
-            targetNode.signalIn = (targetNode.signalIn || 0) + outSignal;
-            zoneCoreSignal += outSignal;
-            return; // 到达核心，不继续延伸
-          }
-
-          const visitKey = `${curr.nodeId}->${targetNode.id}`;
-          if (!visited.has(visitKey)) {
-            visited.add(visitKey);
-            queue.push({ nodeId: targetNode.id, signal: outSignal, pathLen: curr.pathLen + 1 });
-          }
-        });
-      }
-    });
-
-    // 核心判定与增益计算
-    const coreNode = nodes.find(n => n.zoneId === zKey && n.type === 'core');
-    const isSat = zoneCoreSignal > 5;
-    zone.satisfied = isSat;
-
-    if (zKey === 'zone1') {
-      // 物流区：传送带吞吐量 +N件/min，升降机速度 +X%
-      zone.buffValue = isSat ? Math.max(6, Math.round(zoneCoreSignal * 0.15)) : 0;
-      zone.buffValue2 = isSat ? Math.round(zoneCoreSignal * 0.10) : 0;
-      if (coreNode) {
-        coreNode.valText = isSat ? `运转中: 信号 ${zoneCoreSignal.toFixed(1)}` : '待有效信号注入';
-        coreNode.buffText = isSat ? `+${zone.buffValue} 件/min (升降机 +${zone.buffValue2}%)` : '增益未激活';
-      }
-    } else if (zKey === 'zone2') {
-      // 生产区：设备工作速度 +X%，热量效率 +X%
-      zone.buffValue = isSat ? Math.round(zoneCoreSignal * 0.12) : 0;
-      zone.buffValue2 = isSat ? Math.round(zoneCoreSignal * 0.08) : 0;
-      if (coreNode) {
-        coreNode.valText = isSat ? `超频运转: 信号 ${zoneCoreSignal.toFixed(1)}` : '待有效信号注入';
-        coreNode.buffText = isSat ? `设备速度 +${zone.buffValue}%` : '增益未激活';
-      }
-    } else if (zKey === 'zone3') {
-      // 电力区：全厂耗电降低 -X%，发电机产出 +X%
-      zone.buffValue = isSat ? Math.min(45, Math.round(zoneCoreSignal * 0.10)) : 0;
-      zone.buffValue2 = isSat ? Math.round(zoneCoreSignal * 0.06) : 0;
-      if (coreNode) {
-        coreNode.valText = isSat ? `节电监控: 信号 ${zoneCoreSignal.toFixed(1)}` : '待有效信号注入';
-        coreNode.buffText = isSat ? `全厂耗电 -${zone.buffValue}%` : '增益未激活';
-      }
-    } else if (zKey === 'zone4') {
-      // 研究区：解析数据产出 +X%，认证消耗减免 -X%
-      zone.buffValue = isSat ? Math.round(zoneCoreSignal * 0.18) : 0;
-      zone.buffValue2 = isSat ? Math.min(30, Math.round(zoneCoreSignal * 0.08)) : 0;
-      if (coreNode) {
-        coreNode.valText = isSat ? `解析加速: 信号 ${zoneCoreSignal.toFixed(1)}` : '待有效信号注入';
-        coreNode.buffText = isSat ? `解析产出 +${zone.buffValue}% (认证 -${zone.buffValue2}%)` : '增益未激活';
-      }
-    }
-  });
-
-  // 3. 更新右侧区域列表与解锁计数
+  // 更新已解锁数量徽章
   let unlockedCount = 0;
   Object.keys(CPU_BLUEPRINT_STATE.zones).forEach(k => {
     if (CPU_BLUEPRINT_STATE.zones[k].unlocked) unlockedCount++;
@@ -1991,8 +1267,7 @@ function updateBlueprintMonitorStats() {
 
   const legTag = document.getElementById('statBuffLegendary');
   if (legTag) {
-    const stageDesc = CPU_BLUEPRINT_STATE.gameStage === 'prologue' ? '序章' : (CPU_BLUEPRINT_STATE.gameStage === 'lianqi' ? '练气' : '筑基');
-    legTag.textContent = `★ ${unlockedCount}/4 区域解锁 [${stageDesc}]`;
+    legTag.textContent = `★ ${unlockedCount}/4 区域解锁`;
   }
 
   const progText = document.getElementById('zoneProgressText');
@@ -2000,24 +1275,27 @@ function updateBlueprintMonitorStats() {
     progText.textContent = `${unlockedCount} / 4 区域`;
   }
 
+  // 渲染右侧区域清单
   const listEl = document.getElementById('zoneProgressList');
   if (listEl) {
     let listHtml = '';
     const zOrder = ['zone1', 'zone2', 'zone3', 'zone4'];
     zOrder.forEach((zk, idx) => {
       const z = CPU_BLUEPRINT_STATE.zones[zk];
+      const isUn = z.unlocked;
+      const isSat = z.satisfied;
       let badge = '';
-      if (!z.unlocked) {
-        badge = '<span class="text-red-400">待解锁</span>';
-      } else if (z.satisfied) {
-        badge = `<span class="text-amber-300 font-bold">+${z.buffValue}${zk==='zone1'?'件/m':'%'} ✓</span>`;
+      if (!isUn) {
+        badge = '<span class="text-red-400">待引线</span>';
+      } else if (isSat) {
+        badge = '<span class="text-amber-300 font-bold">已满足 ✓</span>';
       } else {
         badge = '<span class="text-cyan-300">调配中</span>';
       }
 
       listHtml += `
         <div onclick="jumpToZone('${z.id}');" class="flex items-center justify-between p-1 rounded bg-black/40 hover:bg-white/10 cursor-pointer transition border border-white/5">
-          <span class="${z.unlocked ? 'text-white/90' : 'text-white/40'}">${z.name}</span>
+          <span class="${isUn ? 'text-white/90' : 'text-white/40'}">${idx+1}. ${z.shortName}</span>
           ${badge}
         </div>
       `;
@@ -2025,64 +1303,34 @@ function updateBlueprintMonitorStats() {
     listEl.innerHTML = listHtml;
   }
 
-  // 4. 更新右侧实际增益数值 (贴合游戏真实玩法数值)
-  const z1 = CPU_BLUEPRINT_STATE.zones.zone1;
-  const z2 = CPU_BLUEPRINT_STATE.zones.zone2;
-  const z3 = CPU_BLUEPRINT_STATE.zones.zone3;
-  const z4 = CPU_BLUEPRINT_STATE.zones.zone4;
-
+  // 更新宏观增益
   const sLog = document.getElementById('statBuffLogistics');
-  if (sLog) {
-    sLog.textContent = z1.satisfied 
-      ? `+${z1.buffValue} 件/min (升降机 +${z1.buffValue2}%)` 
-      : '+0 件/min (未注入)';
-    sLog.className = z1.satisfied ? 'font-bold text-cyan-300' : 'font-bold text-white/40';
-  }
+  if (sLog) sLog.textContent = z1Satisfied ? '+80% (极速流光)' : '+30%';
 
   const sSmelt = document.getElementById('statBuffSmelt');
-  if (sSmelt) {
-    if (!z2.unlocked) {
-      sSmelt.textContent = '未激活 (完成练气认证解锁)';
-      sSmelt.className = 'font-bold text-white/40';
-    } else {
-      sSmelt.textContent = z2.satisfied ? `时钟速度 +${z2.buffValue}% (热量 +${z2.buffValue2}%)` : '+0% (待调配)';
-      sSmelt.className = z2.satisfied ? 'font-bold text-amber-300' : 'font-bold text-white/40';
-    }
-  }
+  if (sSmelt) sSmelt.textContent = z2Satisfied ? '-30% (双倍出锭)' : (CPU_BLUEPRINT_STATE.zones.zone2.unlocked ? '-10%' : '未激活 (乾元区锁定)');
 
   const sGrid = document.getElementById('statBuffGrid');
-  if (sGrid) {
-    if (!z3.unlocked) {
-      sGrid.textContent = '未激活 (完成练气认证解锁)';
-      sGrid.className = 'font-bold text-white/40';
-    } else {
-      sGrid.textContent = z3.satisfied ? `全厂耗电 -${z3.buffValue}% (发电 +${z3.buffValue2}%)` : '-0% (待调配)';
-      sGrid.className = z3.satisfied ? 'font-bold text-purple-300' : 'font-bold text-white/40';
-    }
-  }
+  if (sGrid) sGrid.textContent = z3Satisfied ? '0.0 Ω (无线超导)' : (CPU_BLUEPRINT_STATE.zones.zone3.unlocked ? '+10%' : '未激活 (坎离区锁定)');
 
   const sRes = document.getElementById('statBuffResonance');
   if (sRes) {
-    if (!z4.unlocked) {
-      sRes.textContent = '未激活 (完成筑基认证解锁)';
-      sRes.className = 'font-bold text-white/40';
-    } else {
-      sRes.textContent = z4.satisfied ? `解析产出 +${z4.buffValue}% (认证 -${z4.buffValue2}%)` : '+0% (待调配)';
-      sRes.className = z4.satisfied ? 'font-bold text-emerald-300' : 'font-bold text-white/40';
-    }
+    if (z4Satisfied) sRes.textContent = '★ 四象全贯通·大圆满';
+    else if (z3Satisfied) sRes.textContent = '三才共鸣激活';
+    else if (z2Satisfied) sRes.textContent = '两仪双相激活';
+    else sRes.textContent = '启道原核启动';
   }
 
   // 终极大招引爆按键
   const pulseBtn = document.getElementById('paragonTriggerPulseBtn');
   if (pulseBtn) {
-    if (z4.satisfied && z3.satisfied && z2.satisfied && z1.satisfied) {
+    if (z4Satisfied) {
       pulseBtn.classList.remove('hidden');
     } else {
       pulseBtn.classList.add('hidden');
     }
   }
 }
-
 
 // 锁存参数
 function confirmParagonParamLock() {
@@ -2117,28 +1365,13 @@ function triggerParagonPulseOvercharge() {
 // =========================================================================
 // HUD 窗口开关桥接
 // =========================================================================
-let cpuBlueprintHasInitialized = false;
-
 function openCentralProcessorHUD() {
   playUiSound('click');
   const modal = document.getElementById('cpuProcessorModal');
   if (modal) {
     modal.classList.remove('hidden');
-    if (!cpuBlueprintHasInitialized) {
-      initCentralProcessorBlueprint();
-      cpuBlueprintHasInitialized = true;
-    } else {
-      sanitizeAllBlueprintNodePositions();
-      renderBlueprintPhaseTabs();
-      renderWorldTreeBackgroundSvg();
-      renderBlueprintZonesHtml();
-      renderBlueprintNodesHtml();
-      renderBlueprintWiresSvg();
-      updateBlueprintMonitorStats();
-      updatePaletteTargetZoneBadge();
-    }
+    initCentralProcessorBlueprint();
     requestAnimationFrame(() => {
-      jumpToZone(CPU_BLUEPRINT_STATE.activeZoneId || 'zone1');
       updateCanvasTransform();
       renderBlueprintWiresSvg();
       setTimeout(() => renderBlueprintWiresSvg(), 50);
@@ -2150,10 +1383,6 @@ function openCentralProcessorHUD() {
 function closeCentralProcessorHUD() {
   playUiSound('click');
   cancelBlueprintConnecting();
-  CPU_BLUEPRINT_STATE.isPanning = false;
-  CPU_BLUEPRINT_STATE.draggingNodeId = null;
-  const vp = document.getElementById('paragonViewport');
-  if (vp) vp.classList.remove('bp-viewport-panning');
   const modal = document.getElementById('cpuProcessorModal');
   if (modal) modal.classList.add('hidden');
 }
