@@ -668,8 +668,8 @@
                 <i class="fa-solid fa-shield-halved text-slate-600 mr-1"></i>防御与身法
               </span>
               <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
-                <div class="flex justify-between text-slate-600"><span>阵法防御:</span><b id="statDefVal" class="text-slate-900 font-bold">+0%</b></div>
-                <div class="flex justify-between text-slate-600"><span>灵脉气血:</span><b id="statHpVal" class="text-slate-900 font-bold">+0%</b></div>
+                <div class="flex justify-between text-slate-600"><span>玩家防御:</span><b id="statDefVal" class="text-slate-900 font-bold">+0%</b></div>
+                <div class="flex justify-between text-slate-600"><span>玩家气血(血量):</span><b id="statHpVal" class="text-slate-900 font-bold">+0%</b></div>
                 <div class="flex justify-between text-slate-600"><span>移动身法:</span><b id="statSpeedVal" class="text-slate-900 font-bold">+0%</b></div>
                 <div class="flex justify-between text-slate-600"><span>储物背包:</span><b id="statInventoryVal" class="text-slate-900 font-bold">+0 格</b></div>
               </div>
@@ -988,7 +988,7 @@
     "buff": {
       "def": 8
     },
-    "buffDesc": "阵法防御 +8%",
+    "buffDesc": "玩家防御 +8%",
     "stepDesc": "顺步 +2 格",
     "icon": "fa-shield-halved",
     "textColor": "text-slate-900",
@@ -1121,7 +1121,7 @@
     "buff": {
       "def": 10
     },
-    "buffDesc": "阵法防御 +10%",
+    "buffDesc": "玩家防御 +10%",
     "stepDesc": "顺步 +3 格",
     "icon": "fa-shield-halved",
     "textColor": "text-slate-900",
@@ -1132,15 +1132,15 @@
     "step": 3,
     "tier": 1,
     "category": "combat",
-    "name": "生命芯片 · 中级",
-    "tag": "生命 · 3格",
+    "name": "气血芯片 · 中级",
+    "tag": "气血 · 3格",
     "type": "step",
     "shape": "shape-circle",
     "matClass": "token-def border-slate-700",
     "buff": {
       "hp": 10
     },
-    "buffDesc": "灵脉气血 +10%",
+    "buffDesc": "玩家血量 +10%",
     "stepDesc": "顺步 +3 格",
     "icon": "fa-heart-pulse",
     "textColor": "text-slate-900",
@@ -1406,7 +1406,7 @@
     "buff": {
       "def": 20
     },
-    "buffDesc": "阵法防御 +20%",
+    "buffDesc": "玩家防御 +20%",
     "stepDesc": "顺步 +5 格",
     "icon": "fa-shield-halved",
     "textColor": "text-slate-900",
@@ -1417,15 +1417,15 @@
     "step": 5,
     "tier": 2,
     "category": "combat",
-    "name": "生命芯片 · 高级",
-    "tag": "生命 · 5格",
+    "name": "气血芯片 · 高级",
+    "tag": "气血 · 5格",
     "type": "step",
     "shape": "shape-circle",
     "matClass": "token-def border-sky-400",
     "buff": {
       "hp": 20
     },
-    "buffDesc": "灵脉气血 +20%",
+    "buffDesc": "玩家血量 +20%",
     "stepDesc": "顺步 +5 格",
     "icon": "fa-heart-pulse",
     "textColor": "text-slate-900",
@@ -1858,7 +1858,7 @@
     "icon": "fa-shield-halved",
     "color": "rose",
     "badgeClass": "bg-rose-100 text-rose-900 border-rose-400",
-    "buffDesc": "阵法防御 +50% · 最大气血 +50%",
+    "buffDesc": "玩家防御 +50% · 玩家血量 +50%",
     "traitDesc": "受到致命伤免疫死亡；全阵防御的 50% 转化为反震真伤",
     "buff": {
       "def": 50,
@@ -3797,8 +3797,8 @@ function renderPalette() {
       const boxEl = document.getElementById('constellationStatusBox');
       const pillEl = document.getElementById('constellationMultPill');
 
-      if (badgeEl) badgeEl.textContent = floorDef.name;
-      if (titleEl) titleEl.textContent = `星象插槽：${hitStarsSet.size} / ${totalConstellationSlots}`;
+      if (badgeEl) badgeEl.textContent = `${floorDef.name} · ${floorDef.variantName ? floorDef.variantName.split("·")[0].trim() : "全阵"}`;
+      if (titleEl) titleEl.textContent = `星象插槽：${hitStarsSet.size} / ${totalConstellationSlots} (${floorDef.variantName ? floorDef.variantName.split("·")[0].trim() : "本阶"})`;
 
       if (isAllSatisfied) {
         if (iconEl) iconEl.textContent = '👑';

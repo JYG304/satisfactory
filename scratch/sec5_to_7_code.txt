@@ -480,6 +480,9 @@
       let hitFloorNodesSet = new Set();
       let activeKeystones = [];
       const counts = getActiveRingCounts();
+      if (typeof syncFloorShapeDefToRealm === 'function') {
+        syncFloorShapeDefToRealm();
+      }
       const floorDef = FLOOR_SHAPE_DEFS[CURRENT_FLOOR_SHAPE] || FLOOR_SHAPE_DEFS.dipper;
 
       function traceDiscOpticalPath(discKey, startRingId, startSlotIdx) {

@@ -443,5 +443,29 @@ const newDropdownBlock = `<button onclick="loadScenario('multi_disc_overdrive');
 baseHtml = baseHtml.replace(oldDropdownBlock, newDropdownBlock);
 baseHtml = baseHtml.replace('w-52 bg-white/95', 'w-64 bg-white/95');
 
+// Terminology Standardization: 玩家防御, 玩家气血(血量), 气血芯片
+baseHtml = baseHtml.replace(/<span>阵法防御:<\/span>/g, '<span>玩家防御:</span>');
+baseHtml = baseHtml.replace(/<span>灵脉气血:<\/span>/g, '<span>玩家气血(血量):</span>');
+baseHtml = baseHtml.replace(/"name": "生命芯片 · 中级"/g, '"name": "气血芯片 · 中级"');
+baseHtml = baseHtml.replace(/"tag": "生命 · 3格"/g, '"tag": "气血 · 3格"');
+baseHtml = baseHtml.replace(/"buffDesc": "灵脉气血 \+10%"/g, '"buffDesc": "玩家血量 +10%"');
+baseHtml = baseHtml.replace(/"name": "生命芯片 · 高级"/g, '"name": "气血芯片 · 高级"');
+baseHtml = baseHtml.replace(/"tag": "生命 · 5格"/g, '"tag": "气血 · 5格"');
+baseHtml = baseHtml.replace(/"buffDesc": "灵脉气血 \+20%"/g, '"buffDesc": "玩家血量 +20%"');
+baseHtml = baseHtml.replace(/"buffDesc": "阵法防御 \+8%"/g, '"buffDesc": "玩家防御 +8%"');
+baseHtml = baseHtml.replace(/"buffDesc": "阵法防御 \+10%"/g, '"buffDesc": "玩家防御 +10%"');
+baseHtml = baseHtml.replace(/"buffDesc": "阵法防御 \+20%"/g, '"buffDesc": "玩家防御 +20%"');
+baseHtml = baseHtml.replace(/"buffDesc": "阵法防御 \+50% · 最大气血 \+50%"/g, '"buffDesc": "玩家防御 +50% · 玩家血量 +50%"');
+
+// Update updatePanels badge & title in baseHtml to reflect realm constellation variants
+baseHtml = baseHtml.replace(
+  'if (badgeEl) badgeEl.textContent = floorDef.name;',
+  'if (badgeEl) badgeEl.textContent = `${floorDef.name} · ${floorDef.variantName ? floorDef.variantName.split("·")[0].trim() : "全阵"}`;'
+);
+baseHtml = baseHtml.replace(
+  'if (titleEl) titleEl.textContent = `星象插槽：${hitStarsSet.size} / ${totalConstellationSlots}`;',
+  'if (titleEl) titleEl.textContent = `星象插槽：${hitStarsSet.size} / ${totalConstellationSlots} (${floorDef.variantName ? floorDef.variantName.split("·")[0].trim() : "本阶"})`;'
+);
+
 fs.writeFileSync('scratch/temp_part1.html', baseHtml);
 console.log('Saved updated scratch/temp_part1.html');

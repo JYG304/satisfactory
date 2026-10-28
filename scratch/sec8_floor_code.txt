@@ -1,35 +1,93 @@
     /* =========================================================================
-       8.9 底板基准系统 (跨三盘星象分布：北斗七星等 7 个点分布在不同盘子上面，单个节点放上去增加 120% 效果！)
+       8.9 底板基准系统 (跨三盘星象分布：随境界扩盘自适应展开，2/1/1为A表现，3/2/2为B表现，4/3/3为C表现！)
        ========================================================================= */
     let CURRENT_FLOOR_SHAPE = 'dipper';
 
+    // ✦ 北斗七星 3 种境界表现形式 (A表现 2/1/1 · B表现 3/2/2 · C表现 4/3/3)
+    const dipper_A_nodes = [
+      { id: 'dipper_1', disc: 'combat',   num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe',    x: 390,  y: 424, bx: 265, by: 405, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram',  title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_2', disc: 'combat',   num: 'Ⅱ', name: '天璇·巨门', en: 'Merak',    x: 390,  y: 556, bx: 265, by: 545, color: '#0284c7', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress',  title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_3', disc: 'combat',   num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda',   x: 333,  y: 457, bx: 210, by: 445, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_4', disc: 'industry', num: 'Ⅳ', name: '天权·文曲', en: 'Megrez',   x: 947,  y: 397, bx: 963, by: 385, color: '#6366f1', bg: '#eef2ff', border: '#4f46e5', shape: 'hexagram',  title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_5', disc: 'industry', num: 'Ⅴ', name: '玉衡·廉贞', en: 'Alioth',   x: 890,  y: 364, bx: 765, by: 342, color: '#a855f7', bg: '#faf5ff', border: '#9333ea', shape: 'diamond',   title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_6', disc: 'support',  num: 'Ⅵ', name: '开阳·武曲', en: 'Mizar',    x: 1357, y: 297, bx: 1372, by: 292, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'sunburst',  title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_7', disc: 'support',  num: 'Ⅶ', name: '摇光·破军', en: 'Alkaid',   x: 1374, y: 233, bx: 1390, by: 215, color: '#0891b2', bg: '#ecfeff', border: '#0e7490', shape: 'trident',   title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' }
+    ];
+
+    const dipper_A_combat_nodes = [
+      { id: 'dipper_1', disc: 'combat',   num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe',    x: 390,  y: 424, bx: 265, by: 405, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram',  title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_2', disc: 'combat',   num: 'Ⅱ', name: '天璇·巨门', en: 'Merak',    x: 390,  y: 596, bx: 265, by: 585, color: '#0284c7', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress',  title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_3', disc: 'combat',   num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda',   x: 491,  y: 523, bx: 508, by: 510, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_4', disc: 'industry', num: 'Ⅳ', name: '天权·文曲', en: 'Megrez',   x: 947,  y: 397, bx: 963, by: 385, color: '#6366f1', bg: '#eef2ff', border: '#4f46e5', shape: 'hexagram',  title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_5', disc: 'industry', num: 'Ⅴ', name: '玉衡·廉贞', en: 'Alioth',   x: 890,  y: 364, bx: 765, by: 342, color: '#a855f7', bg: '#faf5ff', border: '#9333ea', shape: 'diamond',   title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_6', disc: 'support',  num: 'Ⅵ', name: '开阳·武曲', en: 'Mizar',    x: 1357, y: 297, bx: 1372, by: 292, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'sunburst',  title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_7', disc: 'support',  num: 'Ⅶ', name: '摇光·破军', en: 'Alkaid',   x: 1374, y: 233, bx: 1390, by: 215, color: '#0891b2', bg: '#ecfeff', border: '#0e7490', shape: 'trident',   title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' }
+    ];
+
+    const dipper_B_nodes = [
+      { id: 'dipper_1', disc: 'combat',   num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe',    x: 390,  y: 424, bx: 265, by: 405, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram',  title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_2', disc: 'combat',   num: 'Ⅱ', name: '天璇·巨门', en: 'Merak',    x: 390,  y: 596, bx: 265, by: 585, color: '#0284c7', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress',  title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_3', disc: 'combat',   num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda',   x: 491,  y: 523, bx: 508, by: 510, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_4', disc: 'industry', num: 'Ⅳ', name: '天权·文曲', en: 'Megrez',   x: 947,  y: 397, bx: 963, by: 385, color: '#6366f1', bg: '#eef2ff', border: '#4f46e5', shape: 'hexagram',  title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_5', disc: 'industry', num: 'Ⅴ', name: '玉衡·廉贞', en: 'Alioth',   x: 890,  y: 364, bx: 765, by: 342, color: '#a855f7', bg: '#faf5ff', border: '#9333ea', shape: 'diamond',   title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_6', disc: 'support',  num: 'Ⅵ', name: '开阳·武曲', en: 'Mizar',    x: 1357, y: 297, bx: 1372, by: 292, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'sunburst',  title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_7', disc: 'support',  num: 'Ⅶ', name: '摇光·破军', en: 'Alkaid',   x: 1374, y: 233, bx: 1390, by: 215, color: '#0891b2', bg: '#ecfeff', border: '#0e7490', shape: 'trident',   title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' }
+    ];
+
+    const dipper_C_nodes = [
+      { id: 'dipper_1', disc: 'combat',   num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe',    x: 390,  y: 424, bx: 265, by: 405, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram',  title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_2', disc: 'combat',   num: 'Ⅱ', name: '天璇·巨门', en: 'Merak',    x: 390,  y: 596, bx: 265, by: 585, color: '#0284c7', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress',  title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_3', disc: 'combat',   num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda',   x: 491,  y: 523, bx: 508, by: 510, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_4', disc: 'industry', num: 'Ⅳ', name: '天权·文曲', en: 'Megrez',   x: 947,  y: 397, bx: 963, by: 385, color: '#6366f1', bg: '#eef2ff', border: '#4f46e5', shape: 'hexagram',  title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_5', disc: 'industry', num: 'Ⅴ', name: '玉衡·廉贞', en: 'Alioth',   x: 890,  y: 364, bx: 765, by: 342, color: '#a855f7', bg: '#faf5ff', border: '#9333ea', shape: 'diamond',   title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_6', disc: 'support',  num: 'Ⅵ', name: '开阳·武曲', en: 'Mizar',    x: 1357, y: 297, bx: 1372, by: 292, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'sunburst',  title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' },
+      { id: 'dipper_7', disc: 'support',  num: 'Ⅶ', name: '摇光·破军', en: 'Alkaid',   x: 1374, y: 233, bx: 1390, by: 215, color: '#0891b2', bg: '#ecfeff', border: '#0e7490', shape: 'trident',   title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' }
+    ];
+
+    const dipper_links = [
+      ['dipper_7', 'dipper_6'],
+      ['dipper_6', 'dipper_5'],
+      ['dipper_5', 'dipper_4'],
+      ['dipper_4', 'dipper_3'],
+      ['dipper_3', 'dipper_2'],
+      ['dipper_2', 'dipper_1'],
+      ['dipper_1', 'dipper_3']
+    ];
+
     const FLOOR_SHAPE_DEFS = {
-      // 1. 【北斗七星天衡阵】(跨三盘分布：辅助盘2星 + 工厂盘2星 + 攻击盘3星 = 7星连珠，单点增加120%效果！)
+      // 1. 【北斗七星天衡阵】(跨三盘分布：随境界扩盘自适应 A/B/C 三种表现)
       dipper: {
         name: '北斗七星天衡阵',
-        desc: '七星跨三盘贯通（辅助盘2星 · 工厂盘2星 · 攻击盘3星）：任意星位放上芯片并通电，该节点直接增加 +120% 效果！',
+        desc: '七星跨三盘贯通（辅助盘2星 · 工厂盘2星 · 攻击盘3星）：星位放上芯片并通电，该节点效果增加 +120%！随境界盘体扩大自适应展开。',
         mult: 2.2,
-        nodes: [
-          // ⚔️ 攻击盘 (斗魁 3 星：适配 1环6槽 / 2环10槽)
-          { id: 'dipper_1', disc: 'combat',   num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe',    x: 390,  y: 424, bx: 265, by: 405, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram',  title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
-          { id: 'dipper_2', disc: 'combat',   num: 'Ⅱ', name: '天璇·巨门', en: 'Merak',    x: 390,  y: 596, bx: 406, by: 585, color: '#0284c7', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress',  title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
-          { id: 'dipper_3', disc: 'combat',   num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda',   x: 491,  y: 523, bx: 508, by: 510, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
-          // ⚙️ 工厂盘 (斗身 2 星)
-          { id: 'dipper_4', disc: 'industry', num: 'Ⅳ', name: '天权·文曲', en: 'Megrez',   x: 947,  y: 397, bx: 963, by: 385, color: '#6366f1', bg: '#eef2ff', border: '#4f46e5', shape: 'hexagram',  title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
-          { id: 'dipper_5', disc: 'industry', num: 'Ⅴ', name: '玉衡·廉贞', en: 'Alioth',   x: 890,  y: 364, bx: 765, by: 342, color: '#a855f7', bg: '#faf5ff', border: '#9333ea', shape: 'diamond',   title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
-          // 🛡️ 辅助盘 (斗柄 2 星)
-          { id: 'dipper_6', disc: 'support',  num: 'Ⅵ', name: '开阳·武曲', en: 'Mizar',    x: 1357, y: 297, bx: 1372, by: 292, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'sunburst',  title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' },
-          { id: 'dipper_7', disc: 'support',  num: 'Ⅶ', name: '摇光·破军', en: 'Alkaid',   x: 1374, y: 233, bx: 1390, by: 215, color: '#0891b2', bg: '#ecfeff', border: '#0e7490', shape: 'trident',   title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' }
-        ],
-        links: [
-          ['dipper_7', 'dipper_6'],
-          ['dipper_6', 'dipper_5'],
-          ['dipper_5', 'dipper_4'],
-          ['dipper_4', 'dipper_3'],
-          ['dipper_3', 'dipper_2'],
-          ['dipper_2', 'dipper_1'],
-          ['dipper_1', 'dipper_3']
-        ]
+        variants: {
+          qi: {
+            variantName: 'A表现 · 练气2/1/1',
+            desc: '练气阶紧凑阵：7颗星宿精准契合基础1环，初入道途全盘贯通！',
+            nodes: dipper_A_nodes,
+            links: dipper_links
+          },
+          qi_combat: {
+            variantName: 'A表现 · 练气2/1/1 (攻击主修)',
+            desc: '练气攻击大盘阵：星宿跨入攻击盘2环，初入道途全盘贯通！',
+            nodes: dipper_A_combat_nodes,
+            links: dipper_links
+          },
+          foundation: {
+            variantName: 'B表现 · 筑基3/2/2',
+            desc: '筑基阶舒展阵：星宿随双盘扩展舒展至2环，星芒更阔！',
+            nodes: dipper_B_nodes,
+            links: dipper_links
+          },
+          core: {
+            variantName: 'C表现 · 金丹4/3/3',
+            desc: '金丹阶万象阵：星宿跨越多层环道，宏大万象！',
+            nodes: dipper_C_nodes,
+            links: dipper_links
+          }
+        },
+        nodes: dipper_A_nodes,
+        links: dipper_links
       },
 
       // 2. 【南斗六司延寿阵】(跨三盘 2+2+2 分布，单点增加120%效果)
@@ -84,7 +142,7 @@
 
       // 5. 【九曜行天日月轮】(跨三盘分布，单点增加120%效果)
       nine_luminaries: {
-        name: '九曜行天日月轮',
+        name: '九曜日月行天阵',
         desc: '日月五星跨三盘排布：任意星位放上芯片即增加 +120% 效果！',
         mult: 2.2,
         nodes: [
@@ -116,6 +174,29 @@
       }
     };
 
+    // ★ 境界与底盘自适应同步函数：随盘面扩大自动将底板切换为当前境界的表现（2/1/1为A表现，3/2/2为B表现，4/3/3为C表现）
+    function syncFloorShapeDefToRealm() {
+      const realm = (typeof CURRENT_REALM !== 'undefined') ? CURRENT_REALM : 'qi';
+      const spec = (typeof SPEC_DISC !== 'undefined') ? SPEC_DISC : 'combat';
+      for (const [k, def] of Object.entries(FLOOR_SHAPE_DEFS)) {
+        if (def.variants) {
+          let variantKey = realm;
+          if (realm === 'qi') {
+            variantKey = (spec === 'combat' && def.variants['qi_combat']) ? 'qi_combat' : 'qi';
+          }
+          const v = def.variants[variantKey] || def.variants[realm] || def.variants['qi'];
+          if (v) {
+            def.nodes = v.nodes;
+            if (v.links) def.links = v.links;
+            def.activeVariant = variantKey;
+            def.variantName = v.variantName;
+            def.variantDesc = v.desc || def.desc;
+          }
+        }
+      }
+    }
+    window.syncFloorShapeDefToRealm = syncFloorShapeDefToRealm;
+
     let SHOW_CONSTELLATION_GUIDE = false;
     let CONSTELLATION_GUIDE_TIMER = null;
 
@@ -139,6 +220,9 @@
     function renderFloorBase(isActive = false, hitSet = null) {
       const svg = document.getElementById('floorSvgLayer');
       if (!svg) return;
+
+      // 实时同步当前境界的底盘表现形式（A/B/C表现）
+      syncFloorShapeDefToRealm();
 
       const shapeDef = FLOOR_SHAPE_DEFS[CURRENT_FLOOR_SHAPE] || FLOOR_SHAPE_DEFS.dipper;
       const counts = getActiveRingCounts();
@@ -267,6 +351,7 @@
     function switchFloorShape(shapeKey) {
       if (!FLOOR_SHAPE_DEFS[shapeKey]) return;
       CURRENT_FLOOR_SHAPE = shapeKey;
+      syncFloorShapeDefToRealm();
       ['dipper', 'southern_dipper', 'ziwei', 'four_symbols', 'nine_luminaries', 'thunder_matrix'].forEach(key => {
         const btn = document.getElementById(`btn_shape_${key}`);
         if (!btn) return;

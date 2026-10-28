@@ -75,13 +75,14 @@
         BOARD_SLOTS['industry_1_3'].chip = 't0_burn_2';      // 燃烧+8% ➔ 5
         BOARD_SLOTS['industry_1_5'].chip = 'chip_triangle_in';
 
-        // 3. ⚔️ 攻击盘 1环 (6槽)：天枢星位激活 2 把自动护体浮游飞剑
+        // 3. ⚔️ 攻击盘 1环 (6槽)：天枢、天璇、天玑三星齐亮，激活玩家防御与护体飞剑
         OUTER_DOCK_SLOTS['dock_combat_0'].coreChip = 'core_industry';
         CENTER_CORE_STATE.industry.detached = true;
         CENTER_CORE_STATE.industry.placedAtDock = 'dock_combat_0';
 
-        BOARD_SLOTS['combat_1_0'].chip = 't2_sword_funnel_1'; // 踩中【Ⅰ 天枢】浮游飞剑+2把 ➔ 5
-        BOARD_SLOTS['combat_1_5'].chip = 'chip_triangle_in';
+        BOARD_SLOTS['combat_1_0'].chip = 't1_crit_3';        // 踩中【Ⅰ 天枢】暴击+15% ➔ 3
+        BOARD_SLOTS['combat_1_3'].chip = 't0_def_2';         // 踩中【Ⅱ 天璇】玩家防御+8% ➔ 5
+        BOARD_SLOTS['combat_1_5'].chip = 'chip_triangle_in'; // 踩中【Ⅲ 天玑】向心折射射入攻击盘中心！
 
       } else if (type === 'act2_foundation_power') {
         // 🎬 第二幕：筑基期 · 稳电防兽潮救急流（主修⚙️工厂3环大盘 + 辅助2环 + 攻击2环，7/7北斗全亮，暴降能耗与污染）
@@ -120,7 +121,7 @@
         BOARD_SLOTS['industry_1_1'].chip = 't0_atk_1';       // 踩中【Ⅳ 天权】攻击+11% ➔ 2
         BOARD_SLOTS['industry_1_2'].chip = 'chip_triangle_in';
 
-        // 3. ⚔️ 攻击盘 2环 + 1环：护山大阵防御与气血踩满斗魁三星
+        // 3. ⚔️ 攻击盘 2环 + 1环：玩家防御与气血踩满斗魁三星
         DISK_RINGS['combat_dock'].currentAngle = 108;
         OUTER_DOCK_SLOTS['dock_combat_0'].coreChip = 'core_industry';
         CENTER_CORE_STATE.industry.detached = true;
@@ -239,7 +240,7 @@
 
         BOARD_SLOTS['combat_4_6'].chip = 't3_sword_funnel_2'; // 浮游飞剑+2把 (+8格) ➔ 14
         BOARD_SLOTS['combat_4_14'].chip = 't3_atk_8';         // 飞剑攻击+30% (+8格) ➔ 22
-        BOARD_SLOTS['combat_4_22'].chip = 't0_def_2';         // 阵法防御+8% (+2格) ➔ 0
+        BOARD_SLOTS['combat_4_22'].chip = 't0_def_2';         // 玩家防御+8% (+2格) ➔ 0
         BOARD_SLOTS['combat_4_0'].chip = 'chip_triangle_in';
 
         BOARD_SLOTS['combat_3_0'].chip = 't2_atspd_5';        // 攻击速度+20% (+5格) ➔ 5
