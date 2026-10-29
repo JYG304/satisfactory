@@ -660,15 +660,98 @@
         }
       }
 
-      const totalConstellationSlots = (floorDef && floorDef.nodes) ? floorDef.nodes.length : 7;
-      const isConstellationAllSatisfied = hitFloorNodesSet.size >= totalConstellationSlots;
-      const constellationMultiplier = isConstellationAllSatisfied ? 2.2 : 1.0;
+      // ✦ 北斗流派取舍判定（斗魁组 vs 斗柄组 + 天权中枢）
+      const doukuiHits = ['dipper_1', 'dipper_2', 'dipper_3'].filter(id => hitFloorNodesSet.has(id));
+      const doubingHits = ['dipper_5', 'dipper_6', 'dipper_7'].filter(id => hitFloorNodesSet.has(id));
+      const hasTianquan = hitFloorNodesSet.has('dipper_4');
 
-      if (isConstellationAllSatisfied) {
-        logSteps.push(`👑 【${floorDef.name}·七星全满共鸣！】三大盘全部 ${totalConstellationSlots} 处星位点亮！每个星位节点均已享受 +120% 效果增幅！`);
+      let resonanceData = {
+        group: 'none',
+        tier: 0,
+        title: '散落星位（未激活流派共鸣）',
+        hint: '在【斗魁·杀伐】与【斗柄·基建】间取舍，点亮2~3星即可激活流派质变！',
+        badge: '未共鸣',
+        icon: '○',
+        pillClass: 'bg-slate-100 text-slate-600 border border-slate-200',
+        boxClass: 'bg-white border border-slate-200'
+      };
+
+      // 1. 斗魁大共鸣 (3星全亮，极致杀伐)
+      if (doukuiHits.length >= 3) {
+        resonanceData.group = 'doukui';
+        resonanceData.tier = 2;
+        resonanceData.title = '⚔️ 斗魁大共鸣 · 玄武剑煞';
+        resonanceData.hint = '斗魁三星齐聚！护体飞剑+2把 · 飞剑攻击+40% · 玩家气血+30% · 防御+30%';
+        resonanceData.badge = '玄武剑煞';
+        resonanceData.icon = '👑';
+        resonanceData.pillClass = 'bg-rose-600 text-white shadow-xs';
+        resonanceData.boxClass = 'bg-rose-50 border border-rose-300';
+        totalBuff.sword_funnel += 2;
+        totalBuff.atk += 40;
+        totalBuff.hp += 30;
+        totalBuff.def += 30;
+        logSteps.push(`👑 【斗魁大共鸣·玄武剑煞激活！】天枢、天璇、天玑三星齐聚！护体飞剑+2把，玩家攻击+40%，气血防御倍增！`);
+      } else if (doukuiHits.length === 2 && doubingHits.length < 2) {
+        // 斗魁小共鸣 (2星)
+        resonanceData.group = 'doukui';
+        resonanceData.tier = 1;
+        resonanceData.title = '⚔️ 斗魁小共鸣 · 杀伐御敌';
+        resonanceData.hint = '斗魁双星点亮！飞剑攻击+20% · 玩家防御+20%';
+        resonanceData.badge = '斗魁·2星';
+        resonanceData.icon = '⚔️';
+        resonanceData.pillClass = 'bg-rose-100 text-rose-800 border border-rose-300';
+        resonanceData.boxClass = 'bg-rose-50/60 border border-rose-200';
+        totalBuff.atk += 20;
+        totalBuff.def += 20;
+        logSteps.push(`⚔️ 【斗魁小共鸣激活】杀伐星位连通，飞剑攻击+20%，玩家防御+20%！`);
       }
 
+      // 2. 斗柄大共鸣 (3星全亮，极致基建)
+      if (doubingHits.length >= 3) {
+        resonanceData.group = 'doubing';
+        resonanceData.tier = 2;
+        resonanceData.title = '⚙️ 斗柄大共鸣 · 神工天巧';
+        resonanceData.hint = '斗柄三星贯通！全线能耗降低30% · 移动速度+20% · 制造与采矿翻倍提速！';
+        resonanceData.badge = '神工天巧';
+        resonanceData.icon = '⚡';
+        resonanceData.pillClass = 'bg-amber-600 text-white shadow-xs';
+        resonanceData.boxClass = 'bg-amber-50 border border-amber-300';
+        totalBuff.power_cut += 30;
+        totalBuff.speed += 20;
+        totalBuff.craft_speed += 40;
+        totalBuff.mining_speed += 40;
+        logSteps.push(`⚡ 【斗柄大共鸣·神工天巧激活！】玉衡、开阳、摇光三星贯通！全线能耗-30%，制造采矿大幅倍增！`);
+      } else if (doubingHits.length === 2 && doukuiHits.length < 2) {
+        // 斗柄小共鸣 (2星)
+        resonanceData.group = 'doubing';
+        resonanceData.tier = 1;
+        resonanceData.title = '⚙️ 斗柄小共鸣 · 天工开物';
+        resonanceData.hint = '斗柄双星点亮！制造提速+20% · 采矿提速+20%';
+        resonanceData.badge = '斗柄·2星';
+        resonanceData.icon = '⚙️';
+        resonanceData.pillClass = 'bg-amber-100 text-amber-800 border border-amber-300';
+        resonanceData.boxClass = 'bg-amber-50/60 border border-amber-200';
+        totalBuff.craft_speed += 20;
+        totalBuff.mining_speed += 20;
+        logSteps.push(`⚙️ 【斗柄小共鸣激活】工控星位连通，制造与采矿提速+20%！`);
+      }
+
+      // 3. 天权中枢转折加成
+      if (hasTianquan) {
+        if (resonanceData.group === 'doukui') {
+          totalBuff.crit += 15;
+          resonanceData.hint += ' · 兼得天权文曲暴击+15%';
+          logSteps.push(`✦ 【天权文曲星连通】贯通杀伐光路，额外提供暴击率 +15%！`);
+        } else if (resonanceData.group === 'doubing') {
+          totalBuff.belt_speed += 25;
+          resonanceData.hint += ' · 兼得天权文曲传送带+25%';
+          logSteps.push(`✦ 【天权文曲星连通】贯通工控网络，额外提供传送带输送 +25%！`);
+        }
+      }
+
+      const constellationMultiplier = resonanceData.tier === 2 ? 1.5 : (resonanceData.tier === 1 ? 1.2 : 1.0);
+
       renderFloorBase(true, hitFloorNodesSet);
-      updatePanels(chainNodes, totalBuff, constellationMultiplier, crossActivated, logSteps, hitFloorNodesSet, activeKeystones);
+      updatePanels(chainNodes, totalBuff, constellationMultiplier, crossActivated, logSteps, hitFloorNodesSet, activeKeystones, resonanceData, doukuiHits, doubingHits);
       updateCenterHubsDOM();
     }

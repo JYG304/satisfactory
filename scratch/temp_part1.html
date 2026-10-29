@@ -607,17 +607,28 @@
             </span>
           </div>
 
-          <!-- 状态提示条 -->
-          <div id="constellationStatusBox" class="p-2.5 rounded-lg bg-white border border-slate-200 text-xs font-mono-sci flex items-center justify-between transition-all">
+          <!-- 流派取舍共鸣提示条 -->
+          <div id="constellationStatusBox" class="p-2.5 rounded-lg bg-white border border-slate-200 text-xs font-mono-sci flex items-center justify-between transition-all shadow-xs">
             <div class="flex items-center space-x-2">
               <span id="constellationIcon" class="text-base">○</span>
               <div>
-                <div class="font-bold text-slate-900" id="constellationTitle">星象插槽：0 / 7</div>
-                <div class="text-[10px] text-slate-500" id="constellationHint">全部满足后激活 ×1.2 倍全属性</div>
+                <div class="font-bold text-slate-900" id="constellationTitle">散落星芒（未成流派）</div>
+                <div class="text-[10px] text-slate-500" id="constellationHint">选择【斗魁·杀伐】或【斗柄·基建】，点亮2~3星即触发流派质变！</div>
               </div>
             </div>
             <div id="constellationMultPill" class="text-xs font-black font-mono-sci px-2 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">
-              x1.0
+              未共鸣
+            </div>
+          </div>
+          <!-- 斗魁/斗柄两系取舍进度指示条 -->
+          <div class="grid grid-cols-2 gap-1.5 pt-1 text-[10px] font-mono-sci">
+            <div id="constellationDoukuiBox" class="p-1.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between shadow-2xs">
+              <span class="text-rose-700 font-bold"><i class="fa-solid fa-khanda mr-1"></i>斗魁·杀伐</span>
+              <span id="constellationDoukuiVal" class="font-bold text-slate-600">0/3</span>
+            </div>
+            <div id="constellationDoubingBox" class="p-1.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between shadow-2xs">
+              <span class="text-amber-700 font-bold"><i class="fa-solid fa-industry mr-1"></i>斗柄·基建</span>
+              <span id="constellationDoubingVal" class="font-bold text-slate-600">0/3</span>
             </div>
           </div>
         </div>
@@ -3779,52 +3790,61 @@ function renderPalette() {
       solveStepNetwork();
     }
     
-    function updatePanels(chainNodes, totalBuff, constellationMultiplier, isCrossActive, logSteps, hitStarsSet = new Set(), activeKeystones = []) {
+    function updatePanels(chainNodes, totalBuff, constellationMultiplier, isCrossActive, logSteps, hitStarsSet = new Set(), activeKeystones = [], resonanceData = null, doukuiHits = [], doubingHits = []) {
       const rightTag = document.getElementById('rightChainStatusTag');
       const countPill = document.getElementById('statActiveCountPill');
 
       if (countPill) countPill.textContent = `${chainNodes.length} 个构件生效`;
 
       const floorDef = FLOOR_SHAPE_DEFS[CURRENT_FLOOR_SHAPE] || FLOOR_SHAPE_DEFS.dipper;
-      const totalConstellationSlots = (floorDef && floorDef.nodes) ? floorDef.nodes.length : 7;
-      const isAllSatisfied = hitStarsSet.size >= totalConstellationSlots;
 
-      // 更新星象加成卡片
+      // 更新星象加成卡片（斗魁杀伐 vs 斗柄基建 流派取舍）
       const badgeEl = document.getElementById('constellationBadge');
       const titleEl = document.getElementById('constellationTitle');
       const hintEl = document.getElementById('constellationHint');
       const iconEl = document.getElementById('constellationIcon');
       const boxEl = document.getElementById('constellationStatusBox');
       const pillEl = document.getElementById('constellationMultPill');
+      const doukuiValEl = document.getElementById('constellationDoukuiVal');
+      const doubingValEl = document.getElementById('constellationDoubingVal');
 
-      if (badgeEl) badgeEl.textContent = `${floorDef.name} · ${floorDef.variantName ? floorDef.variantName.split("·")[0].trim() : "全阵"}`;
-      if (titleEl) titleEl.textContent = `星象插槽：${hitStarsSet.size} / ${totalConstellationSlots} (${floorDef.variantName ? floorDef.variantName.split("·")[0].trim() : "本阶"})`;
+      if (badgeEl) badgeEl.textContent = `${floorDef.name} · ${floorDef.variantName ? floorDef.variantName.split('·')[0].trim() : '全阵'}`;
 
-      if (isAllSatisfied) {
-        if (iconEl) iconEl.textContent = '👑';
+      if (doukuiValEl) {
+        doukuiValEl.textContent = `${doukuiHits.length} / 3${doukuiHits.length >= 3 ? ' (大共鸣)' : (doukuiHits.length === 2 ? ' (小共鸣)' : '')}`;
+        doukuiValEl.className = doukuiHits.length >= 3 ? 'font-bold text-rose-600' : (doukuiHits.length === 2 ? 'font-bold text-rose-500' : 'font-bold text-slate-500');
+      }
+      if (doubingValEl) {
+        doubingValEl.textContent = `${doubingHits.length} / 3${doubingHits.length >= 3 ? ' (大共鸣)' : (doubingHits.length === 2 ? ' (小共鸣)' : '')}`;
+        doubingValEl.className = doubingHits.length >= 3 ? 'font-bold text-amber-600' : (doubingHits.length === 2 ? 'font-bold text-amber-500' : 'font-bold text-slate-500');
+      }
+
+      if (resonanceData && resonanceData.tier > 0) {
+        if (iconEl) iconEl.textContent = resonanceData.icon;
+        if (titleEl) titleEl.textContent = resonanceData.title;
         if (hintEl) {
-          hintEl.textContent = '已满足全部星象插槽！全属性生效 ×1.2';
-          hintEl.className = 'text-[10px] text-emerald-600 font-bold';
+          hintEl.textContent = resonanceData.hint;
+          hintEl.className = 'text-[10px] text-slate-700 font-bold';
         }
-        if (boxEl) boxEl.className = 'p-2.5 rounded-lg bg-emerald-50 border border-emerald-300 text-xs font-mono-sci flex items-center justify-between';
+        if (boxEl) boxEl.className = `p-2.5 rounded-lg text-xs font-mono-sci flex items-center justify-between transition-all ${resonanceData.boxClass}`;
         if (pillEl) {
-          pillEl.textContent = 'x1.2';
-          pillEl.className = 'text-xs font-black font-mono-sci px-2 py-1 rounded bg-emerald-600 text-white shadow-xs';
+          pillEl.textContent = resonanceData.badge;
+          pillEl.className = `text-xs font-black font-mono-sci px-2 py-1 rounded transition-all ${resonanceData.pillClass}`;
         }
         if (rightTag) {
-          rightTag.textContent = '星象圆满 (x1.2)';
-          rightTag.className = 'text-[9.5px] px-2 py-0.5 rounded bg-emerald-600 text-white font-mono-sci font-bold';
+          rightTag.textContent = resonanceData.badge;
+          rightTag.className = `text-[9.5px] px-2 py-0.5 rounded font-mono-sci font-bold ${resonanceData.tier === 2 ? (resonanceData.group === 'doukui' ? 'bg-rose-600 text-white' : 'bg-amber-600 text-white') : 'bg-slate-800 text-white'}`;
         }
       } else {
         if (iconEl) iconEl.textContent = '○';
+        if (titleEl) titleEl.textContent = `散落星位 (已连通 ${hitStarsSet.size} 星)`;
         if (hintEl) {
-          const remain = totalConstellationSlots - hitStarsSet.size;
-          hintEl.textContent = `还差 ${remain} 处，全部满足后触发全属性 ×1.2`;
+          hintEl.textContent = '在【斗魁·杀伐】与【斗柄·基建】间取舍，点亮2~3星即可激活流派质变！';
           hintEl.className = 'text-[10px] text-slate-500';
         }
         if (boxEl) boxEl.className = 'p-2.5 rounded-lg bg-white border border-slate-200 text-xs font-mono-sci flex items-center justify-between';
         if (pillEl) {
-          pillEl.textContent = 'x1.0';
+          pillEl.textContent = '未共鸣';
           pillEl.className = 'text-xs font-black font-mono-sci px-2 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200';
         }
         if (rightTag) {

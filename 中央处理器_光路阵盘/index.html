@@ -607,17 +607,28 @@
             </span>
           </div>
 
-          <!-- 状态提示条 -->
-          <div id="constellationStatusBox" class="p-2.5 rounded-lg bg-white border border-slate-200 text-xs font-mono-sci flex items-center justify-between transition-all">
+          <!-- 流派取舍共鸣提示条 -->
+          <div id="constellationStatusBox" class="p-2.5 rounded-lg bg-white border border-slate-200 text-xs font-mono-sci flex items-center justify-between transition-all shadow-xs">
             <div class="flex items-center space-x-2">
               <span id="constellationIcon" class="text-base">○</span>
               <div>
-                <div class="font-bold text-slate-900" id="constellationTitle">星象插槽：0 / 7</div>
-                <div class="text-[10px] text-slate-500" id="constellationHint">全部满足后激活 ×1.2 倍全属性</div>
+                <div class="font-bold text-slate-900" id="constellationTitle">散落星芒（未成流派）</div>
+                <div class="text-[10px] text-slate-500" id="constellationHint">选择【斗魁·杀伐】或【斗柄·基建】，点亮2~3星即触发流派质变！</div>
               </div>
             </div>
             <div id="constellationMultPill" class="text-xs font-black font-mono-sci px-2 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">
-              x1.0
+              未共鸣
+            </div>
+          </div>
+          <!-- 斗魁/斗柄两系取舍进度指示条 -->
+          <div class="grid grid-cols-2 gap-1.5 pt-1 text-[10px] font-mono-sci">
+            <div id="constellationDoukuiBox" class="p-1.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between shadow-2xs">
+              <span class="text-rose-700 font-bold"><i class="fa-solid fa-khanda mr-1"></i>斗魁·杀伐</span>
+              <span id="constellationDoukuiVal" class="font-bold text-slate-600">0/3</span>
+            </div>
+            <div id="constellationDoubingBox" class="p-1.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between shadow-2xs">
+              <span class="text-amber-700 font-bold"><i class="fa-solid fa-industry mr-1"></i>斗柄·基建</span>
+              <span id="constellationDoubingVal" class="font-bold text-slate-600">0/3</span>
             </div>
           </div>
         </div>
@@ -3944,16 +3955,99 @@ function renderPalette() {
         }
       }
 
-      const totalConstellationSlots = (floorDef && floorDef.nodes) ? floorDef.nodes.length : 7;
-      const isConstellationAllSatisfied = hitFloorNodesSet.size >= totalConstellationSlots;
-      const constellationMultiplier = isConstellationAllSatisfied ? 2.2 : 1.0;
+      // ✦ 北斗流派取舍判定（斗魁组 vs 斗柄组 + 天权中枢）
+      const doukuiHits = ['dipper_1', 'dipper_2', 'dipper_3'].filter(id => hitFloorNodesSet.has(id));
+      const doubingHits = ['dipper_5', 'dipper_6', 'dipper_7'].filter(id => hitFloorNodesSet.has(id));
+      const hasTianquan = hitFloorNodesSet.has('dipper_4');
 
-      if (isConstellationAllSatisfied) {
-        logSteps.push(`👑 【${floorDef.name}·七星全满共鸣！】三大盘全部 ${totalConstellationSlots} 处星位点亮！每个星位节点均已享受 +120% 效果增幅！`);
+      let resonanceData = {
+        group: 'none',
+        tier: 0,
+        title: '散落星位（未激活流派共鸣）',
+        hint: '在【斗魁·杀伐】与【斗柄·基建】间取舍，点亮2~3星即可激活流派质变！',
+        badge: '未共鸣',
+        icon: '○',
+        pillClass: 'bg-slate-100 text-slate-600 border border-slate-200',
+        boxClass: 'bg-white border border-slate-200'
+      };
+
+      // 1. 斗魁大共鸣 (3星全亮，极致杀伐)
+      if (doukuiHits.length >= 3) {
+        resonanceData.group = 'doukui';
+        resonanceData.tier = 2;
+        resonanceData.title = '⚔️ 斗魁大共鸣 · 玄武剑煞';
+        resonanceData.hint = '斗魁三星齐聚！护体飞剑+2把 · 飞剑攻击+40% · 玩家气血+30% · 防御+30%';
+        resonanceData.badge = '玄武剑煞';
+        resonanceData.icon = '👑';
+        resonanceData.pillClass = 'bg-rose-600 text-white shadow-xs';
+        resonanceData.boxClass = 'bg-rose-50 border border-rose-300';
+        totalBuff.sword_funnel += 2;
+        totalBuff.atk += 40;
+        totalBuff.hp += 30;
+        totalBuff.def += 30;
+        logSteps.push(`👑 【斗魁大共鸣·玄武剑煞激活！】天枢、天璇、天玑三星齐聚！护体飞剑+2把，玩家攻击+40%，气血防御倍增！`);
+      } else if (doukuiHits.length === 2 && doubingHits.length < 2) {
+        // 斗魁小共鸣 (2星)
+        resonanceData.group = 'doukui';
+        resonanceData.tier = 1;
+        resonanceData.title = '⚔️ 斗魁小共鸣 · 杀伐御敌';
+        resonanceData.hint = '斗魁双星点亮！飞剑攻击+20% · 玩家防御+20%';
+        resonanceData.badge = '斗魁·2星';
+        resonanceData.icon = '⚔️';
+        resonanceData.pillClass = 'bg-rose-100 text-rose-800 border border-rose-300';
+        resonanceData.boxClass = 'bg-rose-50/60 border border-rose-200';
+        totalBuff.atk += 20;
+        totalBuff.def += 20;
+        logSteps.push(`⚔️ 【斗魁小共鸣激活】杀伐星位连通，飞剑攻击+20%，玩家防御+20%！`);
       }
 
+      // 2. 斗柄大共鸣 (3星全亮，极致基建)
+      if (doubingHits.length >= 3) {
+        resonanceData.group = 'doubing';
+        resonanceData.tier = 2;
+        resonanceData.title = '⚙️ 斗柄大共鸣 · 神工天巧';
+        resonanceData.hint = '斗柄三星贯通！全线能耗降低30% · 移动速度+20% · 制造与采矿翻倍提速！';
+        resonanceData.badge = '神工天巧';
+        resonanceData.icon = '⚡';
+        resonanceData.pillClass = 'bg-amber-600 text-white shadow-xs';
+        resonanceData.boxClass = 'bg-amber-50 border border-amber-300';
+        totalBuff.power_cut += 30;
+        totalBuff.speed += 20;
+        totalBuff.craft_speed += 40;
+        totalBuff.mining_speed += 40;
+        logSteps.push(`⚡ 【斗柄大共鸣·神工天巧激活！】玉衡、开阳、摇光三星贯通！全线能耗-30%，制造采矿大幅倍增！`);
+      } else if (doubingHits.length === 2 && doukuiHits.length < 2) {
+        // 斗柄小共鸣 (2星)
+        resonanceData.group = 'doubing';
+        resonanceData.tier = 1;
+        resonanceData.title = '⚙️ 斗柄小共鸣 · 天工开物';
+        resonanceData.hint = '斗柄双星点亮！制造提速+20% · 采矿提速+20%';
+        resonanceData.badge = '斗柄·2星';
+        resonanceData.icon = '⚙️';
+        resonanceData.pillClass = 'bg-amber-100 text-amber-800 border border-amber-300';
+        resonanceData.boxClass = 'bg-amber-50/60 border border-amber-200';
+        totalBuff.craft_speed += 20;
+        totalBuff.mining_speed += 20;
+        logSteps.push(`⚙️ 【斗柄小共鸣激活】工控星位连通，制造与采矿提速+20%！`);
+      }
+
+      // 3. 天权中枢转折加成
+      if (hasTianquan) {
+        if (resonanceData.group === 'doukui') {
+          totalBuff.crit += 15;
+          resonanceData.hint += ' · 兼得天权文曲暴击+15%';
+          logSteps.push(`✦ 【天权文曲星连通】贯通杀伐光路，额外提供暴击率 +15%！`);
+        } else if (resonanceData.group === 'doubing') {
+          totalBuff.belt_speed += 25;
+          resonanceData.hint += ' · 兼得天权文曲传送带+25%';
+          logSteps.push(`✦ 【天权文曲星连通】贯通工控网络，额外提供传送带输送 +25%！`);
+        }
+      }
+
+      const constellationMultiplier = resonanceData.tier === 2 ? 1.5 : (resonanceData.tier === 1 ? 1.2 : 1.0);
+
       renderFloorBase(true, hitFloorNodesSet);
-      updatePanels(chainNodes, totalBuff, constellationMultiplier, crossActivated, logSteps, hitFloorNodesSet, activeKeystones);
+      updatePanels(chainNodes, totalBuff, constellationMultiplier, crossActivated, logSteps, hitFloorNodesSet, activeKeystones, resonanceData, doukuiHits, doubingHits);
       updateCenterHubsDOM();
     }
 
@@ -4079,43 +4173,43 @@ function renderPalette() {
 
     // ✦ 北斗七星 3 种境界表现形式 (A表现 2/1/1 · B表现 3/2/2 · C表现 4/3/3)
     const dipper_A_nodes = [
-      { id: 'dipper_1', disc: 'combat',   num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe',    x: 390,  y: 424, bx: 265, by: 405, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram',  title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_2', disc: 'combat',   num: 'Ⅱ', name: '天璇·巨门', en: 'Merak',    x: 390,  y: 556, bx: 265, by: 545, color: '#0284c7', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress',  title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_3', disc: 'combat',   num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda',   x: 333,  y: 457, bx: 210, by: 445, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_4', disc: 'industry', num: 'Ⅳ', name: '天权·文曲', en: 'Megrez',   x: 947,  y: 397, bx: 963, by: 385, color: '#6366f1', bg: '#eef2ff', border: '#4f46e5', shape: 'hexagram',  title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_5', disc: 'industry', num: 'Ⅴ', name: '玉衡·廉贞', en: 'Alioth',   x: 890,  y: 364, bx: 765, by: 342, color: '#a855f7', bg: '#faf5ff', border: '#9333ea', shape: 'diamond',   title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_6', disc: 'support',  num: 'Ⅵ', name: '开阳·武曲', en: 'Mizar',    x: 1357, y: 297, bx: 1372, by: 292, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'sunburst',  title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_7', disc: 'support',  num: 'Ⅶ', name: '摇光·破军', en: 'Alkaid',   x: 1374, y: 233, bx: 1390, by: 215, color: '#0891b2', bg: '#ecfeff', border: '#0e7490', shape: 'trident',   title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' }
+      { id: 'dipper_1', disc: 'combat',   num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe',    x: 390,  y: 424, bx: 265, by: 405, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram',  title: '【斗魁】天枢·贪狼 · 飞剑伤害+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_2', disc: 'combat',   num: 'Ⅱ', name: '天璇·巨门', en: 'Merak',    x: 390,  y: 556, bx: 265, by: 545, color: '#0284c7', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress',  title: '【斗魁】天璇·巨门 · 玩家防御+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_3', disc: 'combat',   num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda',   x: 333,  y: 457, bx: 210, by: 445, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '【斗魁】天玑·禄存 · 玩家气血+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_4', disc: 'industry', num: 'Ⅳ', name: '天权·文曲', en: 'Megrez',   x: 947,  y: 397, bx: 963, by: 385, color: '#6366f1', bg: '#eef2ff', border: '#4f46e5', shape: 'hexagram',  title: '【天衡中枢】天权·文曲 · 中枢转折+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_5', disc: 'industry', num: 'Ⅴ', name: '玉衡·廉贞', en: 'Alioth',   x: 890,  y: 364, bx: 765, by: 342, color: '#a855f7', bg: '#faf5ff', border: '#9333ea', shape: 'diamond',   title: '【斗柄】玉衡·廉贞 · 制造提速+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_6', disc: 'support',  num: 'Ⅵ', name: '开阳·武曲', en: 'Mizar',    x: 1357, y: 297, bx: 1372, by: 292, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'sunburst',  title: '【斗柄】开阳·武曲 · 采矿提速+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_7', disc: 'support',  num: 'Ⅶ', name: '摇光·破军', en: 'Alkaid',   x: 1374, y: 233, bx: 1390, by: 215, color: '#0891b2', bg: '#ecfeff', border: '#0e7490', shape: 'trident',   title: '【斗柄】摇光·破军 · 移速背包+100%', desc: '节点效果 +120%' }
     ];
 
     const dipper_A_combat_nodes = [
-      { id: 'dipper_1', disc: 'combat',   num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe',    x: 390,  y: 424, bx: 265, by: 405, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram',  title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_2', disc: 'combat',   num: 'Ⅱ', name: '天璇·巨门', en: 'Merak',    x: 390,  y: 596, bx: 265, by: 585, color: '#0284c7', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress',  title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_3', disc: 'combat',   num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda',   x: 491,  y: 523, bx: 508, by: 510, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_4', disc: 'industry', num: 'Ⅳ', name: '天权·文曲', en: 'Megrez',   x: 947,  y: 397, bx: 963, by: 385, color: '#6366f1', bg: '#eef2ff', border: '#4f46e5', shape: 'hexagram',  title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_5', disc: 'industry', num: 'Ⅴ', name: '玉衡·廉贞', en: 'Alioth',   x: 890,  y: 364, bx: 765, by: 342, color: '#a855f7', bg: '#faf5ff', border: '#9333ea', shape: 'diamond',   title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_6', disc: 'support',  num: 'Ⅵ', name: '开阳·武曲', en: 'Mizar',    x: 1357, y: 297, bx: 1372, by: 292, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'sunburst',  title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_7', disc: 'support',  num: 'Ⅶ', name: '摇光·破军', en: 'Alkaid',   x: 1374, y: 233, bx: 1390, by: 215, color: '#0891b2', bg: '#ecfeff', border: '#0e7490', shape: 'trident',   title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' }
+      { id: 'dipper_1', disc: 'combat',   num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe',    x: 390,  y: 424, bx: 265, by: 405, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram',  title: '【斗魁】天枢·贪狼 · 飞剑伤害+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_2', disc: 'combat',   num: 'Ⅱ', name: '天璇·巨门', en: 'Merak',    x: 390,  y: 596, bx: 265, by: 585, color: '#0284c7', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress',  title: '【斗魁】天璇·巨门 · 玩家防御+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_3', disc: 'combat',   num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda',   x: 491,  y: 523, bx: 508, by: 510, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '【斗魁】天玑·禄存 · 玩家气血+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_4', disc: 'industry', num: 'Ⅳ', name: '天权·文曲', en: 'Megrez',   x: 947,  y: 397, bx: 963, by: 385, color: '#6366f1', bg: '#eef2ff', border: '#4f46e5', shape: 'hexagram',  title: '【天衡中枢】天权·文曲 · 中枢转折+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_5', disc: 'industry', num: 'Ⅴ', name: '玉衡·廉贞', en: 'Alioth',   x: 890,  y: 364, bx: 765, by: 342, color: '#a855f7', bg: '#faf5ff', border: '#9333ea', shape: 'diamond',   title: '【斗柄】玉衡·廉贞 · 制造提速+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_6', disc: 'support',  num: 'Ⅵ', name: '开阳·武曲', en: 'Mizar',    x: 1357, y: 297, bx: 1372, by: 292, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'sunburst',  title: '【斗柄】开阳·武曲 · 采矿提速+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_7', disc: 'support',  num: 'Ⅶ', name: '摇光·破军', en: 'Alkaid',   x: 1374, y: 233, bx: 1390, by: 215, color: '#0891b2', bg: '#ecfeff', border: '#0e7490', shape: 'trident',   title: '【斗柄】摇光·破军 · 移速背包+100%', desc: '节点效果 +120%' }
     ];
 
     const dipper_B_nodes = [
-      { id: 'dipper_1', disc: 'combat',   num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe',    x: 390,  y: 424, bx: 265, by: 405, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram',  title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_2', disc: 'combat',   num: 'Ⅱ', name: '天璇·巨门', en: 'Merak',    x: 390,  y: 596, bx: 265, by: 585, color: '#0284c7', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress',  title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_3', disc: 'combat',   num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda',   x: 491,  y: 523, bx: 508, by: 510, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_4', disc: 'industry', num: 'Ⅳ', name: '天权·文曲', en: 'Megrez',   x: 947,  y: 397, bx: 963, by: 385, color: '#6366f1', bg: '#eef2ff', border: '#4f46e5', shape: 'hexagram',  title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_5', disc: 'industry', num: 'Ⅴ', name: '玉衡·廉贞', en: 'Alioth',   x: 890,  y: 364, bx: 765, by: 342, color: '#a855f7', bg: '#faf5ff', border: '#9333ea', shape: 'diamond',   title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_6', disc: 'support',  num: 'Ⅵ', name: '开阳·武曲', en: 'Mizar',    x: 1357, y: 297, bx: 1372, by: 292, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'sunburst',  title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_7', disc: 'support',  num: 'Ⅶ', name: '摇光·破军', en: 'Alkaid',   x: 1374, y: 233, bx: 1390, by: 215, color: '#0891b2', bg: '#ecfeff', border: '#0e7490', shape: 'trident',   title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' }
+      { id: 'dipper_1', disc: 'combat',   num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe',    x: 390,  y: 424, bx: 265, by: 405, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram',  title: '【斗魁】天枢·贪狼 · 飞剑伤害+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_2', disc: 'combat',   num: 'Ⅱ', name: '天璇·巨门', en: 'Merak',    x: 390,  y: 596, bx: 265, by: 585, color: '#0284c7', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress',  title: '【斗魁】天璇·巨门 · 玩家防御+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_3', disc: 'combat',   num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda',   x: 491,  y: 523, bx: 508, by: 510, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '【斗魁】天玑·禄存 · 玩家气血+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_4', disc: 'industry', num: 'Ⅳ', name: '天权·文曲', en: 'Megrez',   x: 947,  y: 397, bx: 963, by: 385, color: '#6366f1', bg: '#eef2ff', border: '#4f46e5', shape: 'hexagram',  title: '【天衡中枢】天权·文曲 · 中枢转折+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_5', disc: 'industry', num: 'Ⅴ', name: '玉衡·廉贞', en: 'Alioth',   x: 890,  y: 364, bx: 765, by: 342, color: '#a855f7', bg: '#faf5ff', border: '#9333ea', shape: 'diamond',   title: '【斗柄】玉衡·廉贞 · 制造提速+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_6', disc: 'support',  num: 'Ⅵ', name: '开阳·武曲', en: 'Mizar',    x: 1357, y: 297, bx: 1372, by: 292, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'sunburst',  title: '【斗柄】开阳·武曲 · 采矿提速+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_7', disc: 'support',  num: 'Ⅶ', name: '摇光·破军', en: 'Alkaid',   x: 1374, y: 233, bx: 1390, by: 215, color: '#0891b2', bg: '#ecfeff', border: '#0e7490', shape: 'trident',   title: '【斗柄】摇光·破军 · 移速背包+100%', desc: '节点效果 +120%' }
     ];
 
     const dipper_C_nodes = [
-      { id: 'dipper_1', disc: 'combat',   num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe',    x: 390,  y: 424, bx: 265, by: 405, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram',  title: '攻击盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_2', disc: 'combat',   num: 'Ⅱ', name: '天璇·巨门', en: 'Merak',    x: 390,  y: 596, bx: 265, by: 585, color: '#0284c7', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress',  title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_3', disc: 'combat',   num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda',   x: 491,  y: 523, bx: 508, by: 510, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '攻击盘2环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_4', disc: 'industry', num: 'Ⅳ', name: '天权·文曲', en: 'Megrez',   x: 947,  y: 397, bx: 963, by: 385, color: '#6366f1', bg: '#eef2ff', border: '#4f46e5', shape: 'hexagram',  title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_5', disc: 'industry', num: 'Ⅴ', name: '玉衡·廉贞', en: 'Alioth',   x: 890,  y: 364, bx: 765, by: 342, color: '#a855f7', bg: '#faf5ff', border: '#9333ea', shape: 'diamond',   title: '工厂盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_6', disc: 'support',  num: 'Ⅵ', name: '开阳·武曲', en: 'Mizar',    x: 1357, y: 297, bx: 1372, by: 292, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'sunburst',  title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' },
-      { id: 'dipper_7', disc: 'support',  num: 'Ⅶ', name: '摇光·破军', en: 'Alkaid',   x: 1374, y: 233, bx: 1390, by: 215, color: '#0891b2', bg: '#ecfeff', border: '#0e7490', shape: 'trident',   title: '辅助盘1环 · 效果+120%', desc: '节点效果 +120%' }
+      { id: 'dipper_1', disc: 'combat',   num: 'Ⅰ', name: '天枢·贪狼', en: 'Dubhe',    x: 390,  y: 424, bx: 265, by: 405, color: '#ef4444', bg: '#fef2f2', border: '#dc2626', shape: 'octagram',  title: '【斗魁】天枢·贪狼 · 飞剑伤害+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_2', disc: 'combat',   num: 'Ⅱ', name: '天璇·巨门', en: 'Merak',    x: 390,  y: 596, bx: 265, by: 585, color: '#0284c7', bg: '#f0f9ff', border: '#0369a1', shape: 'fortress',  title: '【斗魁】天璇·巨门 · 玩家防御+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_3', disc: 'combat',   num: 'Ⅲ', name: '天玑·禄存', en: 'Phecda',   x: 491,  y: 523, bx: 508, by: 510, color: '#10b981', bg: '#ecfdf5', border: '#059669', shape: 'triquetra', title: '【斗魁】天玑·禄存 · 玩家气血+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_4', disc: 'industry', num: 'Ⅳ', name: '天权·文曲', en: 'Megrez',   x: 947,  y: 397, bx: 963, by: 385, color: '#6366f1', bg: '#eef2ff', border: '#4f46e5', shape: 'hexagram',  title: '【天衡中枢】天权·文曲 · 中枢转折+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_5', disc: 'industry', num: 'Ⅴ', name: '玉衡·廉贞', en: 'Alioth',   x: 890,  y: 364, bx: 765, by: 342, color: '#a855f7', bg: '#faf5ff', border: '#9333ea', shape: 'diamond',   title: '【斗柄】玉衡·廉贞 · 制造提速+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_6', disc: 'support',  num: 'Ⅵ', name: '开阳·武曲', en: 'Mizar',    x: 1357, y: 297, bx: 1372, by: 292, color: '#d97706', bg: '#fffbeb', border: '#b45309', shape: 'sunburst',  title: '【斗柄】开阳·武曲 · 采矿提速+100%', desc: '节点效果 +120%' },
+      { id: 'dipper_7', disc: 'support',  num: 'Ⅶ', name: '摇光·破军', en: 'Alkaid',   x: 1374, y: 233, bx: 1390, by: 215, color: '#0891b2', bg: '#ecfeff', border: '#0e7490', shape: 'trident',   title: '【斗柄】摇光·破军 · 移速背包+100%', desc: '节点效果 +120%' }
     ];
 
     const dipper_links = [
@@ -4441,52 +4535,61 @@ function renderPalette() {
     window.switchFloorShape = switchFloorShape;
 
 
-    function updatePanels(chainNodes, totalBuff, constellationMultiplier, isCrossActive, logSteps, hitStarsSet = new Set(), activeKeystones = []) {
+    function updatePanels(chainNodes, totalBuff, constellationMultiplier, isCrossActive, logSteps, hitStarsSet = new Set(), activeKeystones = [], resonanceData = null, doukuiHits = [], doubingHits = []) {
       const rightTag = document.getElementById('rightChainStatusTag');
       const countPill = document.getElementById('statActiveCountPill');
 
       if (countPill) countPill.textContent = `${chainNodes.length} 个构件生效`;
 
       const floorDef = FLOOR_SHAPE_DEFS[CURRENT_FLOOR_SHAPE] || FLOOR_SHAPE_DEFS.dipper;
-      const totalConstellationSlots = (floorDef && floorDef.nodes) ? floorDef.nodes.length : 7;
-      const isAllSatisfied = hitStarsSet.size >= totalConstellationSlots;
 
-      // 更新星象加成卡片
+      // 更新星象加成卡片（斗魁杀伐 vs 斗柄基建 流派取舍）
       const badgeEl = document.getElementById('constellationBadge');
       const titleEl = document.getElementById('constellationTitle');
       const hintEl = document.getElementById('constellationHint');
       const iconEl = document.getElementById('constellationIcon');
       const boxEl = document.getElementById('constellationStatusBox');
       const pillEl = document.getElementById('constellationMultPill');
+      const doukuiValEl = document.getElementById('constellationDoukuiVal');
+      const doubingValEl = document.getElementById('constellationDoubingVal');
 
-      if (badgeEl) badgeEl.textContent = `${floorDef.name} · ${floorDef.variantName ? floorDef.variantName.split("·")[0].trim() : "全阵"}`;
-      if (titleEl) titleEl.textContent = `星象插槽：${hitStarsSet.size} / ${totalConstellationSlots} (${floorDef.variantName ? floorDef.variantName.split("·")[0].trim() : "本阶"})`;
+      if (badgeEl) badgeEl.textContent = `${floorDef.name} · ${floorDef.variantName ? floorDef.variantName.split('·')[0].trim() : '全阵'}`;
 
-      if (isAllSatisfied) {
-        if (iconEl) iconEl.textContent = '👑';
+      if (doukuiValEl) {
+        doukuiValEl.textContent = `${doukuiHits.length} / 3${doukuiHits.length >= 3 ? ' (大共鸣)' : (doukuiHits.length === 2 ? ' (小共鸣)' : '')}`;
+        doukuiValEl.className = doukuiHits.length >= 3 ? 'font-bold text-rose-600' : (doukuiHits.length === 2 ? 'font-bold text-rose-500' : 'font-bold text-slate-500');
+      }
+      if (doubingValEl) {
+        doubingValEl.textContent = `${doubingHits.length} / 3${doubingHits.length >= 3 ? ' (大共鸣)' : (doubingHits.length === 2 ? ' (小共鸣)' : '')}`;
+        doubingValEl.className = doubingHits.length >= 3 ? 'font-bold text-amber-600' : (doubingHits.length === 2 ? 'font-bold text-amber-500' : 'font-bold text-slate-500');
+      }
+
+      if (resonanceData && resonanceData.tier > 0) {
+        if (iconEl) iconEl.textContent = resonanceData.icon;
+        if (titleEl) titleEl.textContent = resonanceData.title;
         if (hintEl) {
-          hintEl.textContent = '已满足全部星象插槽！全属性生效 ×1.2';
-          hintEl.className = 'text-[10px] text-emerald-600 font-bold';
+          hintEl.textContent = resonanceData.hint;
+          hintEl.className = 'text-[10px] text-slate-700 font-bold';
         }
-        if (boxEl) boxEl.className = 'p-2.5 rounded-lg bg-emerald-50 border border-emerald-300 text-xs font-mono-sci flex items-center justify-between';
+        if (boxEl) boxEl.className = `p-2.5 rounded-lg text-xs font-mono-sci flex items-center justify-between transition-all ${resonanceData.boxClass}`;
         if (pillEl) {
-          pillEl.textContent = 'x1.2';
-          pillEl.className = 'text-xs font-black font-mono-sci px-2 py-1 rounded bg-emerald-600 text-white shadow-xs';
+          pillEl.textContent = resonanceData.badge;
+          pillEl.className = `text-xs font-black font-mono-sci px-2 py-1 rounded transition-all ${resonanceData.pillClass}`;
         }
         if (rightTag) {
-          rightTag.textContent = '星象圆满 (x1.2)';
-          rightTag.className = 'text-[9.5px] px-2 py-0.5 rounded bg-emerald-600 text-white font-mono-sci font-bold';
+          rightTag.textContent = resonanceData.badge;
+          rightTag.className = `text-[9.5px] px-2 py-0.5 rounded font-mono-sci font-bold ${resonanceData.tier === 2 ? (resonanceData.group === 'doukui' ? 'bg-rose-600 text-white' : 'bg-amber-600 text-white') : 'bg-slate-800 text-white'}`;
         }
       } else {
         if (iconEl) iconEl.textContent = '○';
+        if (titleEl) titleEl.textContent = `散落星位 (已连通 ${hitStarsSet.size} 星)`;
         if (hintEl) {
-          const remain = totalConstellationSlots - hitStarsSet.size;
-          hintEl.textContent = `还差 ${remain} 处，全部满足后触发全属性 ×1.2`;
+          hintEl.textContent = '在【斗魁·杀伐】与【斗柄·基建】间取舍，点亮2~3星即可激活流派质变！';
           hintEl.className = 'text-[10px] text-slate-500';
         }
         if (boxEl) boxEl.className = 'p-2.5 rounded-lg bg-white border border-slate-200 text-xs font-mono-sci flex items-center justify-between';
         if (pillEl) {
-          pillEl.textContent = 'x1.0';
+          pillEl.textContent = '未共鸣';
           pillEl.className = 'text-xs font-black font-mono-sci px-2 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200';
         }
         if (rightTag) {
@@ -4560,21 +4663,17 @@ function renderPalette() {
         CURRENT_REALM = 'qi';
         SPEC_DISC = 'combat';
 
-        // 1. 🛡️ 辅助盘 基础1环 (6槽，R=66)：旋转 15.2° 对准始发源，点亮北斗第7星(摇光)、第6星(开阳)并射入辅助盘中心！
+        // 1. 🛡️ 辅助盘 基础1环 (6槽)：仅作桥梁，接收入射后直射入核，放空开阳基建星位！
         DISK_RINGS['support_1'].currentAngle = 15.2;
-        BOARD_SLOTS['support_1_1'].chip = 't0_speed_1';      // 踩中【Ⅶ 摇光】(+120%效果) ➔ 2
-        BOARD_SLOTS['support_1_2'].chip = 't0_atk_1';        // 踩中【Ⅵ 开阳】(+120%效果) ➔ 3
-        BOARD_SLOTS['support_1_3'].chip = 'chip_triangle_in'; // 3 ➔ 射入辅助盘中心！
+        BOARD_SLOTS['support_1_1'].chip = 'chip_triangle_in'; // 接收入射直接射入辅助核！
 
-        // 2. 将【辅助盘中心核】插入 ⚙️ 工厂盘【独立最外圈 · 北(上)外接槽 (dock_industry_0)】！
+        // 2. 将【辅助盘中心核】插入 ⚙️ 工厂盘【独立最外圈 · dock_industry_0】
         OUTER_DOCK_SLOTS['dock_industry_0'].coreChip = 'core_support';
         CENTER_CORE_STATE.support.detached = true;
         CENTER_CORE_STATE.support.placedAtDock = 'dock_industry_0';
 
-        // 工厂盘 基础1环 (6槽，R=66)：从第1槽(索引0，正北-90°)接收入射，点亮北斗第5星(玉衡)、第4星(天权)并射入工厂盘中心！
-        BOARD_SLOTS['industry_1_0'].chip = 't0_craft_1';     // 踩中【Ⅴ 玉衡】(+120%效果) ➔ 1
-        BOARD_SLOTS['industry_1_1'].chip = 't0_mine_2';      // 踩中【Ⅳ 天权】(+120%效果) ➔ 3
-        BOARD_SLOTS['industry_1_3'].chip = 'chip_triangle_in'; // 3 ➔ 射入工厂盘中心！
+        // 工厂盘仅作单跳中转，不踩玉衡与天权！
+        BOARD_SLOTS['industry_1_0'].chip = 'chip_triangle_in'; // 直射入工厂核！
 
         // 3. 将【工厂盘中心核】插入 ⚔️ 攻击盘【可旋转独立外圈 · 外圈射入槽 (dock_combat_0)】，并将独立外圈旋转 108° 对准 2环第4槽(18°)！
         DISK_RINGS['combat_dock'].currentAngle = 108;
@@ -4624,9 +4723,8 @@ function renderPalette() {
         CENTER_CORE_STATE.industry.detached = true;
         CENTER_CORE_STATE.industry.placedAtDock = 'dock_combat_0';
 
-        BOARD_SLOTS['combat_1_0'].chip = 't1_crit_3';        // 踩中【Ⅰ 天枢】暴击+15% ➔ 3
-        BOARD_SLOTS['combat_1_3'].chip = 't0_def_2';         // 踩中【Ⅱ 天璇】玩家防御+8% ➔ 5
-        BOARD_SLOTS['combat_1_5'].chip = 'chip_triangle_in'; // 踩中【Ⅲ 天玑】向心折射射入攻击盘中心！
+        // 攻击盘仅保留闭环底核，放空斗魁战力星位，换取全阵极致基建与采矿速度！
+        BOARD_SLOTS['combat_1_0'].chip = 'chip_triangle_in'; // 直入核心完成三盘闭环！
 
       } else if (type === 'act2_foundation_power') {
         // 🎬 第二幕：筑基期 · 稳电防兽潮救急流（主修⚙️工厂3环大盘 + 辅助2环 + 攻击2环，7/7北斗全亮，暴降能耗与污染）
@@ -4671,12 +4769,11 @@ function renderPalette() {
         CENTER_CORE_STATE.industry.detached = true;
         CENTER_CORE_STATE.industry.placedAtDock = 'dock_combat_0';
 
-        BOARD_SLOTS['combat_2_3'].chip = 't0_def_2';         // 踩中【Ⅲ 天玑】防御+18% ➔ 5
-        BOARD_SLOTS['combat_2_5'].chip = 't2_def_5';         // 踩中【Ⅱ 天璇】防御+44% ➔ 0
-        BOARD_SLOTS['combat_2_0'].chip = 'chip_triangle_in';
-
-        BOARD_SLOTS['combat_1_0'].chip = 't1_hp_3';          // 踩中【Ⅰ 天枢】气血+22% ➔ 3
-        BOARD_SLOTS['combat_1_3'].chip = 'chip_triangle_in';
+        // 筑基节能稳电：避开天璇杀伐星位，直通闭环，全阵算力倾注于工控节能！
+        BOARD_SLOTS['combat_2_3'].chip = 't2_atk_5';         // 避开天璇 ➔ 8
+        BOARD_SLOTS['combat_2_8'].chip = 't0_def_2';         // 8 ➔ 0
+        BOARD_SLOTS['combat_2_0'].chip = 'chip_triangle_in'; // 0 向心折射入1环！
+        BOARD_SLOTS['combat_1_0'].chip = 'chip_triangle_in'; // 直入核心完成三盘闭环！
 
       } else if (type === 'act3_core_factory') {
         // 🎬 第三幕（流派1）：金丹期 · 万倍吞吐暴铺流（主修⚙️工厂4环大盘 + 辅助3环 + 攻击3环，10环全通 + 7/7北斗全亮）
@@ -4727,15 +4824,8 @@ function renderPalette() {
         CENTER_CORE_STATE.industry.detached = true;
         CENTER_CORE_STATE.industry.placedAtDock = 'dock_combat_0';
 
-        BOARD_SLOTS['combat_3_0'].chip = 't2_burn_5';        // 燃烧+20% (+5格) ➔ 5
-        BOARD_SLOTS['combat_3_5'].chip = 'chip_triangle_in';
-
-        BOARD_SLOTS['combat_2_3'].chip = 't0_burn_2';        // 踩中【Ⅲ 天玑】燃烧+18% ➔ 5
-        BOARD_SLOTS['combat_2_5'].chip = 't2_belt_5';        // 踩中【Ⅱ 天璇】传送带+44% ➔ 0
-        BOARD_SLOTS['combat_2_0'].chip = 'chip_triangle_in';
-
-        BOARD_SLOTS['combat_1_0'].chip = 't1_craft_3';       // 踩中【Ⅰ 天枢】制造+22% ➔ 3
-        BOARD_SLOTS['combat_1_3'].chip = 'chip_triangle_in';
+        // 金丹极致产能：放空斗魁战力星位，光流直入内核闭环，将全阵算力倾注于工业极限超频！
+        BOARD_SLOTS['combat_3_0'].chip = 'chip_triangle_in';
 
       } else if (type === 'act3_core_swords') {
         // 🎬 第三幕（流派2）：金丹期 · 一人成军万剑流（主修⚔️攻击4环大盘 + 工厂3环 + 辅助3环，10环全通 + 万剑齐发）
@@ -4756,9 +4846,7 @@ function renderPalette() {
 
         DISK_RINGS['support_1'].currentAngle = 15.2;
         BOARD_SLOTS['support_1_4'].chip = 't1_speed_3';      // 移速+10% ➔ 1
-        BOARD_SLOTS['support_1_1'].chip = 't0_speed_1';      // 踩中【Ⅶ 摇光】移速+11% ➔ 2
-        BOARD_SLOTS['support_1_2'].chip = 't0_atk_1';        // 踩中【Ⅵ 开阳】攻击+11% ➔ 3
-        BOARD_SLOTS['support_1_3'].chip = 'chip_triangle_in';
+        BOARD_SLOTS['support_1_1'].chip = 'chip_triangle_in'; // 放空开阳工控位，直入核心快速导通杀伐！
 
         // 2. ⚙️ 工厂盘 3环 + 2环 + 1环
         OUTER_DOCK_SLOTS['dock_industry_0'].coreChip = 'core_support';
@@ -4772,9 +4860,8 @@ function renderPalette() {
         BOARD_SLOTS['industry_2_5'].chip = 't2_mine_5';      // 采矿+20% ➔ 0
         BOARD_SLOTS['industry_2_0'].chip = 'chip_triangle_in';
 
-        BOARD_SLOTS['industry_1_0'].chip = 't0_craft_1';     // 踩中【Ⅴ 玉衡】制造+11% ➔ 1
-        BOARD_SLOTS['industry_1_1'].chip = 't0_mine_2';      // 踩中【Ⅳ 天权】采矿+18% ➔ 3
-        BOARD_SLOTS['industry_1_3'].chip = 'chip_triangle_in';
+        // 工厂盘仅保留中枢转折，放空玉衡基建位，全力强化万剑杀伐！
+        BOARD_SLOTS['industry_1_0'].chip = 'chip_triangle_in';
 
         // 3. ⚔️ 攻击盘 4环 + 3环 + 2环 + 1环 (主修4环大盘：浮游飞剑+攻击+暴击+攻速满配)
         DISK_RINGS['combat_dock'].currentAngle = 90;

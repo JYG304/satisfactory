@@ -16,21 +16,17 @@
         CURRENT_REALM = 'qi';
         SPEC_DISC = 'combat';
 
-        // 1. 🛡️ 辅助盘 基础1环 (6槽，R=66)：旋转 15.2° 对准始发源，点亮北斗第7星(摇光)、第6星(开阳)并射入辅助盘中心！
+        // 1. 🛡️ 辅助盘 基础1环 (6槽)：仅作桥梁，接收入射后直射入核，放空开阳基建星位！
         DISK_RINGS['support_1'].currentAngle = 15.2;
-        BOARD_SLOTS['support_1_1'].chip = 't0_speed_1';      // 踩中【Ⅶ 摇光】(+120%效果) ➔ 2
-        BOARD_SLOTS['support_1_2'].chip = 't0_atk_1';        // 踩中【Ⅵ 开阳】(+120%效果) ➔ 3
-        BOARD_SLOTS['support_1_3'].chip = 'chip_triangle_in'; // 3 ➔ 射入辅助盘中心！
+        BOARD_SLOTS['support_1_1'].chip = 'chip_triangle_in'; // 接收入射直接射入辅助核！
 
-        // 2. 将【辅助盘中心核】插入 ⚙️ 工厂盘【独立最外圈 · 北(上)外接槽 (dock_industry_0)】！
+        // 2. 将【辅助盘中心核】插入 ⚙️ 工厂盘【独立最外圈 · dock_industry_0】
         OUTER_DOCK_SLOTS['dock_industry_0'].coreChip = 'core_support';
         CENTER_CORE_STATE.support.detached = true;
         CENTER_CORE_STATE.support.placedAtDock = 'dock_industry_0';
 
-        // 工厂盘 基础1环 (6槽，R=66)：从第1槽(索引0，正北-90°)接收入射，点亮北斗第5星(玉衡)、第4星(天权)并射入工厂盘中心！
-        BOARD_SLOTS['industry_1_0'].chip = 't0_craft_1';     // 踩中【Ⅴ 玉衡】(+120%效果) ➔ 1
-        BOARD_SLOTS['industry_1_1'].chip = 't0_mine_2';      // 踩中【Ⅳ 天权】(+120%效果) ➔ 3
-        BOARD_SLOTS['industry_1_3'].chip = 'chip_triangle_in'; // 3 ➔ 射入工厂盘中心！
+        // 工厂盘仅作单跳中转，不踩玉衡与天权！
+        BOARD_SLOTS['industry_1_0'].chip = 'chip_triangle_in'; // 直射入工厂核！
 
         // 3. 将【工厂盘中心核】插入 ⚔️ 攻击盘【可旋转独立外圈 · 外圈射入槽 (dock_combat_0)】，并将独立外圈旋转 108° 对准 2环第4槽(18°)！
         DISK_RINGS['combat_dock'].currentAngle = 108;
@@ -80,9 +76,8 @@
         CENTER_CORE_STATE.industry.detached = true;
         CENTER_CORE_STATE.industry.placedAtDock = 'dock_combat_0';
 
-        BOARD_SLOTS['combat_1_0'].chip = 't1_crit_3';        // 踩中【Ⅰ 天枢】暴击+15% ➔ 3
-        BOARD_SLOTS['combat_1_3'].chip = 't0_def_2';         // 踩中【Ⅱ 天璇】玩家防御+8% ➔ 5
-        BOARD_SLOTS['combat_1_5'].chip = 'chip_triangle_in'; // 踩中【Ⅲ 天玑】向心折射射入攻击盘中心！
+        // 攻击盘仅保留闭环底核，放空斗魁战力星位，换取全阵极致基建与采矿速度！
+        BOARD_SLOTS['combat_1_0'].chip = 'chip_triangle_in'; // 直入核心完成三盘闭环！
 
       } else if (type === 'act2_foundation_power') {
         // 🎬 第二幕：筑基期 · 稳电防兽潮救急流（主修⚙️工厂3环大盘 + 辅助2环 + 攻击2环，7/7北斗全亮，暴降能耗与污染）
@@ -127,12 +122,11 @@
         CENTER_CORE_STATE.industry.detached = true;
         CENTER_CORE_STATE.industry.placedAtDock = 'dock_combat_0';
 
-        BOARD_SLOTS['combat_2_3'].chip = 't0_def_2';         // 踩中【Ⅲ 天玑】防御+18% ➔ 5
-        BOARD_SLOTS['combat_2_5'].chip = 't2_def_5';         // 踩中【Ⅱ 天璇】防御+44% ➔ 0
-        BOARD_SLOTS['combat_2_0'].chip = 'chip_triangle_in';
-
-        BOARD_SLOTS['combat_1_0'].chip = 't1_hp_3';          // 踩中【Ⅰ 天枢】气血+22% ➔ 3
-        BOARD_SLOTS['combat_1_3'].chip = 'chip_triangle_in';
+        // 筑基节能稳电：避开天璇杀伐星位，直通闭环，全阵算力倾注于工控节能！
+        BOARD_SLOTS['combat_2_3'].chip = 't2_atk_5';         // 避开天璇 ➔ 8
+        BOARD_SLOTS['combat_2_8'].chip = 't0_def_2';         // 8 ➔ 0
+        BOARD_SLOTS['combat_2_0'].chip = 'chip_triangle_in'; // 0 向心折射入1环！
+        BOARD_SLOTS['combat_1_0'].chip = 'chip_triangle_in'; // 直入核心完成三盘闭环！
 
       } else if (type === 'act3_core_factory') {
         // 🎬 第三幕（流派1）：金丹期 · 万倍吞吐暴铺流（主修⚙️工厂4环大盘 + 辅助3环 + 攻击3环，10环全通 + 7/7北斗全亮）
@@ -183,15 +177,8 @@
         CENTER_CORE_STATE.industry.detached = true;
         CENTER_CORE_STATE.industry.placedAtDock = 'dock_combat_0';
 
-        BOARD_SLOTS['combat_3_0'].chip = 't2_burn_5';        // 燃烧+20% (+5格) ➔ 5
-        BOARD_SLOTS['combat_3_5'].chip = 'chip_triangle_in';
-
-        BOARD_SLOTS['combat_2_3'].chip = 't0_burn_2';        // 踩中【Ⅲ 天玑】燃烧+18% ➔ 5
-        BOARD_SLOTS['combat_2_5'].chip = 't2_belt_5';        // 踩中【Ⅱ 天璇】传送带+44% ➔ 0
-        BOARD_SLOTS['combat_2_0'].chip = 'chip_triangle_in';
-
-        BOARD_SLOTS['combat_1_0'].chip = 't1_craft_3';       // 踩中【Ⅰ 天枢】制造+22% ➔ 3
-        BOARD_SLOTS['combat_1_3'].chip = 'chip_triangle_in';
+        // 金丹极致产能：放空斗魁战力星位，光流直入内核闭环，将全阵算力倾注于工业极限超频！
+        BOARD_SLOTS['combat_3_0'].chip = 'chip_triangle_in';
 
       } else if (type === 'act3_core_swords') {
         // 🎬 第三幕（流派2）：金丹期 · 一人成军万剑流（主修⚔️攻击4环大盘 + 工厂3环 + 辅助3环，10环全通 + 万剑齐发）
@@ -212,9 +199,7 @@
 
         DISK_RINGS['support_1'].currentAngle = 15.2;
         BOARD_SLOTS['support_1_4'].chip = 't1_speed_3';      // 移速+10% ➔ 1
-        BOARD_SLOTS['support_1_1'].chip = 't0_speed_1';      // 踩中【Ⅶ 摇光】移速+11% ➔ 2
-        BOARD_SLOTS['support_1_2'].chip = 't0_atk_1';        // 踩中【Ⅵ 开阳】攻击+11% ➔ 3
-        BOARD_SLOTS['support_1_3'].chip = 'chip_triangle_in';
+        BOARD_SLOTS['support_1_1'].chip = 'chip_triangle_in'; // 放空开阳工控位，直入核心快速导通杀伐！
 
         // 2. ⚙️ 工厂盘 3环 + 2环 + 1环
         OUTER_DOCK_SLOTS['dock_industry_0'].coreChip = 'core_support';
@@ -228,9 +213,8 @@
         BOARD_SLOTS['industry_2_5'].chip = 't2_mine_5';      // 采矿+20% ➔ 0
         BOARD_SLOTS['industry_2_0'].chip = 'chip_triangle_in';
 
-        BOARD_SLOTS['industry_1_0'].chip = 't0_craft_1';     // 踩中【Ⅴ 玉衡】制造+11% ➔ 1
-        BOARD_SLOTS['industry_1_1'].chip = 't0_mine_2';      // 踩中【Ⅳ 天权】采矿+18% ➔ 3
-        BOARD_SLOTS['industry_1_3'].chip = 'chip_triangle_in';
+        // 工厂盘仅保留中枢转折，放空玉衡基建位，全力强化万剑杀伐！
+        BOARD_SLOTS['industry_1_0'].chip = 'chip_triangle_in';
 
         // 3. ⚔️ 攻击盘 4环 + 3环 + 2环 + 1环 (主修4环大盘：浮游飞剑+攻击+暴击+攻速满配)
         DISK_RINGS['combat_dock'].currentAngle = 90;
