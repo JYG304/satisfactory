@@ -562,6 +562,12 @@
             <marker id="arrowhead-blue" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
               <polygon points="0 0, 6 3, 0 6" fill="#00f0ff" />
             </marker>
+            <marker id="arrowhead-red" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <polygon points="0 0, 6 3, 0 6" fill="#f43f5e" />
+            </marker>
+            <marker id="arrowhead-yellow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <polygon points="0 0, 6 3, 0 6" fill="#f59e0b" />
+            </marker>
             <marker id="arrowhead-gold" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
               <polygon points="0 0, 6 3, 0 6" fill="#0284c7" />
             </marker>
@@ -621,16 +627,23 @@
             </div>
           </div>
           <!-- 斗魁/斗柄两系取舍进度指示条 -->
-          <div class="grid grid-cols-2 gap-1.5 pt-1 text-[10px] font-mono-sci">
-            <div id="constellationDoukuiBox" class="p-1.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between shadow-2xs">
-              <span class="text-rose-700 font-bold"><i class="fa-solid fa-khanda mr-1"></i>斗魁·杀伐</span>
-              <span id="constellationDoukuiVal" class="font-bold text-slate-600">0/3</span>
+          <div class="grid grid-cols-3 gap-1 pt-1 text-[10px] font-mono-sci">
+            <div id="constellationCombatBox" class="p-1.5 rounded-lg bg-rose-50/70 border border-rose-200 flex flex-col items-center justify-center text-center shadow-2xs">
+              <span class="text-rose-700 font-bold text-[9.5px]"><i class="fa-solid fa-shield-halved mr-0.5"></i>红盘·战斗</span>
+              <span id="constellationCombatVal" class="font-bold text-slate-800 text-[11px] mt-0.5">0/3</span>
             </div>
-            <div id="constellationDoubingBox" class="p-1.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between shadow-2xs">
-              <span class="text-amber-700 font-bold"><i class="fa-solid fa-industry mr-1"></i>斗柄·基建</span>
-              <span id="constellationDoubingVal" class="font-bold text-slate-600">0/3</span>
+            <div id="constellationIndustryBox" class="p-1.5 rounded-lg bg-amber-50/70 border border-amber-200 flex flex-col items-center justify-center text-center shadow-2xs">
+              <span class="text-amber-700 font-bold text-[9.5px]"><i class="fa-solid fa-gear mr-0.5"></i>黄盘·工厂</span>
+              <span id="constellationIndustryVal" class="font-bold text-slate-800 text-[11px] mt-0.5">0/2</span>
+            </div>
+            <div id="constellationSupportBox" class="p-1.5 rounded-lg bg-sky-50/70 border border-sky-200 flex flex-col items-center justify-center text-center shadow-2xs">
+              <span class="text-sky-700 font-bold text-[9.5px]"><i class="fa-solid fa-wind mr-0.5"></i>蓝盘·辅助</span>
+              <span id="constellationSupportVal" class="font-bold text-slate-800 text-[11px] mt-0.5">0/2</span>
             </div>
           </div>
+          <!-- 兼容旧脚本引用 -->
+          <span id="constellationDoukuiVal" class="hidden">0/3</span>
+          <span id="constellationDoubingVal" class="hidden">0/3</span>
         </div>
 
         <!-- 模块 2：阵盘总共加成了多少 (总加成明细清单，直白纯粹) -->
@@ -3781,6 +3794,8 @@ function renderPalette() {
       const floorDef = FLOOR_SHAPE_DEFS[CURRENT_FLOOR_SHAPE] || FLOOR_SHAPE_DEFS.dipper;
 
       function traceDiscOpticalPath(discKey, startRingId, startSlotIdx) {
+        const discColor = discKey === 'combat' ? 'red' : (discKey === 'industry' ? 'yellow' : 'blue');
+        const sparkColor = discKey === 'combat' ? '#f43f5e' : (discKey === 'industry' ? '#f59e0b' : '#00f0ff');
         let curRingId = startRingId;
         let curSlotIdx = startSlotIdx;
         const visited = new Set();
@@ -3830,22 +3845,22 @@ function renderPalette() {
               const tx = dMeta.cx + innerRingObj.radius * Math.cos(rad);
               const ty = dMeta.cy + innerRingObj.radius * Math.sin(rad);
 
-              drawBeamLine(svgBeams, curPos.x, curPos.y, tx, ty, 'rose', true);
+              drawBeamLine(svgBeams, curPos.x, curPos.y, tx, ty, discColor, true);
               const align = getClosestSlotToAngle(innerRingId, curPos.angleDeg, 22);
               if (!align.isAligned) {
                 drawImpactSpark(svgImpacts, tx, ty, '#f59e0b', 5);
                 logSteps.push(`⚡ [${dMeta.name}内环待对齐] 变轨三角向内折射，偏离 ${innerRingObj.name} 插槽 ${align.diff.toFixed(1)}°（请旋转内环对齐）`);
                 break;
               }
-              drawImpactSpark(svgImpacts, tx, ty, '#00f0ff', 5);
+              drawImpactSpark(svgImpacts, tx, ty, sparkColor, 5);
               logSteps.push(`▲ [${dMeta.name}向心折射] 进入 ${innerRingObj.name} 第 ${align.slotIndex + 1} 槽！`);
               curRingId = innerRingId;
               curSlotIdx = align.slotIndex;
               continue;
             } else {
               // 已在基础 1 环：直接射入盘体中心！激活中心极核可取下状态！（不再绘制多余的射出点）
-              drawBeamLine(svgBeams, curPos.x, curPos.y, dMeta.cx, dMeta.cy, 'rose', true);
-              drawImpactSpark(svgImpacts, dMeta.cx, dMeta.cy, '#fbbf24', 6.5);
+              drawBeamLine(svgBeams, curPos.x, curPos.y, dMeta.cx, dMeta.cy, discColor, true);
+              drawImpactSpark(svgImpacts, dMeta.cx, dMeta.cy, sparkColor, 6.5);
               CENTER_CORE_STATE[discKey].charged = true;
               if (discKey === 'combat') crossActivated = true;
 
@@ -3856,8 +3871,8 @@ function renderPalette() {
             const rMeta = DISK_RINGS[curRingId];
             const nextIdx = (curSlotIdx + spec.step) % rMeta.slotCount;
             const nextPos = getSlotWorldPos(curRingId, nextIdx);
-            drawRingArc(svgBeams, curRingId, curSlotIdx, nextIdx, 'cyan');
-            drawImpactSpark(svgImpacts, nextPos.x, nextPos.y, '#0f172a', 4.5);
+            drawRingArc(svgBeams, curRingId, curSlotIdx, nextIdx, discColor);
+            drawImpactSpark(svgImpacts, nextPos.x, nextPos.y, sparkColor, 4.5);
             logSteps.push(`➔ [${spec.name}] 在 ${rMeta.name} 步进 +${spec.step} ➔ 第 ${nextIdx + 1} 槽`);
             curSlotIdx = nextIdx;
           }
@@ -3879,7 +3894,7 @@ function renderPalette() {
       const apertureStatusEl = document.getElementById('c1ApertureStatusBadge');
 
       if (!supAlign.isAligned) {
-        drawBeamLine(svgBeams, rightEmitterPos.x, rightEmitterPos.y, supEntryX, supEntryY, 'cyan', true);
+        drawBeamLine(svgBeams, rightEmitterPos.x, rightEmitterPos.y, supEntryX, supEntryY, 'blue', true);
         drawImpactSpark(svgImpacts, supEntryX, supEntryY, '#f59e0b', 5);
         if (apertureStatusEl) {
           apertureStatusEl.setAttribute('fill', '#f59e0b');
@@ -3888,7 +3903,7 @@ function renderPalette() {
         logSteps.push(`⚡ [始发待找平] 激光射至辅助盘 (${supOutRing.name})，偏离插槽 ${supAlign.diff.toFixed(1)}°（请旋转辅助盘对齐）`);
       } else {
         const startSlotPos = getSlotWorldPos(supOutRingId, supAlign.slotIndex);
-        drawBeamLine(svgBeams, rightEmitterPos.x, rightEmitterPos.y, startSlotPos.x, startSlotPos.y, 'cyan', true);
+        drawBeamLine(svgBeams, rightEmitterPos.x, rightEmitterPos.y, startSlotPos.x, startSlotPos.y, 'blue', true);
         drawImpactSpark(svgImpacts, startSlotPos.x, startSlotPos.y, '#00f0ff', 5);
         if (apertureStatusEl) {
           apertureStatusEl.setAttribute('fill', '#00f0ff');
@@ -3920,7 +3935,7 @@ function renderPalette() {
           const dstDockPos = getOuterDockWorldPos(cState.placedAtDock);
 
           // 1. 绘制高亮跨盘导入线 (源盘中心 ➔ 目标盘可旋转独立外圈插槽)！
-          drawBeamLine(svgBeams, srcMeta.cx, srcMeta.cy, dstDockPos.x, dstDockPos.y, 'hyper', true);
+          drawBeamLine(svgBeams, srcMeta.cx, srcMeta.cy, dstDockPos.x, dstDockPos.y, srcKey === 'support' ? 'blue' : 'yellow', true);
           drawImpactSpark(svgImpacts, dstDockPos.x, dstDockPos.y, '#fbbf24', 6);
 
           // 累加中心导光核自身的属性加成
@@ -3942,12 +3957,12 @@ function renderPalette() {
 
           const align = getClosestSlotToAngle(dstOutRingId, dstDockPos.angleDeg, 22);
           if (!align.isAligned) {
-            drawBeamLine(svgBeams, dstDockPos.x, dstDockPos.y, ringEdgeX, ringEdgeY, 'rose', true);
+            drawBeamLine(svgBeams, dstDockPos.x, dstDockPos.y, ringEdgeX, ringEdgeY, dstKey === 'combat' ? 'red' : 'yellow', true);
             drawImpactSpark(svgImpacts, ringEdgeX, ringEdgeY, '#f59e0b', 5);
             logSteps.push(`🚀 [导入线已连上] ${srcMeta.name} ➔ ${dstMeta.name}【${targetDock.label}】，可旋转独立外圈或基础环使之对齐！`);
           } else {
             const entrySlotPos = getSlotWorldPos(dstOutRingId, align.slotIndex);
-            drawBeamLine(svgBeams, dstDockPos.x, dstDockPos.y, entrySlotPos.x, entrySlotPos.y, 'rose', true);
+            drawBeamLine(svgBeams, dstDockPos.x, dstDockPos.y, entrySlotPos.x, entrySlotPos.y, dstKey === 'combat' ? 'red' : 'yellow', true);
             drawImpactSpark(svgImpacts, entrySlotPos.x, entrySlotPos.y, '#00f0ff', 5.5);
             logSteps.push(`🚀 【跨盘导入线导通！】${srcMeta.name}中心 ➔ ${dstMeta.name}【${targetDock.label}】➔ 射入${dstOutRing.name}第 ${align.slotIndex + 1} 槽！`);
             traceDiscOpticalPath(dstKey, dstOutRingId, align.slotIndex);
@@ -3963,8 +3978,8 @@ function renderPalette() {
       let resonanceData = {
         group: 'none',
         tier: 0,
-        title: '散落星位（未激活流派共鸣）',
-        hint: '在【斗魁·杀伐】与【斗柄·基建】间取舍，点亮2~3星即可激活流派质变！',
+        title: '散落星位（未激活盘系共鸣）',
+        hint: '主选【红色盘·战斗】或【黄色盘·工控】，同色星位点亮2~3星即触发大共鸣！',
         badge: '未共鸣',
         icon: '○',
         pillClass: 'bg-slate-100 text-slate-600 border border-slate-200',
@@ -3975,9 +3990,9 @@ function renderPalette() {
       if (doukuiHits.length >= 3) {
         resonanceData.group = 'doukui';
         resonanceData.tier = 2;
-        resonanceData.title = '⚔️ 斗魁大共鸣 · 玄武剑煞';
-        resonanceData.hint = '斗魁三星齐聚！护体飞剑+2把 · 飞剑攻击+40% · 玩家气血+30% · 防御+30%';
-        resonanceData.badge = '玄武剑煞';
+        resonanceData.title = '⚔️ 红色战斗大共鸣 · 万剑齐发';
+        resonanceData.hint = '红色盘三星齐亮！护体飞剑+2把 · 玩家攻击+40% · 玩家防御+30% · 气血+30%';
+        resonanceData.badge = '红色·万剑煞';
         resonanceData.icon = '👑';
         resonanceData.pillClass = 'bg-rose-600 text-white shadow-xs';
         resonanceData.boxClass = 'bg-rose-50 border border-rose-300';
@@ -3985,14 +4000,14 @@ function renderPalette() {
         totalBuff.atk += 40;
         totalBuff.hp += 30;
         totalBuff.def += 30;
-        logSteps.push(`👑 【斗魁大共鸣·玄武剑煞激活！】天枢、天璇、天玑三星齐聚！护体飞剑+2把，玩家攻击+40%，气血防御倍增！`);
+        logSteps.push(`👑 【红色战斗大共鸣激活！】攻击盘三星齐亮！护体飞剑+2把，玩家攻击+40%，气血防御倍增！`);
       } else if (doukuiHits.length === 2 && doubingHits.length < 2) {
         // 斗魁小共鸣 (2星)
         resonanceData.group = 'doukui';
         resonanceData.tier = 1;
-        resonanceData.title = '⚔️ 斗魁小共鸣 · 杀伐御敌';
-        resonanceData.hint = '斗魁双星点亮！飞剑攻击+20% · 玩家防御+20%';
-        resonanceData.badge = '斗魁·2星';
+        resonanceData.title = '⚔️ 红色战斗小共鸣 · 战力强化';
+        resonanceData.hint = '红色盘双星点亮！飞剑攻击+20% · 玩家防御+20%';
+        resonanceData.badge = '红盘·2星';
         resonanceData.icon = '⚔️';
         resonanceData.pillClass = 'bg-rose-100 text-rose-800 border border-rose-300';
         resonanceData.boxClass = 'bg-rose-50/60 border border-rose-200';
@@ -4005,9 +4020,9 @@ function renderPalette() {
       if (doubingHits.length >= 3) {
         resonanceData.group = 'doubing';
         resonanceData.tier = 2;
-        resonanceData.title = '⚙️ 斗柄大共鸣 · 神工天巧';
-        resonanceData.hint = '斗柄三星贯通！全线能耗降低30% · 移动速度+20% · 制造与采矿翻倍提速！';
-        resonanceData.badge = '神工天巧';
+        resonanceData.title = '⚙️ 黄色工控大共鸣 · 极速爆产';
+        resonanceData.hint = '黄色盘三星齐亮！全线能耗降低30% · 移动速度+20% · 制造与采矿翻倍提速！';
+        resonanceData.badge = '黄色·极速产';
         resonanceData.icon = '⚡';
         resonanceData.pillClass = 'bg-amber-600 text-white shadow-xs';
         resonanceData.boxClass = 'bg-amber-50 border border-amber-300';
@@ -4015,14 +4030,14 @@ function renderPalette() {
         totalBuff.speed += 20;
         totalBuff.craft_speed += 40;
         totalBuff.mining_speed += 40;
-        logSteps.push(`⚡ 【斗柄大共鸣·神工天巧激活！】玉衡、开阳、摇光三星贯通！全线能耗-30%，制造采矿大幅倍增！`);
+        logSteps.push(`⚡ 【黄色工控大共鸣激活！】工厂与辅助星位贯通！全线能耗-30%，制造采矿大幅倍增！`);
       } else if (doubingHits.length === 2 && doukuiHits.length < 2) {
         // 斗柄小共鸣 (2星)
         resonanceData.group = 'doubing';
         resonanceData.tier = 1;
-        resonanceData.title = '⚙️ 斗柄小共鸣 · 天工开物';
-        resonanceData.hint = '斗柄双星点亮！制造提速+20% · 采矿提速+20%';
-        resonanceData.badge = '斗柄·2星';
+        resonanceData.title = '⚙️ 黄色工控小共鸣 · 工业提速';
+        resonanceData.hint = '黄色盘双星点亮！制造提速+20% · 采矿提速+20%';
+        resonanceData.badge = '黄盘·2星';
         resonanceData.icon = '⚙️';
         resonanceData.pillClass = 'bg-amber-100 text-amber-800 border border-amber-300';
         resonanceData.boxClass = 'bg-amber-50/60 border border-amber-200';
@@ -4054,60 +4069,56 @@ function renderPalette() {
     /* =========================================================================
        8. SVG 精密工程绘制辅助
        ========================================================================= */
-    function drawBeamLine(svgGroup, x1, y1, x2, y2, colorType = 'cyan', showArrow = true) {
-      // 底层细光晕
+    function drawBeamLine(svgGroup, x1, y1, x2, y2, colorType = 'blue', showArrow = true) {
+      // 依盘色分流：红盘用红线，黄盘用黄线，蓝盘用蓝线
+      const isRed = colorType === 'red' || colorType === 'rose';
+      const isYellow = colorType === 'yellow' || colorType === 'gold' || colorType === 'slingshot';
+      
+      const glowColor = isRed ? '#f43f5e' : (isYellow ? '#facc15' : '#00f0ff');
+      const coreColor = isRed ? '#e11d48' : (isYellow ? '#d97706' : '#0284c7');
+      const arrowId = isRed ? 'arrowhead-red' : (isYellow ? 'arrowhead-yellow' : 'arrowhead-blue');
+
+      // 底层高亮光晕
       const bloomLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
       bloomLine.setAttribute('x1', x1);
       bloomLine.setAttribute('y1', y1);
       bloomLine.setAttribute('x2', x2);
-      bloomLine.setAttribute('y2', y2);
-      bloomLine.setAttribute('stroke-width', '3');
-      bloomLine.setAttribute('opacity', '0.25');
+      bloomLine.setAttribute('y2', x2 === x1 && y2 === y1 ? y2 + 0.1 : y2);
+      bloomLine.setAttribute('stroke', glowColor);
+      bloomLine.setAttribute('stroke-width', '4.5');
+      bloomLine.setAttribute('stroke-linecap', 'round');
+      bloomLine.setAttribute('opacity', '0.65');
+      bloomLine.setAttribute('style', 'filter: drop-shadow(0 0 6px ' + glowColor + ');');
 
-      // 顶层实体工程墨线
+      // 顶层实体能量光束
       const coreLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
       coreLine.setAttribute('x1', x1);
       coreLine.setAttribute('y1', y1);
       coreLine.setAttribute('x2', x2);
       coreLine.setAttribute('y2', y2);
-      coreLine.setAttribute('stroke-width', '1.6');
-
-      if (colorType === 'hyper') {
-        bloomLine.setAttribute('stroke', '#00f0ff');
-        bloomLine.setAttribute('stroke-width', '6');
-        bloomLine.setAttribute('opacity', '0.6');
-        bloomLine.setAttribute('filter', 'url(#beamGlow)');
-        coreLine.setAttribute('stroke', '#0284c7');
-        coreLine.setAttribute('stroke-width', '2.8');
-        coreLine.setAttribute('stroke-dasharray', '8 4');
-        if (showArrow) coreLine.setAttribute('marker-end', 'url(#arrowhead-blue)');
-      } else if (colorType === 'slingshot') {
-        bloomLine.setAttribute('stroke', '#f59e0b');
-        bloomLine.setAttribute('stroke-width', '5');
-        bloomLine.setAttribute('opacity', '0.5');
-        coreLine.setAttribute('stroke', '#d97706');
-        coreLine.setAttribute('stroke-width', '2.5');
-        coreLine.setAttribute('stroke-dasharray', '6 3');
-        if (showArrow) coreLine.setAttribute('marker-end', 'url(#arrowhead)');
-      } else if (colorType === 'gold') {
-        bloomLine.setAttribute('stroke', '#0f172a');
-        coreLine.setAttribute('stroke', '#0f172a');
-        if (showArrow) coreLine.setAttribute('marker-end', 'url(#arrowhead)');
-      } else if (colorType === 'rose') {
-        bloomLine.setAttribute('stroke', '#e11d48');
-        coreLine.setAttribute('stroke', '#be123c');
-        if (showArrow) coreLine.setAttribute('marker-end', 'url(#arrowhead-blue)');
-      } else {
-        bloomLine.setAttribute('stroke', '#0284c7');
-        coreLine.setAttribute('stroke', '#0284c7');
-        if (showArrow) coreLine.setAttribute('marker-end', 'url(#arrowhead-blue)');
-      }
+      coreLine.setAttribute('stroke', coreColor);
+      coreLine.setAttribute('stroke-width', '2.2');
+      coreLine.setAttribute('stroke-linecap', 'round');
+      coreLine.setAttribute('stroke-dasharray', '8 4');
+      if (showArrow) coreLine.setAttribute('marker-end', 'url(#' + arrowId + ')');
 
       svgGroup.appendChild(bloomLine);
       svgGroup.appendChild(coreLine);
     }
 
-    function drawRingArc(svgGroup, ringId, fromSlot, toSlot, colorType = 'cyan') {
+    function drawImpactSpark(svgGroup, x, y, color = '#0f172a', r = 4.5) {
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', x);
+      circle.setAttribute('cy', y);
+      circle.setAttribute('r', r);
+      circle.setAttribute('fill', color || '#0f172a');
+      circle.setAttribute('stroke', '#ffffff');
+      circle.setAttribute('stroke-width', '1.8');
+      circle.setAttribute('style', 'filter: drop-shadow(0 0 4px ' + (color || '#00f0ff') + ');');
+      svgGroup.appendChild(circle);
+    }
+
+    function drawRingArc(svgGroup, ringId, fromSlot, toSlot, colorType = 'blue') {
       const ring = DISK_RINGS[ringId];
       if (!ring) return;
       const startPos = getSlotWorldPos(ringId, fromSlot);
@@ -4116,54 +4127,74 @@ function renderPalette() {
       const slotStep = (toSlot - fromSlot + ring.slotCount) % ring.slotCount;
       const arcDeg = slotStep * (360 / ring.slotCount);
       const largeArc = arcDeg > 180 ? 1 : 0;
+      const pathData = 'M ' + startPos.x + ' ' + startPos.y + ' A ' + ring.radius + ' ' + ring.radius + ' 0 ' + largeArc + ' 1 ' + endPos.x + ' ' + endPos.y;
 
-      const pathData = `M ${startPos.x} ${startPos.y} A ${ring.radius} ${ring.radius} 0 ${largeArc} 1 ${endPos.x} ${endPos.y}`;
+      // 依盘色分流：红盘用红线，黄盘用黄线，蓝盘用蓝线
+      const isRed = colorType === 'red' || colorType === 'rose' || (ringId && ringId.startsWith('combat'));
+      const isYellow = colorType === 'yellow' || colorType === 'gold' || (ringId && ringId.startsWith('industry'));
+      
+      const glowColor = isRed ? '#f43f5e' : (isYellow ? '#facc15' : '#00f0ff');
+      const coreColor = isRed ? '#e11d48' : (isYellow ? '#d97706' : '#0284c7');
+      const arrowId = isRed ? 'arrowhead-red' : (isYellow ? 'arrowhead-yellow' : 'arrowhead-blue');
+      const badgeBg = isRed ? '#ffe4e6' : (isYellow ? '#fef3c7' : '#e0f2fe');
+      const badgeText = isRed ? '#9f1239' : (isYellow ? '#92400e' : '#0369a1');
+      const badgeBorder = isRed ? '#f43f5e' : (isYellow ? '#f59e0b' : '#0284c7');
 
-      // ✦ 1. 高亮外层耀目碧青光晕 (极强辨识度，彻底消除发黑清淡感) ✦
+      // 1. 高亮外层耀目光晕 (红盘红光，黄盘黄光，蓝盘蓝光)
       const glowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       glowPath.setAttribute('d', pathData);
       glowPath.setAttribute('fill', 'none');
-      glowPath.setAttribute('stroke', '#00f0ff');
+      glowPath.setAttribute('stroke', glowColor);
       glowPath.setAttribute('stroke-width', '4.5');
       glowPath.setAttribute('stroke-linecap', 'round');
-      glowPath.setAttribute('opacity', '0.85');
-      glowPath.setAttribute('style', 'filter: drop-shadow(0 0 6px #00f0ff);');
+      glowPath.setAttribute('opacity', '0.75');
+      glowPath.setAttribute('style', 'filter: drop-shadow(0 0 6px ' + glowColor + ');');
       svgGroup.appendChild(glowPath);
 
-      // ✦ 2. 内层高能量核心光束 (炽青能量动效) ✦
+      // 2. 内层高能量核心光束
       const corePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       corePath.setAttribute('d', pathData);
       corePath.setAttribute('fill', 'none');
-      corePath.setAttribute('stroke', '#0284c7');
+      corePath.setAttribute('stroke', coreColor);
       corePath.setAttribute('stroke-width', '2.2');
       corePath.setAttribute('stroke-linecap', 'round');
       corePath.setAttribute('stroke-dasharray', '8 4');
-      corePath.setAttribute('marker-end', 'url(#arrowhead-blue)');
+      corePath.setAttribute('marker-end', 'url(#' + arrowId + ')');
       svgGroup.appendChild(corePath);
 
-      // ✦ 3. 步数轨迹浮动气泡 (+N 步数醒目标识，让玩家一眼看懂跳了几格) ✦
+      // 3. 步数轨迹浮动气泡
       const startDeg = ((-90 + fromSlot * (360 / ring.slotCount) + ring.currentAngle + 360) % 360);
       const midDeg = (startDeg + arcDeg / 2) * Math.PI / 180;
       const midX = ring.cx + ring.radius * Math.cos(midDeg);
       const midY = ring.cy + ring.radius * Math.sin(midDeg);
 
       const badgeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      badgeGroup.innerHTML = `
-        <circle cx="${midX}" cy="${midY}" r="7.5" fill="#020617" stroke="#00f0ff" stroke-width="1.5" />
-        <text x="${midX}" y="${midY + 3}" font-family="'Share Tech Mono', monospace" font-size="8" font-weight="black" fill="#00f0ff" text-anchor="middle">+${slotStep}</text>
-      `;
+      badgeGroup.setAttribute('transform', 'translate(' + midX + ', ' + midY + ')');
+
+      const badgeBgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      badgeBgRect.setAttribute('x', '-11');
+      badgeBgRect.setAttribute('y', '-7');
+      badgeBgRect.setAttribute('width', '22');
+      badgeBgRect.setAttribute('height', '14');
+      badgeBgRect.setAttribute('rx', '4');
+      badgeBgRect.setAttribute('fill', badgeBg);
+      badgeBgRect.setAttribute('stroke', badgeBorder);
+      badgeBgRect.setAttribute('stroke-width', '1');
+      badgeBgRect.setAttribute('opacity', '0.95');
+
+      const badgeTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      badgeTxt.setAttribute('x', '0');
+      badgeTxt.setAttribute('y', '3');
+      badgeTxt.setAttribute('text-anchor', 'middle');
+      badgeTxt.setAttribute('fill', badgeText);
+      badgeTxt.setAttribute('font-size', '9px');
+      badgeTxt.setAttribute('font-weight', 'bold');
+      badgeTxt.setAttribute('font-family', 'ui-monospace, monospace');
+      badgeTxt.textContent = '+' + slotStep;
+
+      badgeGroup.appendChild(badgeBgRect);
+      badgeGroup.appendChild(badgeTxt);
       svgGroup.appendChild(badgeGroup);
-    }
-    
-    function drawImpactSpark(svgGroup, x, y, color = '#0f172a', r = 4.5) {
-      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      circle.setAttribute('cx', x);
-      circle.setAttribute('cy', y);
-      circle.setAttribute('r', r);
-      circle.setAttribute('fill', '#0f172a');
-      circle.setAttribute('stroke', '#ffffff');
-      circle.setAttribute('stroke-width', '1.8');
-      svgGroup.appendChild(circle);
     }
 
         /* =========================================================================
@@ -4399,11 +4430,20 @@ function renderPalette() {
       function renderStarGlyph(node, isAligned) {
         const x = node.x;
         const y = node.y;
-        const goldMain = isAligned ? '#fbbf24' : '#f59e0b';
-        const goldBright = isAligned ? '#fef08a' : '#fde68a';
-        const darkBase = '#0f172a';
-        const outerHaloR = isAligned ? 30 : 25;
-        const outerHaloOpacity = isAligned ? '0.22' : '0.10';
+
+        // 依盘色分流艺术表现：红盘用赤红朱砂玄铁，黄盘用琥珀铜金，蓝盘用天蓝玄晶灵玉！
+        const isRed = node.disc === 'combat';
+        const isYellow = node.disc === 'industry';
+        
+        const mainColor = isRed 
+          ? (isAligned ? '#ef4444' : '#f87171')
+          : (isYellow ? (isAligned ? '#f59e0b' : '#fbbf24') : (isAligned ? '#0ea5e9' : '#38bdf8'));
+          
+        const brightColor = isRed ? '#fee2e2' : (isYellow ? '#fef3c7' : '#e0f2fe');
+        const darkBase = isRed ? '#450a0a' : (isYellow ? '#451a03' : '#082f49');
+        const haloColor = isRed ? '#f43f5e' : (isYellow ? '#f59e0b' : '#00f0ff');
+        const outerHaloR = isAligned ? 32 : 26;
+        const outerHaloOpacity = isAligned ? '0.35' : '0.15';
 
         // 四方主星芒尖角 (外伸至 r=29px，芯片半径仅16px，保证100%从芯片四周外露！)
         const mainStarPoints = `
@@ -4421,24 +4461,23 @@ function renderPalette() {
         `;
 
         return `
-          <!-- 1. 外围柔和金辉光晕 -->
-          <circle cx="${x}" cy="${y}" r="${outerHaloR}" fill="${goldMain}" fill-opacity="${outerHaloOpacity}" />
-          <!-- 2. 外露四角与八角鎏金星芒托架 (超出芯片边缘13px，绝不被芯片遮挡) -->
+          <!-- 1. 外围对应盘色流光光晕 (红盘红光 / 黄盘黄光 / 蓝盘蓝光) -->
+          <circle cx="${x}" cy="${y}" r="${outerHaloR}" fill="${haloColor}" fill-opacity="${outerHaloOpacity}" style="filter: drop-shadow(0 0 6px ${haloColor});" />
+          <!-- 2. 外露四角与八角星芒托架 (超出芯片边缘13px，绝不被芯片遮挡) -->
           <polygon points="${x},${y - 29} ${x + 6},${y - 15} ${x + 29},${y} ${x + 6},${y + 15} ${x},${y + 29} ${x - 6},${y + 15} ${x - 29},${y} ${x - 6},${y - 15}"
-                   fill="${goldMain}" stroke="${darkBase}" stroke-width="1.4" opacity="${isAligned ? '1' : '0.88'}" />
+                   fill="${mainColor}" stroke="${darkBase}" stroke-width="1.4" opacity="${isAligned ? '1' : '0.88'}" />
           <polygon points="${x + 19},${y - 19} ${x + 6},${y - 13} ${x + 19},${y + 19} ${x + 13},${y + 6} ${x - 19},${y + 19} ${x - 6},${y + 13} ${x - 19},${y - 19} ${x - 13},${y - 6}"
-                   fill="${darkBase}" stroke="${goldMain}" stroke-width="1.2" opacity="0.92" />
-          <!-- 3. 黑金罗盘外环 (r=21px，环绕在 r=16px 的芯片外围形成一圈黑金星环) -->
+                   fill="${darkBase}" stroke="${mainColor}" stroke-width="1.2" opacity="0.92" />
+          <!-- 3. 黑金罗盘外环 (r=21px，环绕在 r=16px 的芯片外围形成一圈对应盘色的星环) -->
           <circle cx="${x}" cy="${y}" r="21" fill="${darkBase}" fill-opacity="${isAligned ? '0.95' : '0.88'}"
-                  stroke="${goldMain}" stroke-width="${isAligned ? '2.2' : '1.6'}" />
-          <circle cx="${x}" cy="${y}" r="18" fill="none" stroke="${goldBright}" stroke-width="0.9" stroke-dasharray="3 2" opacity="${isAligned ? '0.95' : '0.65'}" />
-          <!-- 4. 底座中心星印 (未放芯片时清晰显示金色星核与序号；放上芯片后位于芯片正下方) -->
-          <circle cx="${x}" cy="${y}" r="9" fill="${isAligned ? goldMain : '#1e293b'}" stroke="${goldMain}" stroke-width="1.3" />
-          <text x="${x}" y="${y + 3.5}" text-anchor="middle" font-family="'Share Tech Mono', monospace" font-weight="900" font-size="9.5" fill="${isAligned ? darkBase : goldBright}">★</text>
+                  stroke="${mainColor}" stroke-width="${isAligned ? '2.2' : '1.6'}" />
+          <circle cx="${x}" cy="${y}" r="18" fill="none" stroke="${brightColor}" stroke-width="0.9" stroke-dasharray="3 2" opacity="${isAligned ? '0.95' : '0.65'}" />
+          <!-- 4. 底座中心星印 (未放芯片时清晰显示星核与序号；放上芯片后位于芯片正下方) -->
+          <circle cx="${x}" cy="${y}" r="9" fill="${isAligned ? mainColor : '#1e293b'}" stroke="${mainColor}" stroke-width="1.3" />
+          <text x="${x}" y="${y + 3.5}" text-anchor="middle" font-family="'Share Tech Mono', monospace" font-weight="900" font-size="9.5" fill="${isAligned ? darkBase : brightColor}">★</text>
         `;
       }
 
-      // 先判定哪些星位当前有芯片重合
       const alignedMap = {};
       const nodeMap = {};
       if (shapeDef.nodes) {
@@ -4552,17 +4591,31 @@ function renderPalette() {
       const pillEl = document.getElementById('constellationMultPill');
       const doukuiValEl = document.getElementById('constellationDoukuiVal');
       const doubingValEl = document.getElementById('constellationDoubingVal');
+      const combatValEl = document.getElementById('constellationCombatVal');
+      const industryValEl = document.getElementById('constellationIndustryVal');
+      const supportValEl = document.getElementById('constellationSupportVal');
 
       if (badgeEl) badgeEl.textContent = `${floorDef.name} · ${floorDef.variantName ? floorDef.variantName.split('·')[0].trim() : '全阵'}`;
 
-      if (doukuiValEl) {
-        doukuiValEl.textContent = `${doukuiHits.length} / 3${doukuiHits.length >= 3 ? ' (大共鸣)' : (doukuiHits.length === 2 ? ' (小共鸣)' : '')}`;
-        doukuiValEl.className = doukuiHits.length >= 3 ? 'font-bold text-rose-600' : (doukuiHits.length === 2 ? 'font-bold text-rose-500' : 'font-bold text-slate-500');
+      const combatCount = ['dipper_1', 'dipper_2', 'dipper_3'].filter(id => hitStarsSet.has(id)).length;
+      const industryCount = ['dipper_4', 'dipper_5'].filter(id => hitStarsSet.has(id)).length;
+      const supportCount = ['dipper_6', 'dipper_7'].filter(id => hitStarsSet.has(id)).length;
+
+      if (combatValEl) {
+        combatValEl.textContent = `${combatCount} / 3${combatCount >= 3 ? ' ★' : ''}`;
+        combatValEl.className = combatCount >= 3 ? 'font-black text-rose-600 text-[11px] mt-0.5' : 'font-bold text-slate-800 text-[11px] mt-0.5';
       }
-      if (doubingValEl) {
-        doubingValEl.textContent = `${doubingHits.length} / 3${doubingHits.length >= 3 ? ' (大共鸣)' : (doubingHits.length === 2 ? ' (小共鸣)' : '')}`;
-        doubingValEl.className = doubingHits.length >= 3 ? 'font-bold text-amber-600' : (doubingHits.length === 2 ? 'font-bold text-amber-500' : 'font-bold text-slate-500');
+      if (industryValEl) {
+        industryValEl.textContent = `${industryCount} / 2${industryCount >= 2 ? ' ★' : ''}`;
+        industryValEl.className = industryCount >= 2 ? 'font-black text-amber-600 text-[11px] mt-0.5' : 'font-bold text-slate-800 text-[11px] mt-0.5';
       }
+      if (supportValEl) {
+        supportValEl.textContent = `${supportCount} / 2${supportCount >= 2 ? ' ★' : ''}`;
+        supportValEl.className = supportCount >= 2 ? 'font-black text-sky-600 text-[11px] mt-0.5' : 'font-bold text-slate-800 text-[11px] mt-0.5';
+      }
+
+      if (doukuiValEl) doukuiValEl.textContent = `${doukuiHits.length} / 3`;
+      if (doubingValEl) doubingValEl.textContent = `${doubingHits.length} / 3`;
 
       if (resonanceData && resonanceData.tier > 0) {
         if (iconEl) iconEl.textContent = resonanceData.icon;

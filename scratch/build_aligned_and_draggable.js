@@ -495,16 +495,23 @@ baseHtml = baseHtml.replace(
             </div>
           </div>
           <!-- 斗魁/斗柄两系取舍进度指示条 -->
-          <div class="grid grid-cols-2 gap-1.5 pt-1 text-[10px] font-mono-sci">
-            <div id="constellationDoukuiBox" class="p-1.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between shadow-2xs">
-              <span class="text-rose-700 font-bold"><i class="fa-solid fa-khanda mr-1"></i>斗魁·杀伐</span>
-              <span id="constellationDoukuiVal" class="font-bold text-slate-600">0/3</span>
+          <div class="grid grid-cols-3 gap-1 pt-1 text-[10px] font-mono-sci">
+            <div id="constellationCombatBox" class="p-1.5 rounded-lg bg-rose-50/70 border border-rose-200 flex flex-col items-center justify-center text-center shadow-2xs">
+              <span class="text-rose-700 font-bold text-[9.5px]"><i class="fa-solid fa-shield-halved mr-0.5"></i>红盘·战斗</span>
+              <span id="constellationCombatVal" class="font-bold text-slate-800 text-[11px] mt-0.5">0/3</span>
             </div>
-            <div id="constellationDoubingBox" class="p-1.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between shadow-2xs">
-              <span class="text-amber-700 font-bold"><i class="fa-solid fa-industry mr-1"></i>斗柄·基建</span>
-              <span id="constellationDoubingVal" class="font-bold text-slate-600">0/3</span>
+            <div id="constellationIndustryBox" class="p-1.5 rounded-lg bg-amber-50/70 border border-amber-200 flex flex-col items-center justify-center text-center shadow-2xs">
+              <span class="text-amber-700 font-bold text-[9.5px]"><i class="fa-solid fa-gear mr-0.5"></i>黄盘·工厂</span>
+              <span id="constellationIndustryVal" class="font-bold text-slate-800 text-[11px] mt-0.5">0/2</span>
             </div>
-          </div>`
+            <div id="constellationSupportBox" class="p-1.5 rounded-lg bg-sky-50/70 border border-sky-200 flex flex-col items-center justify-center text-center shadow-2xs">
+              <span class="text-sky-700 font-bold text-[9.5px]"><i class="fa-solid fa-wind mr-0.5"></i>蓝盘·辅助</span>
+              <span id="constellationSupportVal" class="font-bold text-slate-800 text-[11px] mt-0.5">0/2</span>
+            </div>
+          </div>
+          <!-- 兼容旧脚本引用 -->
+          <span id="constellationDoukuiVal" class="hidden">0/3</span>
+          <span id="constellationDoubingVal" class="hidden">0/3</span>`
 );
 
 // Replace entire updatePanels constellation logic with Doukui/Doubing branch resonance
@@ -529,17 +536,31 @@ if (oldUpdatePanelsBlockStart !== -1 && oldUpdatePanelsBlockEnd !== -1) {
       const pillEl = document.getElementById('constellationMultPill');
       const doukuiValEl = document.getElementById('constellationDoukuiVal');
       const doubingValEl = document.getElementById('constellationDoubingVal');
+      const combatValEl = document.getElementById('constellationCombatVal');
+      const industryValEl = document.getElementById('constellationIndustryVal');
+      const supportValEl = document.getElementById('constellationSupportVal');
 
       if (badgeEl) badgeEl.textContent = \`\${floorDef.name} · \${floorDef.variantName ? floorDef.variantName.split('·')[0].trim() : '全阵'}\`;
 
-      if (doukuiValEl) {
-        doukuiValEl.textContent = \`\${doukuiHits.length} / 3\${doukuiHits.length >= 3 ? ' (大共鸣)' : (doukuiHits.length === 2 ? ' (小共鸣)' : '')}\`;
-        doukuiValEl.className = doukuiHits.length >= 3 ? 'font-bold text-rose-600' : (doukuiHits.length === 2 ? 'font-bold text-rose-500' : 'font-bold text-slate-500');
+      const combatCount = ['dipper_1', 'dipper_2', 'dipper_3'].filter(id => hitStarsSet.has(id)).length;
+      const industryCount = ['dipper_4', 'dipper_5'].filter(id => hitStarsSet.has(id)).length;
+      const supportCount = ['dipper_6', 'dipper_7'].filter(id => hitStarsSet.has(id)).length;
+
+      if (combatValEl) {
+        combatValEl.textContent = \`\${combatCount} / 3\${combatCount >= 3 ? ' ★' : ''}\`;
+        combatValEl.className = combatCount >= 3 ? 'font-black text-rose-600 text-[11px] mt-0.5' : 'font-bold text-slate-800 text-[11px] mt-0.5';
       }
-      if (doubingValEl) {
-        doubingValEl.textContent = \`\${doubingHits.length} / 3\${doubingHits.length >= 3 ? ' (大共鸣)' : (doubingHits.length === 2 ? ' (小共鸣)' : '')}\`;
-        doubingValEl.className = doubingHits.length >= 3 ? 'font-bold text-amber-600' : (doubingHits.length === 2 ? 'font-bold text-amber-500' : 'font-bold text-slate-500');
+      if (industryValEl) {
+        industryValEl.textContent = \`\${industryCount} / 2\${industryCount >= 2 ? ' ★' : ''}\`;
+        industryValEl.className = industryCount >= 2 ? 'font-black text-amber-600 text-[11px] mt-0.5' : 'font-bold text-slate-800 text-[11px] mt-0.5';
       }
+      if (supportValEl) {
+        supportValEl.textContent = \`\${supportCount} / 2\${supportCount >= 2 ? ' ★' : ''}\`;
+        supportValEl.className = supportCount >= 2 ? 'font-black text-sky-600 text-[11px] mt-0.5' : 'font-bold text-slate-800 text-[11px] mt-0.5';
+      }
+
+      if (doukuiValEl) doukuiValEl.textContent = \`\${doukuiHits.length} / 3\`;
+      if (doubingValEl) doubingValEl.textContent = \`\${doubingHits.length} / 3\`;
 
       if (resonanceData && resonanceData.tier > 0) {
         if (iconEl) iconEl.textContent = resonanceData.icon;
@@ -577,6 +598,157 @@ if (oldUpdatePanelsBlockStart !== -1 && oldUpdatePanelsBlockEnd !== -1) {
 
       `;
   baseHtml = baseHtml.substring(0, oldUpdatePanelsBlockStart) + newUpdatePanelsConstellation + baseHtml.substring(oldUpdatePanelsBlockEnd);
+}
+
+baseHtml = baseHtml.replace(
+  `<marker id="arrowhead-blue" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <polygon points="0 0, 6 3, 0 6" fill="#00f0ff" />
+            </marker>`,
+  `<marker id="arrowhead-blue" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <polygon points="0 0, 6 3, 0 6" fill="#00f0ff" />
+            </marker>
+            <marker id="arrowhead-red" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <polygon points="0 0, 6 3, 0 6" fill="#f43f5e" />
+            </marker>
+            <marker id="arrowhead-yellow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <polygon points="0 0, 6 3, 0 6" fill="#f59e0b" />
+            </marker>`
+);
+
+const pDrawBeamStart = baseHtml.indexOf("function drawBeamLine(svgGroup, x1, y1, x2, y2, colorType = 'cyan', showArrow = true) {");
+const pDrawRingStart = baseHtml.indexOf("function drawRingArc(svgGroup, ringId, fromSlot, toSlot, colorType = 'cyan') {");
+const pSec89Marker = baseHtml.indexOf("/* =========================================================================\n       8.9 底板基准系统");
+
+if (pDrawBeamStart !== -1 && pDrawRingStart !== -1 && pSec89Marker !== -1) {
+  baseHtml = baseHtml.substring(0, pDrawBeamStart) + `function drawBeamLine(svgGroup, x1, y1, x2, y2, colorType = 'blue', showArrow = true) {
+      // 依盘色分流：红盘用红线，黄盘用黄线，蓝盘用蓝线
+      const isRed = colorType === 'red' || colorType === 'rose';
+      const isYellow = colorType === 'yellow' || colorType === 'gold' || colorType === 'slingshot';
+      
+      const glowColor = isRed ? '#f43f5e' : (isYellow ? '#facc15' : '#00f0ff');
+      const coreColor = isRed ? '#e11d48' : (isYellow ? '#d97706' : '#0284c7');
+      const arrowId = isRed ? 'arrowhead-red' : (isYellow ? 'arrowhead-yellow' : 'arrowhead-blue');
+
+      // 底层高亮光晕
+      const bloomLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      bloomLine.setAttribute('x1', x1);
+      bloomLine.setAttribute('y1', y1);
+      bloomLine.setAttribute('x2', x2);
+      bloomLine.setAttribute('y2', x2 === x1 && y2 === y1 ? y2 + 0.1 : y2);
+      bloomLine.setAttribute('stroke', glowColor);
+      bloomLine.setAttribute('stroke-width', '4.5');
+      bloomLine.setAttribute('stroke-linecap', 'round');
+      bloomLine.setAttribute('opacity', '0.65');
+      bloomLine.setAttribute('style', 'filter: drop-shadow(0 0 6px ' + glowColor + ');');
+
+      // 顶层实体能量光束
+      const coreLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      coreLine.setAttribute('x1', x1);
+      coreLine.setAttribute('y1', y1);
+      coreLine.setAttribute('x2', x2);
+      coreLine.setAttribute('y2', y2);
+      coreLine.setAttribute('stroke', coreColor);
+      coreLine.setAttribute('stroke-width', '2.2');
+      coreLine.setAttribute('stroke-linecap', 'round');
+      coreLine.setAttribute('stroke-dasharray', '8 4');
+      if (showArrow) coreLine.setAttribute('marker-end', 'url(#' + arrowId + ')');
+
+      svgGroup.appendChild(bloomLine);
+      svgGroup.appendChild(coreLine);
+    }
+
+    function drawImpactSpark(svgGroup, x, y, color = '#0f172a', r = 4.5) {
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', x);
+      circle.setAttribute('cy', y);
+      circle.setAttribute('r', r);
+      circle.setAttribute('fill', color || '#0f172a');
+      circle.setAttribute('stroke', '#ffffff');
+      circle.setAttribute('stroke-width', '1.8');
+      circle.setAttribute('style', 'filter: drop-shadow(0 0 4px ' + (color || '#00f0ff') + ');');
+      svgGroup.appendChild(circle);
+    }
+
+    ` + `function drawRingArc(svgGroup, ringId, fromSlot, toSlot, colorType = 'blue') {
+      const ring = DISK_RINGS[ringId];
+      if (!ring) return;
+      const startPos = getSlotWorldPos(ringId, fromSlot);
+      const endPos = getSlotWorldPos(ringId, toSlot);
+
+      const slotStep = (toSlot - fromSlot + ring.slotCount) % ring.slotCount;
+      const arcDeg = slotStep * (360 / ring.slotCount);
+      const largeArc = arcDeg > 180 ? 1 : 0;
+      const pathData = 'M ' + startPos.x + ' ' + startPos.y + ' A ' + ring.radius + ' ' + ring.radius + ' 0 ' + largeArc + ' 1 ' + endPos.x + ' ' + endPos.y;
+
+      // 依盘色分流：红盘用红线，黄盘用黄线，蓝盘用蓝线
+      const isRed = colorType === 'red' || colorType === 'rose' || (ringId && ringId.startsWith('combat'));
+      const isYellow = colorType === 'yellow' || colorType === 'gold' || (ringId && ringId.startsWith('industry'));
+      
+      const glowColor = isRed ? '#f43f5e' : (isYellow ? '#facc15' : '#00f0ff');
+      const coreColor = isRed ? '#e11d48' : (isYellow ? '#d97706' : '#0284c7');
+      const arrowId = isRed ? 'arrowhead-red' : (isYellow ? 'arrowhead-yellow' : 'arrowhead-blue');
+      const badgeBg = isRed ? '#ffe4e6' : (isYellow ? '#fef3c7' : '#e0f2fe');
+      const badgeText = isRed ? '#9f1239' : (isYellow ? '#92400e' : '#0369a1');
+      const badgeBorder = isRed ? '#f43f5e' : (isYellow ? '#f59e0b' : '#0284c7');
+
+      // 1. 高亮外层耀目光晕 (红盘红光，黄盘黄光，蓝盘蓝光)
+      const glowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      glowPath.setAttribute('d', pathData);
+      glowPath.setAttribute('fill', 'none');
+      glowPath.setAttribute('stroke', glowColor);
+      glowPath.setAttribute('stroke-width', '4.5');
+      glowPath.setAttribute('stroke-linecap', 'round');
+      glowPath.setAttribute('opacity', '0.75');
+      glowPath.setAttribute('style', 'filter: drop-shadow(0 0 6px ' + glowColor + ');');
+      svgGroup.appendChild(glowPath);
+
+      // 2. 内层高能量核心光束
+      const corePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      corePath.setAttribute('d', pathData);
+      corePath.setAttribute('fill', 'none');
+      corePath.setAttribute('stroke', coreColor);
+      corePath.setAttribute('stroke-width', '2.2');
+      corePath.setAttribute('stroke-linecap', 'round');
+      corePath.setAttribute('stroke-dasharray', '8 4');
+      corePath.setAttribute('marker-end', 'url(#' + arrowId + ')');
+      svgGroup.appendChild(corePath);
+
+      // 3. 步数轨迹浮动气泡
+      const startDeg = ((-90 + fromSlot * (360 / ring.slotCount) + ring.currentAngle + 360) % 360);
+      const midDeg = (startDeg + arcDeg / 2) * Math.PI / 180;
+      const midX = ring.cx + ring.radius * Math.cos(midDeg);
+      const midY = ring.cy + ring.radius * Math.sin(midDeg);
+
+      const badgeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      badgeGroup.setAttribute('transform', 'translate(' + midX + ', ' + midY + ')');
+
+      const badgeBgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      badgeBgRect.setAttribute('x', '-11');
+      badgeBgRect.setAttribute('y', '-7');
+      badgeBgRect.setAttribute('width', '22');
+      badgeBgRect.setAttribute('height', '14');
+      badgeBgRect.setAttribute('rx', '4');
+      badgeBgRect.setAttribute('fill', badgeBg);
+      badgeBgRect.setAttribute('stroke', badgeBorder);
+      badgeBgRect.setAttribute('stroke-width', '1');
+      badgeBgRect.setAttribute('opacity', '0.95');
+
+      const badgeTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      badgeTxt.setAttribute('x', '0');
+      badgeTxt.setAttribute('y', '3');
+      badgeTxt.setAttribute('text-anchor', 'middle');
+      badgeTxt.setAttribute('fill', badgeText);
+      badgeTxt.setAttribute('font-size', '9px');
+      badgeTxt.setAttribute('font-weight', 'bold');
+      badgeTxt.setAttribute('font-family', 'ui-monospace, monospace');
+      badgeTxt.textContent = '+' + slotStep;
+
+      badgeGroup.appendChild(badgeBgRect);
+      badgeGroup.appendChild(badgeTxt);
+      svgGroup.appendChild(badgeGroup);
+    }
+
+    ` + baseHtml.substring(pSec89Marker);
 }
 
 fs.writeFileSync('scratch/temp_part1.html', baseHtml);

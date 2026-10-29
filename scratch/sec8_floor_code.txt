@@ -231,11 +231,20 @@
       function renderStarGlyph(node, isAligned) {
         const x = node.x;
         const y = node.y;
-        const goldMain = isAligned ? '#fbbf24' : '#f59e0b';
-        const goldBright = isAligned ? '#fef08a' : '#fde68a';
-        const darkBase = '#0f172a';
-        const outerHaloR = isAligned ? 30 : 25;
-        const outerHaloOpacity = isAligned ? '0.22' : '0.10';
+
+        // 依盘色分流艺术表现：红盘用赤红朱砂玄铁，黄盘用琥珀铜金，蓝盘用天蓝玄晶灵玉！
+        const isRed = node.disc === 'combat';
+        const isYellow = node.disc === 'industry';
+        
+        const mainColor = isRed 
+          ? (isAligned ? '#ef4444' : '#f87171')
+          : (isYellow ? (isAligned ? '#f59e0b' : '#fbbf24') : (isAligned ? '#0ea5e9' : '#38bdf8'));
+          
+        const brightColor = isRed ? '#fee2e2' : (isYellow ? '#fef3c7' : '#e0f2fe');
+        const darkBase = isRed ? '#450a0a' : (isYellow ? '#451a03' : '#082f49');
+        const haloColor = isRed ? '#f43f5e' : (isYellow ? '#f59e0b' : '#00f0ff');
+        const outerHaloR = isAligned ? 32 : 26;
+        const outerHaloOpacity = isAligned ? '0.35' : '0.15';
 
         // 四方主星芒尖角 (外伸至 r=29px，芯片半径仅16px，保证100%从芯片四周外露！)
         const mainStarPoints = `
@@ -253,24 +262,23 @@
         `;
 
         return `
-          <!-- 1. 外围柔和金辉光晕 -->
-          <circle cx="${x}" cy="${y}" r="${outerHaloR}" fill="${goldMain}" fill-opacity="${outerHaloOpacity}" />
-          <!-- 2. 外露四角与八角鎏金星芒托架 (超出芯片边缘13px，绝不被芯片遮挡) -->
+          <!-- 1. 外围对应盘色流光光晕 (红盘红光 / 黄盘黄光 / 蓝盘蓝光) -->
+          <circle cx="${x}" cy="${y}" r="${outerHaloR}" fill="${haloColor}" fill-opacity="${outerHaloOpacity}" style="filter: drop-shadow(0 0 6px ${haloColor});" />
+          <!-- 2. 外露四角与八角星芒托架 (超出芯片边缘13px，绝不被芯片遮挡) -->
           <polygon points="${x},${y - 29} ${x + 6},${y - 15} ${x + 29},${y} ${x + 6},${y + 15} ${x},${y + 29} ${x - 6},${y + 15} ${x - 29},${y} ${x - 6},${y - 15}"
-                   fill="${goldMain}" stroke="${darkBase}" stroke-width="1.4" opacity="${isAligned ? '1' : '0.88'}" />
+                   fill="${mainColor}" stroke="${darkBase}" stroke-width="1.4" opacity="${isAligned ? '1' : '0.88'}" />
           <polygon points="${x + 19},${y - 19} ${x + 6},${y - 13} ${x + 19},${y + 19} ${x + 13},${y + 6} ${x - 19},${y + 19} ${x - 6},${y + 13} ${x - 19},${y - 19} ${x - 13},${y - 6}"
-                   fill="${darkBase}" stroke="${goldMain}" stroke-width="1.2" opacity="0.92" />
-          <!-- 3. 黑金罗盘外环 (r=21px，环绕在 r=16px 的芯片外围形成一圈黑金星环) -->
+                   fill="${darkBase}" stroke="${mainColor}" stroke-width="1.2" opacity="0.92" />
+          <!-- 3. 黑金罗盘外环 (r=21px，环绕在 r=16px 的芯片外围形成一圈对应盘色的星环) -->
           <circle cx="${x}" cy="${y}" r="21" fill="${darkBase}" fill-opacity="${isAligned ? '0.95' : '0.88'}"
-                  stroke="${goldMain}" stroke-width="${isAligned ? '2.2' : '1.6'}" />
-          <circle cx="${x}" cy="${y}" r="18" fill="none" stroke="${goldBright}" stroke-width="0.9" stroke-dasharray="3 2" opacity="${isAligned ? '0.95' : '0.65'}" />
-          <!-- 4. 底座中心星印 (未放芯片时清晰显示金色星核与序号；放上芯片后位于芯片正下方) -->
-          <circle cx="${x}" cy="${y}" r="9" fill="${isAligned ? goldMain : '#1e293b'}" stroke="${goldMain}" stroke-width="1.3" />
-          <text x="${x}" y="${y + 3.5}" text-anchor="middle" font-family="'Share Tech Mono', monospace" font-weight="900" font-size="9.5" fill="${isAligned ? darkBase : goldBright}">★</text>
+                  stroke="${mainColor}" stroke-width="${isAligned ? '2.2' : '1.6'}" />
+          <circle cx="${x}" cy="${y}" r="18" fill="none" stroke="${brightColor}" stroke-width="0.9" stroke-dasharray="3 2" opacity="${isAligned ? '0.95' : '0.65'}" />
+          <!-- 4. 底座中心星印 (未放芯片时清晰显示星核与序号；放上芯片后位于芯片正下方) -->
+          <circle cx="${x}" cy="${y}" r="9" fill="${isAligned ? mainColor : '#1e293b'}" stroke="${mainColor}" stroke-width="1.3" />
+          <text x="${x}" y="${y + 3.5}" text-anchor="middle" font-family="'Share Tech Mono', monospace" font-weight="900" font-size="9.5" fill="${isAligned ? darkBase : brightColor}">★</text>
         `;
       }
 
-      // 先判定哪些星位当前有芯片重合
       const alignedMap = {};
       const nodeMap = {};
       if (shapeDef.nodes) {
