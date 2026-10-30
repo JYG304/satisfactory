@@ -662,98 +662,94 @@
         }
       }
 
-      // ✦ 北斗流派取舍判定（斗魁组 vs 斗柄组 + 天权中枢）
-      const doukuiHits = ['dipper_1', 'dipper_2', 'dipper_3'].filter(id => hitFloorNodesSet.has(id));
-      const doubingHits = ['dipper_5', 'dipper_6', 'dipper_7'].filter(id => hitFloorNodesSet.has(id));
-      const hasTianquan = hitFloorNodesSet.has('dipper_4');
+      // ✦ 底板星象取舍判定（红盘攻击 vs 黄盘基建，杜绝全满）
+      const totalFloorNodes = (floorDef && floorDef.nodes) ? floorDef.nodes : [];
+      const combatNodes = totalFloorNodes.filter(n => n.disc === 'combat');
+      const industryNodes = totalFloorNodes.filter(n => n.disc === 'industry');
+      const supportNodes = totalFloorNodes.filter(n => n.disc === 'support');
+
+      const hitCombatHits = combatNodes.filter(n => hitFloorNodesSet.has(n.id));
+      const hitIndustryHits = industryNodes.filter(n => hitFloorNodesSet.has(n.id));
+      const hitSupportHits = supportNodes.filter(n => hitFloorNodesSet.has(n.id));
+      const hitInfraHits = [...hitIndustryHits, ...hitSupportHits]; // 基建总星位（工控+辅助）
 
       let resonanceData = {
         group: 'none',
         tier: 0,
-        title: '散落星位（未激活盘系共鸣）',
-        hint: '主选【红色盘·战斗】或【黄色盘·工控】，同色星位点亮2~3星即触发大共鸣！',
+        title: '散落星位（未激活流派共鸣）',
+        hint: '在【红盘·攻击】与【黄盘·基建】间取舍，同系点亮半数以上即可激活共鸣！',
         badge: '未共鸣',
         icon: '○',
         pillClass: 'bg-slate-100 text-slate-600 border border-slate-200',
         boxClass: 'bg-white border border-slate-200'
       };
 
-      // 1. 斗魁大共鸣 (3星全亮，极致杀伐)
-      if (doukuiHits.length >= 3) {
-        resonanceData.group = 'doukui';
-        resonanceData.tier = 2;
-        resonanceData.title = '⚔️ 红色战斗大共鸣 · 万剑齐发';
-        resonanceData.hint = '红色盘三星齐亮！护体飞剑+2把 · 玩家攻击+40% · 玩家防御+30% · 气血+30%';
-        resonanceData.badge = '红色·万剑煞';
-        resonanceData.icon = '👑';
-        resonanceData.pillClass = 'bg-rose-600 text-white shadow-xs';
-        resonanceData.boxClass = 'bg-rose-50 border border-rose-300';
-        totalBuff.sword_funnel += 2;
-        totalBuff.atk += 40;
-        totalBuff.hp += 30;
-        totalBuff.def += 30;
-        logSteps.push(`👑 【红色战斗大共鸣激活！】攻击盘三星齐亮！护体飞剑+2把，玩家攻击+40%，气血防御倍增！`);
-      } else if (doukuiHits.length === 2 && doubingHits.length < 2) {
-        // 斗魁小共鸣 (2星)
-        resonanceData.group = 'doukui';
-        resonanceData.tier = 1;
-        resonanceData.title = '⚔️ 红色战斗小共鸣 · 战力强化';
-        resonanceData.hint = '红色盘双星点亮！飞剑攻击+20% · 玩家防御+20%';
-        resonanceData.badge = '红盘·2星';
-        resonanceData.icon = '⚔️';
-        resonanceData.pillClass = 'bg-rose-100 text-rose-800 border border-rose-300';
-        resonanceData.boxClass = 'bg-rose-50/60 border border-rose-200';
-        totalBuff.atk += 20;
-        totalBuff.def += 20;
-        logSteps.push(`⚔️ 【斗魁小共鸣激活】杀伐星位连通，飞剑攻击+20%，玩家防御+20%！`);
-      }
-
-      // 2. 斗柄大共鸣 (3星全亮，极致基建)
-      if (doubingHits.length >= 3) {
-        resonanceData.group = 'doubing';
-        resonanceData.tier = 2;
-        resonanceData.title = '⚙️ 黄色工控大共鸣 · 极速爆产';
-        resonanceData.hint = '黄色盘三星齐亮！全线能耗降低30% · 移动速度+20% · 制造与采矿翻倍提速！';
-        resonanceData.badge = '黄色·极速产';
-        resonanceData.icon = '⚡';
-        resonanceData.pillClass = 'bg-amber-600 text-white shadow-xs';
-        resonanceData.boxClass = 'bg-amber-50 border border-amber-300';
-        totalBuff.power_cut += 30;
-        totalBuff.speed += 20;
-        totalBuff.craft_speed += 40;
-        totalBuff.mining_speed += 40;
-        logSteps.push(`⚡ 【黄色工控大共鸣激活！】工厂与辅助星位贯通！全线能耗-30%，制造采矿大幅倍增！`);
-      } else if (doubingHits.length === 2 && doukuiHits.length < 2) {
-        // 斗柄小共鸣 (2星)
-        resonanceData.group = 'doubing';
-        resonanceData.tier = 1;
-        resonanceData.title = '⚙️ 黄色工控小共鸣 · 工业提速';
-        resonanceData.hint = '黄色盘双星点亮！制造提速+20% · 采矿提速+20%';
-        resonanceData.badge = '黄盘·2星';
-        resonanceData.icon = '⚙️';
-        resonanceData.pillClass = 'bg-amber-100 text-amber-800 border border-amber-300';
-        resonanceData.boxClass = 'bg-amber-50/60 border border-amber-200';
-        totalBuff.craft_speed += 20;
-        totalBuff.mining_speed += 20;
-        logSteps.push(`⚙️ 【斗柄小共鸣激活】工控星位连通，制造与采矿提速+20%！`);
-      }
-
-      // 3. 天权中枢转折加成
-      if (hasTianquan) {
-        if (resonanceData.group === 'doukui') {
-          totalBuff.crit += 15;
-          resonanceData.hint += ' · 兼得天权文曲暴击+15%';
-          logSteps.push(`✦ 【天权文曲星连通】贯通杀伐光路，额外提供暴击率 +15%！`);
-        } else if (resonanceData.group === 'doubing') {
-          totalBuff.belt_speed += 25;
-          resonanceData.hint += ' · 兼得天权文曲传送带+25%';
-          logSteps.push(`✦ 【天权文曲星连通】贯通工控网络，额外提供传送带输送 +25%！`);
+      // 1. 红色盘·攻击流派判定 (红盘星位命中 >= 2)
+      if (hitCombatHits.length >= 2 && hitCombatHits.length >= hitInfraHits.length) {
+        if (hitCombatHits.length >= 3 || (combatNodes.length === 2 && hitCombatHits.length === 2)) {
+          // 攻击大共鸣
+          resonanceData.group = 'combat';
+          resonanceData.tier = 2;
+          resonanceData.title = '⚔️ 攻击大共鸣 · 万剑齐发';
+          resonanceData.hint = '攻击星位连通！护体飞剑+2把 · 玩家攻击+40% · 玩家防御+30% · 玩家气血+30%';
+          resonanceData.badge = '攻击大共鸣';
+          resonanceData.icon = '👑';
+          resonanceData.pillClass = 'bg-rose-600 text-white shadow-xs';
+          resonanceData.boxClass = 'bg-rose-50 border border-rose-300';
+          totalBuff.sword_funnel += 2;
+          totalBuff.atk += 40;
+          totalBuff.hp += 30;
+          totalBuff.def += 30;
+          logSteps.push(`👑 【攻击大共鸣激活！】红色攻击盘星位深度贯通！护体飞剑+2把，玩家攻击+40%，防御气血倍增！`);
+        } else {
+          // 攻击小共鸣
+          resonanceData.group = 'combat';
+          resonanceData.tier = 1;
+          resonanceData.title = '⚔️ 攻击小共鸣 · 战力强化';
+          resonanceData.hint = '攻击星位双星点亮！飞剑攻击+20% · 玩家防御+20%';
+          resonanceData.badge = '攻击小共鸣';
+          resonanceData.icon = '⚔️';
+          resonanceData.pillClass = 'bg-rose-100 text-rose-800 border border-rose-300';
+          resonanceData.boxClass = 'bg-rose-50/60 border border-rose-200';
+          totalBuff.atk += 20;
+          totalBuff.def += 20;
+          logSteps.push(`⚔️ 【攻击小共鸣激活】红色攻击盘星位连通，飞剑攻击+20%，玩家防御+20%！`);
+        }
+      } else if (hitInfraHits.length >= 2) {
+        // 2. 黄盘·基建流派判定 (基建星位命中 >= 2)
+        if (hitInfraHits.length >= 3 || (industryNodes.length <= 2 && hitIndustryHits.length >= 2)) {
+          // 基建大共鸣
+          resonanceData.group = 'industry';
+          resonanceData.tier = 2;
+          resonanceData.title = '⚙️ 基建大共鸣 · 极速爆产';
+          resonanceData.hint = '基建星位连通！全线能耗降低30% · 移动速度+20% · 制造与采矿翻倍提速！';
+          resonanceData.badge = '基建大共鸣';
+          resonanceData.icon = '⚡';
+          resonanceData.pillClass = 'bg-amber-600 text-white shadow-xs';
+          resonanceData.boxClass = 'bg-amber-50 border border-amber-300';
+          totalBuff.power_cut += 30;
+          totalBuff.speed += 20;
+          totalBuff.craft_speed += 40;
+          totalBuff.mining_speed += 40;
+          logSteps.push(`⚡ 【基建大共鸣激活！】黄蓝基建星位贯通！全线能耗-30%，制造采矿大幅倍增！`);
+        } else {
+          // 基建小共鸣
+          resonanceData.group = 'industry';
+          resonanceData.tier = 1;
+          resonanceData.title = '⚙️ 基建小共鸣 · 工业提速';
+          resonanceData.hint = '基建双星点亮！制造提速+20% · 采矿提速+20%';
+          resonanceData.badge = '基建小共鸣';
+          resonanceData.icon = '⚙️';
+          resonanceData.pillClass = 'bg-amber-100 text-amber-800 border border-amber-300';
+          resonanceData.boxClass = 'bg-amber-50/60 border border-amber-200';
+          totalBuff.craft_speed += 20;
+          totalBuff.mining_speed += 20;
+          logSteps.push(`⚙️ 【基建小共鸣激活】基建星位连通，制造与采矿提速+20%！`);
         }
       }
-
       const constellationMultiplier = resonanceData.tier === 2 ? 1.5 : (resonanceData.tier === 1 ? 1.2 : 1.0);
 
       renderFloorBase(true, hitFloorNodesSet);
-      updatePanels(chainNodes, totalBuff, constellationMultiplier, crossActivated, logSteps, hitFloorNodesSet, activeKeystones, resonanceData, doukuiHits, doubingHits);
+      updatePanels(chainNodes, totalBuff, constellationMultiplier, crossActivated, logSteps, hitFloorNodesSet, activeKeystones, resonanceData, hitCombatHits, hitInfraHits);
       updateCenterHubsDOM();
     }

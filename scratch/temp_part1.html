@@ -3819,48 +3819,47 @@ function renderPalette() {
       solveStepNetwork();
     }
     
-    function updatePanels(chainNodes, totalBuff, constellationMultiplier, isCrossActive, logSteps, hitStarsSet = new Set(), activeKeystones = [], resonanceData = null, doukuiHits = [], doubingHits = []) {
+    function updatePanels(chainNodes, totalBuff, constellationMultiplier, isCrossActive, logSteps, hitStarsSet = new Set(), activeKeystones = [], resonanceData = null, hitCombatHits = [], hitInfraHits = []) {
       const rightTag = document.getElementById('rightChainStatusTag');
       const countPill = document.getElementById('statActiveCountPill');
 
       if (countPill) countPill.textContent = `${chainNodes.length} 个构件生效`;
 
       const floorDef = FLOOR_SHAPE_DEFS[CURRENT_FLOOR_SHAPE] || FLOOR_SHAPE_DEFS.dipper;
+      const totalFloorNodes = (floorDef && floorDef.nodes) ? floorDef.nodes : [];
+      const totalCombatSlots = totalFloorNodes.filter(n => n.disc === 'combat').length;
+      const totalIndustrySlots = totalFloorNodes.filter(n => n.disc === 'industry').length;
+      const totalSupportSlots = totalFloorNodes.filter(n => n.disc === 'support').length;
 
-      // 更新星象加成卡片（斗魁杀伐 vs 斗柄基建 流派取舍）
+      const hitCombatCount = totalFloorNodes.filter(n => n.disc === 'combat' && hitStarsSet.has(n.id)).length;
+      const hitIndustryCount = totalFloorNodes.filter(n => n.disc === 'industry' && hitStarsSet.has(n.id)).length;
+      const hitSupportCount = totalFloorNodes.filter(n => n.disc === 'support' && hitStarsSet.has(n.id)).length;
+
+      // 更新底盘名称与境界徽章
       const badgeEl = document.getElementById('constellationBadge');
       const titleEl = document.getElementById('constellationTitle');
       const hintEl = document.getElementById('constellationHint');
       const iconEl = document.getElementById('constellationIcon');
       const boxEl = document.getElementById('constellationStatusBox');
       const pillEl = document.getElementById('constellationMultPill');
-      const doukuiValEl = document.getElementById('constellationDoukuiVal');
-      const doubingValEl = document.getElementById('constellationDoubingVal');
       const combatValEl = document.getElementById('constellationCombatVal');
       const industryValEl = document.getElementById('constellationIndustryVal');
       const supportValEl = document.getElementById('constellationSupportVal');
 
-      if (badgeEl) badgeEl.textContent = `${floorDef.name} · ${floorDef.variantName ? floorDef.variantName.split('·')[0].trim() : '全阵'}`;
-
-      const combatCount = ['dipper_1', 'dipper_2', 'dipper_3'].filter(id => hitStarsSet.has(id)).length;
-      const industryCount = ['dipper_4', 'dipper_5'].filter(id => hitStarsSet.has(id)).length;
-      const supportCount = ['dipper_6', 'dipper_7'].filter(id => hitStarsSet.has(id)).length;
+      if (badgeEl) badgeEl.textContent = `${floorDef.name} · ${floorDef.variantName ? floorDef.variantName.split('·')[0].trim() : (totalFloorNodes.length + '槽')}`;
 
       if (combatValEl) {
-        combatValEl.textContent = `${combatCount} / 3${combatCount >= 3 ? ' ★' : ''}`;
-        combatValEl.className = combatCount >= 3 ? 'font-black text-rose-600 text-[11px] mt-0.5' : 'font-bold text-slate-800 text-[11px] mt-0.5';
+        combatValEl.textContent = `${hitCombatCount} / ${totalCombatSlots}${hitCombatCount >= 2 ? ' ★' : ''}`;
+        combatValEl.className = hitCombatCount >= 2 ? 'font-black text-rose-600 text-[11px] mt-0.5' : 'font-bold text-slate-800 text-[11px] mt-0.5';
       }
       if (industryValEl) {
-        industryValEl.textContent = `${industryCount} / 2${industryCount >= 2 ? ' ★' : ''}`;
-        industryValEl.className = industryCount >= 2 ? 'font-black text-amber-600 text-[11px] mt-0.5' : 'font-bold text-slate-800 text-[11px] mt-0.5';
+        industryValEl.textContent = `${hitIndustryCount} / ${totalIndustrySlots}${hitIndustryCount >= 2 ? ' ★' : ''}`;
+        industryValEl.className = hitIndustryCount >= 2 ? 'font-black text-amber-600 text-[11px] mt-0.5' : 'font-bold text-slate-800 text-[11px] mt-0.5';
       }
       if (supportValEl) {
-        supportValEl.textContent = `${supportCount} / 2${supportCount >= 2 ? ' ★' : ''}`;
-        supportValEl.className = supportCount >= 2 ? 'font-black text-sky-600 text-[11px] mt-0.5' : 'font-bold text-slate-800 text-[11px] mt-0.5';
+        supportValEl.textContent = `${hitSupportCount} / ${totalSupportSlots}${hitSupportCount >= 1 ? ' ★' : ''}`;
+        supportValEl.className = hitSupportCount >= 1 ? 'font-black text-sky-600 text-[11px] mt-0.5' : 'font-bold text-slate-800 text-[11px] mt-0.5';
       }
-
-      if (doukuiValEl) doukuiValEl.textContent = `${doukuiHits.length} / 3`;
-      if (doubingValEl) doubingValEl.textContent = `${doubingHits.length} / 3`;
 
       if (resonanceData && resonanceData.tier > 0) {
         if (iconEl) iconEl.textContent = resonanceData.icon;
@@ -3876,13 +3875,13 @@ function renderPalette() {
         }
         if (rightTag) {
           rightTag.textContent = resonanceData.badge;
-          rightTag.className = `text-[9.5px] px-2 py-0.5 rounded font-mono-sci font-bold ${resonanceData.tier === 2 ? (resonanceData.group === 'doukui' ? 'bg-rose-600 text-white' : 'bg-amber-600 text-white') : 'bg-slate-800 text-white'}`;
+          rightTag.className = `text-[9.5px] px-2 py-0.5 rounded font-mono-sci font-bold ${resonanceData.tier === 2 ? (resonanceData.group === 'combat' ? 'bg-rose-600 text-white' : 'bg-amber-600 text-white') : 'bg-slate-800 text-white'}`;
         }
       } else {
         if (iconEl) iconEl.textContent = '○';
-        if (titleEl) titleEl.textContent = `散落星位 (已连通 ${hitStarsSet.size} 星)`;
+        if (titleEl) titleEl.textContent = `散落星位 (已连通 ${hitStarsSet.size} / ${totalFloorNodes.length} 星)`;
         if (hintEl) {
-          hintEl.textContent = '在【斗魁·杀伐】与【斗柄·基建】间取舍，点亮2~3星即可激活流派质变！';
+          hintEl.textContent = '不可全选！在【红盘·攻击】与【黄盘·基建】间取舍，连通半数以上即触发共鸣！';
           hintEl.className = 'text-[10px] text-slate-500';
         }
         if (boxEl) boxEl.className = 'p-2.5 rounded-lg bg-white border border-slate-200 text-xs font-mono-sci flex items-center justify-between';
