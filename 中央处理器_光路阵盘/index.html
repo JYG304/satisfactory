@@ -208,26 +208,17 @@
     <!-- 中右：底板基准星宿切换 -->
     <div class="flex items-center bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 shadow-xs space-x-3">
       <span class="text-[11px] font-mono-sci text-slate-600 font-bold uppercase tracking-wider flex items-center">
-        <i class="fa-solid fa-shapes mr-1.5 text-slate-800"></i>底盘星象:
+        <i class="fa-solid fa-shapes mr-1.5 text-slate-800"></i>底盘图纸:
       </span>
       <div class="flex items-center space-x-1" id="floorShapeButtonGroup" onmouseenter="if(window.setConstellationGuideVisible)setConstellationGuideVisible(true);" onmouseleave="if(window.setConstellationGuideVisible)setConstellationGuideVisible(false);">
-        <button onclick="switchFloorShape('dipper')" id="btn_shape_dipper" class="px-2.5 py-1 rounded bg-slate-900 border border-slate-900 text-white text-[11px] font-bold font-mono-sci shadow-xs" title="北斗七星天衡阵 (2.5x 狂暴星宿)">
-          <i class="fa-solid fa-star mr-1 text-amber-300"></i>北斗七星
+        <button onclick="switchFloorShape('dipper')" id="btn_shape_dipper" class="px-2.5 py-1 rounded bg-slate-900 border border-slate-900 text-white text-[11px] font-bold font-mono-sci shadow-xs transition" title="随境界自动升级底盘：练气5槽 / 筑基7槽 / 金丹9槽，攻守与工业取舍">
+          <i class="fa-solid fa-layer-group mr-1 text-amber-300"></i>境界专属底盘
         </button>
-        <button onclick="switchFloorShape('southern_dipper')" id="btn_shape_southern_dipper" class="px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-slate-800 text-slate-700 text-[11px] font-bold font-mono-sci" title="南斗六司延寿阵 (2.4x 生生长生)">
-          <i class="fa-solid fa-leaf mr-1 text-emerald-600"></i>南斗六司
+        <button onclick="switchFloorShape('combat_focus')" id="btn_shape_combat_focus" class="px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-rose-600 text-slate-700 text-[11px] font-bold font-mono-sci transition" title="激进攻击底盘：纯战斗专精（3槽），放弃基建专注秒怪">
+          <i class="fa-solid fa-shield-halved mr-1 text-rose-600"></i>激进攻击底盘
         </button>
-        <button onclick="switchFloorShape('ziwei')" id="btn_shape_ziwei" class="px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-slate-800 text-slate-700 text-[11px] font-bold font-mono-sci" title="紫微帝垣万剑阵 (3.0x 万剑归宗)">
-          <i class="fa-solid fa-crown mr-1 text-amber-500"></i>紫微万剑
-        </button>
-        <button onclick="switchFloorShape('four_symbols')" id="btn_shape_four_symbols" class="px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-slate-800 text-slate-700 text-[11px] font-bold font-mono-sci" title="二十八宿四象阵 (2.2x 聚灵工厂)">
-          <i class="fa-solid fa-shield-halved mr-1 text-sky-600"></i>四象四极
-        </button>
-        <button onclick="switchFloorShape('nine_luminaries')" id="btn_shape_nine_luminaries" class="px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-slate-800 text-slate-700 text-[11px] font-bold font-mono-sci" title="九曜日月行天阵 (2.6x 阴阳调和)">
-          <i class="fa-solid fa-sun mr-1 text-orange-500"></i>九曜日月
-        </button>
-        <button onclick="switchFloorShape('thunder_matrix')" id="btn_shape_thunder_matrix" class="px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-slate-800 text-slate-700 text-[11px] font-bold font-mono-sci" title="天罡雷劫破虚阵 (2.8x 渡劫爆发)">
-          <i class="fa-solid fa-bolt mr-1 text-purple-600"></i>天罡雷劫
+        <button onclick="switchFloorShape('factory_focus')" id="btn_shape_factory_focus" class="px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-amber-600 text-slate-700 text-[11px] font-bold font-mono-sci transition" title="极速工厂底盘：纯工业专精（4槽），最大化制造与采矿">
+          <i class="fa-solid fa-gear mr-1 text-amber-600"></i>极速工厂底盘
         </button>
       </div>
     </div>
