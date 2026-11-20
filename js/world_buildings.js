@@ -373,11 +373,11 @@ let worldBuildings = [
     "name": "传送带｜玄铁矿 #1",
     "power": "2 MW",
     "wx": -16,
-    "wy": 1,
+    "wy": 2,
     "wz": -6,
     "rot": 270,
     "beltLen": 4,
-    "beltItem": "iron_ore"
+    "beltItem": "MAT_001"
   },
   {
     "id": "bld_miner_fe2",
@@ -395,11 +395,11 @@ let worldBuildings = [
     "name": "传送带｜玄铁矿 #2",
     "power": "2 MW",
     "wx": -20,
-    "wy": 1,
+    "wy": 2,
     "wz": 0,
     "rot": 270,
     "beltLen": 12,
-    "beltItem": "iron_ore"
+    "beltItem": "MAT_001"
   },
   {
     "id": "bld_miner_cu1",
@@ -417,11 +417,11 @@ let worldBuildings = [
     "name": "传送带｜赤铜矿 #1",
     "power": "2 MW",
     "wx": -16,
-    "wy": 1,
+    "wy": 2,
     "wz": 6,
     "rot": 270,
     "beltLen": 4,
-    "beltItem": "copper_ore"
+    "beltItem": "MAT_002"
   },
   {
     "id": "bld_miner_cu2",
@@ -439,11 +439,11 @@ let worldBuildings = [
     "name": "传送带｜赤铜矿 #2",
     "power": "2 MW",
     "wx": -20,
-    "wy": 1,
+    "wy": 2,
     "wz": 12,
     "rot": 270,
     "beltLen": 12,
-    "beltItem": "copper_ore"
+    "beltItem": "MAT_002"
   },
   {
     "id": "bld_handcraft_init",
@@ -795,7 +795,7 @@ let worldBuildings = [
     "name": "1楼精炼炉 #1 (玄铁锭)",
     "power": "15 MW",
     "wx": -11,
-    "wy": 1,
+    "wy": 2,
     "wz": -6,
     "rot": 270
   },
@@ -805,11 +805,11 @@ let worldBuildings = [
     "name": "传送带｜玄铁锭",
     "power": "2 MW",
     "wx": -6.5,
-    "wy": 1,
+    "wy": 2,
     "wz": -6,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "iron_ingot"
+    "beltItem": "MAT_006"
   },
   {
     "id": "bld_split_1",
@@ -817,7 +817,7 @@ let worldBuildings = [
     "name": "分流器 #1",
     "power": "2 MW",
     "wx": -4,
-    "wy": 1,
+    "wy": 2,
     "wz": -6,
     "rot": 270
   },
@@ -827,7 +827,7 @@ let worldBuildings = [
     "name": "1楼精炼炉 #2 (玄铁锭)",
     "power": "15 MW",
     "wx": -11,
-    "wy": 1,
+    "wy": 2,
     "wz": 0,
     "rot": 270
   },
@@ -837,11 +837,11 @@ let worldBuildings = [
     "name": "传送带｜玄铁锭",
     "power": "2 MW",
     "wx": -6.5,
-    "wy": 1,
+    "wy": 2,
     "wz": 0,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "iron_ingot"
+    "beltItem": "MAT_006"
   },
   {
     "id": "bld_split_2",
@@ -849,7 +849,7 @@ let worldBuildings = [
     "name": "分流器 #2",
     "power": "2 MW",
     "wx": -4,
-    "wy": 1,
+    "wy": 2,
     "wz": 0,
     "rot": 270
   },
@@ -859,7 +859,7 @@ let worldBuildings = [
     "name": "1楼精炼炉 #3 (赤铜锭)",
     "power": "15 MW",
     "wx": -11,
-    "wy": 1,
+    "wy": 2,
     "wz": 6,
     "rot": 270
   },
@@ -869,11 +869,11 @@ let worldBuildings = [
     "name": "传送带｜赤铜锭",
     "power": "2 MW",
     "wx": -6.5,
-    "wy": 1,
+    "wy": 2,
     "wz": 6,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "copper_ingot"
+    "beltItem": "MAT_007"
   },
   {
     "id": "bld_split_3",
@@ -881,7 +881,7 @@ let worldBuildings = [
     "name": "分流器 #3",
     "power": "2 MW",
     "wx": -4,
-    "wy": 1,
+    "wy": 2,
     "wz": 6,
     "rot": 270
   },
@@ -891,7 +891,7 @@ let worldBuildings = [
     "name": "1楼精炼炉 #4 (赤铜锭)",
     "power": "15 MW",
     "wx": -11,
-    "wy": 1,
+    "wy": 2,
     "wz": 12,
     "rot": 270
   },
@@ -901,11 +901,11 @@ let worldBuildings = [
     "name": "传送带｜赤铜锭",
     "power": "2 MW",
     "wx": -6.5,
-    "wy": 1,
+    "wy": 2,
     "wz": 12,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "copper_ingot"
+    "beltItem": "MAT_007"
   },
   {
     "id": "bld_split_4",
@@ -913,7 +913,7 @@ let worldBuildings = [
     "name": "分流器 #4",
     "power": "2 MW",
     "wx": -4,
-    "wy": 1,
+    "wy": 2,
     "wz": 12,
     "rot": 270
   },
@@ -923,11 +923,11 @@ let worldBuildings = [
     "name": "传送带｜进加工台",
     "power": "2 MW",
     "wx": -1.5,
-    "wy": 1,
+    "wy": 2,
     "wz": -6,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "iron_ingot"
+    "beltItem": "MAT_006"
   },
   {
     "id": "bld_asm_1",
@@ -935,7 +935,7 @@ let worldBuildings = [
     "name": "1楼加工台 #1 (玄铁板)",
     "power": "10 MW",
     "wx": 2,
-    "wy": 1,
+    "wy": 2,
     "wz": -6,
     "rot": 270
   },
@@ -945,11 +945,11 @@ let worldBuildings = [
     "name": "传送带｜玄铁板",
     "power": "2 MW",
     "wx": 5.5,
-    "wy": 1,
+    "wy": 2,
     "wz": -6,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "iron_plate"
+    "beltItem": "MAT_008"
   },
   {
     "id": "bld_asm_2",
@@ -957,7 +957,7 @@ let worldBuildings = [
     "name": "1楼加工台 #2 (玄铁齿轮)",
     "power": "10 MW",
     "wx": 9,
-    "wy": 1,
+    "wy": 2,
     "wz": -6,
     "rot": 270
   },
@@ -967,11 +967,11 @@ let worldBuildings = [
     "name": "传送带｜玄铁齿轮",
     "power": "2 MW",
     "wx": 12.5,
-    "wy": 1,
+    "wy": 2,
     "wz": -6,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "iron_gear"
+    "beltItem": "MAT_011"
   },
   {
     "id": "bld_asm_3",
@@ -979,7 +979,7 @@ let worldBuildings = [
     "name": "1楼加工台 #3 (玄铁梁)",
     "power": "10 MW",
     "wx": 16,
-    "wy": 1,
+    "wy": 2,
     "wz": -6,
     "rot": 270
   },
@@ -989,11 +989,11 @@ let worldBuildings = [
     "name": "传送带｜玄铁梁→1号电梯",
     "power": "2 MW",
     "wx": 19.5,
-    "wy": 1,
+    "wy": 2,
     "wz": -6,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "iron_beam"
+    "beltItem": "MAT_014"
   },
   {
     "id": "bld_belt_1b1",
@@ -1001,11 +1001,11 @@ let worldBuildings = [
     "name": "传送带｜进加工台",
     "power": "2 MW",
     "wx": -1.5,
-    "wy": 1,
+    "wy": 2,
     "wz": 0,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "iron_ingot"
+    "beltItem": "MAT_006"
   },
   {
     "id": "bld_asm_4",
@@ -1013,7 +1013,7 @@ let worldBuildings = [
     "name": "1楼加工台 #4 (设备管件)",
     "power": "10 MW",
     "wx": 2,
-    "wy": 1,
+    "wy": 2,
     "wz": 0,
     "rot": 270
   },
@@ -1023,11 +1023,11 @@ let worldBuildings = [
     "name": "传送带｜进粉碎机",
     "power": "2 MW",
     "wx": 5,
-    "wy": 1,
+    "wy": 2,
     "wz": 0,
     "rot": 270,
     "beltLen": 2,
-    "beltItem": "iron_ingot"
+    "beltItem": "MAT_006"
   },
   {
     "id": "bld_crush_1",
@@ -1035,7 +1035,7 @@ let worldBuildings = [
     "name": "1楼粉碎机 #1 (玄铁粉)",
     "power": "20 MW",
     "wx": 7,
-    "wy": 1,
+    "wy": 2,
     "wz": 0,
     "rot": 270
   },
@@ -1045,11 +1045,11 @@ let worldBuildings = [
     "name": "传送带｜玄铁粉",
     "power": "2 MW",
     "wx": 9.5,
-    "wy": 1,
+    "wy": 2,
     "wz": 0,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "iron_powder"
+    "beltItem": "MAT_009"
   },
   {
     "id": "bld_crush_2",
@@ -1057,7 +1057,7 @@ let worldBuildings = [
     "name": "1楼粉碎机 #2 (玄铁粉)",
     "power": "20 MW",
     "wx": 12,
-    "wy": 1,
+    "wy": 2,
     "wz": 0,
     "rot": 270
   },
@@ -1067,11 +1067,11 @@ let worldBuildings = [
     "name": "传送带｜玄铁粉",
     "power": "2 MW",
     "wx": 14.5,
-    "wy": 1,
+    "wy": 2,
     "wz": 0,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "iron_powder"
+    "beltItem": "MAT_009"
   },
   {
     "id": "bld_crush_3",
@@ -1079,7 +1079,7 @@ let worldBuildings = [
     "name": "1楼粉碎机 #3 (玄铁粉)",
     "power": "20 MW",
     "wx": 17,
-    "wy": 1,
+    "wy": 2,
     "wz": 0,
     "rot": 270
   },
@@ -1089,11 +1089,11 @@ let worldBuildings = [
     "name": "传送带｜玄铁粉→2号电梯",
     "power": "2 MW",
     "wx": 19.5,
-    "wy": 1,
+    "wy": 2,
     "wz": 0,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "iron_powder"
+    "beltItem": "MAT_009"
   },
   {
     "id": "bld_belt_1c0_1",
@@ -1101,11 +1101,11 @@ let worldBuildings = [
     "name": "传送带｜赤铜锭→切割机",
     "power": "2 MW",
     "wx": -1.5,
-    "wy": 1,
+    "wy": 2,
     "wz": 6,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "copper_ingot"
+    "beltItem": "MAT_007"
   },
   {
     "id": "bld_cut_1_1",
@@ -1113,7 +1113,7 @@ let worldBuildings = [
     "name": "1楼切割机 #1A (导灵铜片)",
     "power": "25 MW",
     "wx": 1,
-    "wy": 1,
+    "wy": 2,
     "wz": 6,
     "rot": 270
   },
@@ -1123,11 +1123,11 @@ let worldBuildings = [
     "name": "传送带｜导灵铜片",
     "power": "2 MW",
     "wx": 3.5,
-    "wy": 1,
+    "wy": 2,
     "wz": 6,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "ling_copper_sheet"
+    "beltItem": "MAT_013"
   },
   {
     "id": "bld_cut_1_2",
@@ -1135,7 +1135,7 @@ let worldBuildings = [
     "name": "1楼切割机 #1B (铜线)",
     "power": "25 MW",
     "wx": 6,
-    "wy": 1,
+    "wy": 2,
     "wz": 6,
     "rot": 270
   },
@@ -1145,11 +1145,11 @@ let worldBuildings = [
     "name": "传送带｜铜线",
     "power": "2 MW",
     "wx": 8.5,
-    "wy": 1,
+    "wy": 2,
     "wz": 6,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "copper_wire"
+    "beltItem": "MAT_019"
   },
   {
     "id": "bld_cut_1_3",
@@ -1157,7 +1157,7 @@ let worldBuildings = [
     "name": "1楼切割机 #1C (木结构件)",
     "power": "25 MW",
     "wx": 11,
-    "wy": 1,
+    "wy": 2,
     "wz": 6,
     "rot": 270
   },
@@ -1167,19 +1167,19 @@ let worldBuildings = [
     "name": "传送带｜铜线→合流",
     "power": "2 MW",
     "wx": 13.5,
-    "wy": 1,
+    "wy": 2,
     "wz": 6,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "copper_wire"
+    "beltItem": "MAT_019"
   },
   {
     "id": "bld_merger_1f_1",
-    "type": "bd_123",
+    "type": "merger",
     "name": "1楼合流器 #1",
     "power": "2 MW",
     "wx": 16,
-    "wy": 1,
+    "wy": 2,
     "wz": 6,
     "rot": 270
   },
@@ -1189,11 +1189,11 @@ let worldBuildings = [
     "name": "传送带｜送往垂直电梯",
     "power": "2 MW",
     "wx": 19,
-    "wy": 1,
+    "wy": 2,
     "wz": 6,
     "rot": 270,
     "beltLen": 4,
-    "beltItem": "copper_wire"
+    "beltItem": "MAT_019"
   },
   {
     "id": "bld_belt_1c0_2",
@@ -1201,11 +1201,11 @@ let worldBuildings = [
     "name": "传送带｜赤铜锭→切割机",
     "power": "2 MW",
     "wx": -1.5,
-    "wy": 1,
+    "wy": 2,
     "wz": 12,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "copper_ingot"
+    "beltItem": "MAT_007"
   },
   {
     "id": "bld_cut_2_1",
@@ -1213,7 +1213,7 @@ let worldBuildings = [
     "name": "1楼切割机 #2A (导灵铜片)",
     "power": "25 MW",
     "wx": 1,
-    "wy": 1,
+    "wy": 2,
     "wz": 12,
     "rot": 270
   },
@@ -1223,11 +1223,11 @@ let worldBuildings = [
     "name": "传送带｜导灵铜片",
     "power": "2 MW",
     "wx": 3.5,
-    "wy": 1,
+    "wy": 2,
     "wz": 12,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "ling_copper_sheet"
+    "beltItem": "MAT_013"
   },
   {
     "id": "bld_cut_2_2",
@@ -1235,7 +1235,7 @@ let worldBuildings = [
     "name": "1楼切割机 #2B (铜线)",
     "power": "25 MW",
     "wx": 6,
-    "wy": 1,
+    "wy": 2,
     "wz": 12,
     "rot": 270
   },
@@ -1245,11 +1245,11 @@ let worldBuildings = [
     "name": "传送带｜铜线",
     "power": "2 MW",
     "wx": 8.5,
-    "wy": 1,
+    "wy": 2,
     "wz": 12,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "copper_wire"
+    "beltItem": "MAT_019"
   },
   {
     "id": "bld_cut_2_3",
@@ -1257,7 +1257,7 @@ let worldBuildings = [
     "name": "1楼切割机 #2C (木结构件)",
     "power": "25 MW",
     "wx": 11,
-    "wy": 1,
+    "wy": 2,
     "wz": 12,
     "rot": 270
   },
@@ -1267,19 +1267,19 @@ let worldBuildings = [
     "name": "传送带｜铜线→合流",
     "power": "2 MW",
     "wx": 13.5,
-    "wy": 1,
+    "wy": 2,
     "wz": 12,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "copper_wire"
+    "beltItem": "MAT_019"
   },
   {
     "id": "bld_merger_1f_2",
-    "type": "bd_123",
+    "type": "merger",
     "name": "1楼合流器 #2",
     "power": "2 MW",
     "wx": 16,
-    "wy": 1,
+    "wy": 2,
     "wz": 12,
     "rot": 270
   },
@@ -1289,11 +1289,11 @@ let worldBuildings = [
     "name": "传送带｜送往垂直电梯",
     "power": "2 MW",
     "wx": 19,
-    "wy": 1,
+    "wy": 2,
     "wz": 12,
     "rot": 270,
     "beltLen": 4,
-    "beltItem": "copper_wire"
+    "beltItem": "MAT_019"
   },
   {
     "id": "bld_lift_12_1",
@@ -1301,11 +1301,11 @@ let worldBuildings = [
     "name": "垂直电梯 1F→2F #1",
     "power": "3 MW",
     "wx": 22,
-    "wy": 1,
+    "wy": 2,
     "wz": -6,
     "rot": 270,
-    "liftHeight": 7.0,
-    "beltItem": "iron_beam"
+    "liftHeight": 14,
+    "beltItem": "MAT_014"
   },
   {
     "id": "bld_lift_12_2",
@@ -1313,11 +1313,11 @@ let worldBuildings = [
     "name": "垂直电梯 1F→2F #2",
     "power": "3 MW",
     "wx": 22,
-    "wy": 1,
+    "wy": 2,
     "wz": 0,
     "rot": 270,
-    "liftHeight": 7.0,
-    "beltItem": "iron_powder"
+    "liftHeight": 14,
+    "beltItem": "MAT_009"
   },
   {
     "id": "bld_lift_12_3",
@@ -1325,11 +1325,11 @@ let worldBuildings = [
     "name": "垂直电梯 1F→2F #3",
     "power": "3 MW",
     "wx": 22,
-    "wy": 1,
+    "wy": 2,
     "wz": 6,
     "rot": 270,
-    "liftHeight": 7.0,
-    "beltItem": "copper_wire"
+    "liftHeight": 14,
+    "beltItem": "MAT_019"
   },
   {
     "id": "bld_lift_12_4",
@@ -1337,11 +1337,11 @@ let worldBuildings = [
     "name": "垂直电梯 1F→2F #4",
     "power": "3 MW",
     "wx": 22,
-    "wy": 1,
+    "wy": 2,
     "wz": 12,
     "rot": 270,
-    "liftHeight": 7.0,
-    "beltItem": "ling_copper_sheet"
+    "liftHeight": 14,
+    "beltItem": "MAT_013"
   },
   {
     "id": "bld_col_a_-16_-10",
@@ -1359,7 +1359,7 @@ let worldBuildings = [
     "name": "承重立柱 (中层)",
     "power": "0 MW",
     "wx": -16,
-    "wy": 4,
+    "wy": 8,
     "wz": -10,
     "rot": 0
   },
@@ -1369,7 +1369,7 @@ let worldBuildings = [
     "name": "承重立柱 (顶层)",
     "power": "0 MW",
     "wx": -16,
-    "wy": 8,
+    "wy": 16,
     "wz": -10,
     "rot": 0
   },
@@ -1379,7 +1379,7 @@ let worldBuildings = [
     "name": "承重立柱 (顶帽)",
     "power": "0 MW",
     "wx": -16,
-    "wy": 12,
+    "wy": 24,
     "wz": -10,
     "rot": 0
   },
@@ -1399,7 +1399,7 @@ let worldBuildings = [
     "name": "承重立柱 (中层)",
     "power": "0 MW",
     "wx": -16,
-    "wy": 4,
+    "wy": 8,
     "wz": 15,
     "rot": 0
   },
@@ -1409,7 +1409,7 @@ let worldBuildings = [
     "name": "承重立柱 (顶层)",
     "power": "0 MW",
     "wx": -16,
-    "wy": 8,
+    "wy": 16,
     "wz": 15,
     "rot": 0
   },
@@ -1419,7 +1419,7 @@ let worldBuildings = [
     "name": "承重立柱 (顶帽)",
     "power": "0 MW",
     "wx": -16,
-    "wy": 12,
+    "wy": 24,
     "wz": 15,
     "rot": 0
   },
@@ -1439,7 +1439,7 @@ let worldBuildings = [
     "name": "承重立柱 (中层)",
     "power": "0 MW",
     "wx": 22,
-    "wy": 4,
+    "wy": 8,
     "wz": -10,
     "rot": 0
   },
@@ -1449,7 +1449,7 @@ let worldBuildings = [
     "name": "承重立柱 (顶层)",
     "power": "0 MW",
     "wx": 22,
-    "wy": 8,
+    "wy": 16,
     "wz": -10,
     "rot": 0
   },
@@ -1459,7 +1459,7 @@ let worldBuildings = [
     "name": "承重立柱 (顶帽)",
     "power": "0 MW",
     "wx": 22,
-    "wy": 12,
+    "wy": 24,
     "wz": -10,
     "rot": 0
   },
@@ -1479,7 +1479,7 @@ let worldBuildings = [
     "name": "承重立柱 (中层)",
     "power": "0 MW",
     "wx": 22,
-    "wy": 4,
+    "wy": 8,
     "wz": 15,
     "rot": 0
   },
@@ -1489,7 +1489,7 @@ let worldBuildings = [
     "name": "承重立柱 (顶层)",
     "power": "0 MW",
     "wx": 22,
-    "wy": 8,
+    "wy": 16,
     "wz": 15,
     "rot": 0
   },
@@ -1499,7 +1499,7 @@ let worldBuildings = [
     "name": "承重立柱 (顶帽)",
     "power": "0 MW",
     "wx": 22,
-    "wy": 12,
+    "wy": 24,
     "wz": 15,
     "rot": 0
   },
@@ -1509,7 +1509,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": -12,
-    "wy": 7,
+    "wy": 14,
     "wz": -6,
     "rot": 0
   },
@@ -1519,7 +1519,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": -6,
-    "wy": 7,
+    "wy": 14,
     "wz": -6,
     "rot": 0
   },
@@ -1529,7 +1529,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": 0,
-    "wy": 7,
+    "wy": 14,
     "wz": -6,
     "rot": 0
   },
@@ -1539,7 +1539,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": 6,
-    "wy": 7,
+    "wy": 14,
     "wz": -6,
     "rot": 0
   },
@@ -1549,7 +1549,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": 12,
-    "wy": 7,
+    "wy": 14,
     "wz": -6,
     "rot": 0
   },
@@ -1559,7 +1559,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": 18,
-    "wy": 7,
+    "wy": 14,
     "wz": -6,
     "rot": 0
   },
@@ -1569,7 +1569,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": -12,
-    "wy": 7,
+    "wy": 14,
     "wz": 0,
     "rot": 0
   },
@@ -1579,7 +1579,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": -6,
-    "wy": 7,
+    "wy": 14,
     "wz": 0,
     "rot": 0
   },
@@ -1589,7 +1589,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": 0,
-    "wy": 7,
+    "wy": 14,
     "wz": 0,
     "rot": 0
   },
@@ -1599,7 +1599,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": 6,
-    "wy": 7,
+    "wy": 14,
     "wz": 0,
     "rot": 0
   },
@@ -1609,7 +1609,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": 12,
-    "wy": 7,
+    "wy": 14,
     "wz": 0,
     "rot": 0
   },
@@ -1619,7 +1619,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": 18,
-    "wy": 7,
+    "wy": 14,
     "wz": 0,
     "rot": 0
   },
@@ -1629,7 +1629,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": -12,
-    "wy": 7,
+    "wy": 14,
     "wz": 6,
     "rot": 0
   },
@@ -1639,7 +1639,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": -6,
-    "wy": 7,
+    "wy": 14,
     "wz": 6,
     "rot": 0
   },
@@ -1649,7 +1649,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": 0,
-    "wy": 7,
+    "wy": 14,
     "wz": 6,
     "rot": 0
   },
@@ -1659,7 +1659,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": 6,
-    "wy": 7,
+    "wy": 14,
     "wz": 6,
     "rot": 0
   },
@@ -1669,7 +1669,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": 12,
-    "wy": 7,
+    "wy": 14,
     "wz": 6,
     "rot": 0
   },
@@ -1679,7 +1679,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": 18,
-    "wy": 7,
+    "wy": 14,
     "wz": 6,
     "rot": 0
   },
@@ -1689,7 +1689,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": -12,
-    "wy": 7,
+    "wy": 14,
     "wz": 12,
     "rot": 0
   },
@@ -1699,7 +1699,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": -6,
-    "wy": 7,
+    "wy": 14,
     "wz": 12,
     "rot": 0
   },
@@ -1709,7 +1709,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": 0,
-    "wy": 7,
+    "wy": 14,
     "wz": 12,
     "rot": 0
   },
@@ -1719,7 +1719,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": 6,
-    "wy": 7,
+    "wy": 14,
     "wz": 12,
     "rot": 0
   },
@@ -1729,7 +1729,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": 12,
-    "wy": 7,
+    "wy": 14,
     "wz": 12,
     "rot": 0
   },
@@ -1739,7 +1739,7 @@ let worldBuildings = [
     "name": "2楼底座｜3×3×1m",
     "power": "0 MW",
     "wx": 18,
-    "wy": 7,
+    "wy": 14,
     "wz": 12,
     "rot": 0
   },
@@ -1749,11 +1749,11 @@ let worldBuildings = [
     "name": "2楼传送带｜电梯出料",
     "power": "2 MW",
     "wx": 19,
-    "wy": 8,
+    "wy": 16,
     "wz": -6,
     "rot": 90,
     "beltLen": 4,
-    "beltItem": "copper_wire"
+    "beltItem": "MAT_019"
   },
   {
     "id": "bld_hasm_1_1",
@@ -1761,7 +1761,7 @@ let worldBuildings = [
     "name": "2楼组装机 #1A (控制模块)",
     "power": "50 MW",
     "wx": 14,
-    "wy": 8,
+    "wy": 16,
     "wz": -6,
     "rot": 90
   },
@@ -1771,11 +1771,11 @@ let worldBuildings = [
     "name": "2楼传送带｜控制模块",
     "power": "2 MW",
     "wx": 9,
-    "wy": 8,
+    "wy": 16,
     "wz": -6,
     "rot": 90,
     "beltLen": 4,
-    "beltItem": "basic_control_module"
+    "beltItem": "mat_014"
   },
   {
     "id": "bld_hasm_1_2",
@@ -1783,7 +1783,7 @@ let worldBuildings = [
     "name": "2楼组装机 #1B (生物控制芯)",
     "power": "50 MW",
     "wx": 4,
-    "wy": 8,
+    "wy": 16,
     "wz": -6,
     "rot": 90
   },
@@ -1793,11 +1793,11 @@ let worldBuildings = [
     "name": "2楼传送带｜控制芯→2F电梯",
     "power": "2 MW",
     "wx": -7,
-    "wy": 8,
+    "wy": 16,
     "wz": -6,
     "rot": 90,
     "beltLen": 16,
-    "beltItem": "basic_control_module"
+    "beltItem": "mat_014"
   },
   {
     "id": "bld_belt_2e_2",
@@ -1805,11 +1805,11 @@ let worldBuildings = [
     "name": "2楼传送带｜电梯出料",
     "power": "2 MW",
     "wx": 19,
-    "wy": 8,
+    "wy": 16,
     "wz": 0,
     "rot": 90,
     "beltLen": 4,
-    "beltItem": "copper_wire"
+    "beltItem": "MAT_019"
   },
   {
     "id": "bld_hasm_2_1",
@@ -1817,7 +1817,7 @@ let worldBuildings = [
     "name": "2楼组装机 #2A (控制模块)",
     "power": "50 MW",
     "wx": 14,
-    "wy": 8,
+    "wy": 16,
     "wz": 0,
     "rot": 90
   },
@@ -1827,11 +1827,11 @@ let worldBuildings = [
     "name": "2楼传送带｜控制模块",
     "power": "2 MW",
     "wx": 9,
-    "wy": 8,
+    "wy": 16,
     "wz": 0,
     "rot": 90,
     "beltLen": 4,
-    "beltItem": "basic_control_module"
+    "beltItem": "mat_014"
   },
   {
     "id": "bld_hasm_2_2",
@@ -1839,7 +1839,7 @@ let worldBuildings = [
     "name": "2楼组装机 #2B (生物控制芯)",
     "power": "50 MW",
     "wx": 4,
-    "wy": 8,
+    "wy": 16,
     "wz": 0,
     "rot": 90
   },
@@ -1849,11 +1849,11 @@ let worldBuildings = [
     "name": "2楼传送带｜控制芯→2F电梯",
     "power": "2 MW",
     "wx": -7,
-    "wy": 8,
+    "wy": 16,
     "wz": 0,
     "rot": 90,
     "beltLen": 16,
-    "beltItem": "basic_control_module"
+    "beltItem": "mat_014"
   },
   {
     "id": "bld_belt_2c1",
@@ -1861,11 +1861,11 @@ let worldBuildings = [
     "name": "2楼传送带｜生物液进离心机",
     "power": "2 MW",
     "wx": 19,
-    "wy": 8,
+    "wy": 16,
     "wz": 6,
     "rot": 90,
     "beltLen": 4,
-    "beltItem": "ling_copper_sheet"
+    "beltItem": "MAT_013"
   },
   {
     "id": "bld_cent_2_1",
@@ -1873,7 +1873,7 @@ let worldBuildings = [
     "name": "2楼离心机 #1",
     "power": "35 MW",
     "wx": 15,
-    "wy": 8,
+    "wy": 16,
     "wz": 6,
     "rot": 90
   },
@@ -1883,11 +1883,11 @@ let worldBuildings = [
     "name": "2楼传送带｜级联离心",
     "power": "2 MW",
     "wx": 11,
-    "wy": 8,
+    "wy": 16,
     "wz": 6,
     "rot": 90,
     "beltLen": 4,
-    "beltItem": "ling_copper_sheet"
+    "beltItem": "MAT_013"
   },
   {
     "id": "bld_cent_2_2",
@@ -1895,7 +1895,7 @@ let worldBuildings = [
     "name": "2楼离心机 #2",
     "power": "35 MW",
     "wx": 7,
-    "wy": 8,
+    "wy": 16,
     "wz": 6,
     "rot": 90
   },
@@ -1905,11 +1905,11 @@ let worldBuildings = [
     "name": "2楼传送带｜进解构机",
     "power": "2 MW",
     "wx": 3,
-    "wy": 8,
+    "wy": 16,
     "wz": 6,
     "rot": 90,
     "beltLen": 4,
-    "beltItem": "iron_powder"
+    "beltItem": "MAT_009"
   },
   {
     "id": "bld_decon_2_1",
@@ -1917,7 +1917,7 @@ let worldBuildings = [
     "name": "2楼解构机 #1 (BD_140)",
     "power": "55 MW",
     "wx": -3,
-    "wy": 8,
+    "wy": 16,
     "wz": 6,
     "rot": 90
   },
@@ -1927,11 +1927,11 @@ let worldBuildings = [
     "name": "2楼传送带｜生物组织",
     "power": "2 MW",
     "wx": -11,
-    "wy": 8,
+    "wy": 16,
     "wz": 6,
     "rot": 90,
     "beltLen": 8,
-    "beltItem": "iron_powder"
+    "beltItem": "MAT_009"
   },
   {
     "id": "bld_belt_2d1",
@@ -1939,11 +1939,11 @@ let worldBuildings = [
     "name": "2楼传送带｜进2号解构",
     "power": "2 MW",
     "wx": 19,
-    "wy": 8,
+    "wy": 16,
     "wz": 12,
     "rot": 90,
     "beltLen": 4,
-    "beltItem": "iron_plate"
+    "beltItem": "MAT_008"
   },
   {
     "id": "bld_decon_2_2",
@@ -1951,7 +1951,7 @@ let worldBuildings = [
     "name": "2楼解构机 #2 (BD_140)",
     "power": "55 MW",
     "wx": 13,
-    "wy": 8,
+    "wy": 16,
     "wz": 12,
     "rot": 90
   },
@@ -1961,7 +1961,7 @@ let worldBuildings = [
     "name": "2楼水管｜流体输送",
     "power": "0 MW",
     "wx": 7,
-    "wy": 8,
+    "wy": 16,
     "wz": 12,
     "rot": 0,
     "pipeLen": 4
@@ -1972,7 +1972,7 @@ let worldBuildings = [
     "name": "2楼流体中枢 (BD_158)",
     "power": "0 MW",
     "wx": 1,
-    "wy": 8,
+    "wy": 16,
     "wz": 12,
     "rot": 90
   },
@@ -1982,7 +1982,7 @@ let worldBuildings = [
     "name": "2楼水管｜营养液",
     "power": "0 MW",
     "wx": -4,
-    "wy": 8,
+    "wy": 16,
     "wz": 12,
     "rot": 0,
     "pipeLen": 2
@@ -1993,7 +1993,7 @@ let worldBuildings = [
     "name": "2楼营养基座 (BD_159)",
     "power": "0 MW",
     "wx": -7,
-    "wy": 8,
+    "wy": 16,
     "wz": 12,
     "rot": 90
   },
@@ -2003,7 +2003,7 @@ let worldBuildings = [
     "name": "2楼回收塔 (BD_150)",
     "power": "20 MW",
     "wx": -12,
-    "wy": 8,
+    "wy": 16,
     "wz": 12,
     "rot": 90
   },
@@ -2013,11 +2013,11 @@ let worldBuildings = [
     "name": "垂直电梯 2F→3F #1",
     "power": "3 MW",
     "wx": -16,
-    "wy": 8,
+    "wy": 16,
     "wz": -6,
     "rot": 270,
-    "liftHeight": 7.0,
-    "beltItem": "basic_control_module"
+    "liftHeight": 14,
+    "beltItem": "mat_014"
   },
   {
     "id": "bld_lift_23_2",
@@ -2025,11 +2025,11 @@ let worldBuildings = [
     "name": "垂直电梯 2F→3F #2",
     "power": "3 MW",
     "wx": -16,
-    "wy": 8,
+    "wy": 16,
     "wz": 0,
     "rot": 270,
-    "liftHeight": 7.0,
-    "beltItem": "basic_control_module"
+    "liftHeight": 14,
+    "beltItem": "mat_014"
   },
   {
     "id": "bld_lift_23_3",
@@ -2037,11 +2037,11 @@ let worldBuildings = [
     "name": "垂直电梯 2F→3F #3",
     "power": "3 MW",
     "wx": -16,
-    "wy": 8,
+    "wy": 16,
     "wz": 6,
     "rot": 270,
-    "liftHeight": 7.0,
-    "beltItem": "iron_powder"
+    "liftHeight": 14,
+    "beltItem": "MAT_009"
   },
   {
     "id": "bld_lift_23_4",
@@ -2049,11 +2049,11 @@ let worldBuildings = [
     "name": "垂直电梯 2F→3F #4",
     "power": "3 MW",
     "wx": -16,
-    "wy": 8,
+    "wy": 16,
     "wz": 12,
     "rot": 270,
-    "liftHeight": 7.0,
-    "beltItem": "ling_copper_sheet"
+    "liftHeight": 14,
+    "beltItem": "MAT_013"
   },
   {
     "id": "bld_f3_-12_-6",
@@ -2061,7 +2061,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": -12,
-    "wy": 14,
+    "wy": 28,
     "wz": -6,
     "rot": 0
   },
@@ -2071,7 +2071,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": -6,
-    "wy": 14,
+    "wy": 28,
     "wz": -6,
     "rot": 0
   },
@@ -2081,7 +2081,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": 0,
-    "wy": 14,
+    "wy": 28,
     "wz": -6,
     "rot": 0
   },
@@ -2091,7 +2091,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": 6,
-    "wy": 14,
+    "wy": 28,
     "wz": -6,
     "rot": 0
   },
@@ -2101,7 +2101,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": 12,
-    "wy": 14,
+    "wy": 28,
     "wz": -6,
     "rot": 0
   },
@@ -2111,7 +2111,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": 18,
-    "wy": 14,
+    "wy": 28,
     "wz": -6,
     "rot": 0
   },
@@ -2121,7 +2121,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": -12,
-    "wy": 14,
+    "wy": 28,
     "wz": 0,
     "rot": 0
   },
@@ -2131,7 +2131,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": -6,
-    "wy": 14,
+    "wy": 28,
     "wz": 0,
     "rot": 0
   },
@@ -2141,7 +2141,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": 0,
-    "wy": 14,
+    "wy": 28,
     "wz": 0,
     "rot": 0
   },
@@ -2151,7 +2151,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": 6,
-    "wy": 14,
+    "wy": 28,
     "wz": 0,
     "rot": 0
   },
@@ -2161,7 +2161,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": 12,
-    "wy": 14,
+    "wy": 28,
     "wz": 0,
     "rot": 0
   },
@@ -2171,7 +2171,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": 18,
-    "wy": 14,
+    "wy": 28,
     "wz": 0,
     "rot": 0
   },
@@ -2181,7 +2181,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": -12,
-    "wy": 14,
+    "wy": 28,
     "wz": 6,
     "rot": 0
   },
@@ -2191,7 +2191,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": -6,
-    "wy": 14,
+    "wy": 28,
     "wz": 6,
     "rot": 0
   },
@@ -2201,7 +2201,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": 0,
-    "wy": 14,
+    "wy": 28,
     "wz": 6,
     "rot": 0
   },
@@ -2211,7 +2211,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": 6,
-    "wy": 14,
+    "wy": 28,
     "wz": 6,
     "rot": 0
   },
@@ -2221,7 +2221,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": 12,
-    "wy": 14,
+    "wy": 28,
     "wz": 6,
     "rot": 0
   },
@@ -2231,7 +2231,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": 18,
-    "wy": 14,
+    "wy": 28,
     "wz": 6,
     "rot": 0
   },
@@ -2241,7 +2241,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": -12,
-    "wy": 14,
+    "wy": 28,
     "wz": 12,
     "rot": 0
   },
@@ -2251,7 +2251,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": -6,
-    "wy": 14,
+    "wy": 28,
     "wz": 12,
     "rot": 0
   },
@@ -2261,7 +2261,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": 0,
-    "wy": 14,
+    "wy": 28,
     "wz": 12,
     "rot": 0
   },
@@ -2271,7 +2271,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": 6,
-    "wy": 14,
+    "wy": 28,
     "wz": 12,
     "rot": 0
   },
@@ -2281,7 +2281,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": 12,
-    "wy": 14,
+    "wy": 28,
     "wz": 12,
     "rot": 0
   },
@@ -2291,7 +2291,7 @@ let worldBuildings = [
     "name": "3楼终局平台｜3×3×1m",
     "power": "0 MW",
     "wx": 18,
-    "wy": 14,
+    "wy": 28,
     "wz": 12,
     "rot": 0
   },
@@ -2301,11 +2301,11 @@ let worldBuildings = [
     "name": "3楼传送带｜进引擎",
     "power": "2 MW",
     "wx": -14,
-    "wy": 15,
+    "wy": 30,
     "wz": -5,
     "rot": 270,
     "beltLen": 2,
-    "beltItem": "basic_control_module"
+    "beltItem": "mat_014"
   },
   {
     "id": "bld_engine_3f",
@@ -2313,7 +2313,7 @@ let worldBuildings = [
     "name": "3楼灵力引擎 #2 (高温冶炼)",
     "power": "+50 MW",
     "wx": -10,
-    "wy": 15,
+    "wy": 30,
     "wz": -5,
     "rot": 270
   },
@@ -2323,11 +2323,11 @@ let worldBuildings = [
     "name": "3楼传送带｜合金→炼宝台#1",
     "power": "2 MW",
     "wx": -5,
-    "wy": 15,
+    "wy": 30,
     "wz": -5,
     "rot": 270,
     "beltLen": 4,
-    "beltItem": "high_temp_alloy_ingot"
+    "beltItem": "MAT_043"
   },
   {
     "id": "bld_belt_3w3",
@@ -2335,11 +2335,11 @@ let worldBuildings = [
     "name": "3楼传送带｜进冶炼舱#1",
     "power": "2 MW",
     "wx": -13,
-    "wy": 15,
+    "wy": 30,
     "wz": 3,
     "rot": 270,
     "beltLen": 4,
-    "beltItem": "basic_control_module"
+    "beltItem": "mat_014"
   },
   {
     "id": "bld_chamber_3_1",
@@ -2347,7 +2347,7 @@ let worldBuildings = [
     "name": "3楼冶炼舱 #1 (高温合金)",
     "power": "65 MW",
     "wx": -10,
-    "wy": 15,
+    "wy": 30,
     "wz": 3,
     "rot": 270
   },
@@ -2357,11 +2357,11 @@ let worldBuildings = [
     "name": "3楼传送带｜合金→炼宝台#2",
     "power": "2 MW",
     "wx": -6,
-    "wy": 15,
+    "wy": 30,
     "wz": 3,
     "rot": 270,
     "beltLen": 6,
-    "beltItem": "high_temp_alloy_ingot"
+    "beltItem": "MAT_043"
   },
   {
     "id": "bld_belt_3w5",
@@ -2369,11 +2369,11 @@ let worldBuildings = [
     "name": "3楼传送带｜进冶炼舱#2",
     "power": "2 MW",
     "wx": -13,
-    "wy": 15,
+    "wy": 30,
     "wz": 11,
     "rot": 270,
     "beltLen": 4,
-    "beltItem": "basic_control_module"
+    "beltItem": "mat_014"
   },
   {
     "id": "bld_chamber_3_2",
@@ -2381,7 +2381,7 @@ let worldBuildings = [
     "name": "3楼冶炼舱 #2 (导脉合金)",
     "power": "65 MW",
     "wx": -10,
-    "wy": 15,
+    "wy": 30,
     "wz": 11,
     "rot": 270
   },
@@ -2391,11 +2391,11 @@ let worldBuildings = [
     "name": "3楼传送带｜合金→炼宝台#3",
     "power": "2 MW",
     "wx": -6,
-    "wy": 15,
+    "wy": 30,
     "wz": 11,
     "rot": 270,
     "beltLen": 6,
-    "beltItem": "daomai_alloy"
+    "beltItem": "mat_068"
   },
   {
     "id": "bld_alchemy_1",
@@ -2403,7 +2403,7 @@ let worldBuildings = [
     "name": "3楼炼宝台 #1",
     "power": "45 MW",
     "wx": 1,
-    "wy": 15,
+    "wy": 30,
     "wz": -5,
     "rot": 270
   },
@@ -2413,7 +2413,7 @@ let worldBuildings = [
     "name": "3楼炼宝台 #2",
     "power": "45 MW",
     "wx": 1,
-    "wy": 15,
+    "wy": 30,
     "wz": 3.5,
     "rot": 270
   },
@@ -2423,7 +2423,7 @@ let worldBuildings = [
     "name": "3楼炼宝台 #3",
     "power": "45 MW",
     "wx": 1,
-    "wy": 15,
+    "wy": 30,
     "wz": 12,
     "rot": 270
   },
@@ -2433,11 +2433,11 @@ let worldBuildings = [
     "name": "3楼传送带｜法宝胚 #1",
     "power": "2 MW",
     "wx": 6.5,
-    "wy": 15,
+    "wy": 30,
     "wz": -5,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "fabao_array_embryo"
+    "beltItem": "mat_072"
   },
   {
     "id": "bld_lim_3_1",
@@ -2445,7 +2445,7 @@ let worldBuildings = [
     "name": "3楼限速器 #1",
     "power": "1 MW",
     "wx": 9,
-    "wy": 15,
+    "wy": 30,
     "wz": -5,
     "rot": 270
   },
@@ -2455,11 +2455,11 @@ let worldBuildings = [
     "name": "3楼传送带｜进渡劫台 #1",
     "power": "2 MW",
     "wx": 10.5,
-    "wy": 15,
+    "wy": 30,
     "wz": -5,
     "rot": 270,
     "beltLen": 1,
-    "beltItem": "fabao_array_embryo"
+    "beltItem": "mat_072"
   },
   {
     "id": "bld_trib_1",
@@ -2467,7 +2467,7 @@ let worldBuildings = [
     "name": "3楼渡劫台 #1 (终局产出)",
     "power": "80 MW",
     "wx": 16,
-    "wy": 15,
+    "wy": 30,
     "wz": -4,
     "rot": 270
   },
@@ -2477,11 +2477,11 @@ let worldBuildings = [
     "name": "3楼传送带｜法宝胚 #2",
     "power": "2 MW",
     "wx": 6.5,
-    "wy": 15,
+    "wy": 30,
     "wz": 4,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "fabao_array_embryo"
+    "beltItem": "mat_072"
   },
   {
     "id": "bld_lim_3_2",
@@ -2489,7 +2489,7 @@ let worldBuildings = [
     "name": "3楼限速器 #2",
     "power": "1 MW",
     "wx": 9,
-    "wy": 15,
+    "wy": 30,
     "wz": 4,
     "rot": 270
   },
@@ -2499,11 +2499,11 @@ let worldBuildings = [
     "name": "3楼传送带｜进渡劫台 #2",
     "power": "2 MW",
     "wx": 10.5,
-    "wy": 15,
+    "wy": 30,
     "wz": 4,
     "rot": 270,
     "beltLen": 1,
-    "beltItem": "fabao_array_embryo"
+    "beltItem": "mat_072"
   },
   {
     "id": "bld_trib_2",
@@ -2511,7 +2511,7 @@ let worldBuildings = [
     "name": "3楼渡劫台 #2 (终局产出)",
     "power": "80 MW",
     "wx": 16,
-    "wy": 15,
+    "wy": 30,
     "wz": 7,
     "rot": 270
   },
@@ -2521,11 +2521,11 @@ let worldBuildings = [
     "name": "3楼传送带｜法宝成品入库",
     "power": "2 MW",
     "wx": 6.5,
-    "wy": 15,
+    "wy": 30,
     "wz": 13,
     "rot": 270,
     "beltLen": 3,
-    "beltItem": "fabao_array_embryo"
+    "beltItem": "mat_072"
   },
   {
     "id": "bld_desk_3_1",
@@ -2533,9 +2533,10 @@ let worldBuildings = [
     "name": "3楼置物桌｜小桌板 #1",
     "power": "0 MW",
     "wx": 9,
-    "wy": 15,
+    "wy": 30,
     "wz": 13,
-    "rot": 0
+    "rot": 0,
+    "displayItem": "mat_072"
   },
   {
     "id": "bld_box_3_1a",
@@ -2543,7 +2544,7 @@ let worldBuildings = [
     "name": "成品储藏盒 #1-1",
     "power": "0 MW",
     "wx": 9,
-    "wy": 16,
+    "wy": 32,
     "wz": 13,
     "rot": 0
   },
@@ -2553,7 +2554,7 @@ let worldBuildings = [
     "name": "成品储藏盒 #1-2",
     "power": "0 MW",
     "wx": 9,
-    "wy": 17,
+    "wy": 34,
     "wz": 13,
     "rot": 0
   },
@@ -2563,8 +2564,171 @@ let worldBuildings = [
     "name": "成品储藏盒 #1-3",
     "power": "0 MW",
     "wx": 9,
-    "wy": 18,
+    "wy": 36,
     "wz": 13,
+    "rot": 0
+  },
+  {
+    "id": "bld_f1_show_1",
+    "type": "foundation_3x3",
+    "name": "地基 3×3",
+    "power": "0 MW",
+    "wx": -6,
+    "wy": 0,
+    "wz": 22,
+    "rot": 0
+  },
+  {
+    "id": "bld_f1_show_2",
+    "type": "foundation_3x3",
+    "name": "地基 3×3",
+    "power": "0 MW",
+    "wx": 0,
+    "wy": 0,
+    "wz": 22,
+    "rot": 0
+  },
+  {
+    "id": "bld_f1_show_3",
+    "type": "foundation_3x3",
+    "name": "地基 3×3",
+    "power": "0 MW",
+    "wx": 6,
+    "wy": 0,
+    "wz": 22,
+    "rot": 0
+  },
+  {
+    "id": "bld_f1_show_4",
+    "type": "foundation_3x3",
+    "name": "地基 3×3",
+    "power": "0 MW",
+    "wx": 12,
+    "wy": 0,
+    "wz": 22,
+    "rot": 0
+  },
+  {
+    "id": "bld_desk_1_1",
+    "type": "storage_desk",
+    "name": "1楼置物桌｜小桌板 #1",
+    "power": "0 MW",
+    "wx": -8,
+    "wy": 2,
+    "wz": 22,
+    "rot": 0
+  },
+  {
+    "id": "bld_desk_1_box",
+    "type": "storage_box",
+    "name": "桌面储藏盒｜1×1×1",
+    "power": "0 MW",
+    "wx": -8,
+    "wy": 4,
+    "wz": 22,
+    "rot": 0
+  },
+  {
+    "id": "bld_desk_1_2",
+    "type": "storage_desk",
+    "name": "1楼置物桌｜小桌板 #2",
+    "power": "0 MW",
+    "wx": -4,
+    "wy": 2,
+    "wz": 22,
+    "rot": 0,
+    "displayItem": "mat_100"
+  },
+  {
+    "id": "bld_desk_1_tall",
+    "type": "bd_154",
+    "name": "1楼高置物桌｜1×1×2",
+    "power": "0 MW",
+    "wx": 0,
+    "wy": 2,
+    "wz": 22,
+    "rot": 0
+  },
+  {
+    "id": "bld_desk_1_tall_box",
+    "type": "storage_box",
+    "name": "高桌储藏盒｜1×1×1",
+    "power": "0 MW",
+    "wx": 0,
+    "wy": 6,
+    "wz": 22,
+    "rot": 0
+  },
+  {
+    "id": "bld_box_1_111",
+    "type": "storage_box",
+    "name": "储藏盒｜1×1×1",
+    "power": "0 MW",
+    "wx": 4,
+    "wy": 2,
+    "wz": 22,
+    "rot": 0
+  },
+  {
+    "id": "bld_box_1_211",
+    "type": "bd_114",
+    "name": "窄柜｜2×1×1",
+    "power": "0 MW",
+    "wx": 9,
+    "wy": 2,
+    "wz": 22,
+    "rot": 0
+  },
+  {
+    "id": "bld_box_1_121",
+    "type": "bd_115",
+    "name": "宽柜｜1×2×1",
+    "power": "0 MW",
+    "wx": 13,
+    "wy": 2,
+    "wz": 22,
+    "rot": 0
+  },
+  {
+    "id": "bld_tower_160_1",
+    "type": "bd_160",
+    "name": "飞剑防御塔 #1",
+    "power": "25 MW",
+    "wx": -26,
+    "wy": 0,
+    "wz": 21,
+    "rot": 0
+  },
+  {
+    "id": "bld_desk_2_1",
+    "type": "storage_desk",
+    "name": "2楼置物桌｜血胎样本",
+    "power": "0 MW",
+    "wx": -8,
+    "wy": 16,
+    "wz": 12,
+    "rot": 0,
+    "displayItem": "mat_032"
+  },
+  {
+    "id": "bld_desk_2_2",
+    "type": "storage_desk",
+    "name": "2楼置物桌｜生物芯片",
+    "power": "0 MW",
+    "wx": 16,
+    "wy": 16,
+    "wz": 12,
+    "rot": 0,
+    "displayItem": "mat_015"
+  },
+  {
+    "id": "bld_pill_163_1",
+    "type": "bd_163",
+    "name": "3楼炼丹炉（上）",
+    "power": "20 MW",
+    "wx": -4,
+    "wy": 30,
+    "wz": 12,
     "rot": 0
   }
 ];
@@ -3528,7 +3692,7 @@ function updateBuildPlacementHudCard() {
     data.costs.forEach(c => {
       const stock = c.isBuildingCost
         ? c.need
-        : ((typeof playerInventory !== 'undefined' && playerInventory[c.code] !== undefined) ? playerInventory[c.code] : 0);
+        : (window.isCreativeMode ? 999 : ((typeof playerInventory !== 'undefined' && playerInventory[c.code] !== undefined) ? playerInventory[c.code] : 0));
       const isEnough = stock >= c.need;
       const box = document.createElement('div');
       box.className = `flex flex-col items-center bg-black/75 border ${isEnough ? 'border-white/30' : 'border-rose-500'} rounded px-2.5 py-1 min-w-[56px] shadow-lg`;
@@ -3546,6 +3710,7 @@ function updateBuildPlacementHudCard() {
 function canAffordBuild(buildingKey) {
   const data = buildableDatabase[buildingKey];
   if (!data) return false;
+  if (window.isCreativeMode) return true;
   if (typeof playerInventory === 'undefined') return true;
   return data.costs.every(c => c.isBuildingCost || (playerInventory[c.code] || 0) >= c.need);
 }
@@ -3555,24 +3720,26 @@ function executeBuildPlacementAt(xRatio, yRatio) {
   const data = buildableDatabase[currentPlacingBuildingKey];
   if (!data) return;
 
+  // 若 3D 积木规则禁止当前位置放置 (如目标顶部不可放)，先阻止建造再扣料
+  if (window._world3DPlacementBlockedReason) {
+    playUiSound('craft_fail');
+    showNotification(`⛔ 无法放置：${window._world3DPlacementBlockedReason}`);
+    return;
+  }
+
   if (!canAffordBuild(currentPlacingBuildingKey)) {
     playUiSound('craft_fail');
     showNotification(`原料不足！无法建造【${data.title}】`);
     return;
   }
 
-  // 扣减物料 (建筑前置类成本不从背包物料扣减)
-  data.costs.forEach(c => {
-    if (!c.isBuildingCost && typeof playerInventory !== 'undefined') {
-      playerInventory[c.code] = (playerInventory[c.code] || 0) - c.need;
-    }
-  });
-
-  // 若 3D 积木规则禁止当前位置放置 (如目标顶部不可放)，阻止建造
-  if (window._world3DPlacementBlockedReason) {
-    playUiSound('craft_fail');
-    showNotification(`⛔ 无法放置：${window._world3DPlacementBlockedReason}`);
-    return;
+  // 扣减物料 (创造模式下免扣除；建筑前置类成本不从背包物料扣减)
+  if (!window.isCreativeMode) {
+    data.costs.forEach(c => {
+      if (!c.isBuildingCost && typeof playerInventory !== 'undefined') {
+        playerInventory[c.code] = (playerInventory[c.code] || 0) - c.need;
+      }
+    });
   }
 
   // 若 3D 积木系统吸附到了复合母座插槽上，直接装配进插槽

@@ -148,21 +148,24 @@ const HOTBAR_TIER1_CONFIG = [
     key: 'mine', slotNum: '1', name: '采掘抽水', icon: 'fa-solid fa-trowel-bricks',
     subItems: [
       { key: 'miner', name: '采矿机', icon: 'fa-solid fa-cube', variants: [
-        { key: 'miner', name: '采矿机', sub: '对准矿脉·耗电 5MW', code: 'BD_101' }
+        { key: 'miner', name: '采矿机', sub: '铁/铜/煤/石英/灵石矿 · 4×3×4', code: 'BD_135' }
       ]},
-      { key: 'water_pump', name: '抽水机', icon: 'fa-solid fa-droplet', variants: [
-        { key: 'water_pump', name: '抽水机', sub: '放于水上·耗电 5MW', code: 'BD_116' }
+      { key: 'pump', name: '抽水机', icon: 'fa-solid fa-droplet', variants: [
+        { key: 'pump', name: '抽水机', sub: '清水/原油/灵泉抽取 · 1×2×2', code: 'BD_134' }
       ]}
     ]
   },
   {
-    key: 'smelt', slotNum: '2', name: '冶炼精炼', icon: 'fa-solid fa-fire',
+    key: 'smelt', slotNum: '2', name: '冶炼炼丹', icon: 'fa-solid fa-fire',
     subItems: [
       { key: 'furnace', name: '精炼炉', icon: 'fa-solid fa-fire-burner', variants: [
-        { key: 'furnace', name: '精炼炉', sub: '基础冶炼·耗电 10MW·热力 50', code: 'BD_102' }
+        { key: 'furnace', name: '精炼炉', sub: '金属与玻璃冶炼 · 3×3×3', code: 'BD_136' }
       ]},
       { key: 'smelt_chamber', name: '冶炼舱', icon: 'fa-solid fa-shield', variants: [
-        { key: 'smelt_chamber', name: '冶炼舱', sub: '插件式·需插在灵力引擎上', code: 'BD_113' }
+        { key: 'smelt_chamber', name: '冶炼舱（上）', sub: '插于灵力引擎 · 2×1×2', code: 'BD_148' }
+      ]},
+      { key: 'bd_163', name: '炼丹炉', icon: 'fa-solid fa-flask', variants: [
+        { key: 'bd_163', name: '炼丹炉（上）', sub: '工业炼丹 · 2×1×2', code: 'BD_163' }
       ]}
     ]
   },
@@ -170,13 +173,13 @@ const HOTBAR_TIER1_CONFIG = [
     key: 'base_craft', slotNum: '3', name: '基础加工', icon: 'fa-solid fa-screwdriver-wrench',
     subItems: [
       { key: 'crusher', name: '粉碎机', icon: 'fa-solid fa-hammer', variants: [
-        { key: 'crusher', name: '粉碎机', sub: '材料粉碎·耗电 8MW', code: 'BD_103' }
+        { key: 'crusher', name: '粉碎机', sub: '双出口分选磨粉 · 1×1×1', code: 'BD_137' }
       ]},
       { key: 'assembler', name: '加工台', icon: 'fa-solid fa-gears', variants: [
-        { key: 'assembler', name: '加工台', sub: '机械零件·耗电 6MW', code: 'BD_104' }
+        { key: 'assembler', name: '加工台', sub: '零件与剑丸加工 · 2×2×2', code: 'BD_138' }
       ]},
       { key: 'cutter', name: '切割机', icon: 'fa-solid fa-bolt', variants: [
-        { key: 'cutter', name: '切割机', sub: '精密材料·耗电 12MW', code: 'BD_105' }
+        { key: 'cutter', name: '切割机', sub: '硅片铜片精切 · 1×1×1', code: 'BD_139' }
       ]}
     ]
   },
@@ -184,44 +187,51 @@ const HOTBAR_TIER1_CONFIG = [
     key: 'adv_craft', slotNum: '4', name: '解构组装', icon: 'fa-solid fa-cubes-stacked',
     subItems: [
       { key: 'deconstructor', name: '解构机', icon: 'fa-solid fa-dna', variants: [
-        { key: 'deconstructor', name: '解构机', sub: '只接受修士尸体·耗电 20MW', code: 'BD_107' }
+        { key: 'deconstructor', name: '解构机', sub: '尸解与三阶科研 · 2×4×2', code: 'BD_140' }
       ]},
       { key: 'assembler_heavy', name: '组装机', icon: 'fa-solid fa-box-archive', variants: [
-        { key: 'assembler_heavy', name: '组装机', sub: '双轨校验·耗电 25MW', code: 'BD_111' }
+        { key: 'assembler_heavy', name: '组装机', sub: '高阶双轨总装 · 3×3×3', code: 'BD_146' }
+      ]},
+      { key: 'alchemy_table', name: '炼宝/渡劫', icon: 'fa-solid fa-wand-magic-sparkles', variants: [
+        { key: 'alchemy_table', name: '炼宝台', sub: '祭炼法宝 · 4×4×5', code: 'BD_156' },
+        { key: 'tribulation_table', name: '渡劫台', sub: '终局凝练金丹 · 5×5×6', code: 'BD_157' }
       ]}
     ]
   },
   {
     key: 'bio', slotNum: '5', name: '生物生化', icon: 'fa-solid fa-flask-vial',
     subItems: [
-      { key: 'incubator', name: '培育仓', icon: 'fa-solid fa-leaf', variants: [
-        { key: 'incubator', name: '培育仓', sub: '流固混合·耗电 8MW', code: 'BD_108' }
+      { key: 'incubator', name: '培养仓', icon: 'fa-solid fa-leaf', variants: [
+        { key: 'incubator', name: '培养仓', sub: '流固培养 · 1×1×1', code: 'BD_142' }
       ]},
       { key: 'extractor', name: '提取器', icon: 'fa-solid fa-eye-dropper', variants: [
-        { key: 'extractor', name: '提取器', sub: '单进多出·耗电 10MW', code: 'BD_109' }
+        { key: 'extractor', name: '提取器', sub: '原油裂解与灵液提取 · 2×1×1', code: 'BD_145' }
       ]},
       { key: 'mixer', name: '搅拌机', icon: 'fa-solid fa-blender', variants: [
-        { key: 'mixer', name: '搅拌机', sub: '多进单出·耗电 14MW', code: 'BD_110' }
+        { key: 'mixer', name: '搅拌机', sub: '营养液与稳定液调配 · 2×2×2', code: 'BD_143' }
       ]},
       { key: 'centrifuge', name: '离心机', icon: 'fa-solid fa-arrows-spin', variants: [
-        { key: 'centrifuge', name: '离心机', sub: '单进多出·耗电 15MW', code: 'BD_106' }
+        { key: 'centrifuge', name: '离心机', sub: '原油分馏与重水分离 · 2×2×2', code: 'BD_144' }
       ]},
       { key: 'petri_dish', name: '培养皿', icon: 'fa-solid fa-microscope', variants: [
-        { key: 'petri_dish', name: '培养皿', sub: '生物微培·需插在营养基座', code: 'BD_131' }
+        { key: 'petri_dish', name: '培养皿', sub: '灵草催熟繁殖 · 1×1×1', code: 'BD_141' }
       ]}
     ]
   },
   {
-    key: 'composite', slotNum: '6', name: '复合母座', icon: 'fa-solid fa-layer-group',
+    key: 'composite', slotNum: '6', name: '复合防务', icon: 'fa-solid fa-layer-group',
     subItems: [
       { key: 'power_engine', name: '灵力引擎', icon: 'fa-solid fa-atom', variants: [
-        { key: 'power_engine', name: '灵力引擎', sub: '发电供热·顶部×3插槽承托冶炼舱', code: 'BD_112' }
+        { key: 'power_engine', name: '灵力引擎（下）', sub: '烧煤/燃油/燃料棒 · 4×3×2', code: 'BD_147' }
       ]},
       { key: 'bio_base', name: '营养基座', icon: 'fa-solid fa-shield-halved', variants: [
-        { key: 'bio_base', name: '营养基座', sub: '单插件底座·放培育仓/培养皿', code: 'BD_130' }
+        { key: 'bio_base', name: '营养基座', sub: '承载培养仓/皿 · 1×2×1', code: 'BD_159' }
       ]},
-      { key: 'fluid_hub', name: '流体处理中枢', icon: 'fa-solid fa-gauge-high', variants: [
-        { key: 'fluid_hub', name: '流体处理中枢', sub: '单插件底座·放搅拌/离心/提取', code: 'BD_132' }
+      { key: 'fluid_hub', name: '流体中枢', icon: 'fa-solid fa-gauge-high', variants: [
+        { key: 'fluid_hub', name: '流体处理中枢', sub: '承载搅拌/离心/提取 · 2×4×4', code: 'BD_158' }
+      ]},
+      { key: 'bd_160', name: '飞剑防御塔', icon: 'fa-solid fa-crosshairs', variants: [
+        { key: 'bd_160', name: '飞剑防御塔', sub: '猎杀修士掉尸体 · 2×2×4', code: 'BD_160' }
       ]}
     ]
   },
@@ -229,55 +239,59 @@ const HOTBAR_TIER1_CONFIG = [
     key: 'logi', slotNum: '7', name: '传送物流', icon: 'fa-solid fa-route',
     subItems: [
       { key: 'conveyor', name: '传送带', icon: 'fa-solid fa-arrows-left-right', variants: [
-        { key: 'conveyor', name: '传送带', sub: '自带供电传输', code: 'BD_125' }
+        { key: 'conveyor', name: '传送带｜直线', sub: '固体水平输送 · 1×1×1', code: 'BD_116' },
+        { key: 'vert_conveyor', name: '垂直传送带', sub: '跨楼层竖直运输 · 1×1×1', code: 'BD_121' }
       ]},
-      { key: 'vert_conveyor', name: '垂直传送带', icon: 'fa-solid fa-arrows-up-down', variants: [
-        { key: 'vert_conveyor', name: '垂直传送带', sub: 'Z轴运输·高度3-8米', code: 'BD_129' }
-      ]},
-      { key: 'splitter', name: '分流器', icon: 'fa-solid fa-code-branch', variants: [
-        { key: 'splitter', name: '分流器', sub: '1进3出·品质过滤', code: 'BD_124' }
+      { key: 'splitter', name: '分拣合流', icon: 'fa-solid fa-code-branch', variants: [
+        { key: 'splitter', name: '分流器', sub: '1进2出均衡分流 · 1×1×1', code: 'BD_124' },
+        { key: 'merger', name: '合流器', sub: '2进1出合流 · 1×1×1', code: 'BD_123' },
+        { key: 'conveyor_limiter', name: '限速器', sub: '平衡产线节拍 · 1×1×1', code: 'BD_127' }
       ]},
       { key: 'pipe', name: '水管', icon: 'fa-solid fa-faucet-drip', variants: [
-        { key: 'pipe', name: '水管', sub: '双向流体导管', code: 'BD_127' }
+        { key: 'pipe', name: '水管｜直管', sub: '清水/原油/灵泉/重水导管 · 1×1×1', code: 'BD_128' }
       ]}
     ]
   },
   {
     key: 'power', slotNum: '8', name: '能源环保', icon: 'fa-solid fa-bolt-lightning',
     subItems: [
-      { key: 'power_burner', name: '供能机', icon: 'fa-solid fa-fire-flame-curved', variants: [
-        { key: 'power_burner', name: '供能机', sub: '烧燃料发电·无线供电50米', code: 'BD_117' }
+      { key: 'fuel_generator', name: '燃料发电机', icon: 'fa-solid fa-fire-flame-curved', variants: [
+        { key: 'fuel_generator', name: '燃料发电机', sub: '供电 +100MW · 2×2×2', code: 'BD_149' }
       ]},
-      { key: 'purify_tower', name: '净化塔', icon: 'fa-solid fa-broom', variants: [
-        { key: 'purify_tower', name: '净化塔', sub: '抵消污染·耗电 10MW', code: 'BD_118' }
+      { key: 'wind_generator', name: '风力发电机', icon: 'fa-solid fa-wind', variants: [
+        { key: 'wind_generator', name: '风力发电机', sub: '清洁风电 · 2×2×4', code: 'BD_155' }
+      ]},
+      { key: 'purifier', name: '回收处理塔', icon: 'fa-solid fa-broom', variants: [
+        { key: 'purifier', name: '回收处理塔', sub: '净化血水煞水 · 2×2×3', code: 'BD_150' }
       ]}
     ]
   },
   {
     key: 'storage', slotNum: '9', name: '仓储置物', icon: 'fa-solid fa-box-archive',
     subItems: [
-      { key: 'storage_box', name: '箱子', icon: 'fa-solid fa-box', variants: [
-        { key: 'storage_box', name: '箱子', sub: '存储 16 格', code: 'BD_115' },
-        { key: 'storage_box_large', name: '大箱子', sub: '存储 32 格', code: 'BD_115_L' }
+      { key: 'storage_box', name: '储藏盒', icon: 'fa-solid fa-box', variants: [
+        { key: 'storage_box', name: '储藏盒 1×1×1', sub: '1×1×1m 立方箱 (16格)', code: 'BD_113' },
+        { key: 'bd_114', name: '窄柜 2×1×1', sub: '2×1×1m 窄柜 (32格)', code: 'BD_114' },
+        { key: 'bd_115', name: '宽柜 1×2×1', sub: '1×2×1m 宽柜 (32格)', code: 'BD_115' }
       ]},
-      { key: 'table', name: '置物桌', icon: 'fa-solid fa-table', variants: [
-        { key: 'table', name: '置物桌', sub: '结构工坊桌', code: 'BD_123' }
+      { key: 'storage_desk', name: '小桌板/置物桌', icon: 'fa-solid fa-table', variants: [
+        { key: 'storage_desk', name: '小桌板 1×1×1', sub: '1×1×1m 小型置物桌', code: 'BD_153' },
+        { key: 'bd_154', name: '高置物桌 1×1×2', sub: '1×1×2m 高型置物桌', code: 'BD_154' }
       ]}
     ]
   },
   {
     key: 'struct', slotNum: '0', name: '地基空间', icon: 'fa-solid fa-cubes',
     subItems: [
-      { key: 'foundation', name: '地基', icon: 'fa-solid fa-square', variants: [
-        { key: 'foundation_1x1', name: '地基1x1', sub: '尺寸 1×1×1m', code: 'BD_119' },
-        { key: 'foundation_4x4', name: '地基4x4', sub: '尺寸 4×4×1m', code: 'BD_120' },
-        { key: 'foundation_16x16', name: '地基16x16', sub: '尺寸 16×16×1m', code: 'BD_121' }
+      { key: 'foundation', name: '建筑底座', icon: 'fa-solid fa-square', variants: [
+        { key: 'foundation_1x1', name: '底座 1×1×1', sub: '尺寸 1×1×1m', code: 'BD_102' },
+        { key: 'foundation_2x2', name: '底座 2×2×1', sub: '尺寸 2×2×1m', code: 'BD_104' },
+        { key: 'foundation_3x3', name: '底座 3×3×1', sub: '尺寸 3×3×1m', code: 'BD_105' },
+        { key: 'foundation_pillar', name: '底座柱 1×1×4', sub: '立体立柱 1×1×4m', code: 'BD_103' },
+        { key: 'foundation_beam', name: '底座梁 1×4×1', sub: '连桥梁 1×4×1m', code: 'BD_106' }
       ]},
-      { key: 'iron_beam_bld', name: '玄铁梁', icon: 'fa-solid fa-grip-lines-vertical', variants: [
-        { key: 'iron_beam_bld', name: '玄铁梁', sub: '8×1×1m 承重跨架', code: 'BD_122' }
-      ]},
-      { key: 'teleporter', name: '传送门', icon: 'fa-solid fa-door-open', variants: [
-        { key: 'teleporter', name: '传送门', sub: '空间跃迁·配对频段·耗电 50MW', code: 'BD_114' }
+      { key: 'teleporter', name: '跨区传送门', icon: 'fa-solid fa-door-open', variants: [
+        { key: 'teleporter', name: '跨区传送门', sub: '空间传送 · 2×2×1', code: 'BD_151' }
       ]}
     ]
   }
@@ -780,7 +794,7 @@ function closeOtherModals(current) {
       }
     });
   } else {
-    ['buildModal', 'craftModal', 'invModal', 'searchModal', 'machineModal', 'swordCasketModal', 'hubMilestoneModal', 'codexModal', 'cpuProcessorModal', 'jinShenModal', 'fabaoModal'].forEach(id => {
+    ['buildModal', 'craftModal', 'invModal', 'searchModal', 'machineModal', 'swordCasketModal', 'hubMilestoneModal', 'codexModal', 'techTreeModal', 'jinShenModal', 'fabaoModal'].forEach(id => {
       if (id !== current) {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
@@ -1190,7 +1204,7 @@ document.addEventListener('click', (e) => {
     return;
   }
   // 2. 避免点击在模态弹窗内穿透
-  if (e.target.closest('#buildModal, #craftModal, #invModal, #searchModal, #machineModal, #storageBoxModal, #swordCasketModal, #hubMilestoneModal, #codexModal, #cpuProcessorModal, #jinShenModal, #fabaoModal')) {
+  if (e.target.closest('#buildModal, #craftModal, #invModal, #searchModal, #machineModal, #storageBoxModal, #swordCasketModal, #hubMilestoneModal, #codexModal, #techTreeModal, #jinShenModal, #fabaoModal')) {
     return;
   }
   // 3. 避免点击交互控件触发攻击
@@ -1268,16 +1282,6 @@ document.addEventListener('keydown', (e) => {
 
   const key = e.key.toUpperCase();
 
-  // 若中央处理器连线工控台处于打开状态，只允许 ESC 或 M 响应关闭，其余按键不触发大视界快捷键
-  const cpuModal = document.getElementById('cpuProcessorModal');
-  if (cpuModal && !cpuModal.classList.contains('hidden')) {
-    if (key === 'ESCAPE' || key === 'M') {
-      e.preventDefault();
-      if (typeof closeCentralProcessorHUD === 'function') closeCentralProcessorHUD();
-    }
-    return;
-  }
-
   if (key === 'C') {
     e.preventDefault();
     triggerVehicleAction();
@@ -1313,10 +1317,8 @@ document.addEventListener('keydown', (e) => {
     toggleInventoryModal();
   } else if (key === 'M') {
     e.preventDefault();
-    if (typeof toggleCentralProcessorHUD === 'function') {
-      toggleCentralProcessorHUD();
-    } else if (typeof openCentralProcessorHUD === 'function') {
-      openCentralProcessorHUD();
+    if (typeof toggleTechTreeModal === 'function') {
+      toggleTechTreeModal();
     } else {
       triggerMapAction();
     }
@@ -1375,10 +1377,9 @@ document.addEventListener('keydown', (e) => {
     document.getElementById('swordCasketModal')?.classList.add('hidden');
     document.getElementById('hubMilestoneModal')?.classList.add('hidden');
     document.getElementById('codexModal')?.classList.add('hidden');
-    document.getElementById('cpuProcessorModal')?.classList.add('hidden');
+    document.getElementById('techTreeModal')?.classList.add('hidden');
     document.getElementById('jinShenModal')?.classList.add('hidden');
     document.getElementById('fabaoModal')?.classList.add('hidden');
-    if (typeof closeCentralProcessorHUD === 'function') closeCentralProcessorHUD();
     if (typeof exitBuildPlacingMode === 'function') exitBuildPlacingMode();
     if (typeof closeAdaDialogue === 'function') closeAdaDialogue();
     if (typeof stopCraftingHold === 'function') stopCraftingHold();
@@ -1625,7 +1626,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const modalIds = window.ALL_HUD_MODAL_IDS || [
     'buildModal', 'craftModal', 'invModal', 'searchModal', 'machineModal',
     'storageBoxModal', 'swordCasketModal', 'hubMilestoneModal', 'codexModal',
-    'cpuProcessorModal', 'jinShenModal', 'fabaoModal'
+    'techTreeModal', 'jinShenModal', 'fabaoModal'
   ];
   modalIds.forEach(id => {
     const el = document.getElementById(id);
@@ -1682,15 +1683,10 @@ window.addEventListener('wheel', (e) => {
 let isMapUnlocked = false; // 地图需 MAM 研究解锁
 let isInVehicle = false;    // 是否处于载具中
 
-// [M] 中央处理器 / 地图动作响应
+// [M] 科技树总览响应
 function triggerMapAction() {
-  if (typeof toggleCentralProcessorHUD === 'function') {
-    toggleCentralProcessorHUD();
-  } else if (typeof openCentralProcessorHUD === 'function') {
-    openCentralProcessorHUD();
-  } else {
-    playUiSound('click');
-    showNotification('【中央处理器】工控母板已展开');
+  if (typeof toggleTechTreeModal === 'function') {
+    toggleTechTreeModal();
   }
 }
 

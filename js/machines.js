@@ -105,16 +105,16 @@ function triggerTargetMachineInteract() {
 const PASSIVE_MACHINES = ['furnace', 'crusher', 'miner', 'smelt_chamber'];
 const ACTIVE_MACHINES = ['power_engine', 'fluid_hub', 'bio_base', 'incubator', 'petri_dish', 'cutter', 'assembler', 'assembler_heavy', 'deconstructor', 'centrifuge', 'extractor', 'mixer'];
 
-// 被动加工器独立状态 (1:1 media_1790616834760.png)
-let passiveInputSlot = { item: 'iron_ore', count: 100 };
-let passiveOutputSlot = { item: 'iron_ingot', count: 48 };
+// 被动加工器独立状态
+let passiveInputSlot = { item: 'MAT_001', count: 100 };
+let passiveOutputSlot = { item: 'MAT_006', count: 48 };
 let currentPassiveBagFilter = 'all';
 
-// 底座 BD_112 灵力引擎外部 3 联装模型插槽状态 (支持手动拆卸与安装插件模型)
+// 底座 BD_147 灵力引擎外部 3 联装模型插槽状态
 let engineChamberSlots = [
-  { slotIndex: 0, mounted: true, chamberId: 'smelt_chamber', name: '冶炼舱 #1 (BD_113)', inputItem: 'iron_ingot', outputItem: 'refined_iron_ingot', progress: 68 },
-  { slotIndex: 1, mounted: true, chamberId: 'smelt_chamber', name: '冶炼舱 #2 (BD_113)', inputItem: 'copper_ingot', outputItem: 'high_temp_alloy_ingot', progress: 42 },
-  { slotIndex: 2, mounted: true, chamberId: 'smelt_chamber', name: '冶炼舱 #3 (BD_113)', inputItem: 'coal', outputItem: 'high_temp_alloy_ingot', progress: 25 }
+  { slotIndex: 0, mounted: true, chamberId: 'smelt_chamber', name: '冶炼舱 #1 (BD_148)', inputItem: 'MAT_006', outputItem: 'MAT_051', progress: 68 },
+  { slotIndex: 1, mounted: true, chamberId: 'smelt_chamber', name: '冶炼舱 #2 (BD_148)', inputItem: 'MAT_007', outputItem: 'MAT_043', progress: 42 },
+  { slotIndex: 2, mounted: true, chamberId: 'smelt_chamber', name: '冶炼舱 #3 (BD_148)', inputItem: 'MAT_004', outputItem: 'MAT_043', progress: 25 }
 ];
 let currentChamberSlotIdx = 0; // 当前监视的冶炼舱插槽
 let incubatorTimeAccelerated = false; // 培育仓时间加速器挂载状态 (支持时间加速器挂载)
@@ -146,6 +146,49 @@ function mapLegacyMachineKey(key) {
   return key || 'furnace';
 }
 
+function populateMachineDeviceSelector() {
+  const selector = document.getElementById('machDeviceSelector');
+  if (!selector || typeof XIUXIAN_BUILDINGS === 'undefined') return;
+  const passiveKeys = [];
+  const activeKeys = [];
+  const baseKeys = [];
+
+  Object.entries(XIUXIAN_BUILDINGS).forEach(([key, b]) => {
+    const rcpCnt = Array.isArray(b.recipes) ? b.recipes.length : 0;
+    if (PASSIVE_MACHINES.includes(key)) {
+      passiveKeys.push([key, b, rcpCnt]);
+    } else if (rcpCnt > 0) {
+      activeKeys.push([key, b, rcpCnt]);
+    } else if (key === 'fluid_hub' || key === 'bio_base') {
+      baseKeys.push([key, b, rcpCnt]);
+    }
+  });
+
+  const fmtOpt = ([key, b, cnt], tag) => {
+    const sel = (key === currentMachineId) ? ' selected' : '';
+    const extra = cnt > 0 ? ` · ${cnt}方` : '';
+    return `<option value="${key}"${sel}>${b.name} (${b.code})${extra}${tag}</option>`;
+  };
+
+  selector.innerHTML = `
+    <optgroup label="── 被动加工器 (放啥加工啥 · 可切配方库查看全配方) ──" class="bg-[#0b1522] text-cyan-300">
+      ${passiveKeys.map(item => fmtOpt(item, ' [被动]')).join('')}
+    </optgroup>
+    <optgroup label="── 主动加工器 / 终局工坊 (全部 ${activeKeys.length} 台生产设备 · 192配方) ──" class="bg-[#0b1522] text-stone-200">
+      ${activeKeys.map(item => fmtOpt(item, '')).join('')}
+    </optgroup>
+    <optgroup label="── 复合母座与智能节点 ──" class="bg-[#0b1522] text-amber-300">
+      ${baseKeys.map(item => fmtOpt(item, ' [母座]')).join('')}
+      <option value="conveyor_limiter"${currentMachineId === 'conveyor_limiter' ? ' selected' : ''}>限速器 (BD_127) [节流阻尼原型]</option>
+    </optgroup>
+  `;
+  selector.value = currentMachineId;
+}
+window.populateMachineDeviceSelector = populateMachineDeviceSelector;
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', populateMachineDeviceSelector);
+}
+
 // 打开指定机器专属 HUD
 function openMachineHUD(machineKey) {
   playUiSound('click');
@@ -155,9 +198,7 @@ function openMachineHUD(machineKey) {
   currentMachineId = mappedKey;
   currentOpenedMachine = mappedKey;
 
-  // 自动同步下拉框
-  const selector = document.getElementById('machDeviceSelector');
-  if (selector) selector.value = mappedKey;
+  populateMachineDeviceSelector();
 
   const modeBadge = document.getElementById('machModeBadge');
   const tabRecipe = document.getElementById('machTabRecipe');
@@ -175,8 +216,15 @@ function openMachineHUD(machineKey) {
   if (viewPassive) viewPassive.classList.add('hidden');
   if (viewComposite) viewComposite.classList.add('hidden');
 
+  const bData = (typeof XIUXIAN_BUILDINGS !== 'undefined') ? XIUXIAN_BUILDINGS[mappedKey] : null;
+  if (bData && bData.recipes && bData.recipes.length > 0) {
+    if (!bData.recipes.includes(currentMachineRecipeId)) {
+      currentMachineRecipeId = bData.recipes[0];
+    }
+  }
+
   if (PASSIVE_MACHINES.includes(mappedKey)) {
-    // ==================== 1. 被动加工器 (免选配方 · 放入什么加工什么) - 1:1 media_1790616834760.png ====================
+    // ==================== 1. 被动加工器 (放啥加工啥 · 同时开放配方标签查看全部V7配方) ====================
     if (modeBadge) {
       if (mappedKey === 'smelt_chamber') {
         modeBadge.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-950/70 text-amber-300 border border-amber-400/50 shadow-[0_0_8px_rgba(245,146,30,0.3)]';
@@ -186,22 +234,19 @@ function openMachineHUD(machineKey) {
         modeBadge.innerText = '被动加工器';
       }
     }
-    if (tabRecipe) tabRecipe.classList.add('hidden');
+    if (tabRecipe) tabRecipe.classList.remove('hidden');
     if (tabProd) {
       tabProd.classList.remove('hidden');
-      tabProd.className = 'flex items-center space-x-2 px-3.5 h-full text-xs font-bold bg-[#122232] text-[#00f0ff] transition cursor-pointer border-t border-l border-r border-[#00f0ff]/40';
       tabProd.innerHTML = '<i class="fa-solid fa-arrows-rotate text-[#00f0ff] text-xs"></i><span>被动加工监视</span>';
     }
-    if (viewPassive) viewPassive.classList.remove('hidden');
-    renderPassiveProcessorView();
-    const bData = (typeof XIUXIAN_BUILDINGS !== 'undefined') ? XIUXIAN_BUILDINGS[mappedKey] : null;
+    switchMachineView('prod');
     if (mappedKey === 'smelt_chamber') {
-      showNotification(`【被动加工器】已连接【BD_113 冶炼舱】(插槽 #${currentChamberSlotIdx + 1}) - 免选配方，放进什么材料加工什么材料！`);
+      showNotification(`【被动加工器】已连接【${bData ? bData.name : '冶炼舱'}】(插槽 #${currentChamberSlotIdx + 1}) - 可在[选择配方]查看全配方`);
     } else {
-      showNotification(`【被动加工器】已连接【${bData ? bData.name : mappedKey}】- 免选配方，放进什么材料加工什么材料！`);
+      showNotification(`【被动加工器】已连接【${bData ? bData.name : mappedKey}】- 可在[选择配方]查看全部 ${(bData && bData.recipes) ? bData.recipes.length : 0} 条配方`);
     }
   } else {
-    // ==================== 2. 主动加工器 (自选配方流水线 · 包含 BD_112 灵力引擎底座与 BD_108 培育仓) ====================
+    // ==================== 2. 主动加工器 (自选配方流水线) ====================
     if (modeBadge) {
       if (mappedKey === 'power_engine') {
         modeBadge.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-950/70 text-amber-300 border border-amber-400/50 shadow-[0_0_8px_rgba(245,146,30,0.3)]';
@@ -214,7 +259,7 @@ function openMachineHUD(machineKey) {
         modeBadge.innerText = '营养基座 · 单插件复合母座';
       } else if (mappedKey === 'incubator') {
         modeBadge.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-950/70 text-emerald-300 border border-emerald-400/50 shadow-[0_0_8px_rgba(16,185,129,0.3)]';
-        modeBadge.innerText = '多用处流固培育仓';
+        modeBadge.innerText = '多用处流固培养仓';
       } else if (mappedKey === 'petri_dish') {
         modeBadge.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-teal-950/70 text-teal-300 border border-teal-400/50 shadow-[0_0_8px_rgba(45,212,191,0.3)]';
         modeBadge.innerText = '生物微培 · 培养皿';
@@ -228,26 +273,8 @@ function openMachineHUD(machineKey) {
       tabProd.classList.remove('hidden');
       tabProd.innerHTML = '<i class="fa-solid fa-hammer text-[#f5921e] text-xs"></i><span>生产</span>';
     }
-    const bData = (typeof XIUXIAN_BUILDINGS !== 'undefined') ? XIUXIAN_BUILDINGS[mappedKey] : null;
-    if (bData && bData.recipes && bData.recipes.length > 0) {
-      if (!bData.recipes.includes(currentMachineRecipeId)) {
-        currentMachineRecipeId = bData.recipes[0];
-      }
-    }
     switchMachineView('prod');
-    if (mappedKey === 'power_engine') {
-      showNotification('【底座加工器】已连接【灵力引擎 (BD_112)】- 支持顶部3个模型插槽手动拆装与供能供热！');
-    } else if (mappedKey === 'fluid_hub') {
-      showNotification('【复合母座】已连接【流体处理中枢 (BD_132)】- 顶部单插槽设计，支持搅拌/离心/提取三选一！');
-    } else if (mappedKey === 'bio_base') {
-      showNotification('【复合母座】已连接【营养基座 (BD_130)】- 顶部单插槽设计，支持培养仓/培养皿二选一，直供高纯流体养分！');
-    } else if (mappedKey === 'incubator') {
-      showNotification('【多用处培育仓】已连接【培育仓 (BD_108)】- 具备流固混合4大多用途，支持时间加速器挂载！');
-    } else if (mappedKey === 'petri_dish') {
-      showNotification('【生物微培】已连接【培养皿 (BD_131)】- 精密培育活性菌丝胚与灵草幼胚！');
-    } else {
-      showNotification(`【主动加工器】已连接设备: ${bData ? bData.name : '修仙设备'} (支持自选配方加工)`);
-    }
+    showNotification(`【${bData ? bData.name : mappedKey} (${bData ? bData.code : ''})】已就绪 · 支持查看全部 ${(bData && bData.recipes) ? bData.recipes.length : 0} 条最新配方`);
   }
 
   document.getElementById('machineModal').classList.remove('hidden');
@@ -278,9 +305,21 @@ function switchMachineView(viewType) {
 
   if (PASSIVE_MACHINES.includes(currentMachineId)) {
     const viewPassive = document.getElementById('viewPassiveProcessor');
+    if (viewType === 'recipe') {
+      if (viewPassive) viewPassive.classList.add('hidden');
+      if (viewProd) viewProd.classList.add('hidden');
+      if (viewRecipe) viewRecipe.classList.remove('hidden');
+      tabRecipe.className = 'flex items-center space-x-2 px-3.5 h-full text-xs font-bold bg-[#2e3543] text-white transition cursor-pointer border-t border-l border-r border-white/20';
+      tabProd.className = 'flex items-center space-x-2 px-3.5 h-full text-xs font-bold text-white/60 hover:text-white transition cursor-pointer border-b-2 border-transparent';
+      selectedRecipeInPicker = currentMachineRecipeId;
+      renderRecipePickerView('');
+      return;
+    }
     if (viewPassive) viewPassive.classList.remove('hidden');
     if (viewProd) viewProd.classList.add('hidden');
     if (viewRecipe) viewRecipe.classList.add('hidden');
+    tabProd.className = 'flex items-center space-x-2 px-3.5 h-full text-xs font-bold bg-[#122232] text-[#00f0ff] transition cursor-pointer border-t border-l border-r border-[#00f0ff]/40';
+    tabRecipe.className = 'flex items-center space-x-2 px-3.5 h-full text-xs font-bold text-white/60 hover:text-white transition cursor-pointer border-b-2 border-transparent';
     renderPassiveProcessorView();
     return;
   }
@@ -307,9 +346,9 @@ function switchCurrentMachineDevice(deviceId) {
   playUiSound('toggle');
   if (deviceId === 'conveyor_limiter') {
     if (typeof showNotification === 'function') {
-      showNotification('正在打开【BD_125 传送带限速器】常规建筑控制面板...');
+      showNotification('正在打开【BD_127 限速器】控制原型...');
     }
-    window.location.href = 'conveyor_limiter_prototype.html';
+    window.location.href = '03_功能测试与验证原型/conveyor_limiter_prototype.html';
     return;
   }
   openMachineHUD(deviceId);
@@ -878,24 +917,45 @@ function renderBackpackAndRelatedItems(rData) {
 // 核心机制：免选手工配方，放进什么材料 ➔ 自动识别加工出对应产物！
 // =========================================================================
 
+// 通用：根据机器真实 recipes 动态匹配被动转换产物
+function resolvePassiveMachineRecipe(machineKey, inputItemKey) {
+  const bData = (typeof XIUXIAN_BUILDINGS !== 'undefined') ? XIUXIAN_BUILDINGS[machineKey] : null;
+  const rcpIds = (bData && Array.isArray(bData.recipes)) ? bData.recipes : [];
+  let matched = null;
+  if (typeof XIUXIAN_RECIPES !== 'undefined') {
+    for (const rid of rcpIds) {
+      const r = XIUXIAN_RECIPES[rid];
+      if (!r) continue;
+      if (Array.isArray(r.inputs) && r.inputs.some(inp => inp.item === inputItemKey)) {
+        matched = r;
+        break;
+      }
+    }
+    if (!matched && rcpIds.length > 0) {
+      matched = XIUXIAN_RECIPES[rcpIds[0]] || null;
+    }
+  }
+  return matched;
+}
+
 function renderPassiveProcessorView() {
   const title = document.getElementById('passiveMachineTitle');
   const bData = (typeof XIUXIAN_BUILDINGS !== 'undefined') ? XIUXIAN_BUILDINGS[currentMachineId] : null;
   const bName = bData ? bData.name : '精炼炉';
-  const bCode = bData ? bData.code : 'BD_102';
+  const bCode = bData ? bData.code : 'BD_136';
 
   const backToBaseBtn = document.getElementById('passiveBackToBaseBtn');
 
   if (currentMachineId === 'smelt_chamber') {
-    if (title) title.innerText = `冶炼舱 #${currentChamberSlotIdx + 1} (BD_113) · 挂载式被动加工器`;
+    if (title) title.innerText = `冶炼舱 #${currentChamberSlotIdx + 1} (${bCode}) · 挂载式被动加工器`;
     if (backToBaseBtn) backToBaseBtn.classList.remove('hidden');
     const ruleNote = document.getElementById('passiveRuleNote');
-    if (ruleNote) ruleNote.innerText = '底座汲热冶炼 · 放入金属材料自动识别转化';
+    if (ruleNote) ruleNote.innerText = '底座汲热冶炼 · 放入材料自动匹配 V7 配方 (共 ' + ((bData && bData.recipes) ? bData.recipes.length : 0) + ' 条)';
   } else {
     if (title) title.innerText = `${bName} (${bCode}) · 被动加工器`;
     if (backToBaseBtn) backToBaseBtn.classList.add('hidden');
     const ruleNote = document.getElementById('passiveRuleNote');
-    if (ruleNote) ruleNote.innerText = '放进什么材料 ➔ 自动加工什么材料';
+    if (ruleNote) ruleNote.innerText = `放啥加工啥 · 自动匹配 ${bName} 真实配方 (${(bData && bData.recipes) ? bData.recipes.length : 0} 条，可点上方[选择配方]查看)`;
   }
 
   // 1. IN 插槽
@@ -903,85 +963,37 @@ function renderPassiveProcessorView() {
   const inName = document.getElementById('passiveInName');
   const inCount = document.getElementById('passiveInCount');
 
-  // 根据当前设备确定默认或当前输入
+  const matchedRcp = resolvePassiveMachineRecipe(currentMachineId, passiveInputSlot.item);
+
   if (currentMachineId === 'miner') {
-    // 采矿机无需原料放入，直接持续开采地表矿脉
-    const ruleNote = document.getElementById('passiveRuleNote');
-    if (ruleNote) ruleNote.innerText = '自动化开采玄铁矿脉 ➔ 持续产出';
+    const r = (currentMachineRecipeId && XIUXIAN_RECIPES && XIUXIAN_RECIPES[currentMachineRecipeId]) || matchedRcp;
+    const targetName = r && r.output ? r.output.name : '玄铁矿';
     if (inIcon) inIcon.className = 'fa-solid fa-mountain text-stone-300 text-3xl mb-1';
-    if (inName) inName.innerText = '玄铁矿脉';
+    if (inName) inName.innerText = `${targetName}脉`;
     if (inCount) inCount.innerText = '富矿 (100%)';
   } else {
-    const defaultItemName = (currentMachineId === 'smelt_chamber') ? '玄铁锭' : '玄铁矿';
-    const inDef = (typeof XIUXIAN_ITEMS !== 'undefined' && XIUXIAN_ITEMS[passiveInputSlot.item]) || { name: defaultItemName, icon: 'fa-gem' };
+    const inDef = (typeof XIUXIAN_ITEMS !== 'undefined' && XIUXIAN_ITEMS[passiveInputSlot.item]) || { name: '原料', icon: 'fa-gem' };
     if (passiveInputSlot.count > 0) {
       if (inIcon) inIcon.className = (inDef.icon || 'fa-solid fa-cube') + ' text-3xl mb-1 text-amber-400 drop-shadow';
       if (inName) inName.innerText = inDef.name;
       if (inCount) inCount.innerText = `x${passiveInputSlot.count}`;
     } else {
       if (inIcon) inIcon.className = 'fa-solid fa-plus text-cyan-400/50 text-2xl mb-1';
-      if (inName) inName.innerText = (currentMachineId === 'smelt_chamber') ? '投入金属' : '原料空';
+      if (inName) inName.innerText = '投入原料';
       if (inCount) inCount.innerText = '点击右侧放入';
     }
   }
 
-  // 2. 自动转换映射判定 (核心：放进什么材料，他就加工什么材料)
-  let outItemCode = 'iron_ingot';
+  // 2. 动态转换映射判定 (读取 XIUXIAN_RECIPES)
+  let outItemCode = 'MAT_006';
   let mappingDesc = '放啥加工啥';
-  let cycleDuration = 2.0;
+  let cycleDuration = matchedRcp ? (matchedRcp.timeSec || 10) : 10;
 
-  if (currentMachineId === 'smelt_chamber') {
-    // BD_113 冶炼舱挂载式被动加工逻辑：底座汲热，高级合金熔炼
-    if (passiveInputSlot.item === 'copper_ingot' || passiveInputSlot.item === 'copper_ore') {
-      outItemCode = 'high_temp_alloy_ingot';
-      mappingDesc = '高温冶炼: 赤铜 ➔ 高温合金锭';
-      cycleDuration = 3.0;
-    } else if (passiveInputSlot.item === 'sha_crystal') {
-      outItemCode = 'daomai_alloy';
-      mappingDesc = '高温冶炼: 煞气结晶 ➔ 导脉合金';
-      cycleDuration = 4.0;
-    } else if (passiveInputSlot.item === 'iron_ingot') {
-      outItemCode = 'refined_iron_ingot';
-      mappingDesc = '高温冶炼: 玄铁锭 ➔ 精炼玄铁锭';
-      cycleDuration = 2.5;
-    } else if (passiveInputSlot.item === 'iron_ore') {
-      outItemCode = 'iron_ingot';
-      mappingDesc = '初级冶炼: 玄铁矿 ➔ 玄铁锭';
-      cycleDuration = 2.0;
-    } else if (passiveInputSlot.item === 'coal') {
-      outItemCode = 'high_temp_alloy_ingot';
-      mappingDesc = '高温冶炼: 煤炭碳化 ➔ 高温合金锭';
-      cycleDuration = 3.0;
-    } else {
-      outItemCode = 'refined_iron_ingot';
-      mappingDesc = '高温冶炼: 金属提纯 ➔ 精炼玄铁锭';
-      cycleDuration = 2.5;
-    }
-  } else if (currentMachineId === 'furnace') {
-    if (passiveInputSlot.item === 'copper_ore') {
-      outItemCode = 'copper_ingot';
-      mappingDesc = '智能识别: 赤铜矿 ➔ 赤铜锭';
-    } else if (passiveInputSlot.item === 'iron_ingot') {
-      outItemCode = 'refined_iron_ingot';
-      mappingDesc = '智能识别: 玄铁锭 ➔ 精炼玄铁锭';
-    } else {
-      outItemCode = 'iron_ingot';
-      mappingDesc = '智能识别: 玄铁矿 ➔ 玄铁锭';
-    }
-    cycleDuration = 2.0;
-  } else if (currentMachineId === 'crusher') {
-    if (passiveInputSlot.item === 'coal') {
-      outItemCode = 'waste_purify_powder';
-      mappingDesc = '智能识别: 煤炭 ➔ 净化粉';
-    } else {
-      outItemCode = 'iron_powder';
-      mappingDesc = '智能识别: 玄铁锭 ➔ 玄铁粉';
-    }
-    cycleDuration = 1.5;
-  } else if (currentMachineId === 'miner') {
-    outItemCode = 'iron_ore';
-    mappingDesc = '开采: 地脉玄铁矿 ➔ 120/分';
-    cycleDuration = 0.5;
+  if (matchedRcp && matchedRcp.output) {
+    outItemCode = matchedRcp.output.item || 'MAT_006';
+    const inSummary = (matchedRcp.inputs || []).map(x => `${x.name || ((XIUXIAN_ITEMS[x.item] || {}).name || x.item)}×${x.count}`).join(' + ');
+    const outSummary = (matchedRcp.outputs || [matchedRcp.output]).map(x => `${x.name || ((XIUXIAN_ITEMS[x.item] || {}).name || x.item)}×${x.count}`).join(' + ');
+    mappingDesc = inSummary ? `${inSummary} ➔ ${outSummary}` : `自动化采集 ➔ ${outSummary}`;
   }
 
   const mappingTextElem = document.getElementById('passiveDetectedMappingText');
@@ -1044,50 +1056,65 @@ function renderPassiveProcessorView() {
   renderPassive72BagGrid();
 }
 
-// 渲染 72 格 BAG (8列 × 9行，前32格已开辟，后40格红 X 锁定)
+// 渲染被动加工器右侧实时背包 (联动 playerInventory，创造模式自动扩格)
 function renderPassive72BagGrid() {
   const container = document.getElementById('passiveBag72Grid');
   if (!container) return;
   container.innerHTML = '';
 
-  const totalSlots = 72;
-  const activeSlots = 32;
+  let filteredItems = (typeof buildBagItemsFromPlayerInventory === 'function')
+    ? buildBagItemsFromPlayerInventory().filter(x => x.type !== 'weapon').map(x => ({ item: x.id, count: x.count, def: x }))
+    : (backpackInventory || []);
 
-  // 根据当前标签过滤
-  let filteredItems = backpackInventory || [];
   if (currentPassiveBagFilter === 'Building') {
-    filteredItems = filteredItems.filter(b => ['iron_plate', 'iron_rod', 'concrete', 'iron_beam', 'power_pole', 'biomass_burner', 'furnace', 'cutter', 'miner'].includes(b.item));
+    filteredItems = filteredItems.filter(b => {
+      const cat = (XIUXIAN_ITEMS[b.item] || {}).category || '';
+      return cat.includes('建材') || cat.includes('零件') || cat.includes('管路');
+    });
   } else if (currentPassiveBagFilter === 'Materials') {
-    filteredItems = filteredItems.filter(b => ['iron_ore', 'copper_ore', 'coal', 'iron_ingot', 'copper_ingot', 'refined_iron_ingot', 'high_temp_alloy_ingot', 'daomai_alloy', 'iron_powder', 'copper_wire'].includes(b.item));
+    filteredItems = filteredItems.filter(b => {
+      const cat = (XIUXIAN_ITEMS[b.item] || {}).category || '';
+      return cat.includes('矿物') || cat.includes('金属');
+    });
   } else if (currentPassiveBagFilter === 'Equipment') {
-    filteredItems = filteredItems.filter(b => ['sword_casket', 'compass', 'build_gun', 'portable_miner'].includes(b.item));
+    filteredItems = filteredItems.filter(b => {
+      const cat = (XIUXIAN_ITEMS[b.item] || {}).category || '';
+      return cat.includes('电力') || cat.includes('控制');
+    });
   } else if (currentPassiveBagFilter === 'Other') {
-    filteredItems = filteredItems.filter(b => ['bio_chip', 'fabao_array_embryo', 'daomai_sheet', 'sha_crystal'].includes(b.item));
+    filteredItems = filteredItems.filter(b => {
+      const cat = (XIUXIAN_ITEMS[b.item] || {}).category || '';
+      return cat.includes('生物') || cat.includes('灵根') || cat.includes('环保') || cat.includes('剑丸');
+    });
   }
+
+  const activeSlots = (typeof isThunderPurified !== 'undefined' && (isThunderPurified || window.isCreativeMode))
+    ? Math.max(72, Math.ceil(filteredItems.length / 8) * 8)
+    : Math.max(32, Math.ceil(filteredItems.length / 8) * 8);
+  const totalSlots = Math.max(72, activeSlots);
 
   for (let i = 0; i < totalSlots; i++) {
     const slot = document.createElement('div');
     if (i < activeSlots) {
-      // 开放的 32 个槽位
       if (i < filteredItems.length && filteredItems[i]) {
         const itemObj = filteredItems[i];
         const def = (typeof XIUXIAN_ITEMS !== 'undefined') ? XIUXIAN_ITEMS[itemObj.item] : null;
-        slot.className = 'w-10 h-10 bg-[#101722] hover:bg-[#1a2536] border border-cyan-500/30 hover:border-[#00f0ff] rounded flex items-center justify-center relative cursor-pointer group shadow transition';
-        slot.title = `【${def ? def.name : itemObj.item}】x${itemObj.count}\n• 点击立即放入被动加工器 [IN] 槽位！`;
+        slot.className = 'w-10 h-10 bg-[#101722] hover:bg-[#1a2536] border border-cyan-500/30 hover:border-[#00f0ff] rounded flex flex-col items-center justify-center relative cursor-pointer group shadow transition p-0.5';
+        slot.title = `【${def ? def.name : itemObj.item}】x${itemObj.count}\n• 点击立即投入被动加工器 [IN] 槽位！`;
         slot.onclick = () => depositItemIntoPassiveInput(itemObj);
         slot.innerHTML = `
-          <i class="${def ? def.icon : 'fa-solid fa-cube'} text-stone-200 text-sm group-hover:scale-110 transition"></i>
-          <span class="absolute bottom-0.5 right-1 text-[8px] font-mono font-bold text-cyan-300 drop-shadow">${itemObj.count}</span>
+          <i class="${def ? def.icon : 'fa-solid fa-cube'} text-stone-200 text-xs group-hover:scale-110 transition"></i>
+          <span class="text-[6px] text-white/60 truncate w-full text-center leading-none mt-0.5">${def ? def.name : ''}</span>
+          <span class="absolute top-0 right-0.5 text-[7px] font-mono font-bold text-cyan-300 drop-shadow">${itemObj.count}</span>
         `;
       } else {
         slot.className = 'w-10 h-10 bg-[#070d16] border border-white/10 rounded flex items-center justify-center text-[10px] text-white/10';
         slot.innerHTML = '<span class="text-[8px] font-mono text-white/15">·</span>';
       }
     } else {
-      // 后 40 个锁定槽位 (带 X 标志，1:1 还原截图)
       slot.className = 'w-10 h-10 bg-[#060a12] border border-red-500/10 rounded flex items-center justify-center text-red-500/30 font-bold select-none cursor-not-allowed';
-      slot.title = '【天雷封禁槽位】需前往随身背包通过【天雷淬体】解除封印！';
-      slot.onclick = () => showNotification('此槽位受经脉封禁锁定，可在角色背包按 [Tab] 点击【天雷淬体】解锁！');
+      slot.title = '【未解锁槽位】按 [Tab] 打开背包点击【创造模式】或【天雷淬体】解锁！';
+      slot.onclick = () => showNotification('可在右上角或 [Tab] 背包点击【创造模式 (全满)】解锁全部槽位与物料！');
       slot.innerHTML = '<i class="fa-solid fa-xmark text-xs opacity-40"></i>';
     }
     container.appendChild(slot);
@@ -1121,27 +1148,24 @@ function depositItemIntoPassiveInput(itemObj) {
     item: itemObj.item,
     count: (passiveInputSlot.item === itemObj.item ? passiveInputSlot.count : 0) + depositAmount
   };
-  itemObj.count -= depositAmount;
-  if (itemObj.count <= 0) {
-    const idx = backpackInventory.indexOf(itemObj);
-    if (idx !== -1) backpackInventory.splice(idx, 1);
+  if (!window.isCreativeMode && typeof playerInventory !== 'undefined') {
+    playerInventory[itemObj.item] = Math.max(0, (playerInventory[itemObj.item] || 0) - depositAmount);
   }
-  showNotification(`【被动加工器】已投入原料【${def ? def.name : itemObj.item}】x${depositAmount}，智能识别自动加工中！`);
+  if (typeof syncBackpackFromPlayerInventory === 'function') syncBackpackFromPlayerInventory();
+  showNotification(`【被动加工器】已投入原料【${def ? def.name : itemObj.item}】x${depositAmount}`);
   renderPassiveProcessorView();
 }
 
-// 点击 IN 插槽快速投料
 function triggerPassiveInputSlotClick() {
   playUiSound('click');
-  const found = backpackInventory.find(b => ['iron_ore', 'copper_ore', 'iron_ingot', 'coal'].includes(b.item));
+  const found = backpackInventory.find(b => ['MAT_001', 'MAT_002', 'MAT_006', 'MAT_004', 'mat_098', 'mat_102'].includes(b.item));
   if (found) {
     depositItemIntoPassiveInput(found);
   } else {
-    showNotification('背包中暂无适配加工的矿石或金属锭，请先开采或放入！');
+    showNotification('请点击右侧背包中的任意矿石/原料放入 [IN] 槽位');
   }
 }
 
-// 提取被动加工产物
 function collectPassiveOutput() {
   if (!passiveOutputSlot || passiveOutputSlot.count <= 0) {
     showNotification('当前成品产出槽为空');
@@ -1149,37 +1173,16 @@ function collectPassiveOutput() {
   }
   playUiSound('craft_success');
   const count = passiveOutputSlot.count;
-  let itemCode = 'iron_ingot';
-  if (currentMachineId === 'smelt_chamber') {
-    if (passiveInputSlot.item === 'copper_ingot' || passiveInputSlot.item === 'copper_ore') {
-      itemCode = 'high_temp_alloy_ingot';
-    } else if (passiveInputSlot.item === 'sha_crystal') {
-      itemCode = 'daomai_alloy';
-    } else if (passiveInputSlot.item === 'iron_ingot') {
-      itemCode = 'refined_iron_ingot';
-    } else if (passiveInputSlot.item === 'iron_ore') {
-      itemCode = 'iron_ingot';
-    } else if (passiveInputSlot.item === 'coal') {
-      itemCode = 'high_temp_alloy_ingot';
-    } else {
-      itemCode = 'refined_iron_ingot';
-    }
-  } else if (currentMachineId === 'furnace') {
-    itemCode = (passiveInputSlot.item === 'copper_ore') ? 'copper_ingot' : (passiveInputSlot.item === 'iron_ingot' ? 'refined_iron_ingot' : 'iron_ingot');
-  } else if (currentMachineId === 'crusher') {
-    itemCode = (passiveInputSlot.item === 'coal') ? 'waste_purify_powder' : 'iron_powder';
-  } else if (currentMachineId === 'miner') {
-    itemCode = 'iron_ore';
-  }
+  const matchedRcp = resolvePassiveMachineRecipe(currentMachineId, passiveInputSlot.item);
+  const itemCode = (matchedRcp && matchedRcp.output && matchedRcp.output.item) ? matchedRcp.output.item : 'MAT_006';
 
   const def = (typeof XIUXIAN_ITEMS !== 'undefined') ? XIUXIAN_ITEMS[itemCode] : null;
-  const found = backpackInventory.find(b => b.item === itemCode);
-  if (found) {
-    found.count += count;
-  } else {
-    backpackInventory.push({ item: itemCode, count: count });
+  if (typeof playerInventory !== 'undefined') {
+    playerInventory[itemCode] = (playerInventory[itemCode] || 0) + count;
   }
-  showNotification(`【产物提取】已提取【${def ? def.name : itemCode}】x${count} 存入随身背包！`);
+  if (typeof syncBackpackFromPlayerInventory === 'function') syncBackpackFromPlayerInventory();
+  if (typeof syncInventoryDisplay === 'function') syncInventoryDisplay();
+  showNotification(`【产物提取】已提取【${def ? def.name : itemCode}】x${count} 存入真实随身库存！`);
   passiveOutputSlot.count = 0;
   renderPassiveProcessorView();
 }
@@ -1605,8 +1608,15 @@ function renderSelectedRecipeDetail(recipeId) {
 function confirmSelectedRecipeForMachine() {
   playUiSound('craft_success');
   currentMachineRecipeId = selectedRecipeInPicker;
+  const rDef = resolveRecipeDefinition(currentMachineRecipeId);
+  if (PASSIVE_MACHINES.includes(currentMachineId) && rDef) {
+    const firstIn = (Array.isArray(rDef.inputs) && rDef.inputs[0]?.item) || (rDef.input && rDef.input.item);
+    if (firstIn) {
+      passiveInputSlot = { item: firstIn, count: Math.max(20, passiveInputSlot.count || 20) };
+    }
+  }
   const bName = (typeof XIUXIAN_BUILDINGS !== 'undefined' && XIUXIAN_BUILDINGS[currentMachineId]?.name) || '设备';
-  const rName = (resolveRecipeDefinition(currentMachineRecipeId)?.name) || '配方';
+  const rName = (rDef && rDef.name) || '配方';
   showNotification(`已为【${bName.split(' ')[0]}】成功装载配方: ${rName}`);
   switchMachineView('prod');
 }
@@ -1691,7 +1701,7 @@ function toggleMachinePowerSwitch() {
 
   if (PASSIVE_MACHINES.includes(currentMachineId)) {
     renderPassiveProcessorView();
-  } else if (COMPOSITE_MACHINES.includes(currentMachineId)) {
+  } else if (typeof COMPOSITE_MACHINES !== 'undefined' && COMPOSITE_MACHINES.includes(currentMachineId)) {
     renderCompositeBuildingView();
   } else {
     renderMachineProdView();

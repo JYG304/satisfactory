@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>修仙工厂与中央处理器原型系统</title>
+    <title>修仙工厂 · 系统集成与3D沙盒原型</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -16,24 +16,45 @@
 <body class="text-slate-100 flex flex-col items-center justify-center p-6">
     <div class="max-w-4xl w-full bg-slate-900/80 border border-slate-700/60 rounded-2xl p-8 backdrop-blur shadow-2xl my-auto">
         <header class="text-center mb-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-400 text-xs font-semibold mb-3">
-                <i class="fa-solid fa-microchip"></i> 项目在线体验入口
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-cyan-400 text-xs font-semibold mb-3">
+                <i class="fa-solid fa-cubes"></i> 项目在线体验入口 · V7 数据体系
             </div>
             <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-white mb-2">修仙工厂 · 系统集成与原型</h1>
-            <p class="text-slate-400 text-sm">选择下方入口直接在浏览器中交互体验，或查阅配套工程规范与配置文档。</p>
+            <p class="text-slate-400 text-sm">选择下方入口直接在浏览器中交互体验 3D 沙盒工厂、全量配方与设备调试原型。</p>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- HUD 工厂控制台 -->
+            <a href="satisfactory_hud_replica.html" class="group relative block p-6 bg-slate-800/60 hover:bg-slate-800 border border-cyan-500/30 hover:border-cyan-400 rounded-xl transition duration-200 shadow-lg hover:shadow-cyan-500/10">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-12 h-12 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 text-xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-sliders"></i>
+                    </div>
+                    <span class="text-xs bg-cyan-500 text-slate-950 font-bold px-2 py-0.5 rounded">核心沙盒</span>
+                </div>
+                <h2 class="text-lg font-bold text-white mb-2 group-hover:text-cyan-300 transition-colors flex items-center gap-2">
+                    修仙工厂 HUD & 3D 沙盒控制台
+                    <i class="fa-solid fa-arrow-right text-sm opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+                </h2>
+                <p class="text-slate-400 text-xs leading-relaxed mb-4">
+                    已同步 V7 策划表数据（110 物料 / 60 建筑真实 1:1:1 尺寸 / 192 配方 / 67 科技树节点），支持真实背包、一键创造模式与 3F 演示工厂实时交互。
+                </p>
+                <div class="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono flex-wrap">
+                    <span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700/50">V7 完整同步</span>
+                    <span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700/50">3D 体素仿真</span>
+                </div>
+            </a>
+
             <!-- 传送带限速控制中枢 (常规建筑布局) -->
-            <a href="conveyor_limiter_prototype.html" class="group relative block p-6 bg-slate-800/60 hover:bg-slate-800 border border-emerald-500/30 hover:border-emerald-400 rounded-xl transition duration-200 shadow-lg hover:shadow-emerald-500/10">
+            <a href="03_功能测试与验证原型/conveyor_limiter_prototype.html" class="group relative block p-6 bg-slate-800/60 hover:bg-slate-800 border border-emerald-500/30 hover:border-emerald-400 rounded-xl transition duration-200 shadow-lg hover:shadow-emerald-500/10">
                 <div class="flex items-start justify-between mb-4">
                     <div class="w-12 h-12 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xl group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-gauge-high"></i>
                     </div>
-                    <span class="text-xs bg-emerald-500 text-slate-950 font-bold px-2 py-0.5 rounded">最新成果</span>
+                    <span class="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold px-2 py-0.5 rounded">专项原型</span>
                 </div>
                 <h2 class="text-lg font-bold text-white mb-2 group-hover:text-emerald-300 transition-colors flex items-center gap-2">
-                    传送带限速器
+                    传送带限速器原型
                     <i class="fa-solid fa-arrow-right text-sm opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
                 </h2>
                 <p class="text-slate-400 text-xs leading-relaxed mb-4">
@@ -44,56 +65,14 @@
                     <span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700/50">全交互原型</span>
                 </div>
             </a>
-
-            <!-- 中央处理器光路阵盘 -->
-            <a href="processor/index.html" class="group relative block p-6 bg-slate-800/60 hover:bg-slate-800 border border-amber-500/30 hover:border-amber-400 rounded-xl transition duration-200 shadow-lg hover:shadow-amber-500/10">
-                <div class="flex items-start justify-between mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-xl group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-circle-nodes"></i>
-                    </div>
-                    <span class="text-xs bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded">阵盘系统</span>
-                </div>
-                <h2 class="text-lg font-bold text-white mb-2 group-hover:text-amber-300 transition-colors flex items-center gap-2">
-                    中央处理器 (光路阵盘)
-                    <i class="fa-solid fa-arrow-right text-sm opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
-                </h2>
-                <p class="text-slate-400 text-xs leading-relaxed mb-4">
-                    六轨同心光路阵盘、插槽步数几何整除体系、标准规范化芯片/插件系统、北斗七星共鸣倍率加成面板。
-                </p>
-                <div class="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono flex-wrap">
-                    <span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700/50">/processor/</span>
-                    <span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700/50">完整可玩原型</span>
-                </div>
-            </a>
-
-            <!-- HUD 工厂控制台 -->
-            <a href="satisfactory_hud_replica.html" class="group relative block p-6 bg-slate-800/60 hover:bg-slate-800 border border-cyan-500/30 hover:border-cyan-400 rounded-xl transition duration-200 shadow-lg hover:shadow-cyan-500/10">
-                <div class="flex items-start justify-between mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 text-xl group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-sliders"></i>
-                    </div>
-                    <span class="text-xs bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold px-2 py-0.5 rounded">HUD 原型</span>
-                </div>
-                <h2 class="text-lg font-bold text-white mb-2 group-hover:text-cyan-300 transition-colors flex items-center gap-2">
-                    修仙工厂 HUD 交互面板
-                    <i class="fa-solid fa-arrow-right text-sm opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
-                </h2>
-                <p class="text-slate-400 text-xs leading-relaxed mb-4">
-                    沉浸式高科技与仙道工业风格 HUD 面板，包含生产产线监控、灵气转化流转与设备状态集成演示。
-                </p>
-                <div class="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono flex-wrap">
-                    <span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700/50">HUD 仿真</span>
-                </div>
-            </a>
         </div>
 
         <div class="mt-8 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
             <div class="flex items-center gap-2">
-                <i class="fa-solid fa-folder-tree text-amber-500/70"></i>
-                <span>独立文件夹：<code class="text-slate-300 font-mono">中央处理器_光路阵盘/</code> & <code class="text-slate-300 font-mono">processor/</code></span>
+                <i class="fa-solid fa-database text-cyan-500/70"></i>
+                <span>数值配置表目录：<code class="text-slate-300 font-mono">02_数值与配置数据表/</code>（110 物料 · 60 建筑 · 192 配方）</span>
             </div>
             <div class="flex items-center gap-4">
-                <a href="中央处理器_光路阵盘/README.md" class="hover:text-amber-400 transition-colors underline">阵盘策划文档 (README)</a>
                 <a href="https://github.com/JYG304/satisfactory" target="_blank" class="hover:text-cyan-400 transition-colors"><i class="fa-brands fa-github"></i> GitHub 仓库</a>
             </div>
         </div>

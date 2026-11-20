@@ -269,6 +269,10 @@
             <i class="fa-solid fa-diagram-project text-emerald-300"></i>
             <span>配方解锁树 [K]</span>
           </button>
+          <button id="btnCreativeTop" onclick="toggleCreativeMode();" class="px-2 py-0.5 bg-amber-500/20 hover:bg-amber-500/40 border border-amber-400/60 rounded text-[10px] font-bold text-amber-200 transition cursor-pointer flex items-center space-x-1" title="一键切换创造模式（全110种物料×999 + 解锁全部67节点 + 建造零消耗）">
+            <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+            <span>创造模式: 关</span>
+          </button>
         </div>
       </div>
 
@@ -727,12 +731,12 @@
               <span class="text-[8.5px] font-bold text-slate-700 leading-none">物品/装备</span>
             </button>
 
-            <!-- [1,3] M 中央处理器 (宗门算力中枢 · 法令与金身回路) -->
-            <button id="btnM" onclick="toggleCentralProcessorHUD();" title="[按键 M] 打开中央处理器 (宗门算力中枢 · 宗门宏观法令自选 · 金身节点拉线接入)"
+            <!-- [1,3] M 科技解锁树 (V7 67 节点与 192 配方解锁) -->
+            <button id="btnM" onclick="toggleTechTreeModal();" title="[按键 M / K] 打开修仙工业科技解锁树 (67 研发节点 · 192 配方解锁)"
                     class="w-11 h-11 bg-white hover:bg-amber-50 text-slate-900 border-2 border-amber-400 rounded flex flex-col items-center justify-between py-1 shadow-[0_0_10px_rgba(245,158,11,0.6)] cursor-pointer group hover:scale-105 active:scale-95 transition select-none">
               <span class="text-[9.5px] font-black font-mono text-amber-600 leading-none">M</span>
-              <i class="fa-solid fa-microchip text-xs text-amber-500 group-hover:scale-110 transition"></i>
-              <span class="text-[8.5px] font-bold text-slate-700 leading-none">处理器</span>
+              <i class="fa-solid fa-diagram-project text-xs text-amber-500 group-hover:scale-110 transition"></i>
+              <span class="text-[8.5px] font-bold text-slate-700 leading-none">科技树</span>
             </button>
 
             <!-- [1,4] X 法典百科 (常驻可用 · 亮) -->
@@ -2667,12 +2671,12 @@
         <div class="flex flex-col space-y-3.5">
           
           <button id="btnHolo_hub" 
-                  onclick="toggleInventoryModal(); openCentralProcessorHUD();" 
-                  title="[按键 3 / M] 打开中央处理器 · 暗黑巅峰点式旋转连线中枢"
+                  onclick="toggleInventoryModal(); openTechTreeModal();" 
+                  title="[按键 3 / M / K] 打开修仙工业科技解锁树 (67 研发节点与配方解锁)"
                   class="holo-card-btn w-16 h-16 sm:w-20 sm:h-20 rounded-xl flex flex-col items-center justify-center cursor-pointer">
-            <i class="fa-solid fa-microchip text-xl sm:text-2xl text-orange-600 mb-1"></i>
-            <span class="text-xs sm:text-sm font-black font-sans tracking-wider text-slate-900 leading-none">中央处理器</span>
-            <span class="text-[8.5px] font-mono text-orange-700 font-bold mt-0.5">连线小游戏</span>
+            <i class="fa-solid fa-diagram-project text-xl sm:text-2xl text-emerald-600 mb-1"></i>
+            <span class="text-xs sm:text-sm font-black font-sans tracking-wider text-slate-900 leading-none">科技树</span>
+            <span class="text-[8.5px] font-mono text-emerald-700 font-bold mt-0.5">TECH TREE</span>
           </button>
 
           <button id="btnHolo_craft" 
@@ -2894,12 +2898,25 @@
           <div class="flex-1 p-2.5 flex flex-col justify-between overflow-hidden bg-[#061221]/90">
             
             <!-- 顶栏工具条 -->
-            <div class="flex items-center justify-between pb-1.5 border-b border-[#00f0ff]/20 text-[10px] font-mono shrink-0">
+            <div class="flex flex-wrap items-center justify-between gap-1.5 pb-1.5 border-b border-[#00f0ff]/20 text-[10px] font-mono shrink-0">
               <div class="flex items-center space-x-2">
                 <span class="text-sm font-black font-mono tracking-wider text-[#00f0ff]">BAG</span>
                 <span class="text-cyan-300/80">已开辟: <strong class="text-white" id="bagActiveCount">32</strong> / 72 SLOTS</span>
               </div>
-              <div class="flex items-center space-x-2">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <div class="relative flex items-center">
+                  <i class="fa-solid fa-magnifying-glass text-cyan-400/70 text-[10px] absolute left-2 pointer-events-none"></i>
+                  <input id="bagSearchInput" type="text" placeholder="搜索物料 / ID..."
+                         oninput="setBagSearchFilter(this.value);"
+                         class="w-32 sm:w-40 pl-6 pr-2 py-0.5 bg-slate-900/90 border border-cyan-500/40 focus:border-cyan-400 rounded text-[10px] font-mono text-white placeholder-slate-500 outline-none" />
+                </div>
+                <button id="btnCreativeBag"
+                        onclick="toggleCreativeMode();"
+                        title="一键开启创造模式：全110种物料×999、全部192配方与67科技树节点解锁、建造与合成零消耗"
+                        class="flex items-center space-x-1 px-2.5 py-0.5 bg-amber-500/20 hover:bg-amber-500/40 border border-amber-400/60 text-amber-200 font-bold text-[10px] rounded shadow-[0_0_8px_rgba(245,158,11,0.35)] cursor-pointer active:scale-95 transition">
+                  <i class="fa-solid fa-wand-magic-sparkles text-amber-300 text-[10px]"></i>
+                  <span>全物品×999 (创造模式)</span>
+                </button>
                 <button onclick="sortPlayerBackpack();" 
                         title="自动整理并排序随身背包物料" 
                         class="px-2.5 py-0.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded text-[10px] font-mono text-cyan-200 transition cursor-pointer">
@@ -3528,31 +3545,6 @@
 
       </div>
 
-    </div>
-  </div>
-
-  <!-- 2.3.5 中央处理器 (CPU_001) 工控中枢 · PCB集成电路拓扑平台 -->
-  <div id="cpuProcessorModal"
-       onclick="event.stopPropagation();"
-       onmousedown="event.stopPropagation();"
-       onwheel="event.stopPropagation();"
-       class="absolute inset-0 z-40 bg-black/90 backdrop-blur-lg flex items-center justify-center hidden select-none">
-    <div class="relative w-[96vw] max-w-[1720px] h-[92vh] max-h-[960px] bg-[#070b13] border-2 border-cyan-500/60 rounded-xl shadow-[0_25px_80px_rgba(0,0,0,0.98)] flex flex-col text-white overflow-hidden">
-      <div class="h-11 bg-[#060c14] border-b border-cyan-500/30 flex items-center justify-between px-4 shrink-0">
-        <div class="flex items-center space-x-2.5">
-          <div class="w-7 h-7 rounded bg-cyan-500/20 border border-cyan-400 flex items-center justify-center">
-            <i class="fa-solid fa-circle-nodes text-cyan-300 text-sm"></i>
-          </div>
-          <span class="text-xs font-black tracking-wider text-cyan-200 font-mono">中央处理器 · 灵枢光路阵盘系统 (最新版)</span>
-        </div>
-        <div class="flex items-center space-x-3">
-          <span class="text-[11px] text-slate-400 font-mono hidden sm:inline">按 [Esc] 或 [M] 关闭</span>
-          <button onclick="closeCentralProcessorHUD();" class="w-8 h-8 rounded bg-rose-500/20 hover:bg-rose-500/40 border border-rose-400/50 text-rose-200 flex items-center justify-center cursor-pointer transition" title="关闭中央处理器 [ESC/M]">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-      </div>
-      <iframe id="cpuProcessorIframe" data-src="03_功能测试与验证原型/processor/index.html" class="w-full flex-1 border-0 bg-white"></iframe>
     </div>
   </div>
 
@@ -4258,24 +4250,16 @@
   <script src="js/tech_tree.js"></script>
   <script>
     function openCentralProcessorHUD() {
-      if (typeof closeOtherModals === 'function') closeOtherModals('cpuProcessorModal');
-      const modal = document.getElementById('cpuProcessorModal');
-      const iframe = document.getElementById('cpuProcessorIframe');
-      if (iframe && !iframe.getAttribute('src')) {
-        iframe.setAttribute('src', iframe.getAttribute('data-src'));
-      }
-      if (modal) modal.classList.remove('hidden');
-      if (typeof playUiSound === 'function') playUiSound('toggle');
+      if (typeof openTechTreeModal === 'function') openTechTreeModal();
+      else if (window.TechTree && typeof window.TechTree.open === 'function') window.TechTree.open();
     }
     function closeCentralProcessorHUD() {
-      const modal = document.getElementById('cpuProcessorModal');
-      if (modal) modal.classList.add('hidden');
+      if (typeof closeTechTreeModal === 'function') closeTechTreeModal();
+      else if (window.TechTree && typeof window.TechTree.close === 'function') window.TechTree.close();
     }
     function toggleCentralProcessorHUD() {
-      const modal = document.getElementById('cpuProcessorModal');
-      if (!modal) return;
-      if (modal.classList.contains('hidden')) openCentralProcessorHUD();
-      else closeCentralProcessorHUD();
+      if (typeof toggleTechTreeModal === 'function') toggleTechTreeModal();
+      else if (window.TechTree && typeof window.TechTree.toggle === 'function') window.TechTree.toggle();
     }
   </script>
   <script src="js/jinshen_system.js"></script>

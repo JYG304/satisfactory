@@ -20,11 +20,10 @@ f:\UE5\修仙工厂策划案\
 │
 ├── [Web 主原型工程] (双击 index.html 即可直接运行，无外部依赖)
 │   ├── index.html                    # GitHub Pages 引导入口
-│   ├── satisfactory_hud_replica.html # 完整 3D 修仙 HUD 与工厂控制原型
-│   ├── astrolabe_bg_texture.jpg      # 天道阵盘背景图
-│   ├── xiuxian_data.js               # 核心物料、机器与配方数据驱动
+│   ├── satisfactory_hud_replica.html # 完整 3D 修仙 HUD 与工厂控制原型 (V7: 110 物料 / 60 建筑 / 192 配方 / 67 科技节点)
+│   ├── xiuxian_data.js               # 核心物料、机器、1:1:1 尺寸与全量配方数据驱动
 │   ├── css/                          # 界面样式库
-│   └── js/                           # 背包、机器、任务、建筑、天道阵盘逻辑
+│   └── js/                           # 背包、机器、任务、建筑、3D 体素、科技解锁树逻辑
 │
 ├── 01_核心策划案/ (Current GDD - 当前最新有效策划方案)
 │   ├── 修仙工厂_与DSP_幸福工厂对比及全球竞品深度调研研报.md  # 最新全景万字研报 (含与DSP/幸福工厂及11款竞品对比)
@@ -48,9 +47,7 @@ f:\UE5\修仙工厂策划案\
 │   ├── cpu_battles_prototype.html         # 背包乱斗式构筑对战测试
 │   ├── cpu_sandbox_test.html              # CPU 核心多米诺脉冲沙盒
 │   ├── HUD快捷面板原型.html
-│   ├── 游戏案例库_截图画廊.html
-│   ├── processor/                         # 独立 CPU 处理器原型模块
-│   └── 中央处理器_光路阵盘/
+│   └── 游戏案例库_截图画廊.html
 │
 ├── 04_参考素材与截图/ (References & Art - 美术参考与规范)
 │   ├── 参考UI与交互截图/                  # 游戏 UI、提交窗口、缺少材料提示等参考截图

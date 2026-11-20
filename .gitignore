@@ -2,6 +2,10 @@
 .cache/
 .artifact_work/
 *.inspect.ndjson
+scratch/
+outputs/
+05_历史版本与归档/
+炼金工厂配方参考.doc
 
 # OS/editor noise
 .DS_Store

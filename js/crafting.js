@@ -67,7 +67,7 @@ const craftingRecipes = new Proxy({}, {
   }
 });
 
-let currentCraftRecipeKey = 'iron_plate';
+let currentCraftRecipeKey = (typeof XIUXIAN_RECIPES !== 'undefined' && Object.keys(XIUXIAN_RECIPES)[0]) || 'rcp_001';
 let isCraftingHolding = false;
 let craftHoldStartTime = 0;
 let craftHoldProgress = 0; // 0 到 100
@@ -235,10 +235,11 @@ function handleRecipeSearch(query) {
   });
 }
 
-// 检查当前配方原料是否充足
+// 检查当前配方原料是否充足 (创造模式免原料直造)
 function canCraftCurrentRecipe() {
   const rec = craftingRecipes[currentCraftRecipeKey];
   if (!rec) return false;
+  if (window.isCreativeMode) return true;
   return rec.ingredients.every(ing => (playerInventory[ing.code] || 0) >= ing.need);
 }
 
@@ -342,10 +343,12 @@ function executeCraftSuccess() {
   const rec = craftingRecipes[currentCraftRecipeKey];
   if (!rec) return;
 
-  // 扣除材料
-  rec.ingredients.forEach(ing => {
-    playerInventory[ing.code] -= ing.need;
-  });
+  // 扣除材料 (创造模式下免消耗)
+  if (!window.isCreativeMode) {
+    rec.ingredients.forEach(ing => {
+      playerInventory[ing.code] = Math.max(0, (playerInventory[ing.code] || 0) - ing.need);
+    });
+  }
 
   // 产生成品
   playerInventory[rec.outCode] = (playerInventory[rec.outCode] || 0) + rec.outAmount;
@@ -354,6 +357,7 @@ function executeCraftSuccess() {
   playUiSound('craft_success');
   spawnCraftFlyBadge(`+${rec.outAmount} ${rec.name}`);
   syncInventoryDisplay();
+  if (typeof syncBackpackFromPlayerInventory === 'function') syncBackpackFromPlayerInventory();
 }
 
 // 浮动产出徽章动效
@@ -375,9 +379,11 @@ function craftBatchQuick(num) {
 
   let count = 0;
   while (canCraftCurrentRecipe() && count < num) {
-    rec.ingredients.forEach(ing => {
-      playerInventory[ing.code] -= ing.need;
-    });
+    if (!window.isCreativeMode) {
+      rec.ingredients.forEach(ing => {
+        playerInventory[ing.code] = Math.max(0, (playerInventory[ing.code] || 0) - ing.need);
+      });
+    }
     playerInventory[rec.outCode] = (playerInventory[rec.outCode] || 0) + rec.outAmount;
     count++;
   }
@@ -387,6 +393,7 @@ function craftBatchQuick(num) {
     spawnCraftFlyBadge(`批量完成: +${count * rec.outAmount} ${rec.name}`);
     showNotification(`急速制造完成: ${rec.name} x ${count * rec.outAmount}`);
     syncInventoryDisplay();
+    if (typeof syncBackpackFromPlayerInventory === 'function') syncBackpackFromPlayerInventory();
   } else {
     playUiSound('craft_fail');
     showNotification('原料不足，无法批量制造！');
@@ -431,14 +438,16 @@ function syncInventoryDisplay() {
   Object.keys(craftingRecipes).forEach(key => {
     const r = craftingRecipes[key];
     if (!r || !r.ingredients) return;
-    let maxCanMake = 9999;
-    r.ingredients.forEach(ing => {
-      const avail = Math.floor((playerInventory[ing.code] || 0) / ing.need);
-      if (avail < maxCanMake) maxCanMake = avail;
-    });
+    let maxCanMake = window.isCreativeMode ? 999 : 9999;
+    if (!window.isCreativeMode) {
+      r.ingredients.forEach(ing => {
+        const avail = Math.floor((playerInventory[ing.code] || 0) / ing.need);
+        if (avail < maxCanMake) maxCanMake = avail;
+      });
+    }
     const stockLabel = document.getElementById(`rcard-stock-${key}`);
     if (stockLabel) {
-      stockLabel.innerText = `[${maxCanMake}]`;
+      stockLabel.innerText = window.isCreativeMode ? `[∞]` : `[${maxCanMake}]`;
       const isCurrent = (key === currentCraftRecipeKey || r.id === currentCraftRecipeKey);
       stockLabel.className = `text-[11px] font-mono font-bold shrink-0 ${isCurrent ? 'text-white' : (maxCanMake > 0 ? 'text-emerald-400' : 'text-white/30')}`;
     }
@@ -449,6 +458,9 @@ function syncInventoryDisplay() {
   }
   if (typeof syncMilestoneTrackerDisplay === 'function') {
     syncMilestoneTrackerDisplay();
+  }
+  if (typeof renderPlayerEquipmentModal === 'function') {
+    renderPlayerEquipmentModal();
   }
 }
 

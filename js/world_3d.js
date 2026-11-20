@@ -23,12 +23,12 @@
 
   // 相机轨道状态 (纯鼠标控制，无玩家 WASD 移动)
   const camState = {
-    target: new THREE.Vector3(3, 7.5, 2),
+    target: new THREE.Vector3(3, 13, 2),
     yaw: -0.42,       // 弧度
     pitch: 0.44,      // 俯仰角
-    distance: 56,     // 观察距离 (完整俯瞰三层叠加立体大厂)
-    minDist: 8,
-    maxDist: 120
+    distance: 68,     // 观察距离 (完整俯瞰 1:1:1 比例三层立体大厂)
+    minDist: 6,
+    maxDist: 160
   };
 
   // 鼠标交互状态
@@ -49,9 +49,9 @@
   const buildingMeshMap = new Map(); // bld.id -> { group, bld, animators, labelAnchorY, topY }
   const interactableMeshes = [];     // 用于 raycaster 检测的所有子网格
 
-  // 策划表体素占格尺度：1 水平格 = 2.0m，1 高度(m) = 1.0m (严格对齐 1×1×1m, 1×1×4m, 3×3×1m)
+  // 策划表体素占格尺度：1 水平格 = 2.0m，1 高度格 = 2.0m (严格等比 1:1:1 立方体体素)
   const GRID_UNIT = 2.0;
-  const HEIGHT_UNIT = 1.0;
+  const HEIGHT_UNIT = 2.0;
   function getBuildingTableDef(type) {
     if (typeof XIUXIAN_BUILDINGS === 'undefined') return null;
     const alias = {
@@ -63,7 +63,10 @@
       water_pump: 'pump',
       purify_tower: 'purifier',
       portal: 'teleporter',
-      beam: 'foundation_beam'
+      beam: 'foundation_beam',
+      bd_113: 'storage_box',
+      bd_123: 'merger',
+      bd_153: 'storage_desk'
     };
     return XIUXIAN_BUILDINGS[type] || XIUXIAN_BUILDINGS[alias[type]] || null;
   }
@@ -388,42 +391,59 @@
     const mFluidDark = getMat('fluidDark', () => stdMat(0x0e2236, 0.45, 0.6));
     const mWood = getMat('wood', () => stdMat(0x8b4513, 0.75, 0.15));
 
-    const add = (mesh, idOverride = null, isTop = false, slotType = null) => {
+    const subGroup = new THREE.Group();
+    const add = (mesh, idOverride = null, isTop = false, slotType = null, targetParent = group) => {
       if (!isHologram && bld) {
         tagMesh(mesh, bld, idOverride || bld.type, isTop, slotType);
       }
-      group.add(mesh);
+      targetParent.add(mesh);
       return mesh;
     };
+    const addSub = (mesh, idOverride = null, isTop = false, slotType = null) => add(mesh, idOverride, isTop, slotType, subGroup);
 
     const bDef = getBuildingTableDef(type);
     const dimX = bDef ? (bDef.dimX || 1) : 1;
     const dimY = bDef ? (bDef.dimY || 1) : 1;
-    const dimZ = bDef ? (bDef.dimZ || 1) : 1;
+    const dimZ = bDef ? (bDef.dimZ !== undefined ? bDef.dimZ : 1) : 1;
     const W = dimX * GRID_UNIT;
     const D = dimY * GRID_UNIT;
-    let topY = Math.max(1.0, dimZ * HEIGHT_UNIT);
+    const H = (dimZ === 0 ? 0.16 : dimZ) * HEIGHT_UNIT;
+    let topY = H;
+
+    const fitSubGroup = (targetW = W * 0.94, targetH = H, targetD = D * 0.94) => {
+      subGroup.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(subGroup);
+      if (!box.isEmpty()) {
+        const sz = new THREE.Vector3();
+        box.getSize(sz);
+        const sx = sz.x > 0.01 ? targetW / sz.x : 1;
+        const sy = sz.y > 0.01 ? targetH / sz.y : 1;
+        const szScale = sz.z > 0.01 ? targetD / sz.z : 1;
+        subGroup.scale.set(sx, sy, szScale);
+        subGroup.position.set(0, -box.min.y * sy, 0);
+      }
+      group.add(subGroup);
+    };
 
     if (type === 'power_engine') {
-      // 灵力引擎 (BD_147, 4×3 = 8m×6m) + 顶部 3 联装冶炼舱 (自然立体比例，绝不压扁)
-      const chassis = new THREE.Mesh(new THREE.BoxGeometry(7.4, 1.8, 5.2), mFluidDark);
-      chassis.position.y = 0.9;
+      // 灵力引擎（下）(BD_147, 4×3×2 = 8m×4m×6m) + 顶部 3 联装冶炼舱/炼丹炉插槽
+      const deckH = H;
+      const chassis = new THREE.Mesh(new THREE.BoxGeometry(W * 0.94, deckH - 0.25, D * 0.9), mFluidDark);
+      chassis.position.y = (deckH - 0.25) / 2;
       add(chassis, 'power_engine');
-      const deckTrim = new THREE.Mesh(new THREE.BoxGeometry(7.6, 0.22, 5.4), mCyanGlow);
-      deckTrim.position.y = 1.85;
+      const deckTrim = new THREE.Mesh(new THREE.BoxGeometry(W * 0.96, 0.25, D * 0.94), mCyanGlow);
+      deckTrim.position.y = deckH - 0.125;
       add(deckTrim, 'power_engine');
-      // 散热片组
       for (let f = -2; f <= 2; f++) {
-        const fin = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1.3, 5.5), mSteel);
-        fin.position.set(f * 1.4, 0.9, 0);
+        const fin = new THREE.Mesh(new THREE.BoxGeometry(0.28, deckH * 0.78, D * 0.96), mSteel);
+        fin.position.set(f * (W * 0.17), deckH * 0.45, 0);
         add(fin, 'power_engine');
       }
-      // 前置能量核心环
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.14, 12, 24), mCyanGlow);
-      ring.position.set(0, 0.95, 2.68);
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.16, 12, 24), mCyanGlow);
+      ring.position.set(0, deckH * 0.5, D * 0.46);
       add(ring, 'power_engine');
-      const core = new THREE.Mesh(new THREE.SphereGeometry(0.38, 16, 16), mAmberGlow);
-      core.position.set(0, 0.95, 2.68);
+      const core = new THREE.Mesh(new THREE.SphereGeometry(0.48, 16, 16), mAmberGlow);
+      core.position.set(0, deckH * 0.5, D * 0.46);
       add(core, 'power_engine');
       animators.push((t) => {
         ring.rotation.z = t * 1.8;
@@ -436,161 +456,163 @@
         { slotIndex: 2, mounted: true }
       ];
       slotsData.forEach((slot, i) => {
-        const sx = (i - 1) * 2.2;
+        const sx = (i - 1) * (W * 0.28);
         const slotId = slot.mounted ? `smelt_chamber_${i}` : `smelt_slot_empty_${i}`;
         if (slot.mounted) {
-          const chamber = new THREE.Mesh(new THREE.BoxGeometry(1.7, 1.6, 2.2), mOrange);
-          chamber.position.set(sx, 2.75, 0);
+          const chamber = new THREE.Mesh(new THREE.BoxGeometry(1.85, 2.6, 2.2), mOrange);
+          chamber.position.set(sx, deckH + 1.3, 0);
           add(chamber, slotId, true, 'engine_chamber');
-          const fireWin = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.7, 0.18), mAmberGlow);
-          fireWin.position.set(sx, 2.7, 1.12);
+          const fireWin = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.9, 0.2), mAmberGlow);
+          fireWin.position.set(sx, deckH + 1.25, 1.15);
           add(fireWin, slotId, true, 'engine_chamber');
-          const chimney = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.32, 0.85, 12), mDark);
-          chimney.position.set(sx, 3.95, 0);
+          const chimney = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.36, 1.2, 12), mDark);
+          chimney.position.set(sx, deckH + 3.2, 0);
           add(chimney, slotId, true, 'engine_chamber');
         } else {
-          const emptyPad = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.2, 2.0), stdMat(0x334155, 0.6, 0.3, 0xf5921e, 0.25));
-          emptyPad.position.set(sx, 2.06, 0);
+          const emptyPad = new THREE.Mesh(new THREE.BoxGeometry(1.75, 0.24, 2.1), stdMat(0x334155, 0.6, 0.3, 0xf5921e, 0.25));
+          emptyPad.position.set(sx, deckH + 0.12, 0);
           add(emptyPad, slotId, true, 'engine_chamber');
         }
       });
-      topY = 4.4;
-      labelAnchorY = 5.0;
+      topY = H;
+      labelAnchorY = H + 4.4;
 
     } else if (type === 'fluid_hub') {
-      // 流体处理中枢 (BD_158, 2×4 = 4m×8m) + 顶部搅拌机/萃取塔插槽
-      const base = new THREE.Mesh(new THREE.BoxGeometry(3.6, 1.8, 7.2), mFluidDark);
-      base.position.y = 0.9;
+      // 流体处理中枢 (BD_158, 2×4×4 = 4m×8m×8m) + 顶部搅拌机/离心机/提取器插槽
+      const baseH = H * 0.52;
+      const base = new THREE.Mesh(new THREE.BoxGeometry(W * 0.92, baseH - 0.25, D * 0.92), mFluidDark);
+      base.position.y = (baseH - 0.25) / 2;
       add(base, 'fluid_hub');
-      const collar = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.2, 7.4), mCyanGlow);
-      collar.position.y = 1.85;
+      const collar = new THREE.Mesh(new THREE.BoxGeometry(W * 0.96, 0.25, D * 0.96), mCyanGlow);
+      collar.position.y = baseH - 0.125;
       add(collar, 'fluid_hub');
-      // 两侧双储液罐
-      [-2.1, 2.1].forEach((pz) => {
-        const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 1.8, 16), mSteel);
-        tank.position.set(0, 1.1, pz);
+      [-D * 0.28, D * 0.28].forEach((pz) => {
+        const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, baseH * 0.95, 16), mSteel);
+        tank.position.set(0, baseH * 0.5, pz);
         add(tank, 'fluid_hub');
       });
-      // 左右法兰接口
-      [-2.0, 2.0].forEach((px) => {
-        const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.7, 12), mCyanGlow);
+      [-W * 0.5, W * 0.5].forEach((px) => {
+        const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.7, 12), mCyanGlow);
         pipe.rotation.z = Math.PI / 2;
-        pipe.position.set(px, 0.9, 0);
+        pipe.position.set(px, baseH * 0.45, 0);
         add(pipe, 'fluid_hub');
       });
 
       const slot = (typeof fluidHubSlot !== 'undefined') ? fluidHubSlot : { mounted: true, childId: 'mixer' };
       const topId = slot.mounted && slot.childId ? slot.childId : 'fluid_hub_slot';
+      const pluginH = H - baseH;
       if (slot.mounted && slot.childId === 'extractor') {
-        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 1.0, 2.6, 16), mSteel);
-        col.position.y = 3.25;
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 1.15, pluginH * 0.9, 16), mSteel);
+        col.position.y = baseH + pluginH * 0.45;
         add(col, topId, true, 'fluid_hub');
-        const coil = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.1, 10, 24), mCyanGlow);
+        const coil = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.12, 10, 24), mCyanGlow);
         coil.rotation.x = Math.PI / 2;
-        coil.position.y = 3.25;
+        coil.position.y = baseH + pluginH * 0.5;
         add(coil, topId, true, 'fluid_hub');
-        animators.push((t) => { coil.position.y = 3.0 + Math.sin(t * 2.5) * 0.65; });
+        animators.push((t) => { coil.position.y = baseH + pluginH * 0.45 + Math.sin(t * 2.5) * 0.7; });
       } else if (slot.mounted) {
-        const drum = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.15, 1.7, 18), mSteel);
-        drum.position.y = 2.8;
+        const drum = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.25, pluginH * 0.75, 18), mSteel);
+        drum.position.y = baseH + pluginH * 0.38;
         add(drum, topId, true, 'fluid_hub');
-        const rotor = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.25, 0.28), mCyanGlow);
-        rotor.position.y = 3.8;
+        const rotor = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.3, 0.32), mCyanGlow);
+        rotor.position.y = baseH + pluginH * 0.85;
         add(rotor, topId, true, 'fluid_hub');
         animators.push((t) => { rotor.rotation.y = t * 4.5; });
       }
-      topY = 4.5;
-      labelAnchorY = 5.1;
+      topY = H;
+      labelAnchorY = H + 0.8;
 
     } else if (type === 'bio_base') {
-      // 营养基座 (BD_159, 1×2 = 2m×4m) + 顶部培育仓/培养皿插槽
-      const base = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.2, 3.8), mBioDark);
-      base.position.y = 0.6;
+      // 营养基座 (BD_159, 1×2×1 = 2m×2m×4m) + 顶部培养仓/培养皿插槽
+      const base = new THREE.Mesh(new THREE.BoxGeometry(W * 0.94, H - 0.22, D * 0.94), mBioDark);
+      base.position.y = (H - 0.22) / 2;
       add(base, 'bio_base');
-      const pipeBar = new THREE.Mesh(new THREE.BoxGeometry(2.15, 0.2, 3.95), mEmeraldGlow);
-      pipeBar.position.y = 1.22;
+      const pipeBar = new THREE.Mesh(new THREE.BoxGeometry(W * 0.98, 0.22, D * 0.98), mEmeraldGlow);
+      pipeBar.position.y = H - 0.11;
       add(pipeBar, 'bio_base');
 
       const slot = (typeof bioBaseSlot !== 'undefined') ? bioBaseSlot : { mounted: true, childId: 'incubator' };
       const topId = slot.mounted && slot.childId ? slot.childId : 'bio_base_slot';
       if (slot.mounted && slot.childId === 'petri_dish') {
-        const dish = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.95, 0.5, 20), mEmeraldGlow);
-        dish.position.y = 1.55;
+        const dish = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.95, 0.7, 20), mEmeraldGlow);
+        dish.position.y = H + 0.35;
         add(dish, topId, true, 'bio_base');
       } else if (slot.mounted) {
         const dome = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.8, 0.85, 1.8, 18),
+          new THREE.CylinderGeometry(0.85, 0.9, 1.8, 18),
           new THREE.MeshStandardMaterial({ color: 0x10b981, transparent: true, opacity: 0.55, roughness: 0.2, emissive: 0x059669, emissiveIntensity: 0.45 })
         );
-        dome.position.y = 2.2;
+        dome.position.y = H + 0.9;
         add(dome, topId, true, 'bio_base');
-        const halo = new THREE.Mesh(new THREE.TorusGeometry(0.68, 0.08, 10, 22), mYellow);
+        const halo = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.08, 10, 22), mYellow);
         halo.rotation.x = Math.PI / 2;
-        halo.position.y = 3.25;
+        halo.position.y = H + 1.95;
         add(halo, topId, true, 'bio_base');
         animators.push((t) => { halo.rotation.z = t * 2.2; });
       }
-      topY = 3.5;
-      labelAnchorY = 4.2;
+      topY = H;
+      labelAnchorY = H + 2.7;
 
     } else if (type === 'miner') {
-      // 采矿机 (BD_135, 4×3×4 = 8m×6m 底座 + 高耸钻井架)
+      // 采矿机 (BD_135, 4×3×4)
       const pad = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.5, 5.2), mDark);
       pad.position.y = 0.25;
-      add(pad);
+      addSub(pad);
       [[-3.0, -2.1], [3.0, -2.1], [-3.0, 2.1], [3.0, 2.1]].forEach(([lx, lz]) => {
         const leg = new THREE.Mesh(new THREE.BoxGeometry(0.55, 3.6, 0.55), mSteel);
         leg.position.set(lx, 2.0, lz);
-        add(leg);
+        addSub(leg);
       });
       const body = new THREE.Mesh(new THREE.BoxGeometry(5.6, 1.8, 4.0), mOrange);
       body.position.y = 3.2;
-      add(body);
+      addSub(body);
       const crown = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.4, 2.6), mSteel);
       crown.position.y = 4.8;
-      add(crown);
+      addSub(crown);
       const drill = new THREE.Mesh(new THREE.ConeGeometry(0.95, 2.6, 10), mYellow);
       drill.rotation.x = Math.PI;
       drill.position.y = 1.4;
-      add(drill);
+      addSub(drill);
       const ore = new THREE.Mesh(new THREE.OctahedronGeometry(0.85, 0), mCyanGlow);
       ore.position.y = 0.35;
-      add(ore);
+      addSub(ore);
       animators.push((t) => {
         drill.rotation.y = t * 6.0;
         drill.position.y = 1.35 + Math.sin(t * 10) * 0.1;
       });
-      topY = 5.5;
-      labelAnchorY = 6.2;
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 0.9;
 
     } else if (type === 'furnace' || type === 'smelter') {
-      // 精炼炉 (BD_136, 3×3×3 = 6m×6m 工业高炉)
+      // 精炼炉 (BD_136, 3×3×3)
       const plinth = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.6, 5.4), mDark);
       plinth.position.y = 0.3;
-      add(plinth);
+      addSub(plinth);
       const lower = new THREE.Mesh(new THREE.CylinderGeometry(2.1, 2.45, 2.4, 10), mOrange);
       lower.position.y = 1.8;
-      add(lower);
+      addSub(lower);
       const upper = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 2.05, 1.4, 10), mSlate);
       upper.position.y = 3.7;
-      add(upper);
+      addSub(upper);
       const firebox = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.2, 0.45), mAmberGlow);
       firebox.position.set(0, 1.4, 2.25);
-      add(firebox);
+      addSub(firebox);
       const stack = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.72, 1.8, 12), mSteel);
       stack.position.y = 5.1;
-      add(stack);
+      addSub(stack);
       const ring = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.1, 8, 18), mOrange);
       ring.rotation.x = Math.PI / 2;
       ring.position.y = 5.95;
-      add(ring);
+      addSub(ring);
+      fitSubGroup();
       const puffs = [];
       for (let p = 0; p < 3; p++) {
         const puff = new THREE.Mesh(
           new THREE.SphereGeometry(0.38, 10, 10),
           new THREE.MeshBasicMaterial({ color: 0xffd2a6, transparent: true, opacity: 0.45 })
         );
-        puff.position.set((p - 1) * 0.25, 6.2 + p * 0.6, 0);
+        puff.position.set((p - 1) * 0.25, H + 0.3 + p * 0.6, 0);
         group.add(puff);
         puffs.push(puff);
       }
@@ -598,128 +620,133 @@
         firebox.material.emissiveIntensity = 0.8 + Math.sin(t * 5) * 0.25;
         puffs.forEach((pf, idx) => {
           const cycle = (t * 0.7 + idx * 0.33) % 1;
-          pf.position.y = 6.1 + cycle * 2.2;
+          pf.position.y = H + 0.2 + cycle * 2.2;
           pf.scale.setScalar(0.6 + cycle * 1.1);
           pf.material.opacity = (1 - cycle) * 0.45;
         });
       });
-      topY = 6.0;
-      labelAnchorY = 6.8;
+      topY = H;
+      labelAnchorY = H + 0.9;
 
     } else if (type === 'assembler') {
-      // 加工台 (BD_138, 2×2×2 = 4m×4m)
+      // 加工台 (BD_138, 2×2×2)
       const base = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.6, 3.6), mDark);
       base.position.y = 0.3;
-      add(base);
+      addSub(base);
       const body = new THREE.Mesh(new THREE.BoxGeometry(3.3, 1.6, 3.3), mSlate);
       body.position.y = 1.4;
-      add(body);
+      addSub(body);
       [-0.95, 0.95].forEach((px, idx) => {
         const pod = new THREE.Mesh(new THREE.BoxGeometry(1.15, 1.3, 3.45), mOrange);
         pod.position.set(px, 1.4, 0);
-        add(pod);
+        addSub(pod);
         const gear = new THREE.Mesh(new THREE.TorusGeometry(0.38, 0.1, 8, 12), mCyanGlow);
         gear.position.set(px, 1.45, 1.78);
-        add(gear);
+        addSub(gear);
         animators.push((t) => { gear.rotation.z = t * (idx === 0 ? 2.8 : -2.8); });
       });
       const cap = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.3, 2.2), mSteel);
       cap.position.y = 2.35;
-      add(cap);
-      topY = 2.5;
-      labelAnchorY = 3.2;
+      addSub(cap);
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 0.8;
 
     } else if (type === 'assembler_heavy') {
-      // 组装机 (BD_146, 3×3×3 = 6m×6m 重型四柱龙门组装站)
+      // 组装机 (BD_146, 3×3×3)
       const base = new THREE.Mesh(new THREE.BoxGeometry(5.6, 0.8, 5.6), mDark);
       base.position.y = 0.4;
-      add(base);
+      addSub(base);
       [[-2.3, -2.3], [2.3, -2.3], [-2.3, 2.3], [2.3, 2.3]].forEach(([px, pz]) => {
         const post = new THREE.Mesh(new THREE.BoxGeometry(0.55, 3.4, 0.55), mSteel);
         post.position.set(px, 2.5, pz);
-        add(post);
+        addSub(post);
       });
       const bridge = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.7, 1.8), mOrange);
       bridge.position.y = 4.2;
-      add(bridge);
+      addSub(bridge);
       const core = new THREE.Mesh(new THREE.OctahedronGeometry(0.75, 0), mCyanGlow);
       core.position.y = 2.4;
-      add(core);
+      addSub(core);
       const ring = new THREE.Mesh(new THREE.TorusGeometry(1.3, 0.1, 10, 24), mCyanGlow);
       ring.rotation.x = Math.PI / 2;
       ring.position.y = 1.4;
-      add(ring);
+      addSub(ring);
       animators.push((t) => {
         core.rotation.y = t * 2.5;
         ring.rotation.z = -t * 1.5;
       });
-      topY = 4.6;
-      labelAnchorY = 5.3;
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 0.9;
 
     } else if (type === 'cutter' || type === 'constructor') {
-      // 切割机 (BD_139, 1×1×1 = 2m×2m 紧凑龙门激光切割机)
+      // 切割机 (BD_139, 1×1×1)
       const bed = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.55, 1.85), mDark);
       bed.position.y = 0.275;
-      add(bed);
+      addSub(bed);
       [-0.75, 0.75].forEach((px) => {
         const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.24, 1.35, 0.35), mSteel);
         pillar.position.set(px, 1.2, 0);
-        add(pillar);
+        addSub(pillar);
       });
       const beam = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.35, 0.45), mOrange);
       beam.position.y = 1.9;
-      add(beam);
+      addSub(beam);
       const laserHead = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.6, 8), mCyanGlow);
       laserHead.rotation.x = Math.PI;
       laserHead.position.y = 1.42;
-      add(laserHead);
+      addSub(laserHead);
       animators.push((t) => { laserHead.position.x = Math.sin(t * 2.8) * 0.45; });
-      topY = 2.1;
-      labelAnchorY = 2.7;
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 0.7;
 
     } else if (type === 'crusher') {
-      // 粉碎机 (BD_137, 1×1×1 = 2m×2m 双滚筒破碎机)
+      // 粉碎机 (BD_137, 1×1×1)
       const body = new THREE.Mesh(new THREE.BoxGeometry(1.85, 1.2, 1.85), mDark);
       body.position.y = 0.6;
-      add(body);
+      addSub(body);
       const hopper = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.55, 0.65, 4), mOrange);
       hopper.rotation.y = Math.PI / 4;
       hopper.position.y = 1.52;
-      add(hopper);
+      addSub(hopper);
       [-0.3, 0.3].forEach((rx, idx) => {
         const roller = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 1.1, 8), mYellow);
         roller.rotation.x = Math.PI / 2;
         roller.position.set(rx, 1.28, 0);
-        add(roller);
+        addSub(roller);
         animators.push((t) => { roller.rotation.y = t * (idx === 0 ? 5 : -5); });
       });
-      topY = 1.85;
-      labelAnchorY = 2.5;
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 0.7;
 
     } else if (type === 'deconstructor') {
-      // 解构机 (BD_140, 2×4 = 4m×8m)
+      // 解构机 (BD_140, 2×4×2)
       const base = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.8, 7.2), mDark);
       base.position.y = 0.4;
-      add(base);
+      addSub(base);
       const mCrimson = stdMat(0xf43f5e, 0.25, 0.5, 0xe11d48, 0.9);
       [[-1.4, -3.0], [1.4, -3.0], [-1.4, 3.0], [1.4, 3.0]].forEach(([px, pz]) => {
         const post = new THREE.Mesh(new THREE.BoxGeometry(0.32, 2.8, 0.32), mSteel);
         post.position.set(px, 2.2, pz);
-        add(post);
+        addSub(post);
       });
       const scanRing = new THREE.Mesh(new THREE.TorusGeometry(1.3, 0.1, 10, 24), mCrimson);
       scanRing.rotation.x = Math.PI / 2;
       scanRing.position.y = 2.0;
-      add(scanRing);
+      addSub(scanRing);
       animators.push((t) => { scanRing.position.y = 2.0 + Math.sin(t * 3.0) * 0.85; });
-      topY = 3.6;
-      labelAnchorY = 4.3;
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 0.8;
 
     } else if (type === 'centrifuge') {
-      // 离心机 (BD_144, 2×2 = 4m×4m)
+      // 离心机 (BD_144, 2×2×2)
       const base = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.85, 1.2, 16), mDark);
       base.position.y = 0.6;
-      add(base);
+      addSub(base);
       const rotor = new THREE.Group();
       rotor.position.y = 1.7;
       const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.9, 14), mCyanGlow);
@@ -732,86 +759,140 @@
         pod.position.set(Math.cos(ang) * 1.35, 0.1, Math.sin(ang) * 1.35);
         rotor.add(arm, pod);
       }
-      group.add(rotor);
+      subGroup.add(rotor);
       animators.push((t) => { rotor.rotation.y = t * 6.5; });
-      topY = 2.4;
-      labelAnchorY = 3.2;
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 0.8;
 
     } else if (type === 'alchemy_table') {
-      // 炼宝台 (BD_156, 4×4×5 = 8m×8m 宏伟八角炼宝祭坛)
+      // 炼宝台 (BD_156, 4×4×5)
       const step1 = new THREE.Mesh(new THREE.CylinderGeometry(3.6, 3.9, 0.7, 8), mDark);
       step1.position.y = 0.35;
-      add(step1);
+      addSub(step1);
       const step2 = new THREE.Mesh(new THREE.CylinderGeometry(2.7, 3.1, 0.8, 8), mSlate);
       step2.position.y = 1.1;
-      add(step2);
+      addSub(step2);
       const cauldron = new THREE.Mesh(new THREE.SphereGeometry(1.35, 18, 18), mPurpleGlow);
       cauldron.position.y = 2.6;
-      add(cauldron);
+      addSub(cauldron);
       const ring1 = new THREE.Mesh(new THREE.TorusGeometry(2.2, 0.12, 10, 32), mYellow);
       ring1.rotation.x = Math.PI / 2;
       ring1.position.y = 2.9;
-      add(ring1);
+      addSub(ring1);
       const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.75, 0.09, 10, 28), mCyanGlow);
       ring2.rotation.x = Math.PI / 3;
       ring2.position.y = 3.4;
-      add(ring2);
+      addSub(ring2);
       [[-2.5, -2.5], [2.5, -2.5], [-2.5, 2.5], [2.5, 2.5]].forEach(([px, pz]) => {
         const lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 3.2, 8), mSteel);
         lamp.position.set(px, 2.0, pz);
-        add(lamp);
+        addSub(lamp);
         const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.32, 0), mPurpleGlow);
         gem.position.set(px, 3.9, pz);
-        add(gem);
+        addSub(gem);
       });
       animators.push((t) => {
         ring1.rotation.z = t * 1.6;
         ring2.rotation.z = -t * 2.2;
         cauldron.scale.setScalar(1 + Math.sin(t * 3) * 0.06);
       });
-      topY = 5.0;
-      labelAnchorY = 5.8;
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 0.9;
 
     } else if (type === 'tribulation_table') {
-      // 渡劫台 (BD_157, 5×5×6 = 10m×10m 终局四象引雷阵台)
+      // 渡劫台 (BD_157, 5×5×6)
       const dais1 = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.9, 0.8, 8), mDark);
       dais1.position.y = 0.4;
-      add(dais1);
+      addSub(dais1);
       const dais2 = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.7, 0.8, 8), mSlate);
       dais2.position.y = 1.2;
-      add(dais2);
+      addSub(dais2);
       [[-3.2, -3.2], [3.2, -3.2], [-3.2, 3.2], [3.2, 3.2]].forEach(([px, pz]) => {
         const pylon = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.42, 4.8, 8), mSteel);
         pylon.position.set(px, 3.0, pz);
-        add(pylon);
+        addSub(pylon);
         const coil = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.08, 8, 16), mCyanGlow);
         coil.rotation.x = Math.PI / 2;
         coil.position.set(px, 5.1, pz);
-        add(coil);
+        addSub(coil);
       });
       const orb = new THREE.Mesh(new THREE.OctahedronGeometry(1.1, 0), mYellow);
       orb.position.y = 4.2;
-      add(orb);
+      addSub(orb);
       const halo = new THREE.Mesh(new THREE.TorusGeometry(1.85, 0.1, 10, 28), mCyanGlow);
       halo.rotation.x = Math.PI / 2;
       halo.position.y = 4.2;
-      add(halo);
+      addSub(halo);
       animators.push((t) => {
         orb.rotation.y = t * 3.2;
         orb.position.y = 4.2 + Math.sin(t * 4) * 0.25;
         halo.rotation.z = -t * 2.0;
       });
-      topY = 6.0;
-      labelAnchorY = 6.8;
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 0.9;
+
+    } else if (type === 'bd_160') {
+      // 飞剑防御塔 (BD_160, 2×2×4)
+      const base = new THREE.Mesh(new THREE.BoxGeometry(3.4, 1.2, 3.4), mDark);
+      base.position.y = 0.6;
+      addSub(base);
+      const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.95, 5.2, 8), mSteel);
+      spire.position.y = 3.8;
+      addSub(spire);
+      const mCrimson = stdMat(0xf43f5e, 0.25, 0.5, 0xe11d48, 0.95);
+      const turretRing = new THREE.Group();
+      turretRing.position.y = 5.8;
+      for (let i = 0; i < 4; i++) {
+        const ang = (i * Math.PI) / 2;
+        const blade = new THREE.Mesh(new THREE.ConeGeometry(0.22, 1.4, 6), mCrimson);
+        blade.rotation.x = Math.PI / 2;
+        blade.rotation.z = ang;
+        blade.position.set(Math.cos(ang) * 1.15, 0, Math.sin(ang) * 1.15);
+        turretRing.add(blade);
+      }
+      subGroup.add(turretRing);
+      const apex = new THREE.Mesh(new THREE.OctahedronGeometry(0.6, 0), mCyanGlow);
+      apex.position.y = 7.0;
+      addSub(apex);
+      animators.push((t) => {
+        turretRing.rotation.y = t * 3.8;
+        apex.rotation.y = -t * 2.5;
+      });
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 0.9;
+
+    } else if (type === 'bd_163') {
+      // 炼丹炉（上） (BD_163, 2×1×2)
+      const plinth = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.6, 1.75), mDark);
+      plinth.position.y = 0.3;
+      addSub(plinth);
+      const cauldron = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.78, 2.2, 14), mOrange);
+      cauldron.position.y = 1.7;
+      addSub(cauldron);
+      const core = new THREE.Mesh(new THREE.TorusGeometry(0.88, 0.14, 10, 20), mAmberGlow);
+      core.rotation.x = Math.PI / 2;
+      core.position.y = 2.2;
+      addSub(core);
+      const cap = new THREE.Mesh(new THREE.ConeGeometry(0.95, 1.0, 12), mSteel);
+      cap.position.y = 3.3;
+      addSub(cap);
+      animators.push((t) => { core.rotation.z = t * 2.2; });
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 0.8;
 
     } else if (type === 'wind_generator') {
       // 风力发电机 (BD_155, 2×2×4)
       const base = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.4, 0.6, 10), mDark);
       base.position.y = 0.3;
-      add(base);
+      addSub(base);
       const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.65, 5.4, 12), mSteel);
       tower.position.y = 3.0;
-      add(tower);
+      addSub(tower);
       const hub = new THREE.Group();
       hub.position.set(0, 5.5, 0.5);
       for (let i = 0; i < 3; i++) {
@@ -820,77 +901,114 @@
         blade.rotation.z = (i * Math.PI * 2) / 3;
         hub.add(blade);
       }
-      group.add(hub);
+      subGroup.add(hub);
       animators.push((t) => { hub.rotation.z = t * 2.6; });
-      topY = 6.2;
-      labelAnchorY = 7.2;
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 1.0;
 
     } else if (type === 'fuel_generator' || type === 'power_burner') {
-      // 燃料发电机 (BD_149, 2×2×2 = 4m×4m)
+      // 燃料发电机 (BD_149, 2×2×2)
       const body = new THREE.Mesh(new THREE.BoxGeometry(3.6, 1.8, 3.4), mDark);
       body.position.y = 0.9;
-      add(body);
+      addSub(body);
       const core = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 1.3, 14), mAmberGlow);
       core.position.set(-0.7, 1.9, 0);
-      add(core);
+      addSub(core);
       const chimney = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 2.2, 12), mSteel);
       chimney.position.set(0.95, 2.5, 0);
-      add(chimney);
-      topY = 3.6;
-      labelAnchorY = 4.3;
+      addSub(chimney);
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 0.8;
 
     } else if (type === 'handcraft') {
-      // 操作台 (BD_152, 2×3)
-      const desk = new THREE.Mesh(new THREE.BoxGeometry(3.4, 1.1, 4.6), mSteel);
-      desk.position.y = 0.55;
-      add(desk);
-      const holo = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.1, 2.2), mCyanGlow);
-      holo.position.y = 1.45;
-      add(holo);
-      animators.push((t) => { holo.position.y = 1.45 + Math.sin(t * 2.5) * 0.1; });
-      topY = 1.8;
-      labelAnchorY = 2.6;
+      // 操作台 (BD_152, 2×3×3)
+      const desk = new THREE.Mesh(new THREE.BoxGeometry(3.4, 1.6, 4.8), mSteel);
+      desk.position.y = 0.8;
+      addSub(desk);
+      const frame = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2.0, 0.4), mDark);
+      frame.position.set(0, 2.6, -2.0);
+      addSub(frame);
+      const holo = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.16, 2.4), mCyanGlow);
+      holo.position.y = 2.05;
+      addSub(holo);
+      animators.push((t) => { holo.position.y = 2.05 + Math.sin(t * 2.5) * 0.12; });
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 0.8;
 
-    } else if (type === 'storage_box' || type === 'bd_114' || type === 'bd_115') {
-      const bh = Math.max(1.0, dimZ * 1.0);
-      const box = new THREE.Mesh(new THREE.BoxGeometry(W * 0.9, bh - 0.18, D * 0.9), mOrange);
-      box.position.y = (bh - 0.18) / 2;
+    } else if (type === 'storage_box' || type === 'bd_113' || type === 'bd_114' || type === 'bd_115') {
+      // 严格对齐 bd_table.xlsx 尺寸：1×1×1 = 2m×2m×2m 立方体，2×1×1 = 4m×2m×2m 窄柜，1×2×1 = 2m×2m×4m 宽柜
+      const bw = W * 0.92;
+      const bd = D * 0.92;
+      const lidH = Math.min(0.28, H * 0.16);
+      const box = new THREE.Mesh(new THREE.BoxGeometry(bw, H - lidH, bd), mOrange);
+      box.position.y = (H - lidH) / 2;
       add(box);
-      const lid = new THREE.Mesh(new THREE.BoxGeometry(W * 0.94, 0.18, D * 0.94), mDark);
-      lid.position.y = bh - 0.09;
+      const lid = new THREE.Mesh(new THREE.BoxGeometry(W * 0.95, lidH, D * 0.95), mDark);
+      lid.position.y = H - lidH / 2;
       add(lid);
-      topY = bh;
-      labelAnchorY = bh + 0.7;
+      const clasp = new THREE.Mesh(new THREE.BoxGeometry(bw * 0.28, H * 0.22, 0.08), mYellow);
+      clasp.position.set(0, H * 0.55, bd / 2 + 0.03);
+      add(clasp);
+      topY = H;
+      labelAnchorY = H + 0.7;
 
-    } else if (type === 'storage_desk' || type === 'bd_154') {
-      const h = type === 'bd_154' ? 2.0 : 1.0;
-      const top = new THREE.Mesh(new THREE.BoxGeometry(W * 0.94, 0.18, D * 0.94), mWood);
-      top.position.y = h - 0.09;
+    } else if (type === 'storage_desk' || type === 'bd_153' || type === 'bd_154') {
+      // 置物桌（小桌板）：BD_153 1×1×1m (2×2×2m 立方占格), BD_154 1×1×2m (2×4×2m)
+      const topThick = 0.22;
+      const top = new THREE.Mesh(new THREE.BoxGeometry(W * 0.94, topThick, D * 0.94), mWood);
+      top.position.y = H - topThick / 2;
       add(top);
+      const trim = new THREE.Mesh(new THREE.BoxGeometry(W * 0.96, 0.08, D * 0.96), mOrange);
+      trim.position.y = H - topThick;
+      add(trim);
       const lx = W * 0.36;
       const lz = D * 0.36;
       [[-lx, -lz], [lx, -lz], [-lx, lz], [lx, lz]].forEach(([px, pz]) => {
-        const leg = new THREE.Mesh(new THREE.BoxGeometry(0.18, h - 0.18, 0.18), mSteel);
-        leg.position.set(px, (h - 0.18) / 2, pz);
+        const leg = new THREE.Mesh(new THREE.BoxGeometry(0.2, H - topThick, 0.2), mSteel);
+        leg.position.set(px, (H - topThick) / 2, pz);
         add(leg);
       });
-      topY = h;
-      labelAnchorY = h + 0.7;
+      if (bld && bld.displayItem && !isHologram) {
+        const prop = createItemMesh3D(bld.displayItem);
+        prop.position.set(0, H + 0.26, 0);
+        prop.scale.setScalar(1.35);
+        group.add(prop);
+        animators.push((t) => { prop.rotation.y = t * 1.4; });
+      }
+      topY = H;
+      labelAnchorY = H + 0.8;
+
+    } else if (type === 'bd_112') {
+      // 支撑 (BD_112, 1×1×5 = 2m×10m×2m)
+      const post = new THREE.Mesh(new THREE.BoxGeometry(W * 0.55, H, D * 0.55), mDark);
+      post.position.y = H / 2;
+      add(post);
+      const collarTop = new THREE.Mesh(new THREE.BoxGeometry(W * 0.92, 0.35, D * 0.92), mOrange);
+      collarTop.position.y = H - 0.175;
+      add(collarTop);
+      const collarBot = new THREE.Mesh(new THREE.BoxGeometry(W * 0.92, 0.35, D * 0.92), mSteel);
+      collarBot.position.y = 0.175;
+      add(collarBot);
+      topY = H;
+      labelAnchorY = H + 0.7;
 
     } else if (type.startsWith('foundation')) {
-      const slabH = Math.max(0.5, dimZ * 1.0);
-      const slab = new THREE.Mesh(new THREE.BoxGeometry(W - 0.04, slabH - 0.12, D - 0.04), mSteel);
-      slab.position.y = (slabH - 0.12) / 2;
+      const slabH = H;
+      const slab = new THREE.Mesh(new THREE.BoxGeometry(W - 0.04, Math.max(0.16, slabH - 0.14), D - 0.04), mSteel);
+      slab.position.y = Math.max(0.08, (slabH - 0.14) / 2);
       add(slab);
-      const rim = new THREE.Mesh(new THREE.BoxGeometry(W - 0.02, 0.12, D - 0.02), mOrange);
-      rim.position.y = slabH - 0.06;
+      const rim = new THREE.Mesh(new THREE.BoxGeometry(W - 0.02, Math.min(0.14, slabH), D - 0.02), mOrange);
+      rim.position.y = Math.max(0.07, slabH - 0.07);
       add(rim);
       topY = slabH;
       labelAnchorY = slabH + 0.7;
 
     } else if (type === 'bd_108' || type === 'bd_109') {
       const steps = type === 'bd_109' ? 8 : 4;
-      const totalH = dimZ * 1.0;
+      const totalH = H;
       const totalD = D;
       for (let s = 0; s < steps; s++) {
         const step = new THREE.Mesh(new THREE.BoxGeometry(W * 0.9, totalH / steps, totalD / steps), mSteel);
@@ -933,7 +1051,7 @@
       labelAnchorY = 1.6;
 
     } else if (type === 'vert_conveyor' || type === 'bd_121') {
-      const h = (bld && bld.liftHeight) ? bld.liftHeight : 4.0;
+      const h = (bld && bld.liftHeight) ? bld.liftHeight : (4.0 * HEIGHT_UNIT);
       const shaft = new THREE.Mesh(new THREE.BoxGeometry(1.4, h, 1.4), mDark);
       shaft.position.y = h / 2;
       add(shaft);
@@ -949,24 +1067,25 @@
       liftTray.position.set(0, 0.85, 0.45);
       group.add(liftTray);
       animators.push((t) => {
-        const yPos = 0.6 + ((t * 1.8) % Math.max(1.5, h - 0.8));
+        const yPos = 0.6 + ((t * 2.6) % Math.max(1.5, h - 0.8));
         liftTray.position.y = yPos;
         liftItem.position.y = yPos + 0.25;
       });
       topY = h;
       labelAnchorY = h + 0.6;
 
-    } else if (type === 'splitter' || type === 'bd_122' || type === 'bd_123' || type === 'bd_124' || type === 'bd_125' || type === 'bd_126' || type === 'bd_161' || type === 'bd_162' || type === 'conveyor_limiter') {
+    } else if (type === 'splitter' || type === 'merger' || type === 'bd_122' || type === 'bd_123' || type === 'bd_124' || type === 'bd_125' || type === 'bd_126' || type === 'bd_161' || type === 'bd_162' || type === 'conveyor_limiter') {
       const isSmart = type === 'bd_125' || type === 'bd_126' || type === 'bd_161' || type === 'bd_162';
       const isLimiter = type === 'conveyor_limiter';
-      const box = new THREE.Mesh(new THREE.BoxGeometry(1.9, 1.25, 1.9), mSteel);
-      box.position.y = 0.625;
+      const trimH = 0.24;
+      const box = new THREE.Mesh(new THREE.BoxGeometry(W * 0.92, H - trimH, D * 0.92), mSteel);
+      box.position.y = (H - trimH) / 2;
       add(box);
-      const topTrim = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.24, 1.55), isLimiter ? mAmberGlow : (isSmart ? mCyanGlow : mOrange));
-      topTrim.position.y = 1.35;
+      const topTrim = new THREE.Mesh(new THREE.BoxGeometry(W * 0.82, trimH, D * 0.82), isLimiter ? mAmberGlow : (isSmart ? mCyanGlow : mOrange));
+      topTrim.position.y = H - trimH / 2;
       add(topTrim);
-      topY = 1.5;
-      labelAnchorY = 2.1;
+      topY = H;
+      labelAnchorY = H + 0.6;
 
     } else if (type === 'pipe' || type.startsWith('bd_128') || type.startsWith('bd_129') || type.startsWith('bd_130') || type.startsWith('bd_131') || type.startsWith('bd_132') || type.startsWith('bd_133')) {
       const pLen = (bld && bld.pipeLen) ? bld.pipeLen : 4.0;
@@ -996,45 +1115,49 @@
     } else if (type === 'pump' || type === 'water_pump') {
       const body = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.4, 1.6, 12), mFluidDark);
       body.position.y = 0.8;
-      add(body);
+      addSub(body);
       const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.65, 1.3, 14), mCyanGlow);
       tank.position.y = 2.2;
-      add(tank);
-      topY = 2.9;
-      labelAnchorY = 3.5;
+      addSub(tank);
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 0.8;
 
     } else if (type === 'purifier' || type === 'purify_tower') {
       const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 1.55, 3.6, 10), mSteel);
       spire.position.y = 1.8;
-      add(spire);
+      addSub(spire);
       const orb = new THREE.Mesh(new THREE.SphereGeometry(0.65, 16, 16), mEmeraldGlow);
       orb.position.y = 4.2;
-      add(orb);
+      addSub(orb);
       animators.push((t) => { orb.position.y = 4.2 + Math.sin(t * 3) * 0.25; });
-      topY = 4.9;
-      labelAnchorY = 5.5;
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 0.8;
 
     } else if (type === 'portal' || type === 'teleporter') {
       const frame = new THREE.Mesh(new THREE.TorusGeometry(1.8, 0.3, 12, 28), mDark);
       frame.position.y = 2.1;
-      add(frame);
+      addSub(frame);
       const vortex = new THREE.Mesh(new THREE.TorusGeometry(1.3, 0.16, 10, 24), mPurpleGlow);
       vortex.position.y = 2.1;
-      add(vortex);
+      addSub(vortex);
       animators.push((t) => { vortex.rotation.z = t * 3.0; });
-      topY = 4.0;
-      labelAnchorY = 4.6;
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 0.8;
 
     } else {
-      const base = new THREE.Mesh(new THREE.BoxGeometry(Math.max(1.8, W * 0.85), 1.4, Math.max(1.8, D * 0.85)), mDark);
-      base.position.y = 0.7;
-      add(base);
-      const core = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.85, 1.1, 14), mOrange);
-      core.position.y = 1.9;
-      add(core);
+      const base = new THREE.Mesh(new THREE.BoxGeometry(Math.max(1.8, W * 0.85), H * 0.6, Math.max(1.8, D * 0.85)), mDark);
+      base.position.y = H * 0.3;
+      addSub(base);
+      const core = new THREE.Mesh(new THREE.CylinderGeometry(Math.min(W, D) * 0.32, Math.min(W, D) * 0.36, H * 0.38, 14), mOrange);
+      core.position.y = H * 0.79;
+      addSub(core);
       animators.push((t) => { core.rotation.y = t * 1.4; });
-      topY = 2.5;
-      labelAnchorY = 3.2;
+      fitSubGroup();
+      topY = H;
+      labelAnchorY = H + 0.8;
     }
 
     if (isHologram) {
@@ -1143,15 +1266,18 @@
 
       buildingsGroup.add(group);
 
-      // 创建 2D 投影标签
+      // 创建 2D 投影标签 (含策划表真实占格尺寸 dimX×dimY×dimZ)
       let labelEl = null;
       if (labelLayer) {
+        const tDef = getBuildingTableDef(bld.type);
+        const dimBadge = tDef ? `${tDef.dimX || 1}×${tDef.dimY || 1}×${tDef.dimZ !== undefined ? tDef.dimZ : 1}` : '';
         labelEl = document.createElement('div');
         labelEl.className = 'world3d-label absolute -translate-x-1/2 -translate-y-full pointer-events-none transition-opacity duration-150';
         labelEl.innerHTML = `
           <div class="flex items-center space-x-1.5 bg-black/80 backdrop-blur-sm border border-[#f5921e]/80 px-2 py-0.5 rounded shadow-lg whitespace-nowrap">
             <span class="w-1.5 h-1.5 rounded-full bg-[#00f0ff]"></span>
             <span class="text-[11px] font-bold text-amber-300 font-mono">${bld.tagTitle || bld.name}</span>
+            ${dimBadge ? `<span class="text-[9px] text-cyan-300 bg-cyan-950/70 px-1 rounded font-mono">${dimBadge}</span>` : ''}
             <span class="text-[9px] text-white/60 bg-white/10 px-1 rounded">${bld.power || '0 MW'}</span>
           </div>
         `;
@@ -1166,9 +1292,9 @@
 
   function isBuildingVisibleInFloorMode(bld) {
     const wy = bld.wy || 0;
-    if (visibleFloorMode === '1f') return wy < 6;
-    if (visibleFloorMode === '2f') return wy < 13;
-    if (visibleFloorMode === '3f') return wy >= 13;
+    if (visibleFloorMode === '1f') return wy < 12;
+    if (visibleFloorMode === '2f') return wy < 26;
+    if (visibleFloorMode === '3f') return wy >= 26;
     return true;
   }
 
@@ -1279,9 +1405,9 @@
       }
       if (typeof isBuildPlacingMode !== 'undefined' && isBuildPlacingMode) {
         if (e.code === 'BracketRight' || e.code === 'PageUp') {
-          manualStackY = Math.min(12, Math.round((manualStackY + 0.7) * 10) / 10);
+          manualStackY = Math.min(36, Math.round((manualStackY + HEIGHT_UNIT) * 10) / 10);
         } else if (e.code === 'BracketLeft' || e.code === 'PageDown') {
-          manualStackY = Math.max(0, Math.round((manualStackY - 0.7) * 10) / 10);
+          manualStackY = Math.max(0, Math.round((manualStackY - HEIGHT_UNIT) * 10) / 10);
         }
       }
     });
@@ -1532,7 +1658,7 @@
       if (modal) modal.classList.remove('hidden');
       return;
     }
-    if (id === 'splitter' || id === 'bd_122' || id === 'bd_123' || id === 'bd_124' || id === 'bd_125' || id === 'bd_126' || id === 'bd_161' || id === 'bd_162') {
+    if (id === 'splitter' || id === 'merger' || id === 'bd_122' || id === 'bd_123' || id === 'bd_124' || id === 'bd_125' || id === 'bd_126' || id === 'bd_161' || id === 'bd_162') {
       openLogisticsConfigModal(hit.bld, 'splitter');
       return;
     }
@@ -1558,10 +1684,10 @@
   }
 
   function resetCamera() {
-    camState.target.set(3, 7.5, 2);
+    camState.target.set(3, 13, 2);
     camState.yaw = -0.42;
     camState.pitch = 0.44;
-    camState.distance = 56;
+    camState.distance = 68;
     updateCameraTransform();
     if (typeof showNotification === 'function') {
       showNotification('【3D 视角已重置】鼠标拖拽旋转，中键/Shift+拖拽平移，点击机器打开配方测试');
@@ -1598,24 +1724,24 @@
         const targetEntry = targetBld ? buildingMeshMap.get(targetBld.id) : null;
         const targetGroup = targetEntry ? targetEntry.group : null;
 
-        // 1. 复合母座插槽吸附 (例如把 冶炼舱 吸到 灵力引擎 上，或 搅拌机/萃取塔 吸到 流体中枢 上)
-        if (targetBld && targetBld.type === 'power_engine' && (placeKey === 'smelt_chamber' || placeKey === 'furnace')) {
+        // 1. 复合母座插槽吸附 (例如把 冶炼舱/炼丹炉 吸到 灵力引擎 上，或 搅拌机/离心机/提取器 吸到 流体中枢 上)
+        if (targetBld && targetBld.type === 'power_engine' && (placeKey === 'smelt_chamber' || placeKey === 'furnace' || placeKey === 'bd_163')) {
           const localX = targetGroup ? hit.point.x - targetGroup.position.x : 0;
-          const slotIdx = localX < -0.65 ? 0 : (localX > 0.65 ? 2 : 1);
-          const sx = (slotIdx - 1) * 1.35;
+          const slotIdx = localX < -1.2 ? 0 : (localX > 1.2 ? 2 : 1);
+          const sx = (slotIdx - 1) * 2.24;
           updateHologram(placeKey);
           hologramGroup.visible = true;
-          hologramGroup.position.set(targetGroup.position.x + sx, targetGroup.position.y + 1.85, targetGroup.position.z);
+          hologramGroup.position.set(targetGroup.position.x + sx, targetGroup.position.y + (targetGroup.userData.topY || 4.0), targetGroup.position.z);
           hologramGroup.rotation.y = targetGroup.rotation.y;
           window._world3DSlotSnapTarget = { type: 'engine_chamber', slotIndex: slotIdx };
           window._world3DPlaceCoords = { wx: hologramGroup.position.x, wy: hologramGroup.position.y, wz: hologramGroup.position.z };
           if (subModeEl) subModeEl.innerText = `🔌 积木插槽吸附: 灵力引擎 #${slotIdx + 1}`;
           return;
         }
-        if (targetBld && targetBld.type === 'fluid_hub' && (placeKey === 'mixer' || placeKey === 'extractor')) {
+        if (targetBld && targetBld.type === 'fluid_hub' && (placeKey === 'mixer' || placeKey === 'extractor' || placeKey === 'centrifuge')) {
           updateHologram(placeKey);
           hologramGroup.visible = true;
-          hologramGroup.position.set(targetGroup.position.x, targetGroup.position.y + 1.65, targetGroup.position.z);
+          hologramGroup.position.set(targetGroup.position.x, targetGroup.position.y + 4.16, targetGroup.position.z);
           hologramGroup.rotation.y = targetGroup.rotation.y;
           window._world3DSlotSnapTarget = { type: 'fluid_hub' };
           window._world3DPlaceCoords = { wx: hologramGroup.position.x, wy: hologramGroup.position.y, wz: hologramGroup.position.z };
@@ -1625,7 +1751,7 @@
         if (targetBld && targetBld.type === 'bio_base' && (placeKey === 'incubator' || placeKey === 'petri_dish')) {
           updateHologram(placeKey);
           hologramGroup.visible = true;
-          hologramGroup.position.set(targetGroup.position.x, targetGroup.position.y + 1.55, targetGroup.position.z);
+          hologramGroup.position.set(targetGroup.position.x, targetGroup.position.y + (targetGroup.userData.topY || 2.0), targetGroup.position.z);
           hologramGroup.rotation.y = targetGroup.rotation.y;
           window._world3DSlotSnapTarget = { type: 'bio_base' };
           window._world3DPlaceCoords = { wx: hologramGroup.position.x, wy: hologramGroup.position.y, wz: hologramGroup.position.z };

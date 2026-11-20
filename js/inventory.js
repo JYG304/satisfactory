@@ -7,12 +7,12 @@ const playerEquipmentSlots = {
   artifact: {
     slotKey: 'artifact',
     category: '法宝',
-    id: 'fabao_array_embryo',
-    matId: 'MAT_076',
-    name: '法宝阵图胚',
+    id: 'mat_072',
+    matId: 'MAT_072',
+    name: '法宝胚',
     icon: 'fa-solid fa-scroll text-yellow-400',
     quality: '法宝中间态',
-    desc: '绑定前可运输的法宝中间态结构图谱。按 [N] 键呼出法宝界面进行本命神识绑定、导脉注入与煞气淬炼。'
+    desc: '炼宝台祭炼法宝的基础胚体。按 [N] 键呼出法宝系统进行神识绑定与煞气淬炼。'
   },
   casket: {
     slotKey: 'casket',
@@ -76,10 +76,9 @@ const ALL_HUD_MODAL_IDS = [
   'swordCasketModal',
   'hubMilestoneModal',
   'codexModal',
-  'cpuProcessorModal',
+  'techTreeModal',
   'jinShenModal',
   'fabaoModal',
-  'techTreeModal',
   'conveyorLimiterModal',
   'logisticsConfigModal'
 ];
@@ -108,14 +107,162 @@ function closeOtherModals(keepId) {
 window.closeOtherModals = closeOtherModals;
 
 // =========================================================================
-// 储物盒 (箱子 BD_115) 存储系统 (1:1 还原用户上传 Image 1: media_1790463961108.png)
+// 真实物料背包 & 创造模式中枢 (100% 驱动自 XIUXIAN_ITEMS 110 项全表，无假物品)
 // =========================================================================
+window.isCreativeMode = false;
+let bagSearchQuery = '';
+let bagSortDescending = true;
+
+// 新手起步阶段基础物料配置 (按 MAT_ID 给初始数量，其余真实物料默认 0，创造模式一键全 999)
+const STARTER_MAT_COUNTS = {
+  MAT_001: 100, MAT_002: 80, MAT_003: 65, MAT_004: 100, MAT_005: 80,
+  MAT_006: 120, MAT_007: 60, MAT_008: 60, MAT_009: 30, MAT_010: 25,
+  MAT_011: 50, MAT_012: 20, MAT_013: 40, MAT_014: 24, MAT_016: 150,
+  MAT_025: 15, MAT_030: 40, MAT_040: 25, MAT_041: 15, MAT_042: 30,
+  MAT_048: 80, MAT_062: 40, MAT_065: 30, MAT_066: 15
+};
+
+const playerInventory = {};
+const STARTER_INVENTORY_SNAPSHOT = {};
+if (typeof XIUXIAN_ITEMS !== 'undefined') {
+  Object.entries(XIUXIAN_ITEMS).forEach(([key, def]) => {
+    const qty = STARTER_MAT_COUNTS[def.matId] || 0;
+    playerInventory[key] = qty;
+    STARTER_INVENTORY_SNAPSHOT[key] = qty;
+  });
+}
+
+// 3 把可拖入剑匣测试的本命飞剑 (独立武器道具，供装备拖拽测试)
+const starterWeaponItems = [
+  { id: 'sword_thunder', name: '紫霄惊雷剑', count: 1, icon: 'fa-solid fa-khanda text-yellow-300 rotate-45', desc: '雷系神品飞剑，九霄天罚，杀伤力+490，暴击率+35%', type: 'weapon', matId: 'SWORD_04' },
+  { id: 'sword_iron', name: '寒铁飞剑', count: 1, icon: 'fa-solid fa-khanda text-cyan-200 rotate-45', desc: '高寒精铁千锤百炼飞剑，御剑杀伤+260，破甲+25%', type: 'weapon', matId: 'SWORD_05' },
+  { id: 'sword_dragon', name: '斩龙巨剑', count: 1, icon: 'fa-solid fa-khanda text-rose-400 rotate-45', desc: '深海龙骨重煞飞剑，破灵碎脉，杀伤力+420', type: 'weapon', matId: 'SWORD_06' }
+];
+
+// 天罡剑匣 4 个专属飞剑插槽
+let casketSwords = [
+  { id: 'sword_wood', name: '青灵竹剑', count: 1, icon: 'fa-solid fa-khanda text-emerald-400 rotate-45', desc: '木系灵品飞剑，万木回春，御风疾走，真元恢复+15/秒', type: 'weapon', matId: 'SWORD_01' },
+  { id: 'sword_fire', name: '炽阳炎剑', count: 1, icon: 'fa-solid fa-khanda text-orange-400 rotate-45', desc: '火系玄品飞剑，离火断金，杀伤力+380，破甲穿透+40%', type: 'weapon', matId: 'SWORD_02' },
+  { id: 'sword_ice', name: '玄冰寒魄剑', count: 1, icon: 'fa-solid fa-khanda text-cyan-300 rotate-45', desc: '水系真品飞剑，凝霜封脉，杀伤力+260，护体冰甲+200', type: 'weapon', matId: 'SWORD_03' },
+  null
+];
+let isCasketTrayOpen = true;
+let isThunderPurified = false; // 是否已天雷淬体解锁后 40 格
+let currentActiveSword = 'wood'; // 当前出鞘主手飞剑: 'wood' | 'fire' | 'ice' | 'thunder'
+let selectedBagSlotIdx = null;
+let liveRenderedBagItems = [];
+const bagExtraWeaponPool = [];
+
 let storageBoxSlots = [
-  { id: 'iron_plate', name: '工业玄铁板', count: 94, icon: 'fa-solid fa-sheet-plastic text-stone-200', desc: '大面积结构用板材，用于设备外壳与传送带', matId: 'MAT_008' },
+  { id: 'MAT_008', name: '玄铁板', count: 94, icon: 'fa-solid fa-sheet-plastic text-stone-200', desc: '加工台压制的基础金属结构板材', matId: 'MAT_006' },
   null, null, null, null, null, null, null,
   null, null, null, null, null, null, null, null,
   null, null, null, null, null, null, null, null
 ];
+
+let backpackInventory = [];
+function buildBagItemsFromPlayerInventory() {
+  const list = [];
+  if (typeof XIUXIAN_ITEMS !== 'undefined') {
+    Object.entries(XIUXIAN_ITEMS).forEach(([key, def]) => {
+      const cnt = playerInventory[key] || 0;
+      if (cnt > 0) {
+        list.push({
+          id: key,
+          matId: def.matId || key,
+          name: def.name,
+          category: def.category || '其他',
+          form: def.form || '实体',
+          count: cnt,
+          icon: def.icon || 'fa-solid fa-cube text-stone-300',
+          desc: def.desc || def.obtainDesc || ''
+        });
+      }
+    });
+  }
+  starterWeaponItems.concat(bagExtraWeaponPool).forEach(w => {
+    const inCasket = casketSwords.some(s => s && s.id === w.id);
+    if (!inCasket && !list.some(x => x.id === w.id)) list.push(w);
+  });
+  return list;
+}
+
+function syncBackpackFromPlayerInventory() {
+  const bagItems = buildBagItemsFromPlayerInventory();
+  backpackInventory.length = 0;
+  bagItems.forEach(it => {
+    if (it.type !== 'weapon') {
+      backpackInventory.push({ item: it.id, count: it.count });
+    }
+  });
+  if (typeof renderPlayerEquipmentModal === 'function') renderPlayerEquipmentModal();
+  if (typeof renderStorageBoxUI === 'function') renderStorageBoxUI();
+}
+window.syncBackpackFromPlayerInventory = syncBackpackFromPlayerInventory;
+syncBackpackFromPlayerInventory();
+
+function updateCreativeModeButtonsUI() {
+  const active = !!window.isCreativeMode;
+  const topBtn = document.getElementById('btnCreativeTop');
+  if (topBtn) {
+    topBtn.innerHTML = active
+      ? '<i class="fa-solid fa-wand-magic-sparkles text-yellow-200"></i><span>创造模式: 已开启</span>'
+      : '<i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i><span>创造模式 (全满)</span>';
+    topBtn.className = active
+      ? 'px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 border border-yellow-300 rounded text-[10px] font-black text-slate-950 shadow-[0_0_12px_rgba(245,158,11,0.75)] transition cursor-pointer flex items-center space-x-1'
+      : 'px-2 py-0.5 bg-purple-500/25 hover:bg-purple-500/45 border border-purple-400/60 rounded text-[10px] font-bold text-purple-200 transition cursor-pointer flex items-center space-x-1';
+  }
+  const bagBtn = document.getElementById('btnCreativeBag');
+  if (bagBtn) {
+    bagBtn.innerHTML = active
+      ? '<i class="fa-solid fa-check-double text-slate-950"></i><span>创造模式: 全物品×999 (点击还原)</span>'
+      : '<i class="fa-solid fa-wand-magic-sparkles text-yellow-300"></i><span>创造模式 (全物品×999)</span>';
+    bagBtn.className = active
+      ? 'px-2.5 py-0.5 bg-gradient-to-r from-amber-400 to-orange-400 text-slate-950 font-black text-[10px] rounded shadow-[0_0_12px_rgba(245,158,11,0.7)] cursor-pointer transition flex items-center space-x-1'
+      : 'px-2.5 py-0.5 bg-gradient-to-r from-purple-600 to-amber-500 hover:from-purple-500 hover:to-amber-400 text-white font-bold text-[10px] rounded shadow cursor-pointer transition flex items-center space-x-1';
+  }
+}
+
+function toggleCreativeMode() {
+  if (typeof playUiSound === 'function') playUiSound('thunder_strike');
+  window.isCreativeMode = !window.isCreativeMode;
+
+  if (window.isCreativeMode) {
+    isThunderPurified = true;
+    if (typeof XIUXIAN_ITEMS !== 'undefined') {
+      Object.keys(XIUXIAN_ITEMS).forEach(k => { playerInventory[k] = 999; });
+    }
+    if (typeof window.TechTree !== 'undefined' && typeof window.TechTree.unlockAll === 'function') {
+      window.TechTree.unlockAll();
+    }
+    if (typeof showNotification === 'function') {
+      const n = (typeof XIUXIAN_ITEMS !== 'undefined') ? Object.keys(XIUXIAN_ITEMS).length : 110;
+      showNotification(`✨【创造模式已开启】全部 ${n} 种真实物料已填满 ×999，建造/手工制造免费，67个科技树节点全解锁！`);
+    }
+  } else {
+    Object.keys(playerInventory).forEach(k => {
+      playerInventory[k] = STARTER_INVENTORY_SNAPSHOT[k] || 0;
+    });
+    if (typeof showNotification === 'function') {
+      showNotification('【创造模式已关闭】已恢复为标准起步库存与正常物料消耗');
+    }
+  }
+
+  updateCreativeModeButtonsUI();
+  syncBackpackFromPlayerInventory();
+  if (typeof syncInventoryDisplay === 'function') syncInventoryDisplay();
+  if (typeof renderCraftingRecipeList === 'function') renderCraftingRecipeList();
+  if (typeof updateBuildPlacementHudCard === 'function') updateBuildPlacementHudCard();
+  if (typeof syncMilestoneTrackerDisplay === 'function') syncMilestoneTrackerDisplay();
+  if (typeof renderMachineProdView === 'function' && currentOpenedMachine) renderMachineProdView();
+}
+window.toggleCreativeMode = toggleCreativeMode;
+
+function setBagSearchFilter(query) {
+  bagSearchQuery = (query || '').toLowerCase().trim();
+  renderPlayerEquipmentModal();
+}
+window.setBagSearchFilter = setBagSearchFilter;
 
 function openStorageBoxModal() {
   playUiSound('click');
@@ -124,7 +271,7 @@ function openStorageBoxModal() {
   if (modal) {
     modal.classList.remove('hidden');
     renderStorageBoxUI();
-    showNotification('已打开【存储】(箱子 BD_115) - 可双向存取、一键拿走全部或储存全部');
+    showNotification('已打开【储藏盒】(BD_113 1×1×1) - 实时连通随身真实库存，可双向存取');
   }
 }
 
@@ -135,7 +282,6 @@ function closeStorageBoxModal() {
 }
 
 function renderStorageBoxUI() {
-  // 1. 左栏 24 格储物箱 (8列x3行)
   const boxGrid = document.getElementById('storageBoxSlotsGrid');
   if (boxGrid) {
     boxGrid.innerHTML = '';
@@ -144,7 +290,7 @@ function renderStorageBoxUI() {
       const slot = document.createElement('div');
       slot.className = 'w-11 h-11 bg-[#1a1d26] hover:bg-[#2b3140] border border-white/10 hover:border-[#f5921e] rounded flex items-center justify-center relative cursor-pointer group transition';
       if (item) {
-        slot.title = `[储物箱格位 #${i + 1}] ${item.name} (${item.matId || ''}) x${item.count}\n• 点击转移至随身背包`;
+        slot.title = `[储物箱格位 #${i + 1}] ${item.name} (${item.matId || ''}) x${item.count}\n• 点击全部取出到随身背包`;
         slot.onclick = () => transferStorageItem(i, true);
         slot.innerHTML = `
           <i class="${item.icon} text-base group-hover:scale-110 transition"></i>
@@ -158,17 +304,18 @@ function renderStorageBoxUI() {
     }
   }
 
-  // 2. 右栏 24 格随身背包 (8列x3行)
   const bagGrid = document.getElementById('storagePlayerBagSlotsGrid');
   if (bagGrid) {
     bagGrid.innerHTML = '';
-    for (let j = 0; j < 24; j++) {
-      const item = activePlayerBagItems[j];
+    const owned = buildBagItemsFromPlayerInventory().filter(x => x.type !== 'weapon');
+    const showSlots = Math.max(24, Math.ceil(owned.length / 8) * 8);
+    for (let j = 0; j < showSlots; j++) {
+      const item = owned[j];
       const slot = document.createElement('div');
       slot.className = 'w-11 h-11 bg-[#161922] hover:bg-[#252a38] border border-white/10 hover:border-[#00f0ff] rounded flex items-center justify-center relative cursor-pointer group transition';
       if (item) {
-        slot.title = `[背包格位 #${j + 1}] ${item.name} (${item.matId || ''}) x${item.count}\n• 点击存入储物箱`;
-        slot.onclick = () => transferStorageItem(j, false);
+        slot.title = `[真实背包] ${item.name} (${item.matId}) x${item.count}\n• 点击存入储物箱一组 (最多100)`;
+        slot.onclick = () => transferStorageItem(item.id, false);
         slot.innerHTML = `
           <i class="${item.icon} text-base group-hover:scale-110 transition"></i>
           <span class="absolute bottom-0.5 right-1 text-[8px] font-mono font-bold text-cyan-200 bg-black/70 px-1 rounded">${item.count}</span>
@@ -182,69 +329,67 @@ function renderStorageBoxUI() {
   }
 }
 
-function transferStorageItem(idx, isFromBox) {
+function transferStorageItem(idxOrKey, isFromBox) {
   playUiSound('click');
   if (isFromBox) {
-    const item = storageBoxSlots[idx];
+    const item = storageBoxSlots[idxOrKey];
     if (!item) return;
-    let targetIdx = activePlayerBagItems.findIndex(x => x === null);
-    if (targetIdx !== -1) {
-      activePlayerBagItems[targetIdx] = item;
-      storageBoxSlots[idx] = null;
-      showNotification(`【取出物料】已将【${item.name}】x${item.count} 转移至随身背包`);
-    } else {
-      showNotification('背包已满，无法容纳更多物料！');
-    }
+    playerInventory[item.id] = (playerInventory[item.id] || 0) + item.count;
+    storageBoxSlots[idxOrKey] = null;
+    showNotification(`【取出物料】已将【${item.name}】x${item.count} 存入真实随身库存`);
   } else {
-    const item = activePlayerBagItems[idx];
-    if (!item) return;
-    let targetIdx = storageBoxSlots.findIndex(x => x === null);
-    if (targetIdx !== -1) {
-      storageBoxSlots[targetIdx] = item;
-      activePlayerBagItems[idx] = null;
-      showNotification(`【存入物料】已将【${item.name}】x${item.count} 存入储物箱`);
-    } else {
+    const key = idxOrKey;
+    const stock = playerInventory[key] || 0;
+    const def = (typeof XIUXIAN_ITEMS !== 'undefined') ? XIUXIAN_ITEMS[key] : null;
+    if (!def || stock <= 0) return;
+    const targetIdx = storageBoxSlots.findIndex(x => x === null);
+    if (targetIdx === -1) {
       showNotification('储物箱已满，无法存放更多物料！');
+      return;
     }
+    const moveCnt = Math.min(stock, def.stack || 100);
+    storageBoxSlots[targetIdx] = { id: key, matId: def.matId, name: def.name, count: moveCnt, icon: def.icon, desc: def.desc };
+    if (!window.isCreativeMode) {
+      playerInventory[key] = Math.max(0, stock - moveCnt);
+    }
+    showNotification(`【存入物料】已将【${def.name}】x${moveCnt} 存入储物箱`);
   }
-  renderStorageBoxUI();
-  renderPlayerEquipmentModal();
+  syncBackpackFromPlayerInventory();
+  if (typeof syncInventoryDisplay === 'function') syncInventoryDisplay();
 }
 
 function takeAllFromStorage() {
   playUiSound('toggle');
   let movedCount = 0;
   for (let i = 0; i < storageBoxSlots.length; i++) {
-    if (storageBoxSlots[i]) {
-      let targetIdx = activePlayerBagItems.findIndex(x => x === null);
-      if (targetIdx !== -1) {
-        activePlayerBagItems[targetIdx] = storageBoxSlots[i];
-        storageBoxSlots[i] = null;
-        movedCount++;
-      }
+    const item = storageBoxSlots[i];
+    if (item) {
+      playerInventory[item.id] = (playerInventory[item.id] || 0) + item.count;
+      storageBoxSlots[i] = null;
+      movedCount++;
     }
   }
-  renderStorageBoxUI();
-  renderPlayerEquipmentModal();
-  showNotification(`【拿走全部】已将储物箱内 ${movedCount} 组物品全部转移至背包！`);
+  syncBackpackFromPlayerInventory();
+  if (typeof syncInventoryDisplay === 'function') syncInventoryDisplay();
+  showNotification(`【拿走全部】已将储物箱内 ${movedCount} 组物品全部转入随身真实库存！`);
 }
 
 function storeAllToStorage() {
   playUiSound('toggle');
   let movedCount = 0;
-  for (let j = 0; j < activePlayerBagItems.length; j++) {
-    if (activePlayerBagItems[j]) {
-      let targetIdx = storageBoxSlots.findIndex(x => x === null);
-      if (targetIdx !== -1) {
-        storageBoxSlots[targetIdx] = activePlayerBagItems[j];
-        activePlayerBagItems[j] = null;
-        movedCount++;
-      }
+  const owned = buildBagItemsFromPlayerInventory().filter(x => x.type !== 'weapon');
+  for (const item of owned) {
+    const targetIdx = storageBoxSlots.findIndex(x => x === null);
+    if (targetIdx === -1) break;
+    storageBoxSlots[targetIdx] = { id: item.id, matId: item.matId, name: item.name, count: Math.min(item.count, 100), icon: item.icon, desc: item.desc };
+    if (!window.isCreativeMode) {
+      playerInventory[item.id] = Math.max(0, (playerInventory[item.id] || 0) - Math.min(item.count, 100));
     }
+    movedCount++;
   }
-  renderStorageBoxUI();
-  renderPlayerEquipmentModal();
-  showNotification(`【储存全部】已将随身背包内 ${movedCount} 组物品全部存入储物箱！`);
+  syncBackpackFromPlayerInventory();
+  if (typeof syncInventoryDisplay === 'function') syncInventoryDisplay();
+  showNotification(`【储存全部】已将 ${movedCount} 组物品存入储物箱！`);
 }
 
 function sortStorageBox() {
@@ -262,95 +407,6 @@ function sortStoragePlayerBag() {
   sortPlayerBackpack();
   renderStorageBoxUI();
 }
-
-// 全局随身背包库存系统 (用于工作台、建造器物料消耗与同步)
-const playerInventory = {
-  iron_ore: 100,            // 玄铁矿 (MAT_001)
-  copper_ore: 80,           // 赤铜矿 (MAT_002)
-  coal: 65,                 // 煤炭 (MAT_004)
-  iron_ingot: 100,          // 玄铁锭 (MAT_006)
-  copper_ingot: 80,         // 赤铜锭 (MAT_007)
-  iron_plate: 120,          // 玄铁板 (MAT_008)
-  iron_powder: 78,          // 玄铁粉 (MAT_009)
-  iron_gear: 60,            // 玄铁齿轮 (MAT_011)
-  lingci_gear: 30,          // 灵磁齿轮 (MAT_012)
-  ling_copper_sheet: 25,    // 导灵铜片 (MAT_013)
-  iron_beam: 50,            // 玄铁梁 (MAT_014)
-  device_interface: 20,     // 设备接口件 (MAT_015)
-  electric_coil: 50,        // 导电线圈 (MAT_016)
-  basic_control_module: 20, // 基础控制模块 (MAT_017)
-  copper_wire: 150,         // 铜线 (MAT_019)
-  refractory_core: 15,      // 耐火炉芯 (MAT_045)
-  wiring_assembly: 30,      // 接线组件 (MAT_069)
-  power_supply_module: 15   // 电源模块 (MAT_070)
-};
-
-// 运行期玩家背包物料列表 (基于 xiuxian_data.js 中的 INITIAL_PLAYER_INVENTORY)
-let backpackInventory = (typeof INITIAL_PLAYER_INVENTORY !== 'undefined') ? [...INITIAL_PLAYER_INVENTORY] : [
-  { item: 'iron_ore', count: 26 },
-  { item: 'copper_ore', count: 28 },
-  { item: 'iron_ingot', count: 46 },
-  { item: 'copper_ingot', count: 25 },
-  { item: 'copper_wire', count: 23 },
-  { item: 'iron_plate', count: 17 },
-  { item: 'iron_gear', count: 20 },
-  { item: 'cultivator_corpse', count: 2 },
-  { item: 'living_tissue', count: 5 },
-  { item: 'neural_bundle', count: 2 },
-  { item: 'iron_powder', count: 45 },
-  { item: 'coal', count: 19 }
-];
-
-// 天罡剑匣 4 个专属飞剑插槽 (严格对齐 48x48px 规格)
-let casketSwords = [
-  { id: 'sword_wood', name: '青灵竹剑', count: 1, icon: 'fa-solid fa-khanda text-emerald-400 rotate-45', desc: '木系灵品飞剑，万木回春，御风疾走，真元恢复+15/秒', type: 'weapon', matId: 'SWORD_01' },
-  { id: 'sword_fire', name: '炽阳炎剑', count: 1, icon: 'fa-solid fa-khanda text-orange-400 rotate-45', desc: '火系玄品飞剑，离火断金，杀伤力+380，破甲穿透+40%', type: 'weapon', matId: 'SWORD_02' },
-  { id: 'sword_ice', name: '玄冰寒魄剑', count: 1, icon: 'fa-solid fa-khanda text-cyan-300 rotate-45', desc: '水系真品飞剑，凝霜封脉，杀伤力+260，护体冰甲+200', type: 'weapon', matId: 'SWORD_03' },
-  null // 剑槽 4 初始空置，等待玩家从背包拖入其他武器
-];
-
-let isCasketTrayOpen = true; // 默认随装备面板展开显示在剑匣旁边
-
-// 默认初始随身 32 格已解锁物品数据 (严格使用《修仙工厂》策划案官方名称)
-const activePlayerBagItems = [
-  { id: 'miner', name: '采矿机', count: 2, icon: 'fa-solid fa-cube text-cyan-300', desc: '自动化采掘地表玄铁矿等基础矿石', matId: 'BD_101' },
-  { id: 'furnace', name: '精炼炉', count: 2, icon: 'fa-solid fa-fire text-orange-400', desc: '基础热炼设备，将矿石熔炼为金属锭', matId: 'BD_102' },
-  { id: 'assembler', name: '加工台', count: 1, icon: 'fa-solid fa-screwdriver-wrench text-amber-300', desc: '基础零件装配成型', matId: 'BD_104' },
-  { id: 'cutter', name: '切割机', count: 1, icon: 'fa-solid fa-bolt text-sky-400', desc: '高速线材与板材精密下料设备', matId: 'BD_105' },
-  { id: 'portable_miner', name: '便携式采矿器', count: 3, icon: 'fa-solid fa-gears text-stone-300', desc: '单体便携手持采掘器', matId: 'TOOL_01' },
-  { id: 'iron_ore', name: '玄铁矿', count: 100, icon: 'fa-solid fa-mountain text-stone-400', desc: '精炼玄铁锭的基础重金属矿石', matId: 'MAT_001' },
-  { id: 'copper_ore', name: '赤铜矿', count: 80, icon: 'fa-solid fa-cubes text-amber-500', desc: '精炼导电赤铜锭的基础有色金属矿石', matId: 'MAT_002' },
-  { id: 'coal', name: '煤炭', count: 65, icon: 'fa-solid fa-fire-flame-curved text-stone-500', desc: '含碳可燃矿物，用于冶炼燃料与热能供应', matId: 'MAT_004' },
-  { id: 'iron_ingot', name: '玄铁锭', count: 58, icon: 'fa-solid fa-bars text-stone-300', desc: '由精炼炉冶炼玄铁矿所得的基础材料', matId: 'MAT_006' },
-  { id: 'copper_ingot', name: '赤铜锭', count: 45, icon: 'fa-solid fa-bars text-amber-400', desc: '由精炼炉熔炼赤铜矿所得的高导电材料', matId: 'MAT_007' },
-  { id: 'iron_plate', name: '玄铁板', count: 120, icon: 'fa-solid fa-sheet-plastic text-stone-200', desc: '大面积结构用板材，用于设备外壳与传送带', matId: 'MAT_008' },
-  { id: 'iron_powder', name: '玄铁粉', count: 30, icon: 'fa-solid fa-braille text-stone-400', desc: '玄铁金属粉末，用于烧结与催化', matId: 'MAT_009' },
-  { id: 'iron_gear', name: '玄铁齿轮', count: 60, icon: 'fa-solid fa-gear text-stone-300', desc: '基础物流、传动骨架与机械零件', matId: 'MAT_011' },
-  { id: 'lingci_gear', name: '灵磁齿轮', count: 25, icon: 'fa-solid fa-gear text-cyan-400', desc: '设备传动件与自动化控制组件', matId: 'MAT_012' },
-  { id: 'ling_copper_sheet', name: '导灵铜片', count: 25, icon: 'fa-solid fa-microchip text-yellow-300', desc: '高纯度赤铜经压延所得的灵气微流薄片', matId: 'MAT_013' },
-  { id: 'iron_beam', name: '玄铁梁', count: 40, icon: 'fa-solid fa-bars-staggered text-stone-400', desc: '设备骨架与设备框架重载结构支撑', matId: 'MAT_014' },
-  { id: 'device_interface', name: '设备接口件', count: 12, icon: 'fa-solid fa-satellite-dish text-sky-400', desc: '通用设备接口；不承担生物加工功能', matId: 'MAT_015' },
-  { id: 'electric_coil', name: '导电线圈', count: 15, icon: 'fa-solid fa-spinner text-yellow-400', desc: '电能核心、动力核心与控制设备的通用电力零件', matId: 'MAT_016' },
-  { id: 'basic_control_module', name: '基础控制模块', count: 8, icon: 'fa-solid fa-microchip text-emerald-400', desc: '智能物流、加工台、主控核心的通用控制零件', matId: 'MAT_017' },
-  { id: 'bio_chip', name: '电子生物芯片', count: 4, icon: 'fa-solid fa-memory text-purple-300', desc: '生物与机器之间的工控元件', matId: 'MAT_018' },
-  { id: 'copper_wire', name: '铜线', count: 150, icon: 'fa-solid fa-plug text-yellow-400', desc: '基础导电用单丝线材，用于绕制线圈与电力传输', matId: 'MAT_019' },
-  { id: 'cultivator_corpse', name: '练气修士尸体', count: 2, icon: 'fa-solid fa-skull text-purple-400', desc: '具有完整经脉结构与微弱残余灵气的修士躯体（策划案官方资源）', matId: 'MAT_020' },
-  { id: 'living_tissue', name: '鲜活生物组织', count: 12, icon: 'fa-solid fa-dna text-rose-400', desc: '含有活性细胞的生物组织块，用于生物合成与芯片接口', matId: 'MAT_021' },
-  { id: 'neural_bundle', name: '神经束', count: 6, icon: 'fa-solid fa-network-wired text-cyan-400', desc: '生物神经信号传导纤维，用于电子生物芯片与灵机控制', matId: 'MAT_022' },
-  { id: 'dry_tissue', name: '脱水生物组织', count: 10, icon: 'fa-solid fa-leaf text-amber-600', desc: '脱水干燥处理后的生物体组织残片', matId: 'MAT_024' },
-  { id: 'raw_water', name: '水源', count: 40, icon: 'fa-solid fa-droplet text-blue-400', desc: '基础天然水体，用于冷却、稀释与溶液配制', matId: 'MAT_033' },
-  { id: 'wiring_assembly', name: '接线组件', count: 30, icon: 'fa-solid fa-diagram-project text-blue-400', desc: '电缆端头、母线排与接线排总成', matId: 'MAT_069' },
-  { id: 'power_supply_module', name: '电源模块', count: 15, icon: 'fa-solid fa-car-battery text-amber-400', desc: '集成变压稳压的独立电源模块', matId: 'MAT_070' },
-  // 特别放入 3 柄飞剑供玩家体验从背包拖入剑匣！
-  { id: 'sword_thunder', name: '紫霄惊雷剑', count: 1, icon: 'fa-solid fa-khanda text-yellow-300 rotate-45', desc: '雷系神品飞剑，九霄天罚，杀伤力+490，暴击率+35%', type: 'weapon', matId: 'SWORD_04' },
-  { id: 'sword_iron', name: '寒铁飞剑', count: 1, icon: 'fa-solid fa-khanda text-cyan-200 rotate-45', desc: '高寒精铁千锤百炼飞剑，御剑杀伤+260，破甲+25%', type: 'weapon', matId: 'SWORD_05' },
-  { id: 'sword_dragon', name: '斩龙巨剑', count: 1, icon: 'fa-solid fa-khanda text-rose-400 rotate-45', desc: '深海龙骨重煞飞剑，破灵碎脉，杀伤力+420', type: 'weapon', matId: 'SWORD_06' },
-  null // 空储物槽 32，供玩家存放从剑匣拖出来的飞剑
-];
-
-let isThunderPurified = false; // 是否已天雷淬体解锁后 40 格
-let currentActiveSword = 'wood'; // 当前出鞘主手飞剑: 'wood' | 'fire' | 'ice' | 'thunder'
-let selectedBagSlotIdx = null;
 
 const swordDefs = {
   wood: { name: '青灵竹剑', desc: '木系灵品，万木生生，疾风迅捷，灵气恢复 +15/秒', icon: 'fa-khanda text-emerald-300 rotate-45' },
@@ -516,7 +572,7 @@ function handleCasketSlotClick(slotIdx) {
 // =========================================================================
 
 function handleBagDragStart(e, idx) {
-  const item = activePlayerBagItems[idx];
+  const item = liveRenderedBagItems[idx];
   if (!item) {
     e.preventDefault();
     return;
@@ -525,7 +581,7 @@ function handleBagDragStart(e, idx) {
   e.dataTransfer.effectAllowed = 'copyMove';
   e.target.classList.add('dragging-item');
   const tip = document.getElementById('bagSlotHoverTip');
-  if (tip) tip.innerHTML = `<span class="text-amber-300 font-bold">正在拖拽: 【${item.name}】</span> - 拖至左上方【天罡剑匣】插槽装入，或拖到其他格位`;
+  if (tip) tip.innerHTML = `<span class="text-amber-300 font-bold">正在拖拽: 【${item.name}】</span> - 拖至左上方【天罡剑匣】插槽装入`;
 }
 
 function handleCasketDragStart(e, slotIdx) {
@@ -569,18 +625,24 @@ function handleCasketSlotDrop(e, targetSlotIdx) {
   try { data = JSON.parse(raw); } catch (err) { return; }
 
   if (data.type === 'bag') {
-    const bagItem = activePlayerBagItems[data.index];
+    const bagItem = liveRenderedBagItems[data.index];
     if (!bagItem) return;
 
-    // 将背包物料/武器置换进剑匣
     const oldCasketSword = casketSwords[targetSlotIdx];
-    casketSwords[targetSlotIdx] = bagItem;
-    activePlayerBagItems[data.index] = oldCasketSword;
+    casketSwords[targetSlotIdx] = { ...bagItem, count: 1 };
+    if (oldCasketSword && oldCasketSword.type === 'weapon' && !starterWeaponItems.some(w => w.id === oldCasketSword.id) && !bagExtraWeaponPool.some(w => w.id === oldCasketSword.id)) {
+      bagExtraWeaponPool.push(oldCasketSword);
+    } else if (oldCasketSword && oldCasketSword.type !== 'weapon') {
+      playerInventory[oldCasketSword.id] = (playerInventory[oldCasketSword.id] || 0) + (oldCasketSword.count || 1);
+    }
+    if (bagItem.type !== 'weapon' && !window.isCreativeMode) {
+      playerInventory[bagItem.id] = Math.max(0, (playerInventory[bagItem.id] || 1) - 1);
+    }
 
     playUiSound('sword_draw');
     showNotification(`【飞剑入匣】已将【${bagItem.name}】纳入天罡剑匣 [剑槽 #${targetSlotIdx + 1}]！`);
+    syncBackpackFromPlayerInventory();
     renderCasketInlineTray();
-    renderPlayerEquipmentModal();
   } else if (data.type === 'casket') {
     const sourceIdx = data.index;
     if (sourceIdx !== targetSlotIdx) {
@@ -606,137 +668,105 @@ function handleBagSlotDrop(e, targetBagIdx) {
   if (data.type === 'casket') {
     const sword = casketSwords[data.index];
     if (!sword) return;
-
-    const targetBagItem = activePlayerBagItems[targetBagIdx];
-    activePlayerBagItems[targetBagIdx] = sword;
-    casketSwords[data.index] = targetBagItem;
+    if (sword.type === 'weapon' && !starterWeaponItems.some(w => w.id === sword.id) && !bagExtraWeaponPool.some(w => w.id === sword.id)) {
+      bagExtraWeaponPool.push(sword);
+    } else if (sword.type !== 'weapon') {
+      playerInventory[sword.id] = (playerInventory[sword.id] || 0) + (sword.count || 1);
+    }
+    casketSwords[data.index] = null;
 
     playUiSound('sword_draw');
-    showNotification(`【拔剑入包】已将【${sword.name}】移入储物矩阵 [格位 #${targetBagIdx + 1}]！`);
+    showNotification(`【拔剑入包】已将【${sword.name}】放回真实储物背包！`);
+    syncBackpackFromPlayerInventory();
     renderCasketInlineTray();
-    renderPlayerEquipmentModal();
-  } else if (data.type === 'bag') {
-    const sourceIdx = data.index;
-    if (sourceIdx !== targetBagIdx) {
-      const temp = activePlayerBagItems[sourceIdx];
-      activePlayerBagItems[sourceIdx] = activePlayerBagItems[targetBagIdx];
-      activePlayerBagItems[targetBagIdx] = temp;
-      playUiSound('click');
-      renderPlayerEquipmentModal();
-    }
   }
 }
 
-// 渲染 72 格 BAG 网格 (前 32 格解锁 + 后 40 格带 X 锁定)
+// 渲染实时背包网格 (100% 绑定 XIUXIAN_ITEMS + playerInventory，创造模式下自动扩格展示全部 110 种真实物料)
 function renderPlayerEquipmentModal() {
   const container = document.getElementById('bagGrid72Container');
   if (!container) return;
   container.innerHTML = '';
 
-  // 1. 前 32 格：已解锁活跃槽位 (4 行 × 8 列)
-  for (let i = 0; i < 32; i++) {
-    const item = activePlayerBagItems[i];
+  let ownedList = buildBagItemsFromPlayerInventory();
+  if (bagSearchQuery) {
+    ownedList = ownedList.filter(it =>
+      (it.name && it.name.toLowerCase().includes(bagSearchQuery)) ||
+      (it.matId && it.matId.toLowerCase().includes(bagSearchQuery)) ||
+      (it.category && it.category.toLowerCase().includes(bagSearchQuery))
+    );
+  }
+  if (bagSortDescending) {
+    ownedList.sort((a, b) => (b.count - a.count) || (a.matId || '').localeCompare(b.matId || ''));
+  } else {
+    ownedList.sort((a, b) => (a.matId || '').localeCompare(b.matId || ''));
+  }
+
+  liveRenderedBagItems = ownedList;
+
+  const unlockedCount = (isThunderPurified || window.isCreativeMode)
+    ? Math.max(72, Math.ceil(ownedList.length / 8) * 8)
+    : Math.max(32, Math.ceil(ownedList.length / 8) * 8);
+  const totalGridSlots = Math.max(72, unlockedCount);
+
+  for (let i = 0; i < totalGridSlots; i++) {
     const slotDiv = document.createElement('div');
     slotDiv.id = `bagSlot_${i}`;
 
-    if (item) {
-      slotDiv.className = `relative w-12 h-12 bg-[#09203a]/90 hover:bg-[#00f0ff]/20 border ${selectedBagSlotIdx === i ? 'border-[#00f0ff] shadow-[0_0_12px_#00f0ff] ring-1 ring-white' : 'border-[#00f0ff]/40 hover:border-[#00f0ff]'} rounded flex flex-col items-center justify-center p-1 cursor-grab active:cursor-grabbing transition group`;
-      slotDiv.draggable = true;
-      slotDiv.ondragstart = (e) => handleBagDragStart(e, i);
-      slotDiv.ondragend = handleDragEnd;
-      slotDiv.onclick = () => inspectBagItem(i, item);
-      slotDiv.title = `[已开辟] ${item.name} (${item.matId || ''}) x${item.count}\n${item.desc}\n• 可拖拽放入左上方剑匣\n• 可在背包格位间拖拽调换`;
-      slotDiv.innerHTML = `
-        <i class="${item.icon} text-lg group-hover:scale-110 transition"></i>
-        <span class="absolute bottom-0.5 right-1 text-[8px] font-mono text-cyan-200 font-bold drop-shadow">${item.count}</span>
-        <span class="absolute top-0.5 left-1 text-[6px] font-mono text-white/30">${i + 1}</span>
-      `;
+    if (i < unlockedCount) {
+      const item = ownedList[i];
+      if (item) {
+        const isCreativeHi = window.isCreativeMode;
+        slotDiv.className = `relative w-12 h-12 ${isCreativeHi ? 'bg-[#0a283e]/90 border-amber-400/70' : 'bg-[#09203a]/90 border-[#00f0ff]/40'} hover:bg-[#00f0ff]/20 border ${selectedBagSlotIdx === i ? 'border-[#00f0ff] shadow-[0_0_12px_#00f0ff] ring-1 ring-white' : 'hover:border-[#00f0ff]'} rounded flex flex-col items-center justify-center p-1 cursor-grab active:cursor-grabbing transition group`;
+        slotDiv.draggable = true;
+        slotDiv.ondragstart = (e) => handleBagDragStart(e, i);
+        slotDiv.ondragend = handleDragEnd;
+        slotDiv.onclick = () => inspectBagItem(i, item);
+        slotDiv.title = `[${item.matId || ''}] ${item.name} ×${item.count}${item.category ? ` · ${item.category}` : ''}${item.form ? ` (${item.form})` : ''}\n${item.desc}`;
+        slotDiv.innerHTML = `
+          <i class="${item.icon} text-base group-hover:scale-110 transition"></i>
+          <span class="text-[7px] text-white/75 truncate w-full text-center leading-tight mt-0.5 px-0.5">${item.name}</span>
+          <span class="absolute top-0.5 right-1 text-[8px] font-mono ${isCreativeHi ? 'text-amber-300' : 'text-cyan-200'} font-bold drop-shadow">${item.count}</span>
+        `;
+      } else {
+        slotDiv.className = 'relative w-12 h-12 bg-[#07192f]/50 border border-[#00f0ff]/20 hover:border-[#00f0ff]/50 rounded flex items-center justify-center cursor-pointer transition';
+        slotDiv.title = `[已开辟] 空置储物格 ${i + 1}`;
+        slotDiv.onclick = () => {
+          playUiSound('click');
+          const tip = document.getElementById('bagSlotHoverTip');
+          if (tip) tip.innerText = `【空置储物槽 #${i + 1}】可存放任意修仙物料、飞剑与法宝`;
+        };
+        slotDiv.innerHTML = `<span class="text-[7px] font-mono text-cyan-500/30">${i + 1}</span>`;
+      }
+      slotDiv.ondragover = handleSlotDragOver;
+      slotDiv.ondragleave = handleSlotDragLeave;
+      slotDiv.ondrop = (e) => handleBagSlotDrop(e, i);
     } else {
-      slotDiv.className = 'relative w-12 h-12 bg-[#07192f]/50 border border-[#00f0ff]/20 hover:border-[#00f0ff]/50 rounded flex items-center justify-center cursor-pointer transition';
-      slotDiv.title = `[已开辟] 空置储物格 ${i + 1}\n可从剑匣或其他格位拖拽物料放入`;
-      slotDiv.onclick = () => {
-        playUiSound('click');
-        document.getElementById('bagSlotHoverTip').innerText = `【空置储物槽 #${i + 1}】可存放任意修仙物料、飞剑与法宝`;
-      };
-      slotDiv.innerHTML = `<span class="text-[7px] font-mono text-cyan-500/30">${i + 1}</span>`;
-    }
-
-    // 允许作为拖放目标
-    slotDiv.ondragover = handleSlotDragOver;
-    slotDiv.ondragleave = handleSlotDragLeave;
-    slotDiv.ondrop = (e) => handleBagSlotDrop(e, i);
-
-    container.appendChild(slotDiv);
-  }
-
-  // 额外的策划案高级物料，在天雷淬体后填充
-  const advancedBonusItems = [
-    { name: '高温合金锭', count: 32, icon: 'fa-solid fa-bars text-red-400', desc: 'BD_113冶炼舱高温所得合金材料', matId: 'MAT_026' },
-    { name: '精炼玄铁锭', count: 40, icon: 'fa-solid fa-cubes text-blue-300', desc: '高纯度玄铁精炼产物', matId: 'MAT_027' },
-    { name: '脱水生物组织', count: 18, icon: 'fa-solid fa-dna text-purple-300', desc: '灭活脱水生物标本', matId: 'MAT_028' },
-    { name: '灵根胚体', count: 1, icon: 'fa-solid fa-atom text-emerald-300', desc: '筑基主线人造灵根关键组装件', matId: 'MAT_029' },
-    { name: '导脉合金', count: 25, icon: 'fa-solid fa-microchip text-yellow-300', desc: '经脉兼容高导灵合金', matId: 'MAT_030' },
-    { name: '灵能晶石', count: 64, icon: 'fa-solid fa-gem text-cyan-300', desc: '纯净天地灵能结晶', matId: 'MAT_072' }
-  ];
-
-  // 2. 后 40 格：根据 isThunderPurified 状态决定是带 X 锁定还是全部开辟！
-  for (let j = 32; j < 72; j++) {
-    const slotDiv = document.createElement('div');
-    if (!isThunderPurified) {
-      // 锁定状态 (带 X 交叉线，Image 2 标志特征)
       slotDiv.className = 'relative w-12 h-12 bg-[#051120]/90 border border-[#00f0ff]/20 rounded flex items-center justify-center cursor-not-allowed group hover:border-red-400/40 transition';
-      slotDiv.title = `[未开辟槽位 #${j + 1}] 点击上方【天雷淬体】引神雷淬脉解锁！`;
+      slotDiv.title = `[未开辟槽位 #${i + 1}] 点击上方【天雷淬体】或【创造模式】解锁全部储物格！`;
       slotDiv.onclick = () => {
         playUiSound('craft_fail');
-        showNotification(`【未开辟储物槽 #${j + 1}】点击上方【⚡ 天雷淬体】引神雷打破经脉界限！`);
+        showNotification(`【未开辟储物槽 #${i + 1}】点击上方【⚡ 天雷淬体】或【✨ 创造模式】解锁！`);
       };
       slotDiv.innerHTML = `
         <svg class="w-full h-full p-2.5 opacity-50 group-hover:opacity-80 transition" viewBox="0 0 36 36">
           <line x1="4" y1="4" x2="32" y2="32" stroke="#00f0ff" stroke-width="1.8" stroke-linecap="round"/>
           <line x1="32" y1="4" x2="4" y2="32" stroke="#00f0ff" stroke-width="1.8" stroke-linecap="round"/>
         </svg>
-        <span class="absolute bottom-0.5 right-1 text-[6px] font-mono text-cyan-500/20">${j + 1}</span>
+        <span class="absolute bottom-0.5 right-1 text-[6px] font-mono text-cyan-500/20">${i + 1}</span>
       `;
-    } else {
-      // 天雷淬体已解锁！(金光/青色开辟槽位)
-      const bonusItem = advancedBonusItems[(j - 32) % advancedBonusItems.length];
-      const hasItem = (j - 32) < advancedBonusItems.length;
-      if (hasItem && bonusItem) {
-        slotDiv.className = 'relative w-12 h-12 bg-[#0a283e]/90 hover:bg-[#00f0ff]/25 border border-amber-400/80 rounded flex flex-col items-center justify-center p-1 cursor-grab active:cursor-grabbing transition shadow-[0_0_8px_rgba(245,158,11,0.3)] group';
-        slotDiv.draggable = true;
-        slotDiv.ondragstart = (e) => handleBagDragStart(e, j);
-        slotDiv.ondragend = handleDragEnd;
-        slotDiv.onclick = () => inspectBagItem(j, bonusItem);
-        slotDiv.title = `[天雷开辟] ${bonusItem.name} x${bonusItem.count}\n${bonusItem.desc}`;
-        slotDiv.innerHTML = `
-          <i class="${bonusItem.icon} text-lg group-hover:scale-110 transition"></i>
-          <span class="absolute bottom-0.5 right-1 text-[8px] font-mono text-amber-200 font-bold drop-shadow">${bonusItem.count}</span>
-          <span class="absolute top-0.5 left-1 text-[6px] font-mono text-amber-400/70">${j + 1}</span>
-        `;
-      } else {
-        slotDiv.className = 'relative w-12 h-12 bg-[#081e32]/60 border border-cyan-400/40 hover:border-cyan-300 rounded flex items-center justify-center cursor-pointer transition';
-        slotDiv.title = `[天雷开辟] 空置储物格 ${j + 1}`;
-        slotDiv.onclick = () => {
-          playUiSound('click');
-          document.getElementById('bagSlotHoverTip').innerText = `【天雷开辟储物槽 #${j + 1}】经脉通达，可收纳万物`;
-        };
-        slotDiv.innerHTML = `<span class="text-[7px] font-mono text-cyan-300/40">${j + 1}</span>`;
-      }
-
-      // 允许作为拖放目标
-      slotDiv.ondragover = handleSlotDragOver;
-      slotDiv.ondragleave = handleSlotDragLeave;
-      slotDiv.ondrop = (e) => handleBagSlotDrop(e, j);
     }
     container.appendChild(slotDiv);
   }
 
-  // 同步渲染剑匣旁边的 4 槽飞剑插槽
   renderCasketInlineTray();
 
-  // 更新已开辟槽位计数
   const activeCountElem = document.getElementById('bagActiveCount');
-  if (activeCountElem) activeCountElem.innerText = isThunderPurified ? '72' : '32';
+  if (activeCountElem) {
+    const totalKinds = (typeof XIUXIAN_ITEMS !== 'undefined') ? Object.keys(XIUXIAN_ITEMS).length : 110;
+    const ownedKinds = Object.values(playerInventory).filter(v => v > 0).length;
+    activeCountElem.innerText = `${ownedKinds}/${totalKinds} 种 · ${unlockedCount}`;
+  }
 }
 
 // 点击物料查看详情
@@ -1239,7 +1269,7 @@ function switchHoloCompassTab(tabId) {
   // 直接打开真实专属界面，不重复维护内嵌两套假视图
   if (tabId === 'hub') {
     toggleInventoryModal();
-    if (typeof openCentralProcessorHUD === 'function') openCentralProcessorHUD();
+    if (typeof openTechTreeModal === 'function') openTechTreeModal();
     return;
   }
   if (tabId === 'craft') {
@@ -1319,16 +1349,12 @@ function toggleInventoryModal(defaultTab) {
 window.switchHoloCompassTab = switchHoloCompassTab;
 window.toggleInventoryModal = toggleInventoryModal;
 
-// 背包排序 (按策划案物料分类与数量自动排序)
+// 背包排序 (切换按数量降序 / 按物料编号升序)
 function sortPlayerBackpack() {
   playUiSound('toggle');
-  activePlayerBagItems.sort((a, b) => {
-    if (!a) return 1;
-    if (!b) return -1;
-    return b.count - a.count;
-  });
-  renderPlayerEquipmentModal();
-  showNotification('随身背包物料已按数量自动规整排序');
+  bagSortDescending = !bagSortDescending;
+  syncBackpackFromPlayerInventory();
+  showNotification(bagSortDescending ? '随身背包已按数量降序排列' : '随身背包已按 MAT 编号顺序排列');
 }
 
 // 罗盘模态打开状态下的 1-8 数字键快捷切换监听 (严格对齐外部功能按键)
