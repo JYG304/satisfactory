@@ -305,6 +305,13 @@ function switchMachineView(viewType) {
 // 切换当前建造设备
 function switchCurrentMachineDevice(deviceId) {
   playUiSound('toggle');
+  if (deviceId === 'conveyor_limiter') {
+    if (typeof showNotification === 'function') {
+      showNotification('正在打开【BD_125 传送带限速器】常规建筑控制面板...');
+    }
+    window.location.href = 'conveyor_limiter_prototype.html';
+    return;
+  }
   openMachineHUD(deviceId);
 }
 
@@ -388,6 +395,7 @@ function mountFluidHubPlugin(childMachineId) {
     name: bData.name
   };
   showNotification(`已成功将【${bData.name}】外部模型安装到【流体处理中枢】顶部单插槽！获得高压流体稳流加成！`);
+  if (typeof renderWorldBuildings === 'function') renderWorldBuildings();
   renderMachineProdView();
 }
 
@@ -401,7 +409,20 @@ function undockFluidHubPlugin() {
     name: '插槽空置'
   };
   showNotification(`已手动拆卸【流体处理中枢】顶部的【${bData.name}】模型并收入背包！`);
+  if (typeof renderWorldBuildings === 'function') renderWorldBuildings();
   renderMachineProdView();
+}
+
+function cycleFluidHubPlugin() {
+  playUiSound('craft');
+  const sequence = ['centrifuge', 'mixer', 'extractor'];
+  let nextIdx = 0;
+  if (fluidHubSlot && fluidHubSlot.mounted && fluidHubSlot.childId) {
+    const curIdx = sequence.indexOf(fluidHubSlot.childId);
+    nextIdx = (curIdx + 1) % sequence.length;
+  }
+  const nextChild = sequence[nextIdx];
+  mountFluidHubPlugin(nextChild);
 }
 
 function openFluidHubMountedMachine() {
@@ -421,6 +442,7 @@ function mountBioBasePlugin(childMachineId) {
     name: bData.name
   };
   showNotification(`已成功将【${bData.name}】外部模型安装到【营养基座】顶部单插槽！获得高纯营养液直供增产！`);
+  if (typeof renderWorldBuildings === 'function') renderWorldBuildings();
   renderMachineProdView();
 }
 
@@ -434,7 +456,20 @@ function undockBioBasePlugin() {
     name: '插槽空置'
   };
   showNotification(`已手动拆卸【营养基座】顶部的【${bData.name}】模型并收入背包！`);
+  if (typeof renderWorldBuildings === 'function') renderWorldBuildings();
   renderMachineProdView();
+}
+
+function cycleBioBasePlugin() {
+  playUiSound('craft');
+  const sequence = ['incubator', 'petri_dish'];
+  let nextIdx = 0;
+  if (bioBaseSlot && bioBaseSlot.mounted && bioBaseSlot.childId) {
+    const curIdx = sequence.indexOf(bioBaseSlot.childId);
+    nextIdx = (curIdx + 1) % sequence.length;
+  }
+  const nextChild = sequence[nextIdx];
+  mountBioBasePlugin(nextChild);
 }
 
 function openBioBaseMountedMachine() {
@@ -444,23 +479,124 @@ function openBioBaseMountedMachine() {
   }
 }
 
-// 兼容别名
+// 兼容别名与全局挂载
 function mountBioBaseSlot(idx, childId) { mountBioBasePlugin(childId || (idx === 0 ? 'incubator' : 'petri_dish')); }
 function undockBioBaseSlot(idx) { undockBioBasePlugin(); }
 function openBioBaseMountedMachineSlot(idx) { openBioBaseMountedMachine(); }
+window.cycleFluidHubPlugin = cycleFluidHubPlugin;
+window.cycleBioBasePlugin = cycleBioBasePlugin;
+window.mountFluidHubPlugin = mountFluidHubPlugin;
+window.undockFluidHubPlugin = undockFluidHubPlugin;
+window.mountBioBasePlugin = mountBioBasePlugin;
+window.undockBioBasePlugin = undockBioBasePlugin;
 
-// 渲染【生产】(Production) 视图 (动态支持 1进1出、2进1出多进单出、1进2出单进多出及双轨物料校验)
+// 配方表以正式 RCP_* 为主键；运行时旧 rcp_* 仍由数据桥接解析，避免存档与 UI 断链。
+function resolveRecipeDefinition(recipeId) {
+  if (typeof XIUXIAN_RECIPES === 'undefined' || !recipeId) return null;
+  if (XIUXIAN_RECIPES[recipeId]) return XIUXIAN_RECIPES[recipeId];
+  const legacyKey = (typeof XIUXIAN_CANONICAL_TO_RECIPE_KEY !== 'undefined') ? XIUXIAN_CANONICAL_TO_RECIPE_KEY[recipeId] : null;
+  return legacyKey ? XIUXIAN_RECIPES[legacyKey] || null : null;
+}
+
+// 渲染【生产】(Production) 视图 (动态支持 1进1出、多进双出、1进2出及多轨物料校验)
 function renderMachineProdView() {
   const bData = (typeof XIUXIAN_BUILDINGS !== 'undefined') ? (XIUXIAN_BUILDINGS[currentMachineId] || XIUXIAN_BUILDINGS['furnace']) : {};
-  const rData = (typeof XIUXIAN_RECIPES !== 'undefined') ? (XIUXIAN_RECIPES[currentMachineRecipeId] || XIUXIAN_RECIPES['rcp_iron_ingot']) : {
+  const rData = (typeof XIUXIAN_RECIPES !== 'undefined') ? (resolveRecipeDefinition(currentMachineRecipeId) || XIUXIAN_RECIPES['rcp_iron_ingot']) : {
     name: '精炼玄铁锭', inputs: [{ item: 'iron_ore', count: 1, rate: 30 }], outputs: [{ item: 'iron_ingot', count: 1, rate: 30 }], timeSec: 2, power: 10
   };
 
-  // 复合建筑与主动加工器面板保持纯净无遮挡 (1:1 对齐用户需求：外部放3个模型并单独点击，内部面板不要大横幅)
+  // 复合建筑母座与插槽状态条 (当打开 fluid_hub, bio_base 及其挂载插件时醒目展示插拔替换)
   const compBanner = document.getElementById('prodCompositeHeaderBanner');
   if (compBanner) {
-    compBanner.classList.add('hidden');
-    compBanner.innerHTML = '';
+    if (['fluid_hub', 'mixer', 'centrifuge', 'extractor'].includes(currentMachineId)) {
+      compBanner.classList.remove('hidden');
+      const isHubBase = (currentMachineId === 'fluid_hub');
+      compBanner.innerHTML = `
+        <div class="p-2.5 rounded-lg bg-[#071322] border-2 border-sky-400/80 shadow-[0_0_15px_rgba(56,189,248,0.3)] flex items-center justify-between">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded bg-sky-500/20 border border-sky-400 flex items-center justify-center text-sky-300">
+              <i class="fa-solid fa-droplet text-sm"></i>
+            </div>
+            <div>
+              <div class="flex items-center space-x-1.5 text-xs font-bold text-white">
+                <span>复合母座: 流体处理中枢 (BD_132)</span>
+                <span class="text-[9px] px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 border border-sky-500/40">顶部单工位</span>
+                ${isHubBase ? '<span class="text-[9px] bg-sky-400 text-black px-1.5 rounded font-bold">当前查看: 母座</span>' : '<span class="text-[9px] bg-cyan-900/60 text-cyan-200 px-1.5 rounded">当前查看: 顶部插件</span>'}
+              </div>
+              <div class="text-[10px] font-mono text-sky-200/80 mt-0.5">
+                当前挂载设备: <strong class="text-white">${fluidHubSlot.mounted ? fluidHubSlot.name : '未安装 (空置)'}</strong> · 高压流体稳流调配中
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center space-x-1.5">
+            <button onclick="mountFluidHubPlugin('mixer');" class="px-2 py-1 rounded text-[10px] font-bold ${fluidHubSlot.mounted && fluidHubSlot.childId === 'mixer' ? 'bg-sky-400 text-black shadow-[0_0_8px_#38bdf8]' : 'bg-white/10 text-white hover:bg-white/20'} transition cursor-pointer">
+              搅拌机 (BD_110)
+            </button>
+            <button onclick="mountFluidHubPlugin('centrifuge');" class="px-2 py-1 rounded text-[10px] font-bold ${fluidHubSlot.mounted && fluidHubSlot.childId === 'centrifuge' ? 'bg-sky-400 text-black shadow-[0_0_8px_#38bdf8]' : 'bg-white/10 text-white hover:bg-white/20'} transition cursor-pointer">
+              离心机 (BD_106)
+            </button>
+            <button onclick="mountFluidHubPlugin('extractor');" class="px-2 py-1 rounded text-[10px] font-bold ${fluidHubSlot.mounted && fluidHubSlot.childId === 'extractor' ? 'bg-sky-400 text-black shadow-[0_0_8px_#38bdf8]' : 'bg-white/10 text-white hover:bg-white/20'} transition cursor-pointer">
+              提取器 (BD_109)
+            </button>
+            <button onclick="undockFluidHubPlugin();" class="px-2 py-1 rounded bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 text-[10px] font-bold border border-rose-500/30 transition cursor-pointer">
+              卸载
+            </button>
+          </div>
+        </div>
+      `;
+    } else if (['bio_base', 'incubator', 'petri_dish'].includes(currentMachineId)) {
+      compBanner.classList.remove('hidden');
+      const isBase = (currentMachineId === 'bio_base');
+      compBanner.innerHTML = `
+        <div class="p-2.5 rounded-lg bg-[#051912] border-2 border-emerald-400/80 shadow-[0_0_15px_rgba(16,185,129,0.3)] flex items-center justify-between">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-300">
+              <i class="fa-solid fa-leaf text-sm"></i>
+            </div>
+            <div>
+              <div class="flex items-center space-x-1.5 text-xs font-bold text-white">
+                <span>复合母座: 营养基座 (BD_130)</span>
+                <span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">顶部单工位</span>
+                ${isBase ? '<span class="text-[9px] bg-emerald-400 text-black px-1.5 rounded font-bold">当前查看: 母座</span>' : '<span class="text-[9px] bg-emerald-900/60 text-emerald-200 px-1.5 rounded">当前查看: 顶部插件</span>'}
+              </div>
+              <div class="text-[10px] font-mono text-emerald-200/80 mt-0.5">
+                当前挂载设备: <strong class="text-white">${bioBaseSlot.mounted ? bioBaseSlot.name : '未安装 (空置)'}</strong> · 高纯流体营养直供增产
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center space-x-1.5">
+            <button onclick="mountBioBasePlugin('incubator');" class="px-2 py-1 rounded text-[10px] font-bold ${bioBaseSlot.mounted && bioBaseSlot.childId === 'incubator' ? 'bg-emerald-400 text-black shadow-[0_0_8px_#10b981]' : 'bg-white/10 text-white hover:bg-white/20'} transition cursor-pointer">
+              培育仓 (BD_108)
+            </button>
+            <button onclick="mountBioBasePlugin('petri_dish');" class="px-2 py-1 rounded text-[10px] font-bold ${bioBaseSlot.mounted && bioBaseSlot.childId === 'petri_dish' ? 'bg-emerald-400 text-black shadow-[0_0_8px_#10b981]' : 'bg-white/10 text-white hover:bg-white/20'} transition cursor-pointer">
+              培养皿 (BD_131)
+            </button>
+            <button onclick="toggleIncubatorTimeAccel();" class="px-2 py-1 rounded text-[10px] font-bold ${incubatorTimeAccelerated ? 'bg-amber-400 text-black shadow-[0_0_8px_#f59e0b]' : 'bg-white/10 text-white/70 hover:bg-white/20'} transition cursor-pointer">
+              ⚡时间加速器
+            </button>
+            <button onclick="undockBioBasePlugin();" class="px-2 py-1 rounded bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 text-[10px] font-bold border border-rose-500/30 transition cursor-pointer">
+              卸载
+            </button>
+          </div>
+        </div>
+      `;
+    } else if (currentMachineId === 'power_engine') {
+      compBanner.classList.remove('hidden');
+      compBanner.innerHTML = `
+        <div class="p-2 rounded-lg bg-[#0a1524] border border-cyan-500/40 flex items-center justify-between text-xs">
+          <div class="flex items-center space-x-2 text-cyan-200">
+            <i class="fa-solid fa-atom text-cyan-400"></i>
+            <span>灵力引擎复合底座 (BD_112) · 顶部 3 插槽热能直供 (150☼)</span>
+          </div>
+          <div class="text-[10px] font-mono text-amber-300">
+            已承载 3 联装冶炼舱 (可在场景中直接点击各舱进行操作)
+          </div>
+        </div>
+      `;
+    } else {
+      compBanner.classList.add('hidden');
+      compBanner.innerHTML = '';
+    }
   }
 
   // 1. 规范化输入物料与产物清单 (完美适配 inputs 数组 与 单一 input/output)
@@ -494,7 +630,7 @@ function renderMachineProdView() {
     }];
   }
 
-  // 2. 顶部配方标题与设备端口逻辑标识 (如 组装机 BD_111 2进1出 · 正面×2 ➔ 背面×1)
+  // 2. 顶部配方标题与设备端口逻辑标识 (如 组装机 BD_111 3进2出 · 正面×2固体+侧面×1液体 ➔ 背面×2固体)
   const titleElem = document.getElementById('prodRecipeNameTitle');
   if (titleElem) titleElem.innerText = rData.name;
 
@@ -864,14 +1000,31 @@ function renderPassiveProcessorView() {
   if (outName) outName.innerText = outDef.name;
   if (outCount) outCount.innerText = `x${passiveOutputSlot.count}`;
 
-  // 4. 遥测仪表 (⚡ 供电负荷 998 +10 / 1130 & 热力工况 300 +10 / 430 ☼)
+  // 4. 遥测仪表 (根据当前场景 worldBuildings 与 XIUXIAN_BUILDINGS 动态汇总供电与热力)
+  let totalGenMW = 0;
+  let totalUseMW = 0;
+  let totalHeat = 0;
+  if (typeof worldBuildings !== 'undefined' && typeof XIUXIAN_BUILDINGS !== 'undefined') {
+    worldBuildings.forEach(b => {
+      const def = XIUXIAN_BUILDINGS[b.type] || XIUXIAN_BUILDINGS[b.type === 'smelter' ? 'furnace' : (b.type === 'constructor' ? 'cutter' : b.type)];
+      if (def) {
+        if ((def.power || 0) < 0) totalGenMW += Math.abs(def.power);
+        else totalUseMW += (def.power || 0);
+        totalHeat += (def.heat || 0);
+      }
+    });
+  }
+  const curMachineDef = (typeof XIUXIAN_BUILDINGS !== 'undefined') ? (XIUXIAN_BUILDINGS[currentMachineId] || XIUXIAN_BUILDINGS.miner) : null;
+  const selfPower = curMachineDef ? Math.max(0, curMachineDef.power || 0) : 0;
+  const selfHeat = curMachineDef ? (curMachineDef.heat || 0) : 0;
+
   const powerText = document.getElementById('passivePowerText');
   if (powerText) {
-    powerText.innerText = isMachinePowerOn ? '⚡ 998 +10 / 1130 MW' : '⚡ 0 / 1130 MW (断电)';
+    powerText.innerText = isMachinePowerOn ? `⚡ ${totalUseMW} (+${selfPower}) / ${totalGenMW} MW` : `⚡ 0 / ${totalGenMW} MW (断电)`;
   }
   const thermalText = document.getElementById('passiveThermalText');
   if (thermalText) {
-    thermalText.innerText = isMachinePowerOn ? '300 +10 / 430 ☼ ℃' : '25 ℃ (冷态)';
+    thermalText.innerText = isMachinePowerOn ? `${25 + totalHeat} (+${selfHeat}) ☼ ℃` : '25 ℃ (冷态)';
   }
 
   // 5. 电源按键
@@ -1059,7 +1212,7 @@ function renderCompositeBuildingView() {
     const card = document.createElement('div');
     if (sock.docked) {
       card.className = 'p-3.5 bg-[#0b1522] border-2 border-cyan-500/50 rounded-lg flex items-center justify-between shadow-[0_4px_15px_rgba(0,240,255,0.15)]';
-      const rDef = (typeof XIUXIAN_RECIPES !== 'undefined') ? XIUXIAN_RECIPES[sock.recipeId] : null;
+      const rDef = resolveRecipeDefinition(sock.recipeId);
       const rName = rDef ? rDef.name : '精炼玄铁锭';
       card.innerHTML = `
         <div class="flex items-center space-x-3">
@@ -1171,7 +1324,7 @@ function collectCompositeSocketOutput(socketIdx) {
 // 触发复合配方冶炼
 function craftCompositeRecipe(recipeId) {
   playUiSound('craft_success');
-  const r = (typeof XIUXIAN_RECIPES !== 'undefined') ? XIUXIAN_RECIPES[recipeId] : null;
+  const r = resolveRecipeDefinition(recipeId);
   const rName = r ? r.name : recipeId;
   
   // 查找一个已停靠的冶炼舱
@@ -1208,14 +1361,16 @@ setInterval(() => {
   }
 
   // 2. 复合建筑插槽生产推进
-  compositeSockets.forEach(sock => {
-    if (sock.docked) {
-      sock.progress = (sock.progress + 15) % 100;
-      if (sock.progress < 15) {
-        sock.bufferOut += 1;
+  if (typeof compositeSockets !== 'undefined' && Array.isArray(compositeSockets)) {
+    compositeSockets.forEach(sock => {
+      if (sock.docked) {
+        sock.progress = (sock.progress + 15) % 100;
+        if (sock.progress < 15) {
+          sock.bufferOut += 1;
+        }
       }
-    }
-  });
+    });
+  }
 
   const compView = document.getElementById('viewCompositeBuilding');
   if (compView && !compView.classList.contains('hidden')) {
@@ -1310,7 +1465,7 @@ function renderRecipePickerView(searchQuery) {
 
   const categorized = {};
   supportedRecipeIds.forEach(rId => {
-    const r = (typeof XIUXIAN_RECIPES !== 'undefined') ? XIUXIAN_RECIPES[rId] : null;
+    const r = resolveRecipeDefinition(rId);
     if (!r) return;
     if (searchQuery && !r.name.toLowerCase().includes(searchQuery)) return;
     const cat = r.category || '通用工艺';
@@ -1384,7 +1539,7 @@ function selectRecipeInPicker(recipeId) {
 
 // 渲染选中的配方详情 (动态支持多材料输入成本与多产物)
 function renderSelectedRecipeDetail(recipeId) {
-  const r = (typeof XIUXIAN_RECIPES !== 'undefined' && XIUXIAN_RECIPES[recipeId]) || {
+  const r = resolveRecipeDefinition(recipeId) || {
     name: '赤铜线圈', desc: '导电线圈', timeSec: 2, outputs: [{ count: 2, item: 'copper_wire' }], inputs: [{ count: 1, item: 'copper_ingot' }]
   };
 
@@ -1451,7 +1606,7 @@ function confirmSelectedRecipeForMachine() {
   playUiSound('craft_success');
   currentMachineRecipeId = selectedRecipeInPicker;
   const bName = (typeof XIUXIAN_BUILDINGS !== 'undefined' && XIUXIAN_BUILDINGS[currentMachineId]?.name) || '设备';
-  const rName = (typeof XIUXIAN_RECIPES !== 'undefined' && XIUXIAN_RECIPES[currentMachineRecipeId]?.name) || '配方';
+  const rName = (resolveRecipeDefinition(currentMachineRecipeId)?.name) || '配方';
   showNotification(`已为【${bName.split(' ')[0]}】成功装载配方: ${rName}`);
   switchMachineView('prod');
 }
@@ -1470,7 +1625,7 @@ function copyMachineSettings() {
     powerOn: isMachinePowerOn
   };
   const bName = (typeof XIUXIAN_BUILDINGS !== 'undefined' && XIUXIAN_BUILDINGS[currentMachineId]?.name) || '设备';
-  const rName = (typeof XIUXIAN_RECIPES !== 'undefined' && XIUXIAN_RECIPES[currentMachineRecipeId]?.name) || '配方';
+  const rName = (resolveRecipeDefinition(currentMachineRecipeId)?.name) || '配方';
   showNotification(`[已复制设置] 机器: ${bName.split(' ')[0]} | 配方: ${rName}`);
 }
 
@@ -1485,7 +1640,7 @@ function pasteMachineSettings() {
   currentMachineRecipeId = copiedSettings.recipeId;
   isMachinePowerOn = copiedSettings.powerOn;
   renderMachineProdView();
-  const rName = (typeof XIUXIAN_RECIPES !== 'undefined' && XIUXIAN_RECIPES[currentMachineRecipeId]?.name) || '配方';
+  const rName = (resolveRecipeDefinition(currentMachineRecipeId)?.name) || '配方';
   showNotification(`[已成功粘贴] 载入配方: ${rName}`);
 }
 

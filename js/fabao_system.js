@@ -9,113 +9,71 @@
 // * 严正声明：剑匣为角色专属装备 (Tab 装备栏)，罗盘为 HUD 导航，二者均不属于法宝系统。
 // =========================================================================
 
-// 官方策划案法宝支线物料标准库 (100% 官方数据定义)
-const FABAO_MATERIALS_CONFIG = {
-  fabao_array_embryo: {
-    id: 'fabao_array_embryo',
-    matId: 'MAT_072',
-    name: '法宝阵图胚',
-    category: '法宝中间态',
-    form: '实体',
-    icon: 'fa-solid fa-scroll text-yellow-400',
-    desc: '绑定前可运输的法宝中间态结构图谱。由重型组装机生产，到达修士手上后进行神识本命绑定与淬火。',
-    building: '组装机 (BD_111)',
-    recipeTime: '90s',
-    inputs: [
-      { name: '生物复合板', code: 'bio_composite_plate', matId: 'MAT_040', count: 2, icon: 'fa-solid fa-shield text-purple-300' },
-      { name: '导脉薄片', code: 'daomai_sheet', matId: 'MAT_069', count: 4, icon: 'fa-solid fa-layer-group text-violet-200' },
-      { name: '法宝稳脉液', code: 'fabao_pulse_liquid', matId: 'MAT_070', count: 2, icon: 'fa-solid fa-flask text-violet-400' }
-    ]
-  },
-  daomai_sheet: {
-    id: 'daomai_sheet',
-    matId: 'MAT_069',
-    name: '导脉薄片',
-    category: '法宝加工材料',
-    form: '实体',
-    icon: 'fa-solid fa-layer-group text-violet-200',
-    desc: '导脉合金切割后的法宝导流薄片，用于在法宝阵图胚内部铺设法力流通滑轨。',
-    building: '切割机 (BD_105)',
-    recipeTime: '10s',
-    inputs: [
-      { name: '导脉合金', code: 'daomai_alloy', matId: 'MAT_068', count: 1, icon: 'fa-solid fa-square text-violet-300' }
-    ]
-  },
-  daomai_alloy: {
-    id: 'daomai_alloy',
-    matId: 'MAT_068',
-    name: '导脉合金',
-    category: '法宝加工材料',
-    form: '实体',
-    icon: 'fa-solid fa-square text-violet-300',
-    desc: '法宝内部导流合金，具备极高的法力传导性能；与矿脉定位件不是同一类材料。',
-    building: '冶炼舱 (BD_113)',
-    recipeTime: '45s',
-    inputs: [
-      { name: '精炼玄铁锭', code: 'refined_iron_ingot', matId: 'MAT_049', count: 2, icon: 'fa-solid fa-cube text-slate-100' },
-      { name: '煞气结晶', code: 'sha_crystal', matId: 'MAT_067', count: 1, icon: 'fa-solid fa-gem text-violet-400' }
-    ]
-  },
-  fabao_pulse_liquid: {
-    id: 'fabao_pulse_liquid',
-    matId: 'MAT_070',
-    name: '法宝稳脉液',
-    category: '法宝加工液体',
-    form: '液体',
-    icon: 'fa-solid fa-flask text-violet-400',
-    desc: '高级流体，稳定法宝内部导脉回路；只进入法宝阵图胚配方。',
-    building: '搅拌机 (BD_110)',
-    recipeTime: '30s',
-    inputs: [
-      { name: '组织精华液', code: 'tissue_essence', matId: 'MAT_024', count: 1, icon: 'fa-solid fa-eye-dropper text-amber-300' },
-      { name: '回用净化水', code: 'recycled_pure_water', matId: 'MAT_037', count: 1, icon: 'fa-solid fa-droplet text-cyan-300' }
-    ]
-  },
-  sha_crystal: {
-    id: 'sha_crystal',
-    matId: 'MAT_067',
-    name: '煞气结晶',
-    category: '法宝支线材料',
-    form: '实体',
-    icon: 'fa-solid fa-gem text-violet-400',
-    desc: '煞气浓缩液的稳定固态，不是灵石。用于熔炼导脉合金与法宝阵图高能淬火。',
-    building: '回收处理塔 / 离心机 (BD_106)',
-    recipeTime: '30s',
-    inputs: [
-      { name: '煞气浓缩液', code: 'sha_concentrate_liquid', matId: 'MAT_073', count: 1, icon: 'fa-solid fa-skull-crossbones text-purple-600' }
-    ]
-  },
-  ore_vein_locator: {
-    id: 'ore_vein_locator',
-    matId: 'MAT_071',
-    name: '矿脉定位件',
-    category: '通用空间组件',
-    form: '实体',
-    icon: 'fa-solid fa-location-crosshairs text-sky-400',
-    desc: '定位已发现矿脉节点，炼宝台合成必备组件。',
-    building: '加工台 (BD_104)',
-    recipeTime: '30s',
-    inputs: [
-      { name: '导灵铜片', code: 'ling_copper_sheet', matId: 'MAT_010', count: 2, icon: 'fa-solid fa-layer-group text-yellow-300' },
-      { name: '基础控制模块', code: 'basic_control_module', matId: 'MAT_014', count: 1, icon: 'fa-solid fa-microchip text-emerald-400' }
-    ]
-  },
-  high_temp_alloy_ingot: {
-    id: 'high_temp_alloy_ingot',
-    matId: 'MAT_041',
-    name: '高温合金锭',
-    category: '高级金属材料',
-    form: '实体',
-    icon: 'fa-solid fa-fire text-orange-400',
-    desc: '筑基高温冶炼材料；当前用电能提供热量；供动力核心、炼宝台和渡劫台使用。',
-    building: '冶炼舱 (BD_113)',
-    recipeTime: '45s',
-    inputs: [
-      { name: '精炼玄铁锭', code: 'refined_iron_ingot', matId: 'MAT_049', count: 1, icon: 'fa-solid fa-cube text-slate-100' },
-      { name: '玄铁粉', code: 'iron_powder', matId: 'MAT_007', count: 3, icon: 'fa-solid fa-braille text-zinc-400' }
-    ]
+// 动态从官方策划表构建法宝支线物料库 (XIUXIAN_ITEMS 与 XIUXIAN_RECIPES)
+function getFabaoMaterialsConfigFromTable() {
+  const fabaoIds = ['fabao_array_embryo', 'daomai_sheet', 'daomai_alloy', 'fabao_pulse_liquid', 'sha_crystal', 'ore_vein_locator', 'high_temp_alloy_ingot'];
+  const config = {};
+
+  if (typeof XIUXIAN_ITEMS === 'undefined' || typeof XIUXIAN_RECIPES === 'undefined') {
+    return config;
   }
-};
+
+  fabaoIds.forEach(id => {
+    const it = XIUXIAN_ITEMS[id];
+    if (!it) return;
+    const rcp = Object.values(XIUXIAN_RECIPES).find(r => r.output && r.output.item === id);
+    const bldKey = rcp ? (rcp.buildingId || rcp.building) : null;
+    const bld = (bldKey && typeof XIUXIAN_BUILDINGS !== 'undefined') ? (XIUXIAN_BUILDINGS[bldKey] || XIUXIAN_BUILDINGS[aliases?.[bldKey]]) : null;
+    const bldName = bld ? `${bld.name} (${bld.bldId || bldKey})` : (rcp ? rcp.building : '加工设施');
+
+    const inputs = (rcp ? (rcp.inputs || []) : []).map(inp => {
+      const inpItem = XIUXIAN_ITEMS[inp.item] || { name: inp.item, icon: 'fa-solid fa-cube text-white', matId: '' };
+      return {
+        name: inpItem.name,
+        code: inp.item,
+        matId: inpItem.matId || '',
+        count: inp.count || inp.amount || 1,
+        icon: inpItem.icon || 'fa-solid fa-cube text-white'
+      };
+    });
+
+    config[id] = {
+      id: id,
+      matId: it.matId || '',
+      name: it.name,
+      category: it.category || '法宝材料',
+      form: it.form || '实体',
+      icon: it.icon || 'fa-solid fa-cube text-yellow-400',
+      desc: it.desc || (rcp ? rcp.desc : ''),
+      building: bldName,
+      recipeTime: (rcp ? (rcp.timeSec || 30) : 30) + 's',
+      inputs: inputs
+    };
+  });
+
+  return config;
+}
+
+// 全局法宝物料配置代理，100% 动态读表
+const FABAO_MATERIALS_CONFIG = new Proxy({}, {
+  get(target, prop) {
+    if (typeof prop !== 'string') return target[prop];
+    const liveConfig = getFabaoMaterialsConfigFromTable();
+    return liveConfig[prop] || target[prop];
+  },
+  ownKeys() {
+    const liveConfig = getFabaoMaterialsConfigFromTable();
+    return Object.keys(liveConfig);
+  },
+  getOwnPropertyDescriptor(target, prop) {
+    const liveConfig = getFabaoMaterialsConfigFromTable();
+    if (prop in liveConfig) {
+      return { configurable: true, enumerable: true, value: liveConfig[prop], writable: true };
+    }
+    return undefined;
+  }
+});
+
 
 // 当前修士绑定的法宝阵图胚状态 (本命淬炼数据)
 const FABAO_EMBRYO_STATE = {

@@ -23,25 +23,46 @@
             <p class="text-slate-400 text-sm">选择下方入口直接在浏览器中交互体验，或查阅配套工程规范与配置文档。</p>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- 传送带限速控制中枢 (常规建筑布局) -->
+            <a href="conveyor_limiter_prototype.html" class="group relative block p-6 bg-slate-800/60 hover:bg-slate-800 border border-emerald-500/30 hover:border-emerald-400 rounded-xl transition duration-200 shadow-lg hover:shadow-emerald-500/10">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-12 h-12 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-gauge-high"></i>
+                    </div>
+                    <span class="text-xs bg-emerald-500 text-slate-950 font-bold px-2 py-0.5 rounded">最新成果</span>
+                </div>
+                <h2 class="text-lg font-bold text-white mb-2 group-hover:text-emerald-300 transition-colors flex items-center gap-2">
+                    传送带限速器
+                    <i class="fa-solid fa-arrow-right text-sm opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+                </h2>
+                <p class="text-slate-400 text-xs leading-relaxed mb-4">
+                    严格参考常规建筑标准布局（1120×720三段流向面板）：上游来料、中间阻尼立柱、下游受控放行、动态履带仿真与随身背包过滤。
+                </p>
+                <div class="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono flex-wrap">
+                    <span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700/50">BD_125 常规建筑</span>
+                    <span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700/50">全交互原型</span>
+                </div>
+            </a>
+
             <!-- 中央处理器光路阵盘 -->
             <a href="processor/index.html" class="group relative block p-6 bg-slate-800/60 hover:bg-slate-800 border border-amber-500/30 hover:border-amber-400 rounded-xl transition duration-200 shadow-lg hover:shadow-amber-500/10">
                 <div class="flex items-start justify-between mb-4">
                     <div class="w-12 h-12 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-xl group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-circle-nodes"></i>
                     </div>
-                    <span class="text-xs bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded">核心推荐</span>
+                    <span class="text-xs bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded">阵盘系统</span>
                 </div>
-                <h2 class="text-xl font-bold text-white mb-2 group-hover:text-amber-300 transition-colors flex items-center gap-2">
+                <h2 class="text-lg font-bold text-white mb-2 group-hover:text-amber-300 transition-colors flex items-center gap-2">
                     中央处理器 (光路阵盘)
                     <i class="fa-solid fa-arrow-right text-sm opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
                 </h2>
                 <p class="text-slate-400 text-xs leading-relaxed mb-4">
-                    六轨同心光路阵盘、插槽步数几何整除体系、标准规范化芯片/插件系统（初级/中级/高级分类）、北斗七星共鸣倍率加成面板。
+                    六轨同心光路阵盘、插槽步数几何整除体系、标准规范化芯片/插件系统、北斗七星共鸣倍率加成面板。
                 </p>
-                <div class="flex items-center gap-2 text-[11px] text-slate-500 font-mono">
-                    <span class="px-2 py-0.5 bg-slate-900 rounded border border-slate-700/50">独立路径 /processor/</span>
-                    <span class="px-2 py-0.5 bg-slate-900 rounded border border-slate-700/50">完整可玩原型</span>
+                <div class="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono flex-wrap">
+                    <span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700/50">/processor/</span>
+                    <span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700/50">完整可玩原型</span>
                 </div>
             </a>
 
@@ -53,15 +74,15 @@
                     </div>
                     <span class="text-xs bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold px-2 py-0.5 rounded">HUD 原型</span>
                 </div>
-                <h2 class="text-xl font-bold text-white mb-2 group-hover:text-cyan-300 transition-colors flex items-center gap-2">
+                <h2 class="text-lg font-bold text-white mb-2 group-hover:text-cyan-300 transition-colors flex items-center gap-2">
                     修仙工厂 HUD 交互面板
                     <i class="fa-solid fa-arrow-right text-sm opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
                 </h2>
                 <p class="text-slate-400 text-xs leading-relaxed mb-4">
                     沉浸式高科技与仙道工业风格 HUD 面板，包含生产产线监控、灵气转化流转与设备状态集成演示。
                 </p>
-                <div class="flex items-center gap-2 text-[11px] text-slate-500 font-mono">
-                    <span class="px-2 py-0.5 bg-slate-900 rounded border border-slate-700/50">satisfactory_hud_replica.html</span>
+                <div class="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono flex-wrap">
+                    <span class="px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700/50">HUD 仿真</span>
                 </div>
             </a>
         </div>

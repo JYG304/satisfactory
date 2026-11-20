@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>传送带限速器 - 原型参考</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome 图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    * {
+      user-select: none;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #0e1218;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    /* 滑块自定义简洁样式 */
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      background: #1e2430;
+      border-radius: 4px;
+      outline: none;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 24px;
+      background: #f5921e;
+      border: 2px solid #ffffff;
+      border-radius: 3px;
+      cursor: pointer;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      background: #ff9d2e;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen text-slate-100 p-4">
+
+  <!-- ======================== 常规建筑标准模态窗口 (原型参考版) ======================== -->
+  <div class="w-[960px] h-[600px] bg-[#222731] border border-white/20 rounded-md flex flex-col shadow-2xl overflow-hidden text-sm">
+    
+    <!-- 1. 顶栏：建筑标题 + 设备型号 + 关闭按钮 -->
+    <div class="h-10 bg-[#161a22] border-b border-black/60 flex items-center justify-between px-4 shrink-0">
+      <div class="flex items-center space-x-3">
+        <span class="text-xs font-bold text-white flex items-center space-x-1.5">
+          <i class="fa-solid fa-gauge text-[#f5921e]"></i>
+          <span>传送带限速器 (BD_125)</span>
+        </span>
+        <span class="text-[11px] text-white/40">|</span>
+        <span class="text-xs text-white/60 font-mono">常规物流建筑 · 原型模式</span>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <!-- 传送带规格 -->
+        <span class="text-xs text-white/50">传送带等级:</span>
+        <select id="beltTierSelect" onchange="onTierChange(this.value);" class="bg-[#10141d] border border-white/20 text-amber-300 font-mono text-xs rounded px-2 py-0.5 focus:outline-none">
+          <option value="60" selected>Mk.1 (上限 60 件/分)</option>
+          <option value="120">Mk.2 (上限 120 件/分)</option>
+          <option value="270">Mk.3 (上限 270 件/分)</option>
+          <option value="480">Mk.4 (上限 480 件/分)</option>
+          <option value="780">Mk.5 (上限 780 件/分)</option>
+        </select>
+
+        <!-- 关闭按钮 -->
+        <button onclick="alert('在游戏中按 [Esc] 或 [E] 关闭该面板');" class="text-white/40 hover:text-white transition px-2 py-0.5 text-base cursor-pointer">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. 主体双栏：左侧流速调节面板 + 右侧背包与物料过滤 -->
+    <div class="flex flex-1 min-h-0">
+      
+      <!-- ==================== 左侧：核心限速面板 (宽 640px) ==================== -->
+      <div class="flex-1 flex flex-col justify-between p-6 bg-[#1f242d] border-r border-black/50">
+        
+        <div class="space-y-6">
+          
+          <!-- 2.1 三段流向简图 (输入 -> 限速核心 -> 输出) -->
+          <div class="flex items-center justify-between space-x-3 bg-[#171b23] border border-black/60 rounded p-4">
+            <!-- 输入端 -->
+            <div class="flex-1 text-center bg-[#242b38] border border-white/10 rounded p-3">
+              <div class="text-[11px] text-white/50 mb-1">上游来料速度</div>
+              <div id="dispIncoming" class="text-xl font-bold font-mono text-white">60 <span class="text-xs text-white/50">件/分</span></div>
+              <div class="text-[10px] text-emerald-400 mt-1 font-mono">● 供应充足</div>
+            </div>
+
+            <!-- 中间箭头与状态 -->
+            <div class="flex flex-col items-center justify-center px-2">
+              <i class="fa-solid fa-arrow-right text-amber-400 text-lg"></i>
+              <span id="dispStatusTag" class="text-[10px] font-bold px-2 py-0.5 mt-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                限速中
+              </span>
+            </div>
+
+            <!-- 输出端 -->
+            <div class="flex-1 text-center bg-[#242b38] border border-white/10 rounded p-3">
+              <div class="text-[11px] text-white/50 mb-1">限制输出速度</div>
+              <div id="dispOutgoing" class="text-xl font-bold font-mono text-amber-400">30 <span class="text-xs text-amber-400/60">件/分</span></div>
+              <div id="dispRatioSub" class="text-[10px] text-white/50 mt-1 font-mono">占比 50.0%</div>
+            </div>
+          </div>
+
+          <!-- 2.2 核心限速调节：滑块 + 精确数值输入 -->
+          <div class="bg-[#171b23] border border-black/60 rounded p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-white/80">设定目标流速:</span>
+              <div class="flex items-center space-x-1.5 font-mono">
+                <!-- 直接输入数字 -->
+                <input id="inputRateVal" 
+                       type="number" 
+                       min="0" 
+                       max="60" 
+                       value="30" 
+                       oninput="onRateInput(this.value);"
+                       class="w-20 bg-[#0e1218] border border-amber-500/50 rounded px-2 py-1 text-amber-400 font-bold text-right focus:outline-none focus:border-amber-400">
+                <span class="text-xs text-white/50">件/分</span>
+              </div>
+            </div>
+
+            <!-- 滑块 Slider -->
+            <div>
+              <input id="speedSlider" 
+                     type="range" 
+                     min="0" 
+                     max="60" 
+                     value="30" 
+                     step="1"
+                     oninput="onSliderChange(this.value);">
+            </div>
+
+            <!-- 快捷预设按钮 -->
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-xs text-white/40">常用比例:</span>
+              <div class="flex items-center space-x-2">
+                <button onclick="setPercent(0);" class="px-2.5 py-1 rounded bg-[#252c3a] hover:bg-rose-900/60 text-white/80 text-xs transition cursor-pointer">0% (暂停)</button>
+                <button onclick="setPercent(25);" class="px-2.5 py-1 rounded bg-[#252c3a] hover:bg-amber-600 hover:text-white text-white/80 text-xs transition cursor-pointer">25%</button>
+                <button onclick="setPercent(50);" class="px-2.5 py-1 rounded bg-[#252c3a] hover:bg-amber-600 hover:text-white text-white/80 text-xs transition cursor-pointer">50%</button>
+                <button onclick="setPercent(75);" class="px-2.5 py-1 rounded bg-[#252c3a] hover:bg-amber-600 hover:text-white text-white/80 text-xs transition cursor-pointer">75%</button>
+                <button onclick="setPercent(100);" class="px-2.5 py-1 rounded bg-[#252c3a] hover:bg-emerald-600 hover:text-white text-white/80 text-xs font-bold transition cursor-pointer">100% (满速)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2.3 物料过滤 (仅限速或放行特定物料，可选) -->
+          <div class="flex items-center justify-between p-3 bg-[#171b23] border border-black/60 rounded">
+            <div class="flex items-center space-x-3">
+              <div id="filterIconBox" class="w-10 h-10 rounded bg-[#242b38] border border-white/20 flex items-center justify-center text-white/60">
+                <i class="fa-solid fa-infinity"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white">放行物料规则</div>
+                <div id="filterLabel" class="text-[11px] text-white/40">全部物料均适用当前限速</div>
+              </div>
+            </div>
+            <button onclick="clearFilter();" class="text-xs text-white/50 hover:text-white underline cursor-pointer">重置为全部放行</button>
+          </div>
+
+        </div>
+
+        <!-- 2.4 底部控制行：开启/停机开关 + 复制设置 -->
+        <div class="pt-4 border-t border-black/50 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <button onclick="alert('已复制限速器参数');" class="px-3 py-1.5 bg-[#2a303c] hover:bg-[#343c4b] border border-white/10 rounded text-xs text-white/80 transition cursor-pointer">
+              <i class="fa-regular fa-copy mr-1"></i>复制设置
+            </button>
+            <button onclick="alert('已粘贴限速器参数');" class="px-3 py-1.5 bg-[#2a303c] hover:bg-[#343c4b] border border-white/10 rounded text-xs text-white/80 transition cursor-pointer">
+              <i class="fa-regular fa-paste mr-1"></i>粘贴设置
+            </button>
+          </div>
+
+          <!-- 启停开关 -->
+          <div class="flex items-center space-x-3">
+            <span id="powerText" class="text-xs font-bold text-emerald-400 font-mono">运行中</span>
+            <button id="powerBtn" onclick="togglePower();" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded shadow transition cursor-pointer">
+              已启用
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== 右侧：常规背包与物料选择 (宽 320px) ==================== -->
+      <div class="w-[320px] bg-[#161a22] flex flex-col justify-between p-4 shrink-0 border-l border-black/40">
+        
+        <div>
+          <!-- 背包标题 -->
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold text-white/70 flex items-center space-x-1.5">
+              <i class="fa-solid fa-boxes-stacked text-xs"></i>
+              <span>随身物品背包</span>
+            </span>
+            <span class="text-[11px] text-white/40 font-mono">点击物品可指定过滤</span>
+          </div>
+
+          <!-- 背包 5 列网格 (原型标准 20格) -->
+          <div id="backpackGrid" class="grid grid-cols-5 gap-1.5">
+            <!-- 由 JS 渲染真实物料格子 -->
+          </div>
+        </div>
+
+        <!-- 背包底部整理 -->
+        <div class="pt-3 border-t border-white/10 flex items-center justify-between text-xs text-white/50">
+          <button onclick="initBackpack();" class="px-3 py-1 bg-[#252c38] hover:bg-[#2f3847] border border-white/10 rounded text-white/80 transition cursor-pointer">
+            整理背包
+          </button>
+          <span class="font-mono text-[11px]">容量: 12/20</span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- 脚本控制逻辑 -->
+  <script>
+    let currentMaxTier = 60; // 传送带当前上限
+    let currentRate = 30;    // 当前设定的流速 (件/分)
+    let isPowerOn = true;    // 运行状态
+    let filteredItem = null; // 指定物料
+
+    // 简单背包数据
+    const backpackItems = [
+      { id: 'iron_ingot', name: '玄铁锭', count: 100, icon: 'fa-solid fa-square text-stone-300' },
+      { id: 'iron_plate', name: '玄铁板', count: 64, icon: 'fa-solid fa-sheet-plastic text-stone-300' },
+      { id: 'copper_ingot', name: '赤铜锭', count: 80, icon: 'fa-solid fa-square text-amber-500' },
+      { id: 'iron_gear', name: '玄铁齿轮', count: 32, icon: 'fa-solid fa-gear text-stone-300' },
+      { id: 'coal', name: '煤炭', count: 99, icon: 'fa-solid fa-cubes text-zinc-500' },
+      { id: 'copper_wire', name: '铜线', count: 200, icon: 'fa-solid fa-lines-leaning text-amber-400' },
+      { id: 'ling_sheet', name: '导灵铜片', count: 45, icon: 'fa-solid fa-layer-group text-yellow-300' },
+      { id: 'iron_beam', name: '玄铁梁', count: 28, icon: 'fa-solid fa-cubes-stacked text-stone-400' },
+    ];
+
+    window.onload = function() {
+      initBackpack();
+      updateView();
+    };
+
+    // 改变传送带等级
+    function onTierChange(val) {
+      currentMaxTier = parseInt(val);
+      const slider = document.getElementById('speedSlider');
+      const input = document.getElementById('inputRateVal');
+      slider.max = currentMaxTier;
+      input.max = currentMaxTier;
+      
+      // 按比例自适应
+      if (currentRate > currentMaxTier) currentRate = currentMaxTier;
+      updateView();
+    }
+
+    // 滑块滑动
+    function onSliderChange(val) {
+      currentRate = parseInt(val);
+      updateView();
+    }
+
+    // 数字输入
+    function onRateInput(val) {
+      let num = parseInt(val) || 0;
+      if (num < 0) num = 0;
+      if (num > currentMaxTier) num = currentMaxTier;
+      currentRate = num;
+      updateView();
+    }
+
+    // 按百分比设定
+    function setPercent(pct) {
+      currentRate = Math.round((currentMaxTier * pct) / 100);
+      updateView();
+    }
+
+    // 启停切换
+    function togglePower() {
+      isPowerOn = !isPowerOn;
+      updateView();
+    }
+
+    // 更新界面各处数据
+    function updateView() {
+      const slider = document.getElementById('speedSlider');
+      const input = document.getElementById('inputRateVal');
+      const dispIncoming = document.getElementById('dispIncoming');
+      const dispOutgoing = document.getElementById('dispOutgoing');
+      const dispRatioSub = document.getElementById('dispRatioSub');
+      const dispStatusTag = document.getElementById('dispStatusTag');
+      const powerBtn = document.getElementById('powerBtn');
+      const powerText = document.getElementById('powerText');
+
+      slider.value = currentRate;
+      input.value = currentRate;
+
+      dispIncoming.innerHTML = `${currentMaxTier} <span class="text-xs text-white/50">件/分</span>`;
+
+      if (!isPowerOn) {
+        dispOutgoing.innerHTML = `0 <span class="text-xs text-rose-400/60">件/分</span>`;
+        dispRatioSub.innerText = '已暂停传输';
+        dispStatusTag.innerText = '已停机';
+        dispStatusTag.className = 'text-[10px] font-bold px-2 py-0.5 mt-1 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30';
+        
+        powerBtn.innerText = '已停机';
+        powerBtn.className = 'px-4 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded shadow transition cursor-pointer';
+        powerText.innerText = '已停用';
+        powerText.className = 'text-xs font-bold text-rose-400 font-mono';
+        return;
+      }
+
+      const ratio = ((currentRate / currentMaxTier) * 100).toFixed(1);
+      dispOutgoing.innerHTML = `${currentRate} <span class="text-xs text-amber-400/60">件/分</span>`;
+      dispRatioSub.innerText = `占比 ${ratio}%`;
+
+      if (currentRate === 0) {
+        dispStatusTag.innerText = '已截断 (0/m)';
+        dispStatusTag.className = 'text-[10px] font-bold px-2 py-0.5 mt-1 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30';
+      } else if (currentRate >= currentMaxTier) {
+        dispStatusTag.innerText = '满速直通';
+        dispStatusTag.className = 'text-[10px] font-bold px-2 py-0.5 mt-1 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+      } else {
+        dispStatusTag.innerText = `限速 ${ratio}%`;
+        dispStatusTag.className = 'text-[10px] font-bold px-2 py-0.5 mt-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30';
+      }
+
+      powerBtn.innerText = '已启用';
+      powerBtn.className = 'px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded shadow transition cursor-pointer';
+      powerText.innerText = '运行中';
+      powerText.className = 'text-xs font-bold text-emerald-400 font-mono';
+    }
+
+    // 渲染背包网格
+    function initBackpack() {
+      const grid = document.getElementById('backpackGrid');
+      grid.innerHTML = '';
+      for (let i = 0; i < 20; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'w-13 h-13 bg-[#242b38] border border-white/10 hover:border-amber-400 rounded flex flex-col items-center justify-center relative cursor-pointer transition';
+        
+        if (i < backpackItems.length) {
+          const item = backpackItems[i];
+          slot.innerHTML = `
+            <i class="${item.icon} text-lg mb-1"></i>
+            <span class="text-[9px] font-mono text-white/60 font-bold leading-none">${item.count}</span>
+          `;
+          slot.title = `点击指定仅限速物料: ${item.name}`;
+          slot.onclick = () => selectFilter(item);
+        } else {
+          slot.className += ' opacity-30';
+        }
+        grid.appendChild(slot);
+      }
+    }
+
+    // 选取过滤物料
+    function selectFilter(item) {
+      filteredItem = item;
+      const box = document.getElementById('filterIconBox');
+      const label = document.getElementById('filterLabel');
+      box.innerHTML = `<i class="${item.icon} text-lg"></i>`;
+      box.className = 'w-10 h-10 rounded bg-[#242b38] border border-amber-400 flex items-center justify-center';
+      label.innerText = `仅限制【${item.name}】放行速度，其他物料不受阻`;
+    }
+
+    // 清除过滤
+    function clearFilter() {
+      filteredItem = null;
+      const box = document.getElementById('filterIconBox');
+      const label = document.getElementById('filterLabel');
+      box.innerHTML = `<i class="fa-solid fa-infinity"></i>`;
+      box.className = 'w-10 h-10 rounded bg-[#242b38] border border-white/20 flex items-center justify-center text-white/60';
+      label.innerText = '全部物料均适用当前限速';
+    }
+  </script>
+</body>
+</html>

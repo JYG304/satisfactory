@@ -8,7 +8,7 @@ const playerEquipmentSlots = {
     slotKey: 'artifact',
     category: '法宝',
     id: 'fabao_array_embryo',
-    matId: 'MAT_072',
+    matId: 'MAT_076',
     name: '法宝阵图胚',
     icon: 'fa-solid fa-scroll text-yellow-400',
     quality: '法宝中间态',
@@ -65,16 +65,47 @@ function inspectEquipmentSlot(slotKey) {
   }
 }
 
+// 全局标准 HUD 模态弹窗列表 (用于 100% 严格互斥与防止点击穿透)
+const ALL_HUD_MODAL_IDS = [
+  'buildModal',
+  'craftModal',
+  'invModal',
+  'searchModal',
+  'machineModal',
+  'storageBoxModal',
+  'swordCasketModal',
+  'hubMilestoneModal',
+  'codexModal',
+  'cpuProcessorModal',
+  'jinShenModal',
+  'fabaoModal',
+  'techTreeModal',
+  'conveyorLimiterModal',
+  'logisticsConfigModal'
+];
+
+function isAnyModalOpen() {
+  return ALL_HUD_MODAL_IDS.some(id => {
+    const el = document.getElementById(id);
+    return el && !el.classList.contains('hidden');
+  });
+}
+window.isAnyModalOpen = isAnyModalOpen;
+window.ALL_HUD_MODAL_IDS = ALL_HUD_MODAL_IDS;
+
 // 关闭除指定窗口外的其他模态弹窗
 function closeOtherModals(keepId) {
-  const modals = ['buildModal', 'craftModal', 'invModal', 'searchModal', 'machineModal', 'hubMilestoneModal', 'storageBoxModal', 'cpuProcessorModal', 'codexModal'];
-  modals.forEach(id => {
+  ALL_HUD_MODAL_IDS.forEach(id => {
     if (id !== keepId) {
       const el = document.getElementById(id);
       if (el) el.classList.add('hidden');
     }
   });
+  if (keepId !== 'buildModal' && typeof exitBuildPlacingMode === 'function') {
+    exitBuildPlacingMode();
+  }
 }
+window.closeOtherModals = closeOtherModals;
 
 // =========================================================================
 // 储物盒 (箱子 BD_115) 存储系统 (1:1 还原用户上传 Image 1: media_1790463961108.png)
@@ -234,17 +265,24 @@ function sortStoragePlayerBag() {
 
 // 全局随身背包库存系统 (用于工作台、建造器物料消耗与同步)
 const playerInventory = {
-  iron_ore: 100,       // 玄铁原矿 (MAT_001)
-  iron_ingot: 58,      // 玄铁金属锭 (MAT_005)
-  iron_plate: 120,     // 工业玄铁板 (MAT_008)
-  iron_rod: 64,        // 标准玄铁棒 (MAT_007)
-  screw: 96,           // 超细螺丝 (MAT_009)
-  copper_ore: 80,      // 赤铜原矿 (MAT_002)
-  copper_ingot: 45,    // 导电赤铜锭 (MAT_006)
-  wire: 200,           // 铜线 (MAT_016)
-  cable: 50,           // 导电线圈 (MAT_013)
-  reinforced_plate: 12,// 建筑基础模块 (MAT_011)
-  iron_powder: 78      // 铁粉 (MAT_022)
+  iron_ore: 100,            // 玄铁矿 (MAT_001)
+  copper_ore: 80,           // 赤铜矿 (MAT_002)
+  coal: 65,                 // 煤炭 (MAT_004)
+  iron_ingot: 100,          // 玄铁锭 (MAT_006)
+  copper_ingot: 80,         // 赤铜锭 (MAT_007)
+  iron_plate: 120,          // 玄铁板 (MAT_008)
+  iron_powder: 78,          // 玄铁粉 (MAT_009)
+  iron_gear: 60,            // 玄铁齿轮 (MAT_011)
+  lingci_gear: 30,          // 灵磁齿轮 (MAT_012)
+  ling_copper_sheet: 25,    // 导灵铜片 (MAT_013)
+  iron_beam: 50,            // 玄铁梁 (MAT_014)
+  device_interface: 20,     // 设备接口件 (MAT_015)
+  electric_coil: 50,        // 导电线圈 (MAT_016)
+  basic_control_module: 20, // 基础控制模块 (MAT_017)
+  copper_wire: 150,         // 铜线 (MAT_019)
+  refractory_core: 15,      // 耐火炉芯 (MAT_045)
+  wiring_assembly: 30,      // 接线组件 (MAT_069)
+  power_supply_module: 15   // 电源模块 (MAT_070)
 };
 
 // 运行期玩家背包物料列表 (基于 xiuxian_data.js 中的 INITIAL_PLAYER_INVENTORY)
@@ -255,7 +293,7 @@ let backpackInventory = (typeof INITIAL_PLAYER_INVENTORY !== 'undefined') ? [...
   { item: 'copper_ingot', count: 25 },
   { item: 'copper_wire', count: 23 },
   { item: 'iron_plate', count: 17 },
-  { item: 'screw', count: 120 },
+  { item: 'iron_gear', count: 20 },
   { item: 'cultivator_corpse', count: 2 },
   { item: 'living_tissue', count: 5 },
   { item: 'neural_bundle', count: 2 },
@@ -280,29 +318,29 @@ const activePlayerBagItems = [
   { id: 'assembler', name: '加工台', count: 1, icon: 'fa-solid fa-screwdriver-wrench text-amber-300', desc: '基础零件装配成型', matId: 'BD_104' },
   { id: 'cutter', name: '切割机', count: 1, icon: 'fa-solid fa-bolt text-sky-400', desc: '高速线材与板材精密下料设备', matId: 'BD_105' },
   { id: 'portable_miner', name: '便携式采矿器', count: 3, icon: 'fa-solid fa-gears text-stone-300', desc: '单体便携手持采掘器', matId: 'TOOL_01' },
-  { id: 'iron_ore', name: '玄铁原矿', count: 100, icon: 'fa-solid fa-mountain text-stone-400', desc: '精炼玄铁锭的基础重金属矿石', matId: 'MAT_001' },
-  { id: 'copper_ore', name: '赤铜原矿', count: 80, icon: 'fa-solid fa-cubes text-amber-500', desc: '精炼导电赤铜锭的基础有色金属矿石', matId: 'MAT_002' },
-  { id: 'coal', name: '煤炭', count: 65, icon: 'fa-solid fa-fire-flame-curved text-stone-500', desc: '含碳可燃矿物，用于冶炼燃料与热能供应', matId: 'MAT_003' },
-  { id: 'iron_ingot', name: '玄铁金属锭', count: 58, icon: 'fa-solid fa-bars text-stone-300', desc: '由精炼炉冶炼玄铁原矿所得的基础材料', matId: 'MAT_005' },
-  { id: 'copper_ingot', name: '导电赤铜锭', count: 45, icon: 'fa-solid fa-bars text-amber-400', desc: '由精炼炉熔炼赤铜原矿所得的高导电材料', matId: 'MAT_006' },
-  { id: 'iron_rod', name: '标准玄铁棒', count: 64, icon: 'fa-solid fa-lines-leaning text-stone-300', desc: '圆截面基础金属棒材，用于框架与传动', matId: 'MAT_007' },
-  { id: 'iron_plate', name: '工业玄铁板', count: 120, icon: 'fa-solid fa-sheet-plastic text-stone-200', desc: '大面积结构用板材，用于设备外壳与传送带', matId: 'MAT_008' },
-  { id: 'screw', name: '超细螺丝', count: 96, icon: 'fa-solid fa-screwdriver text-cyan-300', desc: '精密连接与微型机械固定件', matId: 'MAT_009' },
-  { id: 'copper_wire', name: '铜线', count: 150, icon: 'fa-solid fa-plug text-yellow-400', desc: '基础导电用单丝线材，用于绕制线圈与电力传输', matId: 'MAT_016' },
-  { id: 'ling_copper_sheet', name: '导灵铜片', count: 25, icon: 'fa-solid fa-microchip text-yellow-300', desc: '高纯度赤铜经压延所得的灵气微流薄片', matId: 'MAT_017' },
-  { id: 'iron_powder', name: '铁粉', count: 30, icon: 'fa-solid fa-braille text-stone-400', desc: '玄铁金属粉末，用于烧结与催化', matId: 'MAT_022' },
-  { id: 'cultivator_corpse', name: '练气修士尸体', count: 2, icon: 'fa-solid fa-skull text-purple-400', desc: '具有完整经脉结构与微弱残余灵气的修士躯体（策划案官方资源）', matId: 'MAT_018' },
-  { id: 'living_tissue', name: '鲜活组织', count: 12, icon: 'fa-solid fa-dna text-rose-400', desc: '含有活性细胞的生物组织块，用于生物合成与芯片接口', matId: 'MAT_019' },
-  { id: 'neural_bundle', name: '神经束', count: 6, icon: 'fa-solid fa-network-wired text-cyan-400', desc: '生物神经信号传导纤维，用于电子生物芯片与灵机控制', matId: 'MAT_020' },
-  { id: 'dry_tissue', name: '干燥生物质', count: 10, icon: 'fa-solid fa-leaf text-amber-600', desc: '脱水脱活后的生物有机残渣，用于低级能源', matId: 'MAT_021' },
-  { id: 'bio_chip', name: '电子生物芯片', count: 4, icon: 'fa-solid fa-memory text-purple-300', desc: '生物与机器之间的工控元件', matId: 'MAT_015' },
-  { id: 'basic_control_module', name: '基础控制模块', count: 8, icon: 'fa-solid fa-microchip text-emerald-400', desc: '智能物流、加工台、组装机的通用控制零件', matId: 'MAT_014' },
-  { id: 'electric_coil', name: '导电线圈', count: 15, icon: 'fa-solid fa-spinner text-yellow-400', desc: '电能核心、风力发电机和控制设备的通用电力零件', matId: 'MAT_013' },
-  { id: 'device_interface', name: '设备接口件', count: 12, icon: 'fa-solid fa-satellite-dish text-sky-400', desc: '通用设备接口；不承担生物加工功能', matId: 'MAT_012' },
-  { id: 'building_block', name: '建筑基础模块', count: 50, icon: 'fa-solid fa-cubes-stacked text-stone-400', desc: '建筑底座、支撑、设备框架基础件', matId: 'MAT_011' },
-  { id: 'wood_plank', name: '木板', count: 50, icon: 'fa-solid fa-tree text-amber-700', desc: '原始木质建材，用于初级支撑', matId: 'MAT_024' },
-  { id: 'raw_water', name: '生水', count: 40, icon: 'fa-solid fa-droplet text-blue-400', desc: '未经净化的天然水体，用于冷却与清洗', matId: 'MAT_025' },
-  { id: 'ling_stone', name: '灵石碎块', count: 128, icon: 'fa-solid fa-gem text-cyan-300', desc: '蕴含微量天地灵气的灵石残片', matId: 'MAT_073' },
+  { id: 'iron_ore', name: '玄铁矿', count: 100, icon: 'fa-solid fa-mountain text-stone-400', desc: '精炼玄铁锭的基础重金属矿石', matId: 'MAT_001' },
+  { id: 'copper_ore', name: '赤铜矿', count: 80, icon: 'fa-solid fa-cubes text-amber-500', desc: '精炼导电赤铜锭的基础有色金属矿石', matId: 'MAT_002' },
+  { id: 'coal', name: '煤炭', count: 65, icon: 'fa-solid fa-fire-flame-curved text-stone-500', desc: '含碳可燃矿物，用于冶炼燃料与热能供应', matId: 'MAT_004' },
+  { id: 'iron_ingot', name: '玄铁锭', count: 58, icon: 'fa-solid fa-bars text-stone-300', desc: '由精炼炉冶炼玄铁矿所得的基础材料', matId: 'MAT_006' },
+  { id: 'copper_ingot', name: '赤铜锭', count: 45, icon: 'fa-solid fa-bars text-amber-400', desc: '由精炼炉熔炼赤铜矿所得的高导电材料', matId: 'MAT_007' },
+  { id: 'iron_plate', name: '玄铁板', count: 120, icon: 'fa-solid fa-sheet-plastic text-stone-200', desc: '大面积结构用板材，用于设备外壳与传送带', matId: 'MAT_008' },
+  { id: 'iron_powder', name: '玄铁粉', count: 30, icon: 'fa-solid fa-braille text-stone-400', desc: '玄铁金属粉末，用于烧结与催化', matId: 'MAT_009' },
+  { id: 'iron_gear', name: '玄铁齿轮', count: 60, icon: 'fa-solid fa-gear text-stone-300', desc: '基础物流、传动骨架与机械零件', matId: 'MAT_011' },
+  { id: 'lingci_gear', name: '灵磁齿轮', count: 25, icon: 'fa-solid fa-gear text-cyan-400', desc: '设备传动件与自动化控制组件', matId: 'MAT_012' },
+  { id: 'ling_copper_sheet', name: '导灵铜片', count: 25, icon: 'fa-solid fa-microchip text-yellow-300', desc: '高纯度赤铜经压延所得的灵气微流薄片', matId: 'MAT_013' },
+  { id: 'iron_beam', name: '玄铁梁', count: 40, icon: 'fa-solid fa-bars-staggered text-stone-400', desc: '设备骨架与设备框架重载结构支撑', matId: 'MAT_014' },
+  { id: 'device_interface', name: '设备接口件', count: 12, icon: 'fa-solid fa-satellite-dish text-sky-400', desc: '通用设备接口；不承担生物加工功能', matId: 'MAT_015' },
+  { id: 'electric_coil', name: '导电线圈', count: 15, icon: 'fa-solid fa-spinner text-yellow-400', desc: '电能核心、动力核心与控制设备的通用电力零件', matId: 'MAT_016' },
+  { id: 'basic_control_module', name: '基础控制模块', count: 8, icon: 'fa-solid fa-microchip text-emerald-400', desc: '智能物流、加工台、主控核心的通用控制零件', matId: 'MAT_017' },
+  { id: 'bio_chip', name: '电子生物芯片', count: 4, icon: 'fa-solid fa-memory text-purple-300', desc: '生物与机器之间的工控元件', matId: 'MAT_018' },
+  { id: 'copper_wire', name: '铜线', count: 150, icon: 'fa-solid fa-plug text-yellow-400', desc: '基础导电用单丝线材，用于绕制线圈与电力传输', matId: 'MAT_019' },
+  { id: 'cultivator_corpse', name: '练气修士尸体', count: 2, icon: 'fa-solid fa-skull text-purple-400', desc: '具有完整经脉结构与微弱残余灵气的修士躯体（策划案官方资源）', matId: 'MAT_020' },
+  { id: 'living_tissue', name: '鲜活生物组织', count: 12, icon: 'fa-solid fa-dna text-rose-400', desc: '含有活性细胞的生物组织块，用于生物合成与芯片接口', matId: 'MAT_021' },
+  { id: 'neural_bundle', name: '神经束', count: 6, icon: 'fa-solid fa-network-wired text-cyan-400', desc: '生物神经信号传导纤维，用于电子生物芯片与灵机控制', matId: 'MAT_022' },
+  { id: 'dry_tissue', name: '脱水生物组织', count: 10, icon: 'fa-solid fa-leaf text-amber-600', desc: '脱水干燥处理后的生物体组织残片', matId: 'MAT_024' },
+  { id: 'raw_water', name: '水源', count: 40, icon: 'fa-solid fa-droplet text-blue-400', desc: '基础天然水体，用于冷却、稀释与溶液配制', matId: 'MAT_033' },
+  { id: 'wiring_assembly', name: '接线组件', count: 30, icon: 'fa-solid fa-diagram-project text-blue-400', desc: '电缆端头、母线排与接线排总成', matId: 'MAT_069' },
+  { id: 'power_supply_module', name: '电源模块', count: 15, icon: 'fa-solid fa-car-battery text-amber-400', desc: '集成变压稳压的独立电源模块', matId: 'MAT_070' },
   // 特别放入 3 柄飞剑供玩家体验从背包拖入剑匣！
   { id: 'sword_thunder', name: '紫霄惊雷剑', count: 1, icon: 'fa-solid fa-khanda text-yellow-300 rotate-45', desc: '雷系神品飞剑，九霄天罚，杀伤力+490，暴击率+35%', type: 'weapon', matId: 'SWORD_04' },
   { id: 'sword_iron', name: '寒铁飞剑', count: 1, icon: 'fa-solid fa-khanda text-cyan-200 rotate-45', desc: '高寒精铁千锤百炼飞剑，御剑杀伤+260，破甲+25%', type: 'weapon', matId: 'SWORD_05' },
@@ -728,51 +766,40 @@ function selectEquipSlot(slotType, title, desc) {
 let currentHoloTab = 'main'; // 'main' (角色与背包一体化), 'map', 'hub', 'craft', 'codex', 'todo', 'stats'
 let currentStatsSubTab = 'world'; // 'player' | 'world' | 'cert'
 
-// 统计面板数据 (严格复刻参考图 21 个世界参数及全域指标，采用纯正赛博工控科技风呈现)
+// 统计面板数据 (严格对照《修仙工厂》策划案_V1_正式版：工控参数、能源负荷、煞气环保与主线进度)
 const STATS_DATA = {
   world: [
-    { label: '设备工作速度', value: '100%', icon: 'fa-solid fa-industry', cat: '流水线效能', color: 'text-[#00f0ff]' },
-    { label: '热量消耗速度', value: '100%', icon: 'fa-solid fa-fire-burner', cat: '热工能耗', color: 'text-amber-400' },
-    { label: '燃料热值', value: '100%', icon: 'fa-solid fa-fire', cat: '能源转化', color: 'text-orange-400' },
-    { label: '肥料营养值', value: '100%', icon: 'fa-solid fa-seedling', cat: '生物灵植', color: 'text-emerald-400' },
-    { label: '弹射器射速', value: '60/min', icon: 'fa-solid fa-crosshairs', cat: '物流发射', color: 'text-sky-400' },
-    { label: '加农炮射速', value: '120/min', icon: 'fa-solid fa-bullseye', cat: '深空投送', color: 'text-rose-400' },
-    { label: '萃取机产量', value: '100%', icon: 'fa-solid fa-flask-vial', cat: '精细化工', color: 'text-teal-400' },
-    { label: '蒸馏器产量', value: '100%', icon: 'fa-solid fa-atom', cat: '流体提纯', color: 'text-cyan-300' },
-    { label: '店铺利润', value: '140%', icon: 'fa-solid fa-store', cat: '商市营收', color: 'text-yellow-400' },
-    { label: '杂货利润', value: '180%', icon: 'fa-solid fa-boxes-packing', cat: '常规货殖', color: 'text-amber-300' },
-    { label: '药剂利润', value: '180%', icon: 'fa-solid fa-prescription-bottle', cat: '灵丹仙酿', color: 'text-emerald-300' },
-    { label: '酒水利润', value: '180%', icon: 'fa-solid fa-wine-glass', cat: '琼浆玉液', color: 'text-purple-300' },
-    { label: '珠宝首饰利润', value: '180%', icon: 'fa-solid fa-gem', cat: '灵宝首饰', color: 'text-pink-400' },
-    { label: '圣物利润', value: '180%', icon: 'fa-solid fa-scroll', cat: '古修遗蜕', color: 'text-yellow-300' },
-    { label: '顾客购物数量加成', value: '0%', icon: 'fa-solid fa-cart-shopping', cat: '客商吞吐', color: 'text-white/60' },
-    { label: '大传送门客流量', value: '250%', icon: 'fa-solid fa-dungeon', cat: '星门枢纽', color: 'text-purple-400' },
-    { label: '任务报酬', value: '100%', icon: 'fa-solid fa-award', cat: '悬赏结付', color: 'text-amber-400' },
-    { label: '每日随机任务', value: '1', icon: 'fa-solid fa-clipboard-list', cat: '因果机缘', color: 'text-cyan-300' },
-    { label: '采购合同数量加成', value: '300%', icon: 'fa-solid fa-file-contract', cat: '大宗契约', color: 'text-emerald-400' },
-    { label: '采购合同价格加成', value: '60%', icon: 'fa-solid fa-hand-holding-dollar', cat: '商行议价', color: 'text-amber-300' },
-    { label: '圣物提取加成', value: '0%', icon: 'fa-solid fa-vial-circle-check', cat: '道韵提萃', color: 'text-white/60' }
+    { label: '电网总发电量', value: '95 MW', icon: 'fa-solid fa-bolt', cat: '动力电网', color: 'text-yellow-400' },
+    { label: '电网总用电量', value: '62 MW', icon: 'fa-solid fa-plug', cat: '能耗负载', color: 'text-[#00f0ff]' },
+    { label: '电网负荷率', value: '65.3%', icon: 'fa-solid fa-gauge-high', cat: '供电稳态', color: 'text-emerald-400' },
+    { label: '灵力引擎产热', value: '150 ☼', icon: 'fa-solid fa-fire', cat: '母座热能', color: 'text-amber-500' },
+    { label: '冶炼舱热力消耗', value: '100 ☼', icon: 'fa-solid fa-fire-burner', cat: '高温冶炼', color: 'text-orange-400' },
+    { label: '区域环境煞气值', value: '48 / 100', icon: 'fa-solid fa-skull-crossbones', cat: '环境煞气', color: 'text-purple-400' },
+    { label: '回收处理塔浓缩率', value: '100%', icon: 'fa-solid fa-filter', cat: 'BD_150环保', color: 'text-emerald-300' },
+    { label: '煞气浓缩液存量', value: '36 m³', icon: 'fa-solid fa-flask-vial', cat: 'MAT_077物流', color: 'text-purple-300' },
+    { label: '传送带物流吞吐', value: '120 件/分', icon: 'fa-solid fa-arrows-split-up-and-left', cat: '固体干线', color: 'text-sky-400' },
+    { label: '流体管网总流量', value: '45 L/分', icon: 'fa-solid fa-droplet', cat: '流体水路', color: 'text-cyan-300' }
   ],
-  player: [
-    { label: '修士奔袭速度', value: '100%', icon: 'fa-solid fa-person-running', cat: '基础机动', color: 'text-[#00f0ff]' },
-    { label: '地表采矿挖掘倍率', value: '100%', icon: 'fa-solid fa-pickaxe', cat: '地脉开采', color: 'text-amber-400' },
-    { label: '手工装配制作速度', value: '100%', icon: 'fa-solid fa-screwdriver-wrench', cat: '随身研造', color: 'text-orange-400' },
-    { label: '飞剑破甲真伤加成', value: '120%', icon: 'fa-solid fa-khanda', cat: '破罡斩击', color: 'text-rose-400' },
-    { label: '护体罡气护盾上限', value: '500 点', icon: 'fa-solid fa-shield-halved', cat: '本命护盾', color: 'text-emerald-400' },
-    { label: '随身储物经脉格数', value: '72 格', icon: 'fa-solid fa-boxes-stacked', cat: '经脉芥子', color: 'text-cyan-300' },
-    { label: '灵压极限耐受负荷', value: '8,420 Pa', icon: 'fa-solid fa-gauge-high', cat: '肉身负荷', color: 'text-purple-300' },
-    { label: '地脉煞气抗性加成', value: '45%', icon: 'fa-solid fa-biohazard', cat: '环境抗逆', color: 'text-teal-400' },
-    { label: '高空坠落冲击缓释', value: '30%', icon: 'fa-solid fa-feather-pointed', cat: '御气缓冲', color: 'text-blue-300' },
-    { label: '神识探测扫描半径', value: '500 米', icon: 'fa-solid fa-tower-broadcast', cat: '全息感知', color: 'text-sky-400' }
+  facility: [
+    { label: '采矿机 (BD_135)', value: '2 台', icon: 'fa-solid fa-mountain', cat: '采掘设备', color: 'text-amber-400' },
+    { label: '精炼炉 (BD_136)', value: '2 台', icon: 'fa-solid fa-fire-burner', cat: '冶炼生产', color: 'text-orange-400' },
+    { label: '粉碎机 (BD_137)', value: '1 台', icon: 'fa-solid fa-braille', cat: '中间件研磨', color: 'text-zinc-300' },
+    { label: '加工台 (BD_138)', value: '1 台', icon: 'fa-solid fa-screwdriver-wrench', cat: '基础机械', color: 'text-stone-300' },
+    { label: '切割机 (BD_139)', value: '1 台', icon: 'fa-solid fa-scissors', cat: '精密切削', color: 'text-yellow-300' },
+    { label: '搅拌机 (BD_143)', value: '1 台', icon: 'fa-solid fa-blender', cat: '流固混合', color: 'text-teal-400' },
+    { label: '离心机 (BD_144)', value: '1 台', icon: 'fa-solid fa-atom', cat: '多相分离', color: 'text-sky-300' },
+    { label: '组装机 (BD_146)', value: '1 台', icon: 'fa-solid fa-industry', cat: '双轨组装', color: 'text-[#00f0ff]' },
+    { label: '复合建筑母机座', value: '3 座', icon: 'fa-solid fa-cubes-stacked', cat: '引擎/营养/流体', color: 'text-emerald-400' },
+    { label: '法宝工坊 (BD_156/157)', value: '2 座', icon: 'fa-solid fa-scroll', cat: '炼宝台/渡劫台', color: 'text-amber-300' }
   ],
-  cert: [
-    { label: '宗门商业资质', value: '认证通过 (特等)', icon: 'fa-solid fa-stamp', cat: '仙宗官印', color: 'text-emerald-400' },
-    { label: '流水线自动化评级', value: '甲等上乘', icon: 'fa-solid fa-diagram-project', cat: '工控评定', color: 'text-[#00f0ff]' },
-    { label: '全厂物流平衡效率', value: '94.6%', icon: 'fa-solid fa-scale-balanced', cat: '拓扑平衡', color: 'text-amber-400' },
-    { label: '煞气回收环保达标率', value: '99.8%', icon: 'fa-solid fa-leaf', cat: '天道衡平', color: 'text-emerald-300' },
-    { label: '主电网稳态冗余', value: '165 MW', icon: 'fa-solid fa-bolt', cat: '动力储备', color: 'text-yellow-400' },
-    { label: '每日产值收益估算', value: '28,400 灵石', icon: 'fa-solid fa-coins', cat: '商业推演', color: 'text-amber-300' },
-    { label: '仙宗商盟信誉评级', value: '天阶商契', icon: 'fa-solid fa-certificate', cat: '商道威望', color: 'text-purple-400' }
+  progression: [
+    { label: '当前修士境界', value: '练气期四层', icon: 'fa-solid fa-user-astronaut', cat: '道基修为', color: 'text-cyan-300' },
+    { label: '中央处理器认证', value: '练气·第4层', icon: 'fa-solid fa-microchip', cat: '技术认证', color: 'text-amber-400' },
+    { label: '造化金身阶段供料', value: '阶段二 (金身骨架)', icon: 'fa-solid fa-child', cat: '奇观工程', color: 'text-yellow-400' },
+    { label: '人造灵根原型储备', value: '4 / 20 件', icon: 'fa-solid fa-dna', cat: '终局收束', color: 'text-rose-400' },
+    { label: '山河社稷图淬炼', value: '渡劫前置态 (待引雷)', icon: 'fa-solid fa-cloud-bolt', cat: 'ART_001法宝', color: 'text-purple-300' },
+    { label: '随身储物芥子空间', value: '32 / 72 格', icon: 'fa-solid fa-boxes-stacked', cat: '经脉容量', color: 'text-emerald-400' },
+    { label: '地脉勘探标定矿点', value: '4 处富矿', icon: 'fa-solid fa-map-location-dot', cat: '罗盘信标', color: 'text-sky-400' }
   ]
 };
 
@@ -781,7 +808,7 @@ function switchStatsSubTab(subTab) {
   playUiSound('click');
   currentStatsSubTab = subTab;
 
-  ['world', 'player', 'cert'].forEach(t => {
+  ['world', 'facility', 'progression'].forEach(t => {
     const btn = document.getElementById(`btnStatsTab_${t}`);
     if (!btn) return;
     if (t === subTab) {
@@ -825,8 +852,407 @@ function renderStatsList() {
   });
 }
 
+// =========================================================================
+// 8. 仙门开拓任务系统 (QUESTS SYSTEM - 阶段突破、宗门订单与日常悬赏)
+// =========================================================================
+let currentQuestSubTab = 'main'; // 'main' | 'sect' | 'daily'
+let trackedQuestId = 'main_01'; // 默认追踪主线一
+
+const QUESTS_DATA = {
+  main: [
+    {
+      id: 'main_01',
+      title: '【阶段一·天工基建奠基】',
+      sub: '筑基大计 · 基础采矿与金属流水线构建',
+      icon: 'fa-solid fa-industry text-amber-400',
+      badge: '主线开拓',
+      badgeColor: 'border-amber-400 text-amber-300 bg-amber-950/70',
+      desc: '于灵脉富矿处布设采矿机 (BD_101) 与精炼炉 (BD_102)，建立首条自动化流水线，完成基础工备储备。',
+      goals: [
+        { text: '开采地脉玄铁矿 (MAT_001)', current: 100, target: 100, done: true },
+        { text: '精炼工业玄铁锭 (MAT_006)', current: 100, target: 100, done: true },
+        { text: '冲压制造玄铁板 (MAT_008)', current: 100, target: 100, done: true }
+      ],
+      rewards: [
+        { name: '中品灵石', count: 1000, icon: 'fa-solid fa-gem text-cyan-300' },
+        { name: '乾坤芥子袋强化符', count: 1, icon: 'fa-solid fa-scroll text-yellow-300' }
+      ],
+      status: 'claimable' // 'in_progress' | 'claimable' | 'claimed'
+    },
+    {
+      id: 'main_02',
+      title: '【阶段二·复合灵力引擎与汲热】',
+      sub: '热能转化 · 灵力引擎 (BD_112) 与 3 联装冶炼舱',
+      icon: 'fa-solid fa-atom text-cyan-400',
+      badge: '复合母机',
+      badgeColor: 'border-cyan-400 text-cyan-300 bg-cyan-950/70',
+      desc: '建造并部署灵力引擎复合底座，在其顶部 3 个插槽中插满 BD_113 冶炼舱，借助 150☼ 核心高温冶炼耐火合金。',
+      goals: [
+        { text: '架设灵力引擎母座 (BD_112)', current: 1, target: 1, done: true },
+        { text: '挂载顶部冶炼舱插件 (BD_113)', current: 3, target: 3, done: true },
+        { text: '被动高温冶炼高级合金锭', current: 50, target: 50, done: true }
+      ],
+      rewards: [
+        { name: '中品灵石', count: 2500, icon: 'fa-solid fa-gem text-cyan-300' },
+        { name: '耐火炉芯强化图谱', count: 1, icon: 'fa-solid fa-fire text-amber-400' }
+      ],
+      status: 'claimable'
+    },
+    {
+      id: 'main_03',
+      title: '【阶段三·流固双中枢与生物矩阵】',
+      sub: '高压稳流 · 流体处理中枢 (BD_132) 与 营养基座 (BD_130)',
+      icon: 'fa-solid fa-dna text-emerald-400',
+      badge: '双母座调配',
+      badgeColor: 'border-emerald-400 text-emerald-300 bg-emerald-950/70',
+      desc: '部署流体处理中枢（顶部热插拔离心机/搅拌机）与营养基座（顶部插载培育仓/培养皿），实现高纯灵液与活性组织培殖。',
+      goals: [
+        { text: '架设流体处理中枢 (BD_132)', current: 1, target: 1, done: true },
+        { text: '插槽装配离心机/搅拌机并运转', current: 1, target: 1, done: true },
+        { text: '架设营养基座 (BD_130) 并插装培育仓', current: 1, target: 1, done: true },
+        { text: '培育高纯成熟灵草幼胚', current: 16, target: 20, done: false }
+      ],
+      rewards: [
+        { name: '上品灵石', count: 5000, icon: 'fa-solid fa-gem text-emerald-300' },
+        { name: '时间加速器超频核心', count: 1, icon: 'fa-solid fa-clock text-amber-400' }
+      ],
+      status: 'in_progress'
+    },
+    {
+      id: 'main_04',
+      title: '【阶段四·中央处理器四象大圆满】',
+      sub: '全域算力 · 青龙/朱雀/白虎/玄武 蓝图引线通达',
+      icon: 'fa-solid fa-microchip text-purple-400',
+      badge: '巅峰阵盘',
+      badgeColor: 'border-purple-400 text-purple-300 bg-purple-950/70',
+      desc: '在中央处理器连线小游戏中，满足四大象限的核心要求，引出导灵光缆逐一破除封印，连通极阳脉冲核心。',
+      goals: [
+        { text: '解锁青龙·初阶熔炼核心并通线', current: 1, target: 1, done: true },
+        { text: '解锁朱雀·高能合金增压核心', current: 1, target: 1, done: true },
+        { text: '解锁白虎·精密切削稳流核心', current: 0, target: 1, done: false },
+        { text: '解锁玄武·四象归一大圆满', current: 0, target: 1, done: false }
+      ],
+      rewards: [
+        { name: '极品金丹法宝·山河社稷图', count: 1, icon: 'fa-solid fa-crown text-yellow-400' },
+        { name: '全厂狂暴脉冲永久权柄', count: 1, icon: 'fa-solid fa-bolt text-red-400' }
+      ],
+      status: 'in_progress'
+    }
+  ],
+  sect: [
+    {
+      id: 'sect_01',
+      title: '【太乙神剑门】玄铁重板千斤急调',
+      sub: '宗门订单 · 飞剑剑胚粗铸物资调拨',
+      icon: 'fa-solid fa-shield text-sky-400',
+      badge: '宗门急调',
+      badgeColor: 'border-sky-400 text-sky-300 bg-sky-950/70',
+      desc: '太乙神剑门新招弟子大比，急需大批工业玄铁板铸造制式剑胚。请速调拨 50 块玄铁板。',
+      goals: [
+        { text: '交付玄铁板 (MAT_008)', current: 50, target: 50, item: 'iron_plate', done: true }
+      ],
+      rewards: [
+        { name: '下品灵石', count: 600, icon: 'fa-solid fa-gem text-sky-300' },
+        { name: '太乙剑意残页', count: 1, icon: 'fa-solid fa-scroll text-yellow-300' }
+      ],
+      status: 'claimable'
+    },
+    {
+      id: 'sect_02',
+      title: '【百草仙谷】高纯成熟灵草采购',
+      sub: '丹道订单 · 聚气灵丹炼制主材配额',
+      icon: 'fa-solid fa-leaf text-emerald-400',
+      badge: '炼丹供给',
+      badgeColor: 'border-emerald-400 text-emerald-300 bg-emerald-950/70',
+      desc: '百草谷长老开炉炼制百草凝元丹，急需培育仓出产的成熟灵草 20 株。',
+      goals: [
+        { text: '交付成熟灵草 (MAT_026)', current: 15, target: 20, item: 'mature_ling_grass', done: false }
+      ],
+      rewards: [
+        { name: '中品灵石', count: 1200, icon: 'fa-solid fa-gem text-emerald-300' },
+        { name: '百草灵肥配方', count: 1, icon: 'fa-solid fa-flask text-teal-300' }
+      ],
+      status: 'in_progress'
+    },
+    {
+      id: 'sect_03',
+      title: '【天机御阵阁】导灵铜片与灵磁齿轮',
+      sub: '阵道订单 · 护山大阵灵脉拓扑组件',
+      icon: 'fa-solid fa-microchip text-yellow-400',
+      badge: '天机阵道',
+      badgeColor: 'border-yellow-400 text-yellow-300 bg-yellow-950/70',
+      desc: '天机阁修缮全山灵脉大阵，需高导灵性的压延铜片 25 份与灵磁齿轮 10 份。',
+      goals: [
+        { text: '交付导灵铜片 (MAT_013)', current: 25, target: 25, item: 'ling_copper_sheet', done: true },
+        { text: '交付灵磁齿轮 (MAT_012)', current: 10, target: 10, item: 'lingci_gear', done: true }
+      ],
+      rewards: [
+        { name: '中品灵石', count: 1800, icon: 'fa-solid fa-gem text-yellow-300' },
+        { name: '阵道强化晶石', count: 2, icon: 'fa-solid fa-cubes text-purple-400' }
+      ],
+      status: 'claimable'
+    }
+  ],
+  daily: [
+    {
+      id: 'daily_01',
+      title: '【日常检修】灵力电网全荷载巡检',
+      sub: '工厂运维 · 维持发电量 ≥ 90 MW 稳态',
+      icon: 'fa-solid fa-bolt text-yellow-400',
+      badge: '日常工控',
+      badgeColor: 'border-stone-400 text-stone-300 bg-stone-900',
+      desc: '保持灵力引擎与生物发电机稳压运转，确保全区电网负载平衡。',
+      goals: [
+        { text: '全域电网发电维持 95 MW', current: 95, target: 90, done: true }
+      ],
+      rewards: [
+        { name: '下品灵石', count: 300, icon: 'fa-solid fa-gem text-cyan-200' },
+        { name: '玄铁修复合金', count: 5, icon: 'fa-solid fa-wrench text-stone-300' }
+      ],
+      status: 'claimable'
+    },
+    {
+      id: 'daily_02',
+      title: '【环保除煞】回收处理塔浓缩煞气',
+      sub: '工坊生态 · 抽取浓缩煞气 20 m³',
+      icon: 'fa-solid fa-skull text-purple-400',
+      badge: '日常除煞',
+      badgeColor: 'border-purple-400 text-purple-300 bg-purple-950/70',
+      desc: '回收工坊逸散的地煞浊气，导入回收塔浓缩为煞气浓缩液。',
+      goals: [
+        { text: '回收煞气浓缩液入管 (MAT_077)', current: 36, target: 20, done: true }
+      ],
+      rewards: [
+        { name: '下品灵石', count: 450, icon: 'fa-solid fa-gem text-purple-300' },
+        { name: '辟煞符箓', count: 2, icon: 'fa-solid fa-scroll text-yellow-400' }
+      ],
+      status: 'claimable'
+    }
+  ]
+};
+
+// 切换任务子选项卡
+function switchQuestSubTab(subTab) {
+  playUiSound('click');
+  currentQuestSubTab = subTab;
+
+  ['main', 'sect', 'daily'].forEach(t => {
+    const btn = document.getElementById(`btnQuestTab_${t}`);
+    if (!btn) return;
+    if (t === subTab) {
+      btn.className = 'px-4 py-2 border-b-2 border-amber-400 bg-amber-400/15 text-amber-300 font-black text-xs transition flex items-center space-x-1.5 cursor-pointer shadow-[0_2px_10px_rgba(245,158,11,0.2)]';
+    } else {
+      btn.className = 'px-4 py-2 border-b-2 border-transparent text-white/60 hover:text-white hover:bg-white/5 font-bold text-xs transition flex items-center space-x-1.5 cursor-pointer';
+    }
+  });
+
+  renderQuestList();
+}
+
+// 渲染任务卡片列表
+function renderQuestList() {
+  const container = document.getElementById('questCardsList');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const list = QUESTS_DATA[currentQuestSubTab] || QUESTS_DATA.main;
+
+  list.forEach(q => {
+    const card = document.createElement('div');
+    const isTracked = (trackedQuestId === q.id);
+    const isClaimable = (q.status === 'claimable');
+    const isClaimed = (q.status === 'claimed');
+
+    card.className = `p-3.5 rounded-xl border ${isTracked ? 'border-[#00f0ff] bg-[#091b2e]' : 'border-white/15 bg-[#08121f]'} hover:border-amber-400/70 transition flex flex-col justify-between space-y-2.5 shadow-md`;
+
+    // 目标项 HTML
+    let goalsHtml = '';
+    q.goals.forEach(g => {
+      const pct = Math.min(100, Math.round((g.current / g.target) * 100));
+      goalsHtml += `
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-[11px] font-mono">
+            <span class="text-white/80 flex items-center space-x-1.5">
+              <i class="fa-solid ${g.done ? 'fa-check text-emerald-400' : 'fa-circle-dot text-amber-400'} text-[9px]"></i>
+              <span>${g.text}</span>
+            </span>
+            <span class="font-bold ${g.done ? 'text-emerald-400' : 'text-amber-300'}">${g.current} / ${g.target} (${pct}%)</span>
+          </div>
+          <div class="w-full h-1.5 bg-black/60 rounded-full overflow-hidden border border-white/10">
+            <div class="h-full bg-gradient-to-r ${g.done ? 'from-emerald-500 to-teal-400' : 'from-amber-500 to-orange-400'} rounded-full transition-all duration-300" style="width: ${pct}%;"></div>
+          </div>
+        </div>
+      `;
+    });
+
+    // 奖励项 HTML
+    let rewardsHtml = '';
+    q.rewards.forEach(r => {
+      rewardsHtml += `
+        <div class="flex items-center space-x-1 px-2 py-0.5 rounded bg-black/50 border border-white/10 text-[10px] font-mono">
+          <i class="${r.icon} text-xs"></i>
+          <span class="text-white">${r.name}</span>
+          <span class="text-amber-300 font-bold">+${r.count}</span>
+        </div>
+      `;
+    });
+
+    // 交互操作按键
+    let actionBtnHtml = '';
+    if (isClaimed) {
+      actionBtnHtml = `
+        <span class="px-3 py-1.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-bold font-mono flex items-center space-x-1">
+          <i class="fa-solid fa-check-double"></i>
+          <span>已领取圆满</span>
+        </span>
+      `;
+    } else if (isClaimable) {
+      actionBtnHtml = `
+        <button onclick="claimQuestReward('${q.id}');" class="px-4 py-1.5 rounded bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-500 hover:scale-105 text-black font-black text-xs shadow-[0_0_15px_#f59e0b] cursor-pointer transition flex items-center space-x-1.5 active:scale-95 animate-pulse">
+          <i class="fa-solid fa-gift"></i>
+          <span>领取丰厚报酬</span>
+        </button>
+      `;
+    } else {
+      actionBtnHtml = `
+        <button onclick="trackQuestToHud('${q.id}');" class="px-3 py-1.5 rounded ${isTracked ? 'bg-[#00f0ff]/20 text-[#00f0ff] border border-[#00f0ff]' : 'bg-white/10 hover:bg-white/20 text-white/80'} text-xs font-bold font-mono transition cursor-pointer flex items-center space-x-1">
+          <i class="fa-solid fa-crosshairs text-xs"></i>
+          <span>${isTracked ? '追踪中' : '追踪至准星'}</span>
+        </button>
+      `;
+    }
+
+    card.innerHTML = `
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-9 h-9 rounded-lg bg-black/40 border border-white/20 flex items-center justify-center text-lg shrink-0">
+            <i class="${q.icon}"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h4 class="text-xs sm:text-sm font-black text-white font-sans">${q.title}</h4>
+              <span class="text-[9px] px-1.5 py-0.5 rounded border font-mono font-bold ${q.badgeColor}">${q.badge}</span>
+            </div>
+            <span class="text-[10px] text-cyan-300/80 font-mono">${q.sub}</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          ${actionBtnHtml}
+        </div>
+      </div>
+
+      <p class="text-[11px] text-white/70 leading-relaxed font-sans bg-black/30 p-2 rounded border border-white/5">
+        ${q.desc}
+      </p>
+
+      <!-- 目标进度项 -->
+      <div class="space-y-2 pt-1">
+        ${goalsHtml}
+      </div>
+
+      <!-- 底部奖励条 -->
+      <div class="flex items-center justify-between pt-2 border-t border-white/10">
+        <div class="flex items-center space-x-2">
+          <span class="text-[10px] text-white/50 font-mono">达成奖励:</span>
+          <div class="flex items-center space-x-1.5">
+            ${rewardsHtml}
+          </div>
+        </div>
+        ${!isClaimed && !isClaimable ? `
+          <button onclick="trackQuestToHud('${q.id}');" class="text-[10px] text-cyan-300 hover:text-white underline cursor-pointer font-mono">
+            ${isTracked ? '已在右上角常驻' : '置顶追踪'}
+          </button>
+        ` : ''}
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+// 追踪任务至 HUD
+function trackQuestToHud(questId) {
+  playUiSound('toggle');
+  trackedQuestId = questId;
+
+  let targetQuest = null;
+  Object.values(QUESTS_DATA).forEach(group => {
+    const found = group.find(q => q.id === questId);
+    if (found) targetQuest = found;
+  });
+
+  if (targetQuest) {
+    showNotification(`🎯 已将【${targetQuest.title}】设为当前常驻追踪任务！`);
+    // 同步更新右上角待办清单
+    const todoContainer = document.getElementById('todoCardsContainer');
+    if (todoContainer) {
+      todoContainer.innerHTML = `
+        <div class="bg-black/85 backdrop-blur-md border border-[#00f0ff] rounded p-2.5 flex flex-col items-end shadow-2xl">
+          <div class="flex items-center space-x-1 text-[11px] text-[#00f0ff] font-bold mb-1 font-mono">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-ping"></span>
+            <span>当前追踪: ${targetQuest.title}</span>
+          </div>
+          <div class="space-y-1 w-full text-right text-[10px] font-mono text-white/80">
+            ${targetQuest.goals.map(g => `<div>${g.text}: <strong class="${g.done ? 'text-emerald-400' : 'text-amber-300'}">${g.current}/${g.target}</strong></div>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  renderQuestList();
+}
+
+// 领取任务奖励
+function claimQuestReward(questId) {
+  playUiSound('craft');
+  let targetQuest = null;
+  Object.values(QUESTS_DATA).forEach(group => {
+    const found = group.find(q => q.id === questId);
+    if (found) targetQuest = found;
+  });
+
+  if (!targetQuest) return;
+  targetQuest.status = 'claimed';
+
+  // 奖励发放至背包或提示
+  showNotification(`🎉【开拓嘉奖】恭喜完成【${targetQuest.title}】！灵石与科技物资已妥存随身背包！功勋+200！`);
+
+  // 更新总功勋徽章
+  const badge = document.getElementById('questTotalCreditBadge');
+  if (badge) {
+    const curVal = parseInt(badge.innerText.replace(/[^0-9]/g, '')) || 1850;
+    badge.innerText = `${curVal + 200} 功勋`;
+  }
+
+  renderQuestList();
+}
+
+window.switchQuestSubTab = switchQuestSubTab;
+window.renderQuestList = renderQuestList;
+window.trackQuestToHud = trackQuestToHud;
+window.claimQuestReward = claimQuestReward;
+
 function switchHoloCompassTab(tabId) {
   playUiSound('toggle');
+
+  // 直接打开真实专属界面，不重复维护内嵌两套假视图
+  if (tabId === 'hub') {
+    toggleInventoryModal();
+    if (typeof openCentralProcessorHUD === 'function') openCentralProcessorHUD();
+    return;
+  }
+  if (tabId === 'craft') {
+    toggleInventoryModal();
+    if (typeof toggleCraftModal === 'function') toggleCraftModal();
+    return;
+  }
+  if (tabId === 'codex') {
+    toggleInventoryModal();
+    if (typeof toggleCodexModal === 'function') toggleCodexModal();
+    return;
+  }
+
   currentHoloTab = tabId;
 
   // 1. 更新按钮高亮 (1:1 还原 Image 2 白色高亮发光方块)
@@ -849,11 +1275,12 @@ function switchHoloCompassTab(tabId) {
   const tabNames = {
     main: '角色装备与 72 格储物空间 (CHARACTER & BAG)',
     map: '全息地脉矿脉勘舆图 (TERRITORY MAP)',
-    hub: '中央处理器科技里程碑 (HUB TERMINAL)',
+    hub: '中央处理器境界突破与阶段授权 (CPU TERMINAL)',
     craft: '随身手工操作台 (MANUAL CRAFT)',
     codex: '天工法典万象百科 (CODEX ARCHIVE)',
     todo: '建筑材料待办清单 (TODO LIST)',
-    stats: '全域统计 · 属性倍率与经营认证 (STATISTICS)'
+    stats: '全域统计 · 属性倍率与经营认证 (STATISTICS)',
+    quest: '仙门开拓令与宗门任务委托 (SECT QUESTS)'
   };
   const titleElem = document.getElementById('holoCompassModeTitle');
   if (titleElem) {
@@ -866,6 +1293,8 @@ function switchHoloCompassTab(tabId) {
     renderCasketInlineTray();
   } else if (tabId === 'stats') {
     renderStatsList();
+  } else if (tabId === 'quest') {
+    renderQuestList();
   }
 
   showNotification(`已切换至视图: 【${(tabNames[tabId] || tabId).split(' ')[0]}】`);
@@ -887,6 +1316,8 @@ function toggleInventoryModal(defaultTab) {
     showNotification('已展开【天元全息罗盘仪中枢】(角色装备与背包同屏展示)');
   }
 }
+window.switchHoloCompassTab = switchHoloCompassTab;
+window.toggleInventoryModal = toggleInventoryModal;
 
 // 背包排序 (按策划案物料分类与数量自动排序)
 function sortPlayerBackpack() {
@@ -900,7 +1331,7 @@ function sortPlayerBackpack() {
   showNotification('随身背包物料已按数量自动规整排序');
 }
 
-// 罗盘模态打开状态下的 1-7 数字键快捷切换监听 (严格对齐外部功能按键)
+// 罗盘模态打开状态下的 1-8 数字键快捷切换监听 (严格对齐外部功能按键)
 document.addEventListener('keydown', (e) => {
   const modal = document.getElementById('invModal');
   if (!modal || modal.classList.contains('hidden')) return;
@@ -913,7 +1344,8 @@ document.addEventListener('keydown', (e) => {
     '4': 'craft',   // 手工制作
     '5': 'codex',   // 天工法典
     '6': 'todo',    // 待办清单
-    '7': 'stats'    // 全域统计
+    '7': 'stats',   // 全域统计
+    '8': 'quest'    // 任务开拓
   };
   if (keyMap[e.key]) {
     e.preventDefault();
