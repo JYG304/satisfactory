@@ -376,8 +376,25 @@ function selectTechNode(id, forceRedraw = true) {
         </button>
       `;
     }
+    let rcpSummaryHtml = '';
     if (n.ntype === 'device' && !n.gate) {
       const bKey = (typeof XIUXIAN_CANONICAL_TO_BUILDING_KEY !== 'undefined' && XIUXIAN_CANONICAL_TO_BUILDING_KEY[n.id]) || n.id.toLowerCase();
+      const bObj = (typeof XIUXIAN_BUILDINGS !== 'undefined') ? XIUXIAN_BUILDINGS[bKey] : null;
+      if (bObj && Array.isArray(bObj.recipes) && bObj.recipes.length > 0) {
+        const rcCount = bObj.recipes.length;
+        const topRc = bObj.recipes.slice(0, 5).map(rk => {
+          const r = (typeof XIUXIAN_RECIPES !== 'undefined') ? XIUXIAN_RECIPES[rk] : null;
+          return r ? r.name : rk;
+        }).join('、');
+        rcpSummaryHtml = `
+          <div class="bg-cyan-950/40 border border-cyan-500/30 rounded p-2 text-[11px] mb-2.5">
+            <div class="flex items-center justify-between text-cyan-300 font-bold mb-1">
+              <span>📜 承载专属配方 (${rcCount}方):</span>
+            </div>
+            <div class="text-slate-300 text-[10px] leading-relaxed">${topRc}${rcCount > 5 ? ` 等共 ${rcCount} 种工艺` : ''}</div>
+          </div>
+        `;
+      }
       actionBtnsHtml += `
         <div class="grid grid-cols-2 gap-2">
           <button onclick="techTreeGoBuild('${bKey}');" class="py-1.5 px-2 rounded bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/60 text-amber-200 font-bold text-[11px] cursor-pointer transition">
@@ -419,6 +436,7 @@ function selectTechNode(id, forceRedraw = true) {
         <div class="flex justify-between gap-2"><span class="text-slate-400 shrink-0">材料/输入:</span><span class="text-amber-200 font-mono text-right break-all">${n.mats}</span></div>
         <div class="flex justify-between gap-2"><span class="text-slate-400 shrink-0">前置节点:</span><span class="text-cyan-200 text-right">${getTechReqNames(n)}</span></div>
       </div>
+      ${rcpSummaryHtml}
       <div class="space-y-2">${actionBtnsHtml}</div>
     `;
   }
