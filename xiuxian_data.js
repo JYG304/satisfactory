@@ -1231,7 +1231,17 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 0,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": true,
+    "occupancyMode": "体积占格",
+    "placementRule": "raw_or_surface",
+    "placementTarget": [
+      "raw_map",
+      "top_stackable"
+    ],
+    "placementDesc": "可直接放原始地图，或放在顶部可放的建筑表面；体积占格；顶部可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1267,7 +1277,17 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 0,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": true,
+    "occupancyMode": "体积占格",
+    "placementRule": "raw_or_surface",
+    "placementTarget": [
+      "raw_map",
+      "top_stackable"
+    ],
+    "placementDesc": "可直接放原始地图，或放在顶部可放的建筑表面；体积占格；顶部可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1277,7 +1297,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段I · 起步冶炼（开局）",
     "recipes": [],
     "desc": "提供1×1、4m高的立体支撑和建造面，用于抬高或连接多层结构。",
-    "group": "struct",
+    "group": "org",
     "costs": [
       {
         "code": "MAT_008",
@@ -1303,7 +1323,17 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 0,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": true,
+    "occupancyMode": "体积占格",
+    "placementRule": "raw_or_surface",
+    "placementTarget": [
+      "raw_map",
+      "top_stackable"
+    ],
+    "placementDesc": "可直接放原始地图，或放在顶部可放的建筑表面；体积占格；顶部可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1313,7 +1343,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2（基础加工）",
     "recipes": [],
     "desc": "提供2×2的基础建造面，适合铺设中小型设备和上层结构。",
-    "group": "struct",
+    "group": "org",
     "costs": [
       {
         "code": "bd_102",
@@ -1339,7 +1369,17 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 0,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": true,
+    "occupancyMode": "体积占格",
+    "placementRule": "raw_or_surface",
+    "placementTarget": [
+      "raw_map",
+      "top_stackable"
+    ],
+    "placementDesc": "可直接放原始地图，或放在顶部可放的建筑表面；体积占格；顶部可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1349,7 +1389,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2（基础加工）",
     "recipes": [],
     "desc": "提供3×3的基础建造面，适合承托较大型设备或多格建筑。",
-    "group": "struct",
+    "group": "org",
     "costs": [
       {
         "code": "bd_102",
@@ -1375,7 +1415,17 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 0,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": true,
+    "occupancyMode": "体积占格",
+    "placementRule": "raw_or_surface",
+    "placementTarget": [
+      "raw_map",
+      "top_stackable"
+    ],
+    "placementDesc": "可直接放原始地图，或放在顶部可放的建筑表面；体积占格；顶部可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1385,7 +1435,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2（基础加工）",
     "recipes": [],
     "desc": "提供1×4的条形建造面，用于搭梁、连桥或支撑长条区域。",
-    "group": "struct",
+    "group": "org",
     "costs": [
       {
         "code": "bd_102",
@@ -1411,7 +1461,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 0,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1421,7 +1480,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2 -> BD_139",
     "recipes": [],
     "desc": "提供2×2的薄型顶板，可快速铺设平台并作为上层建筑基面。",
-    "group": "struct",
+    "group": "org",
     "costs": [
       {
         "code": "MAT_008",
@@ -1451,7 +1510,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1461,7 +1529,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2（基础加工）",
     "recipes": [],
     "desc": "连接相邻高差的短楼梯，方便角色在不同高度的平台间通行。",
-    "group": "struct",
+    "group": "org",
     "costs": [
       {
         "code": "MAT_008",
@@ -1491,7 +1559,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1501,7 +1578,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2（基础加工）",
     "recipes": [],
     "desc": "连接较大高差的长楼梯，适合多层平台之间的通行。",
-    "group": "struct",
+    "group": "org",
     "costs": [
       {
         "code": "MAT_008",
@@ -1531,7 +1608,17 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 0,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": true,
+    "occupancyMode": "体积占格",
+    "placementRule": "raw_or_surface",
+    "placementTarget": [
+      "raw_map",
+      "top_stackable"
+    ],
+    "placementDesc": "可直接放原始地图，或放在顶部可放的建筑表面；体积占格；顶部可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1541,7 +1628,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段I · 起步冶炼（开局）",
     "recipes": [],
     "desc": "竖直支撑结构，用于把上层平台落地支撑并连接不同高度的结构面。",
-    "group": "struct",
+    "group": "org",
     "costs": [
       {
         "code": "MAT_014",
@@ -1563,7 +1650,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 0,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 16,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1595,7 +1691,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 0,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 32,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1605,7 +1710,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2 -> BD_138",
     "recipes": [],
     "desc": "窄型储藏柜，可暂存固体物料并接入物流端口，容量32格。",
-    "group": "storage",
+    "group": "org",
     "costs": [
       {
         "code": "MAT_008",
@@ -1635,7 +1740,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 0,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 32,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1645,7 +1759,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2 -> BD_138",
     "recipes": [],
     "desc": "宽型储藏柜，可暂存固体物料并接入物流端口，容量32格。",
-    "group": "storage",
+    "group": "org",
     "costs": [
       {
         "code": "MAT_008",
@@ -1675,7 +1789,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1711,7 +1834,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1721,7 +1853,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2 -> BD_116",
     "recipes": [],
     "desc": "顺时针转向的弯道传送带，用于改变固体物料的运输方向。",
-    "group": "logistics",
+    "group": "logi",
     "costs": [
       {
         "code": "MAT_008",
@@ -1747,7 +1879,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1757,7 +1898,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2 -> BD_116",
     "recipes": [],
     "desc": "逆时针转向的弯道传送带，用于改变固体物料的运输方向。",
-    "group": "logistics",
+    "group": "logi",
     "costs": [
       {
         "code": "MAT_008",
@@ -1783,7 +1924,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1793,7 +1943,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2 -> BD_116",
     "recipes": [],
     "desc": "向上抬升的传送带，用于把物料送到更高的平台。",
-    "group": "logistics",
+    "group": "logi",
     "costs": [
       {
         "code": "MAT_008",
@@ -1819,7 +1969,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1829,7 +1988,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2 -> BD_116",
     "recipes": [],
     "desc": "向下输送的传送带，用于把物料送到更低的平台。",
-    "group": "logistics",
+    "group": "logi",
     "costs": [
       {
         "code": "MAT_008",
@@ -1855,7 +2014,17 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 3,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": true,
+    "occupancyMode": "体积占格",
+    "placementRule": "raw_or_surface",
+    "placementTarget": [
+      "raw_map",
+      "top_stackable"
+    ],
+    "placementDesc": "可直接放原始地图，或放在顶部可放的建筑表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1891,7 +2060,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1901,7 +2079,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2 -> BD_116",
     "recipes": [],
     "desc": "交叉传送节点，让两条物流线路交叉通过，互不合并。",
-    "group": "logistics",
+    "group": "logi",
     "costs": [
       {
         "code": "bd_116",
@@ -1927,7 +2105,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1963,7 +2150,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -1999,7 +2195,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 7,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2009,7 +2214,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2 -> BD_127",
     "recipes": [],
     "desc": "带智能调度的合流器，可协调两路输入并减少线路堵塞。",
-    "group": "logistics",
+    "group": "logi",
     "costs": [
       {
         "code": "bd_123",
@@ -2043,7 +2248,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 7,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2053,7 +2267,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2 -> BD_127",
     "recipes": [],
     "desc": "带智能分配的分流器，可按设定规则把物料分配到多条输出线。",
-    "group": "logistics",
+    "group": "logi",
     "costs": [
       {
         "code": "bd_124",
@@ -2087,7 +2301,20 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 1,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "不占格",
+    "placementRule": "belt_processor",
+    "placementTarget": [
+      "conveyor",
+      "bd_117",
+      "bd_118",
+      "bd_119",
+      "bd_120"
+    ],
+    "placementDesc": "带处理器（不占格）：必须直接架设在传送带上，不可裸放地面或底座",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2097,7 +2324,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2 -> BD_116",
     "recipes": [],
     "desc": "限制传送带物流速度的控制节点，用于平衡产线节拍并减少堵塞。",
-    "group": "prod",
+    "group": "logi",
     "costs": [
       {
         "code": "bd_116",
@@ -2127,7 +2354,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2159,7 +2395,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2169,7 +2414,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段III · GATE_3 -> BD_134",
     "recipes": [],
     "desc": "向上转向的水管，用于改变液体管路方向或高度。",
-    "group": "logistics",
+    "group": "logi",
     "costs": [
       {
         "code": "mat_042",
@@ -2191,7 +2436,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2201,7 +2455,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段III · GATE_3 -> BD_134",
     "recipes": [],
     "desc": "向左转向的水管，用于改变液体管路方向。",
-    "group": "logistics",
+    "group": "logi",
     "costs": [
       {
         "code": "mat_042",
@@ -2223,7 +2477,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2233,7 +2496,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段III · GATE_3 -> BD_134",
     "recipes": [],
     "desc": "带侧向接口的水管，用于从侧面接入或引出液体管路。",
-    "group": "logistics",
+    "group": "logi",
     "costs": [
       {
         "code": "mat_042",
@@ -2255,7 +2518,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2265,7 +2537,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段III · GATE_3 -> BD_134",
     "recipes": [],
     "desc": "带顶部接口的水管，用于从上方接入或引出液体管路。",
-    "group": "logistics",
+    "group": "logi",
     "costs": [
       {
         "code": "mat_042",
@@ -2287,7 +2559,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2297,7 +2578,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段III · GATE_3 -> BD_134",
     "recipes": [],
     "desc": "三通水管，提供三个液体接口，便于分流或汇流。",
-    "group": "logistics",
+    "group": "logi",
     "costs": [
       {
         "code": "mat_042",
@@ -2319,7 +2600,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 10,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": true,
+    "occupancyMode": "体积占格",
+    "placementRule": "water_node",
+    "placementTarget": [
+      "water_node"
+    ],
+    "placementDesc": "仅限原始地图水源/液源节点（清水/原油/灵泉）上放置；体积占格；顶部可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2363,7 +2653,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 5,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": true,
+    "occupancyMode": "体积占格",
+    "placementRule": "ore_node",
+    "placementTarget": [
+      "ore_node"
+    ],
+    "placementDesc": "仅限原始地图矿脉节点（玄铁/赤铜/煤/石英/灵石矿）上放置；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2409,7 +2708,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 15,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": true,
     "hasHeaterGlow": true,
@@ -2455,7 +2763,20 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 20,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "不占格",
+    "placementRule": "belt_processor",
+    "placementTarget": [
+      "conveyor",
+      "bd_117",
+      "bd_118",
+      "bd_119",
+      "bd_120"
+    ],
+    "placementDesc": "带处理器（不占格）：必须直接架设在传送带上，不可裸放地面或底座",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2498,7 +2819,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 10,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2583,7 +2913,20 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 25,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "不占格",
+    "placementRule": "belt_processor",
+    "placementTarget": [
+      "conveyor",
+      "bd_117",
+      "bd_118",
+      "bd_119",
+      "bd_120"
+    ],
+    "placementDesc": "带处理器（不占格）：必须直接架设在传送带上，不可裸放地面或底座",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2630,7 +2973,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 55,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2682,7 +3034,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 0,
     "power": 10,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "slot_bio",
+    "placementTarget": [
+      "bio_base"
+    ],
+    "placementDesc": "生物插件：必须插入【营养基座 (BD_159)】顶部插槽，严禁裸放地面或普通底座",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2726,7 +3087,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 35,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "slot_bio",
+    "placementTarget": [
+      "bio_base"
+    ],
+    "placementDesc": "生物插件：必须插入【营养基座 (BD_159)】顶部插槽，严禁裸放地面或普通底座",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2782,7 +3152,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 10,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "slot_fluid",
+    "placementTarget": [
+      "fluid_hub"
+    ],
+    "placementDesc": "液体插件：必须插入【流体处理中枢 (BD_158)】顶部插槽（Slot_01 / Slot_02），严禁裸放地面或普通底座",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2830,7 +3209,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 35,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "slot_fluid",
+    "placementTarget": [
+      "fluid_hub"
+    ],
+    "placementDesc": "液体插件：必须插入【流体处理中枢 (BD_158)】顶部插槽（Slot_01 / Slot_02），严禁裸放地面或普通底座",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2880,7 +3268,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 20,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "slot_fluid",
+    "placementTarget": [
+      "fluid_hub"
+    ],
+    "placementDesc": "液体插件：必须插入【流体处理中枢 (BD_158)】顶部插槽（Slot_01 / Slot_02），严禁裸放地面或普通底座",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -2932,7 +3329,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 50,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -3007,7 +3413,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": -150,
     "powerGen": 150,
+    "powerRadius": 50,
     "heat": 50,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部可放",
     "clockSpeed": 100,
     "hasHeatGlow": true,
     "hasHeaterGlow": true,
@@ -3059,7 +3474,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 65,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "slot_thermal",
+    "placementTarget": [
+      "power_engine"
+    ],
+    "placementDesc": "上部热能组件：必须安装在【灵力引擎（下）(BD_147)】顶部热能插槽上，严禁裸放地面或普通底座",
     "clockSpeed": 100,
     "hasHeatGlow": true,
     "hasHeaterGlow": true,
@@ -3111,7 +3535,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": -100,
     "powerGen": 100,
+    "powerRadius": 50,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -3125,7 +3558,7 @@ const XIUXIAN_BUILDINGS = {
       "rcp_082"
     ],
     "desc": "燃烧固体燃料发电，为周围建筑提供电力。",
-    "group": "prod",
+    "group": "power",
     "costs": [
       {
         "code": "mat_040",
@@ -3163,7 +3596,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 20,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -3226,7 +3668,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 140,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放；需两座传送门配对",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -3236,7 +3687,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段V · GATE_5 -> BD_147",
     "recipes": [],
     "desc": "连接不同区域的物流传送门；建成后需要与另一座传送门设置配对。",
-    "group": "special",
+    "group": "logi",
     "costs": [
       {
         "code": "mat_046",
@@ -3274,7 +3725,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 5,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -3324,7 +3784,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "不占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；不占格（可贴合工位摆放，顶部可摆设/叠放）",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -3334,7 +3803,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段I · 起步冶炼（开局）",
     "recipes": [],
     "desc": "小型置物桌，用于摆放或展示物品。",
-    "group": "struct",
+    "group": "org",
     "costs": [
       {
         "code": "MAT_052",
@@ -3360,7 +3829,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "不占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；不占格（可贴合工位摆放，顶部可摆设/叠放）",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -3370,7 +3848,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段I · 起步冶炼（开局）",
     "recipes": [],
     "desc": "高型置物桌，适合摆放或展示较高的物品。",
-    "group": "struct",
+    "group": "org",
     "costs": [
       {
         "code": "MAT_052",
@@ -3396,7 +3874,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 0,
     "power": -45,
     "powerGen": 45,
+    "powerRadius": 50,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放；需保持周围空间畅通",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -3406,7 +3893,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2 -> BD_135",
     "recipes": [],
     "desc": "利用风场持续发电，为附近建筑提供电力；需要保持周围空间畅通。",
-    "group": "prod",
+    "group": "power",
     "costs": [
       {
         "code": "mat_040",
@@ -3452,7 +3939,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 45,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -3470,7 +3966,7 @@ const XIUXIAN_BUILDINGS = {
       "rcp_189"
     ],
     "desc": "炼制和加工法宝的专用工作台，可安装法宝插件并输出成品。",
-    "group": "prod",
+    "group": "special",
     "costs": [
       {
         "code": "mat_040",
@@ -3512,7 +4008,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 45,
     "power": 80,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -3526,7 +4031,7 @@ const XIUXIAN_BUILDINGS = {
       "rcp_192"
     ],
     "desc": "终局渡劫设施，需通入重水冷却并加装铅板/橡胶防雷，凝练人造金丹。",
-    "group": "prod",
+    "group": "special",
     "costs": [
       {
         "code": "mat_040",
@@ -3572,7 +4077,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -3620,7 +4134,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 0,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -3664,7 +4187,17 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 15,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 16,
+    "canPlaceOnRawMap": true,
+    "occupancyMode": "体积占格",
+    "placementRule": "raw_or_surface",
+    "placementTarget": [
+      "raw_map",
+      "top_stackable"
+    ],
+    "placementDesc": "可直接放原始地图，或放在顶部可放的建筑表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -3678,7 +4211,7 @@ const XIUXIAN_BUILDINGS = {
       "rcp_093"
     ],
     "desc": "自动发射剑丸迎击攻山修士的防御阵塔，击杀后自动收集修士尸体并通过出口送入物流线。",
-    "group": "prod",
+    "group": "special",
     "costs": [
       {
         "code": "mat_040",
@@ -3712,7 +4245,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 7,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -3722,7 +4264,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2 -> BD_127",
     "recipes": [],
     "desc": "带智能调度的合流器，可协调两路输入并减少线路堵塞。",
-    "group": "logistics",
+    "group": "logi",
     "costs": [
       {
         "code": "bd_123",
@@ -3756,7 +4298,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 7,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "surface_only",
+    "placementTarget": [
+      "top_stackable"
+    ],
+    "placementDesc": "不可直接放原始地图，需放在建筑底座或顶部可放的平台表面；体积占格；顶部不可放",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,
@@ -3766,7 +4317,7 @@ const XIUXIAN_BUILDINGS = {
     "unlockCondition": "阶段II · GATE_2 -> BD_127",
     "recipes": [],
     "desc": "带智能分配的分流器，可按设定规则把物料分配到多条输出线。",
-    "group": "logistics",
+    "group": "logi",
     "costs": [
       {
         "code": "bd_124",
@@ -3800,7 +4351,16 @@ const XIUXIAN_BUILDINGS = {
     "rotStep": 90,
     "power": 40,
     "powerGen": 0,
+    "powerRadius": 0,
     "heat": 0,
+    "containerSlots": 0,
+    "canPlaceOnRawMap": false,
+    "occupancyMode": "体积占格",
+    "placementRule": "slot_thermal",
+    "placementTarget": [
+      "power_engine"
+    ],
+    "placementDesc": "上部热能组件：必须安装在【灵力引擎（下）(BD_147)】顶部热能插槽上，严禁裸放地面或普通底座",
     "clockSpeed": 100,
     "hasHeatGlow": false,
     "hasHeaterGlow": false,

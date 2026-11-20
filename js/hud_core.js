@@ -91,13 +91,17 @@ function buildDatabaseFromTable() {
   const db = {};
   if (typeof XIUXIAN_BUILDINGS !== 'undefined') {
     Object.entries(XIUXIAN_BUILDINGS).forEach(([key, b]) => {
+      // 严格归一化到 Q 键建造菜单 5 大有效分组: prod / logi / power / org / special
       let grp = b.group;
-      if (!grp) {
-        if (b.category === '生产' || b.category === '生产/辅助') grp = 'prod';
-        else if (b.category === '物流') grp = 'logi';
-        else if (b.category === '建筑' || b.category === '仓储') grp = 'org';
-        else if (b.category === '电力') grp = 'power';
-        else grp = 'special';
+      const validGroups = ['prod', 'logi', 'power', 'org', 'special'];
+      if (!validGroups.includes(grp)) {
+        const cat = b.category || '';
+        const useTxt = b.typeDesc || '';
+        if (b.code === 'BD_156' || b.code === 'BD_157' || b.code === 'BD_160') grp = 'special';
+        else if (b.code === 'BD_147' || b.code === 'BD_149' || b.code === 'BD_155' || useTxt.includes('能源')) grp = 'power';
+        else if (cat === '传送带' || cat === '垂直传送带' || cat === '管道' || b.code === 'BD_127' || b.code === 'BD_151' || cat === '物流') grp = 'logi';
+        else if (cat === '结构' || cat === '仓储' || cat === '建筑') grp = 'org';
+        else grp = 'prod';
       }
 
       const costs = (b.costs || []).map(c => {
@@ -126,10 +130,24 @@ function buildDatabaseFromTable() {
         code: b.code || key,
         title: `${b.name} (${b.code || key})`,
         name: b.name,
+        category: b.category || '',
+        typeDesc: b.typeDesc || '',
         group: grp,
         desc: b.desc || '《修仙工厂》标准工业建筑设施。',
         power: powerText,
+        powerRadius: b.powerRadius || 0,
         heat: b.heat || 0,
+        dimX: b.dimX || 1,
+        dimY: b.dimY || 1,
+        dimZ: b.dimZ !== undefined ? b.dimZ : 1,
+        topStackable: !!b.topStackable,
+        rotStep: typeof b.rotStep === 'number' ? b.rotStep : 90,
+        canPlaceOnRawMap: !!b.canPlaceOnRawMap,
+        occupancyMode: b.occupancyMode || '体积占格',
+        placementRule: b.placementRule || (b.canPlaceOnRawMap ? 'raw_or_surface' : 'surface_only'),
+        placementDesc: b.placementDesc || '',
+        containerSlots: b.containerSlots || 0,
+        pluginSlot: b.pluginSlot || '无',
         costs: costs,
         svg: getBuildingSvg(b, key)
       };
@@ -812,7 +830,7 @@ if (typeof buildDatabaseFromTable === 'function') {
   buildingDatabase = buildDatabaseFromTable();
 }
 
-let currentSelectedBuilding = 'smelter';
+let currentSelectedBuilding = 'furnace';
 
 // 动态渲染 Q 键建造菜单中的建筑卡片树
 function renderBuildingListTree(tabId = 'prod') {
@@ -902,11 +920,43 @@ function selectBuildingItem(key) {
   const modelSvg = document.getElementById('buildDetailModelSvg');
   if (modelSvg) modelSvg.innerHTML = data.svg;
 
+  const placementContainer = document.getElementById('buildDetailPlacementRules');
+  if (placementContainer) {
+    const dimTxt = `${data.dimX || 1}×${data.dimY || 1}×${data.dimZ !== undefined ? data.dimZ : 1} 格`;
+    const rawBadge = data.canPlaceOnRawMap
+      ? '<span class="px-1.5 py-0.5 rounded bg-emerald-500/20 border border-emerald-400/50 text-emerald-300">可直放原始地图</span>'
+      : '<span class="px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-400/50 text-amber-300">不可裸放原始地图</span>';
+    const occBadge = data.occupancyMode === '不占格'
+      ? '<span class="px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-400/50 text-cyan-200">不占格</span>'
+      : '<span class="px-1.5 py-0.5 rounded bg-slate-700/70 border border-white/20 text-white/85">体积占格</span>';
+    const topBadge = data.topStackable
+      ? '<span class="px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-400/40 text-emerald-300">顶部可放</span>'
+      : '<span class="px-1.5 py-0.5 rounded bg-rose-500/15 border border-rose-400/40 text-rose-300">顶部不可放</span>';
+    const rotTxt = data.rotStep === 0 ? '0° (不可旋转)' : `${data.rotStep}°`;
+    const extraChips = [];
+    if (data.powerRadius > 0) extraChips.push(`供电半径 ${data.powerRadius}格`);
+    if (data.containerSlots > 0) extraChips.push(`容器 ${data.containerSlots}格`);
+    if (data.pluginSlot && data.pluginSlot !== '无') extraChips.push(`插槽 ${data.pluginSlot}`);
+    placementContainer.innerHTML = `
+      <div class="flex flex-wrap gap-1.5 font-mono text-[10px]">
+        <span class="px-1.5 py-0.5 rounded bg-white/10 border border-white/20 text-cyan-300">${dimTxt}</span>
+        ${rawBadge}
+        ${occBadge}
+        ${topBadge}
+        <span class="px-1.5 py-0.5 rounded bg-white/10 border border-white/20 text-white/80">步进 ${rotTxt}</span>
+        ${extraChips.map(c => `<span class="px-1.5 py-0.5 rounded bg-indigo-500/20 border border-indigo-400/40 text-indigo-200">${c}</span>`).join('')}
+      </div>
+      <div class="text-[11px] text-amber-200/90 leading-snug bg-black/35 border border-amber-500/25 rounded px-2 py-1.5">${data.placementDesc || '标准工业放置规则'}</div>
+    `;
+  }
+
   const costContainer = document.getElementById('buildDetailCostCards');
   if (costContainer) {
     costContainer.innerHTML = '';
     data.costs.forEach(cost => {
-      const currentStock = (typeof playerInventory !== 'undefined' && playerInventory[cost.code] !== undefined) ? playerInventory[cost.code] : (cost.stock || 0);
+      const currentStock = window.isCreativeMode
+        ? 999
+        : ((typeof playerInventory !== 'undefined' && playerInventory[cost.code] !== undefined) ? playerInventory[cost.code] : (cost.stock || 0));
       const isEnough = currentStock >= cost.need;
       const card = document.createElement('div');
       card.className = `flex flex-col items-center bg-[#252b36] border ${isEnough ? 'border-white/20' : 'border-rose-500/60'} rounded p-1.5 min-w-[62px]`;
@@ -975,7 +1025,7 @@ function confirmBuildPlacement() {
   playUiSound('click');
   toggleBuildMenu();
   if (typeof enterBuildPlacingMode === 'function') {
-    enterBuildPlacingMode(currentSelectedBuilding || 'smelter');
+    enterBuildPlacingMode(currentSelectedBuilding || 'furnace');
   } else {
     showNotification(`[建造模式就绪] 正在放置: ${data ? data.name : '设施'} (点击左键部署)`);
   }
@@ -990,7 +1040,7 @@ function toggleBuildMenu() {
   modal.classList.toggle('hidden');
   if (!modal.classList.contains('hidden')) {
     renderBuildingListTree('prod');
-    selectBuildingItem(currentSelectedBuilding || 'smelter');
+    selectBuildingItem(currentSelectedBuilding || 'furnace');
   }
 }
 
@@ -1342,10 +1392,24 @@ document.addEventListener('keydown', (e) => {
     e.preventDefault();
     toggleCinematicMode();
   } else if (key === 'R') {
-    if (isBuildPlacingMode && typeof updateBuildPlacementHudCard === 'function') {
+    if (isBuildPlacingMode && typeof XIUXIAN_BUILDINGS !== 'undefined') {
       e.preventDefault();
-      playUiSound('toggle');
-      showNotification('【建造模式切换】当前模式: 默认');
+      const bKey = (typeof currentPlacingBuildingKey !== 'undefined') ? currentPlacingBuildingKey : 'foundation_2x2';
+      const mappedKey = bKey === 'foundation' ? 'foundation_2x2' : (bKey === 'smelter' ? 'furnace' : (bKey === 'constructor' ? 'cutter' : bKey));
+      const bDef = XIUXIAN_BUILDINGS[mappedKey] || buildingDatabase[bKey];
+      const step = (bDef && typeof bDef.rotStep === 'number') ? bDef.rotStep : 90;
+      if (step === 0) {
+        placingRotationAngle = 0;
+        playUiSound('click');
+        showNotification(`【不可旋转】${bDef ? bDef.name : bKey} 策划表旋转步进为 0°`);
+      } else {
+        placingRotationAngle = (placingRotationAngle + step) % 360;
+        playUiSound('toggle');
+        const ghost = document.getElementById('buildHologramGhost');
+        if (ghost) ghost.style.transform = `translate(-50%, -50%) rotate(${placingRotationAngle}deg)`;
+        if (typeof updateBuildPlacementHudCard === 'function') updateBuildPlacementHudCard();
+        showNotification(`【旋转全息图】${bDef ? bDef.name : bKey}: ${placingRotationAngle}° (步进 ${step}°)`);
+      }
     }
   } else if (key === 'X') {
     e.preventDefault();
@@ -1414,6 +1478,42 @@ document.addEventListener('mousemove', (e) => {
 // =========================================================================
 // 法典 (Codex 百科全书) 弹窗控制逻辑
 // =========================================================================
+function renderCodexBuildingsPane() {
+  const pane = document.getElementById('codexPane_buildings');
+  if (!pane || typeof XIUXIAN_BUILDINGS === 'undefined') return;
+  const entries = Object.entries(XIUXIAN_BUILDINGS);
+  pane.innerHTML = entries.map(([key, b]) => {
+    const dimTxt = `${b.dimX || 1}×${b.dimY || 1}×${b.dimZ !== undefined ? b.dimZ : 1}`;
+    const rawCls = b.canPlaceOnRawMap ? 'text-emerald-300 border-emerald-400/40 bg-emerald-500/15' : 'text-amber-300 border-amber-400/40 bg-amber-500/15';
+    const rawTxt = b.canPlaceOnRawMap ? '直放地图: 是' : '直放地图: 否';
+    const occTxt = b.occupancyMode || '体积占格';
+    const topTxt = b.topStackable ? '顶面可放' : '顶面不可放';
+    const rotTxt = b.rotStep === 0 ? '0°' : `${b.rotStep}°`;
+    const pwrTxt = b.power < 0 ? `+${Math.abs(b.power)}MW` : `${b.power || 0}MW`;
+    return `
+      <div class="bg-white/5 border border-white/15 p-3 rounded hover:border-[#00f0ff] transition flex flex-col justify-between space-y-1.5">
+        <div>
+          <div class="flex items-center justify-between gap-1 text-[#00f0ff] font-bold text-xs mb-1">
+            <span class="truncate"><i class="fa-solid fa-industry mr-1"></i>${b.name} (${b.code || key})</span>
+            <span class="text-[10px] font-mono text-white/75 shrink-0">${dimTxt} | ${pwrTxt}</span>
+          </div>
+          <p class="text-[11px] text-white/70 leading-snug mb-1.5">${b.desc || ''}</p>
+        </div>
+        <div class="space-y-1">
+          <div class="flex flex-wrap gap-1 font-mono text-[9.5px]">
+            <span class="px-1 py-0.5 rounded border ${rawCls}">${rawTxt}</span>
+            <span class="px-1 py-0.5 rounded border border-cyan-400/40 bg-cyan-500/15 text-cyan-200">${occTxt}</span>
+            <span class="px-1 py-0.5 rounded border border-white/20 bg-white/10 text-white/80">${topTxt}</span>
+            <span class="px-1 py-0.5 rounded border border-white/20 bg-white/10 text-white/80">步进 ${rotTxt}</span>
+          </div>
+          <div class="text-[10px] text-amber-200/90 leading-snug">${b.placementDesc || ''}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+window.renderCodexBuildingsPane = renderCodexBuildingsPane;
+
 function toggleCodexModal() {
   playUiSound('click');
   if (typeof closeOtherModals === 'function') closeOtherModals('codexModal');
@@ -1423,8 +1523,9 @@ function toggleCodexModal() {
     if (isOpen) {
       modal.classList.add('hidden');
     } else {
+      renderCodexBuildingsPane();
       modal.classList.remove('hidden');
-      showNotification('已展开【天工法典】(百科全书: 建筑、物料、配方与装备)');
+      showNotification('已展开【天工法典】(百科全书: 建筑、物料、配方与放置条件)');
     }
   }
 }
@@ -1653,9 +1754,12 @@ window.addEventListener('DOMContentLoaded', () => {
   if (typeof renderBuildingListTree === 'function') {
     renderBuildingListTree('prod');
   }
-  // 默认选中精炼炉 (BD_102)
+  // 默认选中精炼炉 (BD_136) 并初始化天工法典全量建筑图鉴
   if (typeof selectBuildingItem === 'function') {
-    selectBuildingItem('smelter');
+    selectBuildingItem('furnace');
+  }
+  if (typeof renderCodexBuildingsPane === 'function') {
+    renderCodexBuildingsPane();
   }
   // 动态同步右上角阶段里程碑追踪 (纯官方数据库 XIUXIAN_ITEMS 驱动)
   if (typeof syncMilestoneTrackerDisplay === 'function') {

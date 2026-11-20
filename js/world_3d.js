@@ -48,6 +48,8 @@
   let manualStackY = 0;
   const buildingMeshMap = new Map(); // bld.id -> { group, bld, animators, labelAnchorY, topY }
   const interactableMeshes = [];     // 用于 raycaster 检测的所有子网格
+  const resourceNodes = [];          // 原始地图矿脉与水源节点
+  const resourceNodeMeshes = [];     // 用于 raycaster 拾取的资源节点网格
 
   // 策划表体素占格尺度：1 水平格 = 2.0m，1 高度格 = 2.0m (严格等比 1:1:1 立方体体素)
   const GRID_UNIT = 2.0;
@@ -69,6 +71,217 @@
       bd_153: 'storage_desk'
     };
     return XIUXIAN_BUILDINGS[type] || XIUXIAN_BUILDINGS[alias[type]] || null;
+  }
+
+  function isConveyorType(type) {
+    return type === 'conveyor' || type === 'bd_117' || type === 'bd_118' || type === 'bd_119' || type === 'bd_120';
+  }
+
+  function getOrientedHalfExtents(def, rotDeg) {
+    const dimX = def ? (def.dimX || 1) : 1;
+    const dimY = def ? (def.dimY || 1) : 1;
+    const dimZ = def ? (def.dimZ !== undefined ? def.dimZ : 1) : 1;
+    const rotQuarter = Math.abs(Math.round((rotDeg || 0) / 90)) % 2 === 1;
+    const w = (rotQuarter ? dimY : dimX) * GRID_UNIT;
+    const d = (rotQuarter ? dimX : dimY) * GRID_UNIT;
+    const h = (dimZ === 0 ? 0.16 : dimZ) * HEIGHT_UNIT;
+    return { hw: w / 2, hd: d / 2, h };
+  }
+
+  function findSupportSurfaceAt(wx, wy, wz) {
+    if (typeof worldBuildings === 'undefined' || wy <= 0.05) return null;
+    for (let i = 0; i < worldBuildings.length; i++) {
+      const b = worldBuildings[i];
+      if (typeof b.wx !== 'number' || typeof b.wz !== 'number') continue;
+      const bDef = getBuildingTableDef(b.type);
+      const { hw, hd, h } = getOrientedHalfExtents(bDef, b.rot || 0);
+      const topY = (b.wy || 0) + h;
+      if (Math.abs(topY - wy) <= 0.35 && Math.abs(wx - b.wx) <= hw + 0.25 && Math.abs(wz - b.wz) <= hd + 0.25) {
+        return { bld: b, def: bDef };
+      }
+    }
+    return null;
+  }
+
+  function checkVolumeOverlap(placeDef, wx, wy, wz, rotDeg) {
+    if (!placeDef || placeDef.occupancyMode === '不占格') return null;
+    if (typeof worldBuildings === 'undefined') return null;
+    const a = getOrientedHalfExtents(placeDef, rotDeg);
+    const epsA_x = Math.min(0.28, a.hw * 0.25);
+    const epsA_z = Math.min(0.28, a.hd * 0.25);
+    const epsA_y = Math.min(0.28, a.h * 0.25);
+    const aMinX = wx - a.hw + epsA_x, aMaxX = wx + a.hw - epsA_x;
+    const aMinZ = wz - a.hd + epsA_z, aMaxZ = wz + a.hd - epsA_z;
+    const aMinY = wy + epsA_y, aMaxY = wy + a.h - epsA_y;
+
+    for (let i = 0; i < worldBuildings.length; i++) {
+      const b = worldBuildings[i];
+      if (typeof b.wx !== 'number' || typeof b.wz !== 'number') continue;
+      const bDef = getBuildingTableDef(b.type);
+      if (bDef && bDef.occupancyMode === '不占格') continue;
+      const bExt = getOrientedHalfExtents(bDef, b.rot || 0);
+      const epsB_x = Math.min(0.28, bExt.hw * 0.25);
+      const epsB_z = Math.min(0.28, bExt.hd * 0.25);
+      const epsB_y = Math.min(0.28, bExt.h * 0.25);
+      const bMinX = b.wx - bExt.hw + epsB_x, bMaxX = b.wx + bExt.hw - epsB_x;
+      const bMinZ = b.wz - bExt.hd + epsB_z, bMaxZ = b.wz + bExt.hd - epsB_z;
+      const bMinY = (b.wy || 0) + epsB_y, bMaxY = (b.wy || 0) + bExt.h - epsB_y;
+
+      if (aMinX < bMaxX && aMaxX > bMinX && aMinZ < bMaxZ && aMaxZ > bMinZ && aMinY < bMaxY && aMaxY > bMinY) {
+        return `体积占格冲突：与【${b.name || (bDef ? bDef.name : b.type)}】空间重叠`;
+      }
+    }
+    return null;
+  }
+
+  function evaluatePlacementRule(placeKey, ctx = {}) {
+    const placeDef = getBuildingTableDef(placeKey);
+    if (!placeDef) {
+      return { allowed: true, reason: null, snapType: null, statusText: '📐 默认网格对齐' };
+    }
+    const rule = placeDef.placementRule || (placeDef.canPlaceOnRawMap ? 'raw_or_surface' : 'surface_only');
+    const targetBld = ctx.targetBld || null;
+    const targetDef = targetBld ? getBuildingTableDef(targetBld.type) : null;
+    const targetTopStackable = ctx.targetTopStackable !== undefined
+      ? !!ctx.targetTopStackable
+      : (targetDef ? !!targetDef.topStackable : true);
+    const hitNormalY = ctx.hitNormalY || 0;
+    const onRawGround = !!ctx.onRawGround;
+    const node = ctx.resourceNode || null;
+    const shouldCheckOverlap = ctx.checkOverlap !== false;
+    const overlapCheck = () => (shouldCheckOverlap && typeof ctx.wx === 'number')
+      ? checkVolumeOverlap(placeDef, ctx.wx, ctx.wy || 0, ctx.wz || 0, ctx.rotDeg || 0)
+      : null;
+
+    if (rule === 'ore_node') {
+      if (!node || node.kind !== 'ore_node') {
+        return {
+          allowed: false,
+          reason: `${placeDef.name} (${placeDef.code}) 只能放置在原始地图的矿脉节点上`,
+          snapType: null,
+          statusText: '⛔ 需对准原始地图【矿脉节点】放置'
+        };
+      }
+      const ov = overlapCheck();
+      if (ov) return { allowed: false, reason: ov, snapType: null, statusText: `⛔ ${ov}` };
+      return { allowed: true, reason: null, snapType: 'ore_node', statusText: `⛏️ 矿脉节点吸附: ${node.label}` };
+    }
+
+    if (rule === 'water_node') {
+      if (!node || node.kind !== 'water_node') {
+        return {
+          allowed: false,
+          reason: `${placeDef.name} (${placeDef.code}) 只能放置在原始地图的水源/液源节点上`,
+          snapType: null,
+          statusText: '⛔ 需对准原始地图【水源/液源节点】放置'
+        };
+      }
+      const ov = overlapCheck();
+      if (ov) return { allowed: false, reason: ov, snapType: null, statusText: `⛔ ${ov}` };
+      return { allowed: true, reason: null, snapType: 'water_node', statusText: `💧 水源节点吸附: ${node.label}` };
+    }
+
+    if (rule === 'belt_processor') {
+      if (!targetBld || !isConveyorType(targetBld.type)) {
+        return {
+          allowed: false,
+          reason: `${placeDef.name} (${placeDef.code}) 属于【带处理器 · 不占格】，必须直接架设在传送带上`,
+          snapType: null,
+          statusText: `⛔ 【带处理器】需对准传送带放置 (${placeDef.occupancyMode})`
+        };
+      }
+      return {
+        allowed: true,
+        reason: null,
+        snapType: 'belt_processor',
+        statusText: `⚙️ 带处理器吸附（不占格）: ${targetBld.name || '传送带'}`
+      };
+    }
+
+    if (rule === 'slot_thermal') {
+      if (!targetBld || targetBld.type !== 'power_engine') {
+        return {
+          allowed: false,
+          reason: `${placeDef.name} (${placeDef.code}) 必须安装在【灵力引擎（下）(BD_147)】顶部热能插槽上`,
+          snapType: null,
+          statusText: '⛔ 需插在【灵力引擎（下）】顶部插槽'
+        };
+      }
+      return { allowed: true, reason: null, snapType: 'engine_chamber', statusText: '🔌 插槽吸附: 灵力引擎热能位' };
+    }
+
+    if (rule === 'slot_fluid') {
+      if (!targetBld || targetBld.type !== 'fluid_hub') {
+        return {
+          allowed: false,
+          reason: `${placeDef.name} (${placeDef.code}) 属于液体插件，必须插入【流体处理中枢 (BD_158)】顶部插槽`,
+          snapType: null,
+          statusText: '⛔ 需插在【流体处理中枢 (BD_158)】插槽'
+        };
+      }
+      return { allowed: true, reason: null, snapType: 'fluid_hub', statusText: '🔌 插槽吸附: 流体处理中枢' };
+    }
+
+    if (rule === 'slot_bio') {
+      if (!targetBld || targetBld.type !== 'bio_base') {
+        return {
+          allowed: false,
+          reason: `${placeDef.name} (${placeDef.code}) 属于生物插件，必须插入【营养基座 (BD_159)】顶部插槽`,
+          snapType: null,
+          statusText: '⛔ 需插在【营养基座 (BD_159)】插槽'
+        };
+      }
+      return { allowed: true, reason: null, snapType: 'bio_base', statusText: '🔌 插槽吸附: 营养基座' };
+    }
+
+    if (rule === 'surface_only') {
+      if (onRawGround) {
+        return {
+          allowed: false,
+          reason: `${placeDef.name} (${placeDef.code}) 不可直接放原始地图，请先铺设【建筑底座】或放到顶部可放的平台表面`,
+          snapType: null,
+          statusText: '⛔ 不可放原始地图：需放在【建筑底座/平台】上'
+        };
+      }
+      if (targetBld && hitNormalY > 0.45 && !targetTopStackable) {
+        return {
+          allowed: false,
+          reason: `${targetBld.name || '该设施'} 顶部不可放 (策划表: 否)`,
+          snapType: null,
+          statusText: `⛔ 顶部不可放置 (${targetBld.name || targetBld.type})`
+        };
+      }
+      const ov = overlapCheck();
+      if (ov) return { allowed: false, reason: ov, snapType: null, statusText: `⛔ ${ov}` };
+      const dimTxt = `${placeDef.dimX}×${placeDef.dimY}×${placeDef.dimZ}格`;
+      return {
+        allowed: true,
+        reason: null,
+        snapType: 'surface',
+        statusText: `🧱 平台/顶面放置 (${dimTxt} · ${placeDef.occupancyMode || '体积占格'})`
+      };
+    }
+
+    // raw_or_surface
+    if (targetBld && hitNormalY > 0.45 && !targetTopStackable) {
+      return {
+        allowed: false,
+        reason: `${targetBld.name || '该设施'} 顶部不可放 (策划表: 否)`,
+        snapType: null,
+        statusText: `⛔ 顶部不可放置 (${targetBld.name || targetBld.type})`
+      };
+    }
+    const ov = overlapCheck();
+    if (ov) return { allowed: false, reason: ov, snapType: null, statusText: `⛔ ${ov}` };
+    const dimTxt = `${placeDef.dimX}×${placeDef.dimY}×${placeDef.dimZ}格`;
+    return {
+      allowed: true,
+      reason: null,
+      snapType: onRawGround ? 'raw_map' : 'surface',
+      statusText: onRawGround
+        ? `📐 原始地图直接放置 (${dimTxt} · [ / ] 调高)`
+        : `🧱 积木表面堆叠 (${dimTxt})`
+    };
   }
 
   // 常用复用材质
@@ -241,22 +454,85 @@
       environmentGroup.add(grp);
     });
 
-    // 4. 场边灵脉晶簇与外星棕榈树
-    const crystalMat = stdMat(0x00f0ff, 0.2, 0.4, 0x00aaff, 0.75);
-    const oreSpots = [
-      [-18, -14], [22, -12], [-24, 14], [20, 16]
+    // 4. 原始地图可交互矿脉节点与水源节点 (用于采矿机 BD_135 与抽水机 BD_134 放置校验)
+    resourceNodes.length = 0;
+    resourceNodeMeshes.length = 0;
+
+    const oreDefs = [
+      { id: 'ore_fe_1', kind: 'ore_node', x: -21, z: -6, label: '玄铁矿脉 #1', color: 0x38bdf8, emissive: 0x0284c7 },
+      { id: 'ore_fe_2', kind: 'ore_node', x: -29, z: 0, label: '玄铁矿脉 #2', color: 0x38bdf8, emissive: 0x0284c7 },
+      { id: 'ore_cu_1', kind: 'ore_node', x: -21, z: 6, label: '赤铜矿脉 #1', color: 0xf59e0b, emissive: 0xd97706 },
+      { id: 'ore_cu_2', kind: 'ore_node', x: -29, z: 12, label: '赤铜矿脉 #2', color: 0xf59e0b, emissive: 0xd97706 },
+      { id: 'ore_coal_free', kind: 'ore_node', x: -24, z: -14, label: '富煤矿脉 [空闲可采]', color: 0x94a3b8, emissive: 0x475569 },
+      { id: 'ore_lingshi_free', kind: 'ore_node', x: -24, z: 18, label: '外星灵石矿(辐射矿) [空闲可采]', color: 0x22d3ee, emissive: 0x0891b2 },
+      { id: 'ore_quartz_free', kind: 'ore_node', x: 26, z: -8, label: '石英砂矿脉 [空闲可采]', color: 0xe2e8f0, emissive: 0x94a3b8 },
+      { id: 'ore_fe_free', kind: 'ore_node', x: 26, z: 8, label: '纯玄铁矿脉 [空闲可采]', color: 0x38bdf8, emissive: 0x0369a1 }
     ];
-    oreSpots.forEach(([ox, oz]) => {
+    oreDefs.forEach((nd) => {
+      resourceNodes.push(nd);
       const cluster = new THREE.Group();
-      for (let k = 0; k < 4; k++) {
-        const shard = new THREE.Mesh(new THREE.OctahedronGeometry(0.6 + k * 0.18, 0), crystalMat);
-        shard.position.set((k - 1.5) * 0.55, 0.5 + k * 0.2, (k % 2) * 0.4);
-        shard.rotation.set(0.2 * k, k * 0.9, 0.15 * k);
+      const pad = new THREE.Mesh(
+        new THREE.CylinderGeometry(2.6, 3.0, 0.22, 8),
+        stdMat(0x2d3748, 0.75, 0.35, nd.emissive, 0.25)
+      );
+      pad.position.y = 0.11;
+      pad.receiveShadow = true;
+      pad.userData.resourceNode = nd;
+      cluster.add(pad);
+      resourceNodeMeshes.push(pad);
+
+      const shardMat = stdMat(nd.color, 0.2, 0.45, nd.emissive, 0.85);
+      for (let k = 0; k < 5; k++) {
+        const shard = new THREE.Mesh(new THREE.OctahedronGeometry(0.58 + (k % 3) * 0.22, 0), shardMat);
+        const angle = (k / 5) * Math.PI * 2;
+        shard.position.set(Math.cos(angle) * 1.15, 0.55 + (k % 2) * 0.25, Math.sin(angle) * 1.15);
+        shard.rotation.set(0.25 * k, k * 0.9, 0.15 * k);
         shard.castShadow = true;
+        shard.userData.resourceNode = nd;
         cluster.add(shard);
+        resourceNodeMeshes.push(shard);
       }
-      cluster.position.set(ox, 0, oz);
+      cluster.position.set(nd.x, 0, nd.z);
       environmentGroup.add(cluster);
+    });
+
+    const waterDefs = [
+      { id: 'water_1', kind: 'water_node', x: -15, z: 17, label: '清水水源 #1', color: 0x06b6d4, emissive: 0x0891b2 },
+      { id: 'water_2', kind: 'water_node', x: -7, z: 17, label: '清水水源 #2', color: 0x06b6d4, emissive: 0x0891b2 },
+      { id: 'water_free', kind: 'water_node', x: -16, z: 26, label: '天然清水泉 [空闲可抽]', color: 0x22d3ee, emissive: 0x0284c7 },
+      { id: 'oil_free', kind: 'water_node', x: -6, z: 26, label: '原油渗点 [空闲可抽]', color: 0x334155, emissive: 0x7c2d12 },
+      { id: 'spirit_free', kind: 'water_node', x: 24, z: 18, label: '灵泉液眼 [空闲可抽]', color: 0x34d399, emissive: 0x059669 }
+    ];
+    waterDefs.forEach((nd) => {
+      resourceNodes.push(nd);
+      const poolGrp = new THREE.Group();
+      const rim = new THREE.Mesh(
+        new THREE.TorusGeometry(2.35, 0.22, 8, 24),
+        stdMat(0x475569, 0.8, 0.25, nd.emissive, 0.35)
+      );
+      rim.rotation.x = Math.PI / 2;
+      rim.position.y = 0.12;
+      rim.userData.resourceNode = nd;
+      poolGrp.add(rim);
+      resourceNodeMeshes.push(rim);
+
+      const poolMat = new THREE.MeshStandardMaterial({
+        color: nd.color,
+        emissive: nd.emissive,
+        emissiveIntensity: 0.7,
+        roughness: 0.15,
+        metalness: 0.2,
+        transparent: true,
+        opacity: 0.78
+      });
+      const waterMesh = new THREE.Mesh(new THREE.CylinderGeometry(2.25, 2.25, 0.16, 20), poolMat);
+      waterMesh.position.y = 0.09;
+      waterMesh.userData.resourceNode = nd;
+      poolGrp.add(waterMesh);
+      resourceNodeMeshes.push(waterMesh);
+
+      poolGrp.position.set(nd.x, 0, nd.z);
+      environmentGroup.add(poolGrp);
     });
 
     // 5. 空中飘浮灵气微粒
@@ -1440,7 +1716,7 @@
 
     document.addEventListener('mousedown', (e) => {
       if (isModalBlockingWorld()) return;
-      if (e.target.closest('button, input, select, a, .hud-panel, #dspBuildHotbarRoot, #combatHudBar, #sysActionsContainer, #buildModeHudOverlay, #dismantleConsoleStrip, #buildModal, #craftModal, #invModal, #machineModal, #storageBoxModal, #cpuProcessorModal, #jinShenModal, #fabaoModal, #codexModal, #hubMilestoneModal')) {
+      if (e.target.closest('button, input, select, a, .hud-panel, #dspBuildHotbarRoot, #combatHudBar, #sysActionsContainer, #buildModeHudOverlay, #dismantleConsoleStrip, #buildModal, #craftModal, #invModal, #machineModal, #storageBoxModal, #techTreeModal, #jinShenModal, #fabaoModal, #codexModal, #hubMilestoneModal')) {
         return;
       }
 
@@ -1498,7 +1774,7 @@
     document.addEventListener('wheel', (e) => {
       if (isModalBlockingWorld()) return;
       if (typeof isBuildPlacingMode !== 'undefined' && isBuildPlacingMode) return; // 建造模式下滚轮交给旋转逻辑
-      if (e.target.closest('#buildModal, #craftModal, #invModal, #machineModal, #codexModal, #cpuProcessorModal, #jinShenModal, #fabaoModal')) return;
+      if (e.target.closest('#buildModal, #craftModal, #invModal, #machineModal, #codexModal, #techTreeModal, #jinShenModal, #fabaoModal')) return;
 
       camState.distance = Math.max(
         camState.minDist,
@@ -1706,17 +1982,91 @@
 
     raycaster.setFromCamera(mouseNDC, camera);
 
-    // A. 建造模式：3D 积木搭建、顶面堆叠与母座插槽吸附 (严格遵守策划表 topStackable 与 dimX/Y/Z)
+    // A. 建造模式：3D 积木搭建、资源节点校验、带处理器/母座插槽吸附、体积占格校验
     if (typeof isBuildPlacingMode !== 'undefined' && isBuildPlacingMode && groundPlane) {
       const placeKey = (typeof currentPlacingBuildingKey !== 'undefined') ? currentPlacingBuildingKey : 'foundation';
       window._world3DSlotSnapTarget = null;
       window._world3DPlacementBlockedReason = null;
 
+      const nodeHits = resourceNodeMeshes.length > 0 ? raycaster.intersectObjects(resourceNodeMeshes, false) : [];
       const bldHits = raycaster.intersectObjects(visibleInteractableMeshes, false);
       const groundHits = raycaster.intersectObject(groundPlane);
       const subModeEl = document.getElementById('buildPlacingSubMode');
       const placeDef = getBuildingTableDef(placeKey);
+      const rule = placeDef ? (placeDef.placementRule || (placeDef.canPlaceOnRawMap ? 'raw_or_surface' : 'surface_only')) : 'raw_or_surface';
       const stepGrid = GRID_UNIT;
+      const rotDeg = (typeof placingRotationAngle !== 'undefined') ? placingRotationAngle : 0;
+
+      const applySubModeBadge = (txt, allowed) => {
+        if (!subModeEl) return;
+        subModeEl.innerText = txt;
+        subModeEl.className = allowed
+          ? 'text-[10px] bg-black/75 border border-emerald-400/60 text-emerald-200 px-2.5 py-0.5 rounded-full mb-2 shadow'
+          : 'text-[10px] bg-rose-950/90 border border-rose-500/80 text-rose-200 px-2.5 py-0.5 rounded-full mb-2 shadow font-bold';
+      };
+
+      const findNearbyNode = (pt) => {
+        if (!pt) return null;
+        let best = null;
+        let bestDist = 4.0;
+        for (let i = 0; i < resourceNodes.length; i++) {
+          const nd = resourceNodes[i];
+          const d = Math.hypot(pt.x - nd.x, pt.z - nd.z);
+          if (d <= bestDist) {
+            bestDist = d;
+            best = nd;
+          }
+        }
+        return best;
+      };
+
+      // 特例 1：矿机 (BD_135) / 抽水机 (BD_134) 强制对准原始地图矿脉/水源节点
+      if ((rule === 'ore_node' || rule === 'water_node') && hologramGroup) {
+        const directNode = (nodeHits.length > 0 && nodeHits[0].object.userData.resourceNode) ? nodeHits[0].object.userData.resourceNode : null;
+        const groundPt = groundHits.length > 0 ? groundHits[0].point : (bldHits.length > 0 ? bldHits[0].point : null);
+        const matchedNode = directNode || findNearbyNode(groundPt);
+
+        let snapX = 0, snapY = 0, snapZ = 0, evalRes = null;
+        if (matchedNode && !(bldHits.length > 0 && matchedNode.kind !== rule)) {
+          snapX = matchedNode.x;
+          snapY = 0;
+          snapZ = matchedNode.z;
+          evalRes = evaluatePlacementRule(placeKey, { resourceNode: matchedNode, onRawGround: true, wx: snapX, wy: snapY, wz: snapZ, rotDeg });
+        } else if (bldHits.length > 0) {
+          const hit = bldHits[0];
+          snapX = Math.round(hit.point.x / stepGrid) * stepGrid;
+          snapY = Math.round((hit.point.y) * 100) / 100;
+          snapZ = Math.round(hit.point.z / stepGrid) * stepGrid;
+          evalRes = evaluatePlacementRule(placeKey, {
+            targetBld: hit.object.userData.bld,
+            resourceNode: findNearbyNode(hit.point),
+            onRawGround: false,
+            wx: snapX,
+            wy: snapY,
+            wz: snapZ,
+            rotDeg
+          });
+        } else if (groundHits.length > 0) {
+          const pt = groundHits[0].point;
+          snapX = Math.round(pt.x / stepGrid) * stepGrid;
+          snapY = 0;
+          snapZ = Math.round(pt.z / stepGrid) * stepGrid;
+          evalRes = evaluatePlacementRule(placeKey, { resourceNode: matchedNode, onRawGround: true, wx: snapX, wy: snapY, wz: snapZ, rotDeg });
+        }
+
+        if (evalRes) {
+          window._world3DPlacementBlockedReason = evalRes.allowed ? null : evalRes.reason;
+          updateHologram(placeKey);
+          hologramGroup.visible = true;
+          hologramGroup.position.set(snapX, snapY + 0.02, snapZ);
+          hologramGroup.rotation.y = -(rotDeg * Math.PI) / 180;
+          window._world3DPlaceCoords = { wx: snapX, wy: snapY, wz: snapZ };
+          applySubModeBadge(evalRes.statusText, evalRes.allowed);
+        } else {
+          hideHologram();
+        }
+        return;
+      }
 
       if (bldHits.length > 0 && hologramGroup) {
         const hit = bldHits[0];
@@ -1724,84 +2074,144 @@
         const targetEntry = targetBld ? buildingMeshMap.get(targetBld.id) : null;
         const targetGroup = targetEntry ? targetEntry.group : null;
 
-        // 1. 复合母座插槽吸附 (例如把 冶炼舱/炼丹炉 吸到 灵力引擎 上，或 搅拌机/离心机/提取器 吸到 流体中枢 上)
-        if (targetBld && targetBld.type === 'power_engine' && (placeKey === 'smelt_chamber' || placeKey === 'furnace' || placeKey === 'bd_163')) {
-          const localX = targetGroup ? hit.point.x - targetGroup.position.x : 0;
+        // 1. 复合母座与带处理器插槽吸附 (冶炼舱/炼丹炉 -> 灵力引擎；流体插件 -> 流体中枢；生物插件 -> 营养基座；带处理器 -> 传送带)
+        if (targetBld && targetGroup && targetBld.type === 'power_engine' && rule === 'slot_thermal') {
+          const localX = hit.point.x - targetGroup.position.x;
           const slotIdx = localX < -1.2 ? 0 : (localX > 1.2 ? 2 : 1);
           const sx = (slotIdx - 1) * 2.24;
+          const snapX = targetGroup.position.x + sx;
+          const snapY = targetGroup.position.y + (targetGroup.userData.topY || 4.0);
+          const snapZ = targetGroup.position.z;
+          const evalRes = evaluatePlacementRule(placeKey, { targetBld, targetTopStackable: true, hitNormalY: 1, onRawGround: false, wx: snapX, wy: snapY, wz: snapZ, rotDeg });
+          window._world3DPlacementBlockedReason = evalRes.allowed ? null : evalRes.reason;
           updateHologram(placeKey);
           hologramGroup.visible = true;
-          hologramGroup.position.set(targetGroup.position.x + sx, targetGroup.position.y + (targetGroup.userData.topY || 4.0), targetGroup.position.z);
+          hologramGroup.position.set(snapX, snapY, snapZ);
           hologramGroup.rotation.y = targetGroup.rotation.y;
-          window._world3DSlotSnapTarget = { type: 'engine_chamber', slotIndex: slotIdx };
-          window._world3DPlaceCoords = { wx: hologramGroup.position.x, wy: hologramGroup.position.y, wz: hologramGroup.position.z };
-          if (subModeEl) subModeEl.innerText = `🔌 积木插槽吸附: 灵力引擎 #${slotIdx + 1}`;
+          window._world3DSlotSnapTarget = evalRes.allowed ? { type: 'engine_chamber', slotIndex: slotIdx } : null;
+          window._world3DPlaceCoords = { wx: snapX, wy: snapY, wz: snapZ };
+          applySubModeBadge(evalRes.allowed ? `🔌 插槽吸附: 灵力引擎 #${slotIdx + 1}` : evalRes.statusText, evalRes.allowed);
           return;
         }
-        if (targetBld && targetBld.type === 'fluid_hub' && (placeKey === 'mixer' || placeKey === 'extractor' || placeKey === 'centrifuge')) {
+        if (targetBld && targetGroup && targetBld.type === 'fluid_hub' && rule === 'slot_fluid') {
+          const localZ = hit.point.z - targetGroup.position.z;
+          const slotIdx = localZ < 0 ? 0 : 1;
+          const szOff = slotIdx === 0 ? -1.6 : 1.6;
+          const snapX = targetGroup.position.x;
+          const snapY = targetGroup.position.y + 4.16;
+          const snapZ = targetGroup.position.z + szOff;
+          const evalRes = evaluatePlacementRule(placeKey, { targetBld, targetTopStackable: true, hitNormalY: 1, onRawGround: false, wx: snapX, wy: snapY, wz: snapZ, rotDeg });
+          window._world3DPlacementBlockedReason = evalRes.allowed ? null : evalRes.reason;
           updateHologram(placeKey);
           hologramGroup.visible = true;
-          hologramGroup.position.set(targetGroup.position.x, targetGroup.position.y + 4.16, targetGroup.position.z);
+          hologramGroup.position.set(snapX, snapY, snapZ);
           hologramGroup.rotation.y = targetGroup.rotation.y;
-          window._world3DSlotSnapTarget = { type: 'fluid_hub' };
-          window._world3DPlaceCoords = { wx: hologramGroup.position.x, wy: hologramGroup.position.y, wz: hologramGroup.position.z };
-          if (subModeEl) subModeEl.innerText = `🔌 积木插槽吸附: 流体中枢顶部`;
+          window._world3DSlotSnapTarget = evalRes.allowed ? { type: 'fluid_hub', slotIndex: slotIdx } : null;
+          window._world3DPlaceCoords = { wx: snapX, wy: snapY, wz: snapZ };
+          applySubModeBadge(evalRes.allowed ? `🔌 插槽吸附: 流体处理中枢 #${slotIdx + 1}` : evalRes.statusText, evalRes.allowed);
           return;
         }
-        if (targetBld && targetBld.type === 'bio_base' && (placeKey === 'incubator' || placeKey === 'petri_dish')) {
+        if (targetBld && targetGroup && targetBld.type === 'bio_base' && rule === 'slot_bio') {
+          const snapX = targetGroup.position.x;
+          const snapY = targetGroup.position.y + (targetGroup.userData.topY || 2.0);
+          const snapZ = targetGroup.position.z;
+          const evalRes = evaluatePlacementRule(placeKey, { targetBld, targetTopStackable: true, hitNormalY: 1, onRawGround: false, wx: snapX, wy: snapY, wz: snapZ, rotDeg });
+          window._world3DPlacementBlockedReason = evalRes.allowed ? null : evalRes.reason;
           updateHologram(placeKey);
           hologramGroup.visible = true;
-          hologramGroup.position.set(targetGroup.position.x, targetGroup.position.y + (targetGroup.userData.topY || 2.0), targetGroup.position.z);
+          hologramGroup.position.set(snapX, snapY, snapZ);
           hologramGroup.rotation.y = targetGroup.rotation.y;
-          window._world3DSlotSnapTarget = { type: 'bio_base' };
-          window._world3DPlaceCoords = { wx: hologramGroup.position.x, wy: hologramGroup.position.y, wz: hologramGroup.position.z };
-          if (subModeEl) subModeEl.innerText = `🔌 积木插槽吸附: 营养基座顶部`;
+          window._world3DSlotSnapTarget = evalRes.allowed ? { type: 'bio_base' } : null;
+          window._world3DPlaceCoords = { wx: snapX, wy: snapY, wz: snapZ };
+          applySubModeBadge(evalRes.statusText, evalRes.allowed);
+          return;
+        }
+        if (targetBld && targetGroup && isConveyorType(targetBld.type) && rule === 'belt_processor') {
+          const snapX = targetGroup.position.x;
+          const snapY = targetGroup.position.y + 0.35;
+          const snapZ = targetGroup.position.z;
+          const evalRes = evaluatePlacementRule(placeKey, { targetBld, targetTopStackable: false, hitNormalY: 1, onRawGround: false, wx: snapX, wy: snapY, wz: snapZ, rotDeg: targetBld.rot || rotDeg, checkOverlap: false });
+          window._world3DPlacementBlockedReason = evalRes.allowed ? null : evalRes.reason;
+          updateHologram(placeKey);
+          hologramGroup.visible = true;
+          hologramGroup.position.set(snapX, snapY, snapZ);
+          hologramGroup.rotation.y = targetGroup.rotation.y;
+          window._world3DSlotSnapTarget = evalRes.allowed ? { type: 'belt_processor', beltId: targetBld.id } : null;
+          window._world3DPlaceCoords = { wx: snapX, wy: snapY, wz: snapZ };
+          applySubModeBadge(evalRes.statusText, evalRes.allowed);
           return;
         }
 
-        // 2. 积木顶面堆叠 / 侧面贴合 (读取 bd_table.xlsx 的 topStackable)
+        // 2. 积木顶面堆叠 / 侧面贴合 (全面校验 topStackable、surface_only 与体积占格)
         if (targetGroup) {
           const n = hit.face ? hit.face.normal.clone().transformDirection(hit.object.matrixWorld) : new THREE.Vector3(0, 1, 0);
-          let snapX, snapY, snapZ;
+          let snapX, snapY, snapZ, evalCtx;
           if (n.y > 0.45) {
-            if (!targetGroup.userData.topStackable) {
-              window._world3DPlacementBlockedReason = `${targetBld.name || '该设施'} 顶部不可放 (策划表: 否)`;
-            }
-            snapY = Math.round((targetGroup.position.y + (targetGroup.userData.topY || 1.6)) * 100) / 100;
+            snapY = Math.round((targetGroup.position.y + (targetGroup.userData.topY || 2.0)) * 100) / 100;
             snapX = Math.round(hit.point.x / stepGrid) * stepGrid;
             snapZ = Math.round(hit.point.z / stepGrid) * stepGrid;
-            if (subModeEl) {
-              subModeEl.innerText = window._world3DPlacementBlockedReason
-                ? `⛔ 顶部不可放置 (${targetBld.name})`
-                : `🧱 积木顶面堆叠: +${snapY.toFixed(1)}m (${placeDef ? `${placeDef.dimX}×${placeDef.dimY}×${placeDef.dimZ}格` : ''})`;
-            }
+            evalCtx = {
+              targetBld,
+              targetTopStackable: !!targetGroup.userData.topStackable,
+              hitNormalY: n.y,
+              onRawGround: false,
+              wx: snapX,
+              wy: snapY,
+              wz: snapZ,
+              rotDeg
+            };
           } else {
             snapY = targetGroup.position.y;
             snapX = Math.round((hit.point.x + n.x * stepGrid) / stepGrid) * stepGrid;
             snapZ = Math.round((hit.point.z + n.z * stepGrid) / stepGrid) * stepGrid;
-            if (subModeEl) subModeEl.innerText = `🧱 积木侧面贴合: +${snapY.toFixed(1)}m`;
+            const sup = findSupportSurfaceAt(snapX, snapY, snapZ);
+            evalCtx = {
+              targetBld: sup ? sup.bld : targetBld,
+              targetTopStackable: sup && sup.def ? !!sup.def.topStackable : true,
+              hitNormalY: sup ? 1 : 0,
+              onRawGround: !sup,
+              wx: snapX,
+              wy: snapY,
+              wz: snapZ,
+              rotDeg
+            };
           }
+          const evalRes = evaluatePlacementRule(placeKey, evalCtx);
+          window._world3DPlacementBlockedReason = evalRes.allowed ? null : evalRes.reason;
           updateHologram(placeKey);
           hologramGroup.visible = true;
           hologramGroup.position.set(snapX, snapY, snapZ);
-          hologramGroup.rotation.y = -((typeof placingRotationAngle !== 'undefined' ? placingRotationAngle : 0) * Math.PI) / 180;
+          hologramGroup.rotation.y = -(rotDeg * Math.PI) / 180;
           window._world3DPlaceCoords = { wx: snapX, wy: snapY, wz: snapZ };
+          applySubModeBadge(evalRes.statusText, evalRes.allowed);
           return;
         }
       }
 
       if (groundHits.length > 0 && hologramGroup) {
-        updateHologram(placeKey);
         const pt = groundHits[0].point;
         const snapX = Math.round(pt.x / stepGrid) * stepGrid;
         const snapZ = Math.round(pt.z / stepGrid) * stepGrid;
         const snapY = manualStackY;
+        const sup = snapY > 0.05 ? findSupportSurfaceAt(snapX, snapY, snapZ) : null;
+        const evalRes = evaluatePlacementRule(placeKey, {
+          targetBld: sup ? sup.bld : null,
+          targetTopStackable: sup && sup.def ? !!sup.def.topStackable : true,
+          hitNormalY: sup ? 1 : 0,
+          onRawGround: !sup,
+          resourceNode: findNearbyNode(pt),
+          wx: snapX,
+          wy: snapY,
+          wz: snapZ,
+          rotDeg
+        });
+        window._world3DPlacementBlockedReason = evalRes.allowed ? null : evalRes.reason;
+        updateHologram(placeKey);
         hologramGroup.visible = true;
         hologramGroup.position.set(snapX, snapY + 0.02, snapZ);
-        hologramGroup.rotation.y = -((typeof placingRotationAngle !== 'undefined' ? placingRotationAngle : 0) * Math.PI) / 180;
+        hologramGroup.rotation.y = -(rotDeg * Math.PI) / 180;
         window._world3DPlaceCoords = { wx: snapX, wy: snapY, wz: snapZ };
-        const dimTxt = placeDef ? `${placeDef.dimX}×${placeDef.dimY}×${placeDef.dimZ}格` : '';
-        if (subModeEl) subModeEl.innerText = snapY > 0 ? `🧱 悬空高度: +${snapY.toFixed(1)}m (${dimTxt})` : `📐 地面网格对齐 (${dimTxt} · [ / ] 调高)`;
+        applySubModeBadge(evalRes.statusText, evalRes.allowed);
       } else {
         hideHologram();
       }
@@ -1940,6 +2350,8 @@
     toggleAllLabels,
     cycleFloorView,
     openLogisticsConfig: openLogisticsConfigModal,
+    evaluatePlacementRule,
+    getResourceNodes: () => resourceNodes,
     getHoveredBuilding: () => (hoveredHit ? hoveredHit.bld : null)
   };
 

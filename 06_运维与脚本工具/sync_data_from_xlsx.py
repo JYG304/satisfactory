@@ -175,6 +175,7 @@ def main():
         "BD_113": "storage_box",
         "BD_116": "conveyor",
         "BD_121": "vert_conveyor",
+        "BD_123": "merger",
         "BD_124": "splitter",
         "BD_127": "conveyor_limiter",
         "BD_128": "pipe",
@@ -220,12 +221,16 @@ def main():
         rot_step = parse_float(r[9] if len(r) > 9 else 0, 0)
         power_use = parse_float(r[10] if len(r) > 10 else 0, 0)
         power_gen = parse_float(r[11] if len(r) > 11 else 0, 0)
+        power_radius = parse_float(r[12] if len(r) > 12 else 0, 0)
         heat = parse_float(r[13] if len(r) > 13 else 0, 0)
+        container_slots = parse_float(r[14] if len(r) > 14 else 0, 0)
         cost_str = r[15] if len(r) > 15 else ""
         unlock_cond = r[16] if len(r) > 16 else ""
         in_ports = r[17] if len(r) > 17 else "-"
         out_ports = r[18] if len(r) > 18 else "-"
         plugin_slot = r[19] if len(r) > 19 else "无"
+        can_place_raw = (r[20] if len(r) > 20 else "") == "是"
+        occupancy_mode = (r[21] if len(r) > 21 and r[21] else "体积占格")
 
         key = (
             explicit_bd_keys.get(bd_id)
@@ -249,19 +254,61 @@ def main():
             costs.append({"code": item_code, "need": parse_float(cnt, 1)})
 
         net_power = -power_gen if power_gen > 0 else power_use
-        group_map = {
-            "结构": "struct",
-            "仓储": "storage",
-            "传送带": "logistics",
-            "垂直传送带": "logistics",
-            "管道": "logistics",
-            "泵": "prod",
-            "矿机": "prod",
-            "机器": "prod",
-            "带处理器": "prod",
-            "插槽": "prod",
-            "基座": "prod",
-        }
+
+        # 严格归一化到 [Q] 建造菜单的 5 个有效分页: prod / logi / power / org / special
+        if bd_id in ("BD_156", "BD_157", "BD_160"):
+            grp = "special"
+        elif bd_id in ("BD_147", "BD_149", "BD_155") or use_cat == "能源":
+            grp = "power"
+        elif cat in ("传送带", "垂直传送带", "管道") or bd_id in ("BD_127", "BD_151"):
+            grp = "logi"
+        elif cat in ("结构", "仓储"):
+            grp = "org"
+        else:
+            grp = "prod"
+
+        # 从 bd_table.xlsx 字段推导出完整放置规则
+        if bd_id == "BD_135":
+            placement_rule = "ore_node"
+            placement_target = ["ore_node"]
+            placement_desc = "仅限原始地图矿脉节点（玄铁/赤铜/煤/石英/灵石矿）上放置；体积占格；顶部不可放"
+        elif bd_id == "BD_134":
+            placement_rule = "water_node"
+            placement_target = ["water_node"]
+            placement_desc = "仅限原始地图水源/液源节点（清水/原油/灵泉）上放置；体积占格；顶部可放"
+        elif cat == "带处理器":
+            placement_rule = "belt_processor"
+            placement_target = ["conveyor", "bd_117", "bd_118", "bd_119", "bd_120"]
+            placement_desc = "带处理器（不占格）：必须直接架设在传送带上，不可裸放地面或底座"
+        elif cat == "插槽" and "生物" in use_cat:
+            placement_rule = "slot_bio"
+            placement_target = ["bio_base"]
+            placement_desc = "生物插件：必须插入【营养基座 (BD_159)】顶部插槽，严禁裸放地面或普通底座"
+        elif cat == "插槽" and "液体" in use_cat:
+            placement_rule = "slot_fluid"
+            placement_target = ["fluid_hub"]
+            placement_desc = "液体插件：必须插入【流体处理中枢 (BD_158)】顶部插槽（Slot_01 / Slot_02），严禁裸放地面或普通底座"
+        elif bd_id in ("BD_148", "BD_163"):
+            placement_rule = "slot_thermal"
+            placement_target = ["power_engine"]
+            placement_desc = "上部热能组件：必须安装在【灵力引擎（下）(BD_147)】顶部热能插槽上，严禁裸放地面或普通底座"
+        elif can_place_raw:
+            placement_rule = "raw_or_surface"
+            placement_target = ["raw_map", "top_stackable"]
+            placement_desc = f"可直接放原始地图，或放在顶部可放的建筑表面；{occupancy_mode}；顶部{'可放' if top_stack else '不可放'}"
+        else:
+            placement_rule = "surface_only"
+            placement_target = ["top_stackable"]
+            if occupancy_mode == "不占格":
+                occ_note = "；不占格（可贴合工位摆放，顶部可摆设/叠放）"
+            else:
+                occ_note = f"；体积占格；顶部{'可放' if top_stack else '不可放'}"
+            extra_note = (
+                "；需保持周围空间畅通"
+                if bd_id == "BD_155"
+                else ("；需两座传送门配对" if bd_id == "BD_151" else "")
+            )
+            placement_desc = f"不可直接放原始地图，需放在建筑底座或顶部可放的平台表面{occ_note}{extra_note}"
 
         new_buildings[key] = {
             "id": key,
@@ -277,7 +324,14 @@ def main():
             "rotStep": rot_step,
             "power": net_power,
             "powerGen": power_gen,
+            "powerRadius": power_radius,
             "heat": heat,
+            "containerSlots": container_slots,
+            "canPlaceOnRawMap": can_place_raw,
+            "occupancyMode": occupancy_mode,
+            "placementRule": placement_rule,
+            "placementTarget": placement_target,
+            "placementDesc": placement_desc,
             "clockSpeed": 100,
             "hasHeatGlow": heat > 0 or old_obj.get("hasHeatGlow", False),
             "hasHeaterGlow": heat > 0 or old_obj.get("hasHeaterGlow", False),
@@ -287,7 +341,7 @@ def main():
             "unlockCondition": unlock_cond,
             "recipes": [],
             "desc": desc,
-            "group": old_obj.get("group", group_map.get(cat, "prod")),
+            "group": grp,
             "costs": costs,
         }
         bd_id_to_key[bd_id] = key

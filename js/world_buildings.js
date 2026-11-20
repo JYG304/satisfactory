@@ -3603,6 +3603,18 @@ function getBuildableDatabaseFromTable() {
         power: powerStr,
         width: w,
         height: h,
+        dimX: b.dimX || 1,
+        dimY: b.dimY || 1,
+        dimZ: b.dimZ !== undefined ? b.dimZ : 1,
+        topStackable: !!b.topStackable,
+        rotStep: typeof b.rotStep === 'number' ? b.rotStep : 90,
+        canPlaceOnRawMap: !!b.canPlaceOnRawMap,
+        occupancyMode: b.occupancyMode || '体积占格',
+        placementRule: b.placementRule || (b.canPlaceOnRawMap ? 'raw_or_surface' : 'surface_only'),
+        placementDesc: b.placementDesc || '',
+        powerRadius: b.powerRadius || 0,
+        containerSlots: b.containerSlots || 0,
+        pluginSlot: b.pluginSlot || '无',
         costs: costs
       };
       db[key] = itemData;
@@ -3681,10 +3693,26 @@ function updateBuildPlacementHudCard() {
   }
 
   const titleElem = document.getElementById('buildPlacingTitle');
+  const ruleBadgeElem = document.getElementById('buildPlacingRuleBadge');
   const subModeElem = document.getElementById('buildPlacingSubMode');
   const costContainer = document.getElementById('buildPlacingCostCards');
 
   if (titleElem) titleElem.innerText = data.title;
+  if (ruleBadgeElem) {
+    const ruleTagMap = {
+      ore_node: '仅限矿脉节点',
+      water_node: '仅限水源节点',
+      belt_processor: '需架设于传送带上',
+      slot_thermal: '需插于灵力引擎(下)',
+      slot_fluid: '需插于流体中枢',
+      slot_bio: '需插于营养基座',
+      raw_or_surface: '可裸放原始地图',
+      surface_only: '需放底座/可叠加面'
+    };
+    const rTag = ruleTagMap[data.placementRule] || (data.canPlaceOnRawMap ? '可裸放原始地图' : '需放底座/可叠加面');
+    const rotTxt = data.rotStep === 0 ? '不可旋转(0°)' : `旋转步进 ${data.rotStep}°`;
+    ruleBadgeElem.innerText = `${data.dimX || 1}×${data.dimY || 1}×${data.dimZ !== undefined ? data.dimZ : 1}格 · ${rTag} · ${data.occupancyMode || '体积占格'} · ${data.topStackable ? '顶部可放' : '顶部不可放'} · ${rotTxt}`;
+  }
   if (subModeElem) subModeElem.innerText = `🔨 建造模式: ${data.subMode || '默认'}`;
 
   if (costContainer) {
@@ -3780,6 +3808,34 @@ function executeBuildPlacementAt(xRatio, yRatio) {
     showNotification(`【积木装配成功】已将【${data.title}】吸附安装至营养基座顶部插槽！`);
     return;
   }
+  if (slotSnap && slotSnap.type === 'belt_processor') {
+    const coords3dBelt = window._world3DPlaceCoords || null;
+    const beltBld = {
+      id: `bld_${data.key}_${Date.now()}`,
+      type: data.key,
+      name: data.title,
+      tagTitle: `${data.title} [带处理器 · 不占格]`,
+      power: data.power,
+      mountedOnBelt: slotSnap.beltId,
+      x: Math.round(xRatio * 100),
+      y: Math.round(yRatio * 100),
+      wx: coords3dBelt ? coords3dBelt.wx : undefined,
+      wy: coords3dBelt ? coords3dBelt.wy : 0.35,
+      wz: coords3dBelt ? coords3dBelt.wz : undefined,
+      rot: placingRotationAngle,
+      width: data.width,
+      height: data.height,
+      refund: data.costs.map(c => ({ code: c.code, name: c.name, count: c.need, icon: c.icon }))
+    };
+    worldBuildings.push(beltBld);
+    renderWorldBuildings();
+    playUiSound('build_place');
+    updateBuildPlacementHudCard();
+    if (typeof syncInventoryDisplay === 'function') syncInventoryDisplay();
+    if (typeof syncMilestoneTrackerDisplay === 'function') syncMilestoneTrackerDisplay();
+    showNotification(`【带处理器已架设】已将【${data.title}】套在传送带上（不占格）！`);
+    return;
+  }
 
   // 创建世界实体
   const newId = `bld_${data.key}_${Date.now()}`;
@@ -3857,7 +3913,7 @@ document.addEventListener('mousedown', (e) => {
   if (typeof isAnyModalOpen === 'function' && isAnyModalOpen()) {
     return;
   }
-  if (e.target.closest('#buildModal') || e.target.closest('#craftModal') || e.target.closest('#invModal') || e.target.closest('#machineModal') || e.target.closest('#hubMilestoneModal') || e.target.closest('#swordCasketModal') || e.target.closest('#codexModal') || e.target.closest('#cpuProcessorModal') || e.target.closest('#jinShenModal') || e.target.closest('#fabaoModal') || e.target.closest('#dspBuildHotbarRoot') || e.target.closest('#combatHudBar') || e.target.closest('#sysActionsContainer') || e.target.closest('button')) {
+  if (e.target.closest('#buildModal') || e.target.closest('#craftModal') || e.target.closest('#invModal') || e.target.closest('#machineModal') || e.target.closest('#hubMilestoneModal') || e.target.closest('#swordCasketModal') || e.target.closest('#codexModal') || e.target.closest('#techTreeModal') || e.target.closest('#jinShenModal') || e.target.closest('#fabaoModal') || e.target.closest('#dspBuildHotbarRoot') || e.target.closest('#combatHudBar') || e.target.closest('#sysActionsContainer') || e.target.closest('button')) {
     return;
   }
 

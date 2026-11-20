@@ -491,6 +491,7 @@
         </div>
         <div class="text-[10px] text-white/70 font-mono tracking-wider">正在建造:</div>
         <div id="buildPlacingTitle" class="text-sm font-extrabold text-white font-sans drop-shadow tracking-wide mb-1">精炼炉 (BD_102)</div>
+        <div id="buildPlacingRuleBadge" class="text-[10px] bg-slate-900/90 border border-cyan-400/40 text-cyan-200 px-2.5 py-0.5 rounded mb-1 max-w-[380px] text-center font-mono"></div>
         <div id="buildPlacingSubMode" class="text-[10px] bg-black/60 border border-white/20 text-stone-200 px-2 py-0.5 rounded-full mb-2">🔨 建造模式: 默认</div>
         <!-- 成本物料 -->
         <div id="buildPlacingCostCards" class="flex items-center space-x-2"></div>
@@ -2066,6 +2067,14 @@
                 <i class="fa-solid fa-bolt text-[#f5921e] text-sm"></i>
                 <span id="buildDetailPower" class="text-sm font-bold font-mono tracking-wider">10MW</span>
               </div>
+            </div>
+
+            <!-- 放置条件与规格区 -->
+            <div class="mb-3.5">
+              <div class="text-[11px] text-white/50 pb-1 mb-1.5 border-b border-white/10 tracking-wider">
+                放置条件与占格规格
+              </div>
+              <div id="buildDetailPlacementRules" class="space-y-1.5 text-[11px]"></div>
             </div>
 
             <!-- 成本区 (原料消耗卡片) -->
