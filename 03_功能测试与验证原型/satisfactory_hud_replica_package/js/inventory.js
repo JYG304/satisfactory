@@ -1,0 +1,1353 @@
+// ====================================================================
+// js/inventory.js - 玩家背包、装备、天雷淬体与天罡剑匣模块
+// ====================================================================
+
+// 官方 4 大装备槽位体系 (严格对齐策划案: 剑匣、法宝、护甲、飞行载具)
+const playerEquipmentSlots = {
+  artifact: {
+    slotKey: 'artifact',
+    category: '法宝',
+    id: 'fabao_array_embryo',
+    matId: 'MAT_076',
+    name: '法宝阵图胚',
+    icon: 'fa-solid fa-scroll text-yellow-400',
+    quality: '法宝中间态',
+    desc: '绑定前可运输的法宝中间态结构图谱。按 [N] 键呼出法宝界面进行本命神识绑定、导脉注入与煞气淬炼。'
+  },
+  casket: {
+    slotKey: 'casket',
+    category: '剑匣',
+    id: 'casket_tiangang',
+    name: '天罡剑匣',
+    icon: 'fa-solid fa-box-archive text-amber-300',
+    quality: '玄品',
+    desc: '天罡四象本命剑匣，内纳4柄飞剑。点击可直接展开二级飞剑插槽，支持从背包拖入武器。'
+  },
+  armor: {
+    slotKey: 'armor',
+    category: '护甲',
+    id: 'armor_xuantie',
+    name: '玄铁护体罡甲',
+    icon: 'fa-solid fa-shield-halved text-emerald-400',
+    quality: '真品',
+    desc: '玄铁百炼护体宝甲，护体罡气+500，抵御物理冲击与基础环境浊气。'
+  },
+  vehicle: {
+    slotKey: 'vehicle',
+    category: '飞行载具',
+    id: 'vehicle_feizhou',
+    name: '御风飞舟',
+    icon: 'fa-solid fa-plane-up text-sky-400',
+    quality: '玄品',
+    desc: '流线御风浮空载具，提供超高速巡航飞行与深渊跨越能力，双击空格可御空升空。'
+  }
+};
+
+// 点击装备槽检查/交互
+function inspectEquipmentSlot(slotKey) {
+  const equip = playerEquipmentSlots[slotKey];
+  if (!equip) return;
+  if (slotKey === 'casket') {
+    openCasketSecondaryMenu();
+    return;
+  }
+  if (slotKey === 'artifact') {
+    if (typeof toggleFabaoModal === 'function') {
+      toggleFabaoModal();
+      return;
+    }
+  }
+  playUiSound('click');
+  showNotification(`【装备槽·${equip.category}】当前装备: 【${equip.name}】(${equip.quality}) - ${equip.desc}`);
+  const tip = document.getElementById('bagSlotHoverTip');
+  if (tip) {
+    tip.innerHTML = `<span class="text-amber-300 font-bold">[${equip.category}] ${equip.name}</span> <span class="text-cyan-300">(${equip.quality})</span> - ${equip.desc}`;
+  }
+}
+
+// 全局标准 HUD 模态弹窗列表 (用于 100% 严格互斥与防止点击穿透)
+const ALL_HUD_MODAL_IDS = [
+  'buildModal',
+  'craftModal',
+  'invModal',
+  'searchModal',
+  'machineModal',
+  'storageBoxModal',
+  'swordCasketModal',
+  'hubMilestoneModal',
+  'codexModal',
+  'cpuProcessorModal',
+  'jinShenModal',
+  'fabaoModal'
+];
+
+function isAnyModalOpen() {
+  return ALL_HUD_MODAL_IDS.some(id => {
+    const el = document.getElementById(id);
+    return el && !el.classList.contains('hidden');
+  });
+}
+window.isAnyModalOpen = isAnyModalOpen;
+window.ALL_HUD_MODAL_IDS = ALL_HUD_MODAL_IDS;
+
+// 关闭除指定窗口外的其他模态弹窗
+function closeOtherModals(keepId) {
+  ALL_HUD_MODAL_IDS.forEach(id => {
+    if (id !== keepId) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    }
+  });
+  if (keepId !== 'buildModal' && typeof exitBuildPlacingMode === 'function') {
+    exitBuildPlacingMode();
+  }
+}
+window.closeOtherModals = closeOtherModals;
+
+// =========================================================================
+// 储物盒 (箱子 BD_115) 存储系统 (1:1 还原用户上传 Image 1: media_1790463961108.png)
+// =========================================================================
+let storageBoxSlots = [
+  { id: 'iron_plate', name: '工业玄铁板', count: 94, icon: 'fa-solid fa-sheet-plastic text-stone-200', desc: '大面积结构用板材，用于设备外壳与传送带', matId: 'MAT_008' },
+  null, null, null, null, null, null, null,
+  null, null, null, null, null, null, null, null,
+  null, null, null, null, null, null, null, null
+];
+
+function openStorageBoxModal() {
+  playUiSound('click');
+  closeOtherModals('storageBoxModal');
+  const modal = document.getElementById('storageBoxModal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    renderStorageBoxUI();
+    showNotification('已打开【存储】(箱子 BD_115) - 可双向存取、一键拿走全部或储存全部');
+  }
+}
+
+function closeStorageBoxModal() {
+  playUiSound('click');
+  const modal = document.getElementById('storageBoxModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function renderStorageBoxUI() {
+  // 1. 左栏 24 格储物箱 (8列x3行)
+  const boxGrid = document.getElementById('storageBoxSlotsGrid');
+  if (boxGrid) {
+    boxGrid.innerHTML = '';
+    for (let i = 0; i < 24; i++) {
+      const item = storageBoxSlots[i];
+      const slot = document.createElement('div');
+      slot.className = 'w-11 h-11 bg-[#1a1d26] hover:bg-[#2b3140] border border-white/10 hover:border-[#f5921e] rounded flex items-center justify-center relative cursor-pointer group transition';
+      if (item) {
+        slot.title = `[储物箱格位 #${i + 1}] ${item.name} (${item.matId || ''}) x${item.count}\n• 点击转移至随身背包`;
+        slot.onclick = () => transferStorageItem(i, true);
+        slot.innerHTML = `
+          <i class="${item.icon} text-base group-hover:scale-110 transition"></i>
+          <span class="absolute bottom-0.5 right-1 text-[8px] font-mono font-bold text-amber-300 bg-black/70 px-1 rounded">${item.count}</span>
+        `;
+      } else {
+        slot.title = `[空储物格 #${i + 1}]`;
+        slot.innerHTML = `<span class="text-[7px] font-mono text-white/15">${i + 1}</span>`;
+      }
+      boxGrid.appendChild(slot);
+    }
+  }
+
+  // 2. 右栏 24 格随身背包 (8列x3行)
+  const bagGrid = document.getElementById('storagePlayerBagSlotsGrid');
+  if (bagGrid) {
+    bagGrid.innerHTML = '';
+    for (let j = 0; j < 24; j++) {
+      const item = activePlayerBagItems[j];
+      const slot = document.createElement('div');
+      slot.className = 'w-11 h-11 bg-[#161922] hover:bg-[#252a38] border border-white/10 hover:border-[#00f0ff] rounded flex items-center justify-center relative cursor-pointer group transition';
+      if (item) {
+        slot.title = `[背包格位 #${j + 1}] ${item.name} (${item.matId || ''}) x${item.count}\n• 点击存入储物箱`;
+        slot.onclick = () => transferStorageItem(j, false);
+        slot.innerHTML = `
+          <i class="${item.icon} text-base group-hover:scale-110 transition"></i>
+          <span class="absolute bottom-0.5 right-1 text-[8px] font-mono font-bold text-cyan-200 bg-black/70 px-1 rounded">${item.count}</span>
+        `;
+      } else {
+        slot.title = `[空背包格 #${j + 1}]`;
+        slot.innerHTML = `<span class="text-[7px] font-mono text-white/15">${j + 1}</span>`;
+      }
+      bagGrid.appendChild(slot);
+    }
+  }
+}
+
+function transferStorageItem(idx, isFromBox) {
+  playUiSound('click');
+  if (isFromBox) {
+    const item = storageBoxSlots[idx];
+    if (!item) return;
+    let targetIdx = activePlayerBagItems.findIndex(x => x === null);
+    if (targetIdx !== -1) {
+      activePlayerBagItems[targetIdx] = item;
+      storageBoxSlots[idx] = null;
+      showNotification(`【取出物料】已将【${item.name}】x${item.count} 转移至随身背包`);
+    } else {
+      showNotification('背包已满，无法容纳更多物料！');
+    }
+  } else {
+    const item = activePlayerBagItems[idx];
+    if (!item) return;
+    let targetIdx = storageBoxSlots.findIndex(x => x === null);
+    if (targetIdx !== -1) {
+      storageBoxSlots[targetIdx] = item;
+      activePlayerBagItems[idx] = null;
+      showNotification(`【存入物料】已将【${item.name}】x${item.count} 存入储物箱`);
+    } else {
+      showNotification('储物箱已满，无法存放更多物料！');
+    }
+  }
+  renderStorageBoxUI();
+  renderPlayerEquipmentModal();
+}
+
+function takeAllFromStorage() {
+  playUiSound('toggle');
+  let movedCount = 0;
+  for (let i = 0; i < storageBoxSlots.length; i++) {
+    if (storageBoxSlots[i]) {
+      let targetIdx = activePlayerBagItems.findIndex(x => x === null);
+      if (targetIdx !== -1) {
+        activePlayerBagItems[targetIdx] = storageBoxSlots[i];
+        storageBoxSlots[i] = null;
+        movedCount++;
+      }
+    }
+  }
+  renderStorageBoxUI();
+  renderPlayerEquipmentModal();
+  showNotification(`【拿走全部】已将储物箱内 ${movedCount} 组物品全部转移至背包！`);
+}
+
+function storeAllToStorage() {
+  playUiSound('toggle');
+  let movedCount = 0;
+  for (let j = 0; j < activePlayerBagItems.length; j++) {
+    if (activePlayerBagItems[j]) {
+      let targetIdx = storageBoxSlots.findIndex(x => x === null);
+      if (targetIdx !== -1) {
+        storageBoxSlots[targetIdx] = activePlayerBagItems[j];
+        activePlayerBagItems[j] = null;
+        movedCount++;
+      }
+    }
+  }
+  renderStorageBoxUI();
+  renderPlayerEquipmentModal();
+  showNotification(`【储存全部】已将随身背包内 ${movedCount} 组物品全部存入储物箱！`);
+}
+
+function sortStorageBox() {
+  playUiSound('toggle');
+  const items = storageBoxSlots.filter(x => x !== null);
+  items.sort((a, b) => b.count - a.count);
+  for (let i = 0; i < storageBoxSlots.length; i++) {
+    storageBoxSlots[i] = items[i] || null;
+  }
+  renderStorageBoxUI();
+  showNotification('储物箱内物品已自动规整排序');
+}
+
+function sortStoragePlayerBag() {
+  sortPlayerBackpack();
+  renderStorageBoxUI();
+}
+
+// 全局随身背包库存系统 (用于工作台、建造器物料消耗与同步)
+const playerInventory = {
+  iron_ore: 100,            // 玄铁矿 (MAT_001)
+  copper_ore: 80,           // 赤铜矿 (MAT_002)
+  coal: 65,                 // 煤炭 (MAT_004)
+  iron_ingot: 100,          // 玄铁锭 (MAT_006)
+  copper_ingot: 80,         // 赤铜锭 (MAT_007)
+  iron_plate: 120,          // 玄铁板 (MAT_008)
+  iron_powder: 78,          // 玄铁粉 (MAT_009)
+  iron_gear: 60,            // 玄铁齿轮 (MAT_011)
+  lingci_gear: 30,          // 灵磁齿轮 (MAT_012)
+  ling_copper_sheet: 25,    // 导灵铜片 (MAT_013)
+  iron_beam: 50,            // 玄铁梁 (MAT_014)
+  device_interface: 20,     // 设备接口件 (MAT_015)
+  electric_coil: 50,        // 导电线圈 (MAT_016)
+  basic_control_module: 20, // 基础控制模块 (MAT_017)
+  copper_wire: 150,         // 铜线 (MAT_019)
+  refractory_core: 15,      // 耐火炉芯 (MAT_045)
+  wiring_assembly: 30,      // 接线组件 (MAT_069)
+  power_supply_module: 15   // 电源模块 (MAT_070)
+};
+
+// 运行期玩家背包物料列表 (基于 xiuxian_data.js 中的 INITIAL_PLAYER_INVENTORY)
+let backpackInventory = (typeof INITIAL_PLAYER_INVENTORY !== 'undefined') ? [...INITIAL_PLAYER_INVENTORY] : [
+  { item: 'iron_ore', count: 26 },
+  { item: 'copper_ore', count: 28 },
+  { item: 'iron_ingot', count: 46 },
+  { item: 'copper_ingot', count: 25 },
+  { item: 'copper_wire', count: 23 },
+  { item: 'iron_plate', count: 17 },
+  { item: 'iron_gear', count: 20 },
+  { item: 'cultivator_corpse', count: 2 },
+  { item: 'living_tissue', count: 5 },
+  { item: 'neural_bundle', count: 2 },
+  { item: 'iron_powder', count: 45 },
+  { item: 'coal', count: 19 }
+];
+
+// 天罡剑匣 4 个专属飞剑插槽 (严格对齐 48x48px 规格)
+let casketSwords = [
+  { id: 'sword_wood', name: '青灵竹剑', count: 1, icon: 'fa-solid fa-khanda text-emerald-400 rotate-45', desc: '木系灵品飞剑，万木回春，御风疾走，真元恢复+15/秒', type: 'weapon', matId: 'SWORD_01' },
+  { id: 'sword_fire', name: '炽阳炎剑', count: 1, icon: 'fa-solid fa-khanda text-orange-400 rotate-45', desc: '火系玄品飞剑，离火断金，杀伤力+380，破甲穿透+40%', type: 'weapon', matId: 'SWORD_02' },
+  { id: 'sword_ice', name: '玄冰寒魄剑', count: 1, icon: 'fa-solid fa-khanda text-cyan-300 rotate-45', desc: '水系真品飞剑，凝霜封脉，杀伤力+260，护体冰甲+200', type: 'weapon', matId: 'SWORD_03' },
+  null // 剑槽 4 初始空置，等待玩家从背包拖入其他武器
+];
+
+let isCasketTrayOpen = true; // 默认随装备面板展开显示在剑匣旁边
+
+// 默认初始随身 32 格已解锁物品数据 (严格使用《修仙工厂》策划案官方名称)
+const activePlayerBagItems = [
+  { id: 'miner', name: '采矿机', count: 2, icon: 'fa-solid fa-cube text-cyan-300', desc: '自动化采掘地表玄铁矿等基础矿石', matId: 'BD_101' },
+  { id: 'furnace', name: '精炼炉', count: 2, icon: 'fa-solid fa-fire text-orange-400', desc: '基础热炼设备，将矿石熔炼为金属锭', matId: 'BD_102' },
+  { id: 'assembler', name: '加工台', count: 1, icon: 'fa-solid fa-screwdriver-wrench text-amber-300', desc: '基础零件装配成型', matId: 'BD_104' },
+  { id: 'cutter', name: '切割机', count: 1, icon: 'fa-solid fa-bolt text-sky-400', desc: '高速线材与板材精密下料设备', matId: 'BD_105' },
+  { id: 'portable_miner', name: '便携式采矿器', count: 3, icon: 'fa-solid fa-gears text-stone-300', desc: '单体便携手持采掘器', matId: 'TOOL_01' },
+  { id: 'iron_ore', name: '玄铁矿', count: 100, icon: 'fa-solid fa-mountain text-stone-400', desc: '精炼玄铁锭的基础重金属矿石', matId: 'MAT_001' },
+  { id: 'copper_ore', name: '赤铜矿', count: 80, icon: 'fa-solid fa-cubes text-amber-500', desc: '精炼导电赤铜锭的基础有色金属矿石', matId: 'MAT_002' },
+  { id: 'coal', name: '煤炭', count: 65, icon: 'fa-solid fa-fire-flame-curved text-stone-500', desc: '含碳可燃矿物，用于冶炼燃料与热能供应', matId: 'MAT_004' },
+  { id: 'iron_ingot', name: '玄铁锭', count: 58, icon: 'fa-solid fa-bars text-stone-300', desc: '由精炼炉冶炼玄铁矿所得的基础材料', matId: 'MAT_006' },
+  { id: 'copper_ingot', name: '赤铜锭', count: 45, icon: 'fa-solid fa-bars text-amber-400', desc: '由精炼炉熔炼赤铜矿所得的高导电材料', matId: 'MAT_007' },
+  { id: 'iron_plate', name: '玄铁板', count: 120, icon: 'fa-solid fa-sheet-plastic text-stone-200', desc: '大面积结构用板材，用于设备外壳与传送带', matId: 'MAT_008' },
+  { id: 'iron_powder', name: '玄铁粉', count: 30, icon: 'fa-solid fa-braille text-stone-400', desc: '玄铁金属粉末，用于烧结与催化', matId: 'MAT_009' },
+  { id: 'iron_gear', name: '玄铁齿轮', count: 60, icon: 'fa-solid fa-gear text-stone-300', desc: '基础物流、传动骨架与机械零件', matId: 'MAT_011' },
+  { id: 'lingci_gear', name: '灵磁齿轮', count: 25, icon: 'fa-solid fa-gear text-cyan-400', desc: '设备传动件与自动化控制组件', matId: 'MAT_012' },
+  { id: 'ling_copper_sheet', name: '导灵铜片', count: 25, icon: 'fa-solid fa-microchip text-yellow-300', desc: '高纯度赤铜经压延所得的灵气微流薄片', matId: 'MAT_013' },
+  { id: 'iron_beam', name: '玄铁梁', count: 40, icon: 'fa-solid fa-bars-staggered text-stone-400', desc: '设备骨架与设备框架重载结构支撑', matId: 'MAT_014' },
+  { id: 'device_interface', name: '设备接口件', count: 12, icon: 'fa-solid fa-satellite-dish text-sky-400', desc: '通用设备接口；不承担生物加工功能', matId: 'MAT_015' },
+  { id: 'electric_coil', name: '导电线圈', count: 15, icon: 'fa-solid fa-spinner text-yellow-400', desc: '电能核心、动力核心与控制设备的通用电力零件', matId: 'MAT_016' },
+  { id: 'basic_control_module', name: '基础控制模块', count: 8, icon: 'fa-solid fa-microchip text-emerald-400', desc: '智能物流、加工台、主控核心的通用控制零件', matId: 'MAT_017' },
+  { id: 'bio_chip', name: '电子生物芯片', count: 4, icon: 'fa-solid fa-memory text-purple-300', desc: '生物与机器之间的工控元件', matId: 'MAT_018' },
+  { id: 'copper_wire', name: '铜线', count: 150, icon: 'fa-solid fa-plug text-yellow-400', desc: '基础导电用单丝线材，用于绕制线圈与电力传输', matId: 'MAT_019' },
+  { id: 'cultivator_corpse', name: '练气修士尸体', count: 2, icon: 'fa-solid fa-skull text-purple-400', desc: '具有完整经脉结构与微弱残余灵气的修士躯体（策划案官方资源）', matId: 'MAT_020' },
+  { id: 'living_tissue', name: '鲜活生物组织', count: 12, icon: 'fa-solid fa-dna text-rose-400', desc: '含有活性细胞的生物组织块，用于生物合成与芯片接口', matId: 'MAT_021' },
+  { id: 'neural_bundle', name: '神经束', count: 6, icon: 'fa-solid fa-network-wired text-cyan-400', desc: '生物神经信号传导纤维，用于电子生物芯片与灵机控制', matId: 'MAT_022' },
+  { id: 'dry_tissue', name: '脱水生物组织', count: 10, icon: 'fa-solid fa-leaf text-amber-600', desc: '脱水干燥处理后的生物体组织残片', matId: 'MAT_024' },
+  { id: 'raw_water', name: '水源', count: 40, icon: 'fa-solid fa-droplet text-blue-400', desc: '基础天然水体，用于冷却、稀释与溶液配制', matId: 'MAT_033' },
+  { id: 'wiring_assembly', name: '接线组件', count: 30, icon: 'fa-solid fa-diagram-project text-blue-400', desc: '电缆端头、母线排与接线排总成', matId: 'MAT_069' },
+  { id: 'power_supply_module', name: '电源模块', count: 15, icon: 'fa-solid fa-car-battery text-amber-400', desc: '集成变压稳压的独立电源模块', matId: 'MAT_070' },
+  // 特别放入 3 柄飞剑供玩家体验从背包拖入剑匣！
+  { id: 'sword_thunder', name: '紫霄惊雷剑', count: 1, icon: 'fa-solid fa-khanda text-yellow-300 rotate-45', desc: '雷系神品飞剑，九霄天罚，杀伤力+490，暴击率+35%', type: 'weapon', matId: 'SWORD_04' },
+  { id: 'sword_iron', name: '寒铁飞剑', count: 1, icon: 'fa-solid fa-khanda text-cyan-200 rotate-45', desc: '高寒精铁千锤百炼飞剑，御剑杀伤+260，破甲+25%', type: 'weapon', matId: 'SWORD_05' },
+  { id: 'sword_dragon', name: '斩龙巨剑', count: 1, icon: 'fa-solid fa-khanda text-rose-400 rotate-45', desc: '深海龙骨重煞飞剑，破灵碎脉，杀伤力+420', type: 'weapon', matId: 'SWORD_06' },
+  null // 空储物槽 32，供玩家存放从剑匣拖出来的飞剑
+];
+
+let isThunderPurified = false; // 是否已天雷淬体解锁后 40 格
+let currentActiveSword = 'wood'; // 当前出鞘主手飞剑: 'wood' | 'fire' | 'ice' | 'thunder'
+let selectedBagSlotIdx = null;
+
+const swordDefs = {
+  wood: { name: '青灵竹剑', desc: '木系灵品，万木生生，疾风迅捷，灵气恢复 +15/秒', icon: 'fa-khanda text-emerald-300 rotate-45' },
+  fire: { name: '炽阳炎剑', desc: '火系玄品，离火断金，杀伤力 +380，穿透 +40%', icon: 'fa-khanda text-orange-400 rotate-45' },
+  ice: { name: '玄冰寒魄剑', desc: '水系真品，凝霜封脉，杀伤力 +260，护体冰甲 +200', icon: 'fa-khanda text-cyan-300 rotate-45' },
+  thunder: { name: '紫霄惊雷剑', desc: '雷系神品，九霄天罚，杀伤力 +490，暴击 +35%', icon: 'fa-khanda text-yellow-300 rotate-45' }
+};
+
+// 天雷淬体突破触发
+function triggerHeavenThunderPurify() {
+  playUiSound('thunder_strike');
+  const flash = document.getElementById('thunderFlashOverlay');
+  if (flash) {
+    flash.classList.remove('lightning-anim');
+    void flash.offsetWidth; // 触发重绘
+    flash.classList.add('lightning-anim');
+  }
+
+  isThunderPurified = !isThunderPurified;
+
+  if (isThunderPurified) {
+    showNotification('⚡【九天天雷淬体·大圆满】引雷淬脉，打破肉身界限！72 格储物空间全部开辟！');
+    const thunderBtn = document.getElementById('btnHeavenThunder');
+    if (thunderBtn) {
+      thunderBtn.innerHTML = '<i class="fa-solid fa-check text-yellow-300"></i><span>淬体圆满 (已全开)</span>';
+      thunderBtn.className = 'flex items-center space-x-1 px-3 py-1 bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-bold text-xs rounded shadow cursor-pointer transition';
+    }
+  } else {
+    showNotification('【天雷淬体封印重置】储物空间恢复为基础 32 格测试状态');
+    const thunderBtn = document.getElementById('btnHeavenThunder');
+    if (thunderBtn) {
+      thunderBtn.innerHTML = '<i class="fa-solid fa-bolt text-yellow-300 animate-bounce"></i><span>天雷淬体</span>';
+      thunderBtn.className = 'flex items-center space-x-1 px-3 py-1 bg-gradient-to-r from-amber-500 via-purple-600 to-cyan-500 text-white font-bold text-xs rounded shadow-[0_0_15px_rgba(245,158,11,0.6)] cursor-pointer active:scale-95 transition';
+    }
+  }
+
+  renderPlayerEquipmentModal();
+}
+
+let currentEquipSubmenuType = 'swordCasket';
+
+// 切换人像下方展示的装备二级菜单 (剑匣 / 本命法宝 / 护甲 / 飞行载具)
+function showEquipSecondarySubmenu(type) {
+  currentEquipSubmenuType = type;
+  const submenus = {
+    swordCasket: 'swordCasketInlineTray',
+    casket: 'swordCasketInlineTray',
+    artifact: 'artifactSubmenuTray',
+    armor: 'armorSubmenuTray',
+    vehicle: 'vehicleSubmenuTray'
+  };
+
+  ['swordCasketInlineTray', 'artifactSubmenuTray', 'armorSubmenuTray', 'vehicleSubmenuTray'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  });
+
+  const activeId = submenus[type] || 'swordCasketInlineTray';
+  const target = document.getElementById(activeId);
+  if (target) {
+    target.classList.remove('hidden');
+    if (type === 'swordCasket' || type === 'casket') {
+      renderCasketInlineTray();
+    }
+  }
+}
+
+// 点击人像装备槽，展开对应二级菜单 (放置在人像下方原随身快捷栏位置)
+function inspectEquipmentSlot(slotType) {
+  playUiSound('click');
+  showEquipSecondarySubmenu(slotType);
+}
+
+// 点击装备栏【天罡剑匣】直接切换/展开剑匣二级菜单
+function openCasketSecondaryMenu() {
+  playUiSound('sword_draw');
+  showEquipSecondarySubmenu('swordCasket');
+  showNotification('【天罡剑匣·二级菜单】已在下方展开，可拖拽飞剑至右侧储物格进行调配');
+}
+
+// 兼容旧接口
+function toggleSwordCasketInlineTray() {
+  openCasketSecondaryMenu();
+}
+function openSwordCasketModal() {
+  openCasketSecondaryMenu();
+}
+function closeSwordCasketModal() {
+  // 不再隐藏，默认常驻展示二级菜单
+}
+
+// 渲染天罡剑匣二级菜单的 4 个飞剑插槽 (放置在人像下方原随身快捷栏位置)
+function renderCasketInlineTray() {
+  const container = document.getElementById('casketSlotsContainer');
+  if (!container) return;
+  container.innerHTML = '';
+
+  let occupiedCount = 0;
+
+  for (let s = 0; s < 4; s++) {
+    const sword = casketSwords[s];
+    const slotDiv = document.createElement('div');
+    slotDiv.id = `casketSlot_${s}`;
+
+    if (sword) {
+      occupiedCount++;
+      slotDiv.className = 'relative w-full h-12 bg-[#09203a]/95 hover:bg-amber-400/20 border border-amber-400/80 hover:border-amber-300 rounded flex flex-col items-center justify-center p-1 cursor-grab active:cursor-grabbing transition group casket-slot-active';
+      slotDiv.draggable = true;
+      slotDiv.title = `[剑槽 #${s + 1}] ${sword.name} (${sword.matId || ''})\n${sword.desc}\n• 可直接拖拽至右侧背包储物格\n• 可拖拽到其他剑槽调换顺序\n• 点击拔剑出鞘设为主手佩剑`;
+      slotDiv.innerHTML = `
+        <i class="${sword.icon} text-base group-hover:scale-110 group-hover:rotate-6 transition"></i>
+        <span class="absolute top-0.5 left-1 text-[7px] font-mono text-amber-300 font-bold">${s + 1}</span>
+        <span class="absolute bottom-0.5 right-1 text-[7px] font-mono text-amber-200/90 font-bold drop-shadow">1</span>
+        <div class="absolute inset-0 rounded pointer-events-none border border-amber-400/0 group-hover:border-amber-300/60 transition"></div>
+      `;
+
+      // 拖拽事件与点击事件
+      slotDiv.ondragstart = (e) => handleCasketDragStart(e, s);
+      slotDiv.ondragend = handleDragEnd;
+      slotDiv.onclick = () => handleCasketSlotClick(s);
+    } else {
+      // 空插槽 (虚线框，可作为放置目标)
+      slotDiv.className = 'relative w-full h-12 bg-[#061426]/70 border border-dashed border-amber-400/40 hover:border-amber-300/80 rounded flex flex-col items-center justify-center cursor-pointer hover:bg-amber-400/10 transition group';
+      slotDiv.title = `[剑槽 #${s + 1}] 空置中\n从右侧储物矩阵中拖拽飞剑或武器至此槽即可入匣！`;
+      slotDiv.innerHTML = `
+        <i class="fa-solid fa-plus text-xs text-amber-400/40 group-hover:text-amber-300 group-hover:scale-125 transition"></i>
+        <span class="absolute top-0.5 left-1 text-[7px] font-mono text-amber-400/40">${s + 1}</span>
+        <span class="text-[6px] text-amber-300/50 mt-0.5 scale-90">空剑槽</span>
+      `;
+      slotDiv.onclick = () => {
+        playUiSound('click');
+        showNotification(`【天罡剑匣·剑槽 #${s + 1}】当前空置，可直接从右侧储物格拖入飞剑或武器！`);
+      };
+    }
+
+    // 允许作为拖放目标
+    slotDiv.ondragover = handleSlotDragOver;
+    slotDiv.ondragleave = handleSlotDragLeave;
+    slotDiv.ondrop = (e) => handleCasketSlotDrop(e, s);
+
+    container.appendChild(slotDiv);
+  }
+
+  // 更新剑匣计数徽章
+  const badge = document.getElementById('casketOccupiedBadge');
+  if (badge) badge.innerText = `${occupiedCount}/4`;
+  const charCasketBadge = document.getElementById('charCasketCountBadge');
+  if (charCasketBadge) charCasketBadge.innerText = `${occupiedCount}`;
+}
+
+// 点击剑匣飞剑槽：拔剑出鞘设为主手佩剑
+function handleCasketSlotClick(slotIdx) {
+  const sword = casketSwords[slotIdx];
+  if (!sword) return;
+  playUiSound('sword_draw');
+  showNotification(`【拔剑出鞘】主手佩剑切换为：【${sword.name}】！${sword.desc}`);
+  const activeLabel = document.getElementById('activeSwordNameLabel');
+  if (activeLabel) activeLabel.innerText = `${sword.name} (已出鞘持握)`;
+}
+
+// =========================================================================
+// HTML5 原生拖拽事件实现 (从背包拖入剑匣、从剑匣拖回背包、相互调换)
+// =========================================================================
+
+function handleBagDragStart(e, idx) {
+  const item = activePlayerBagItems[idx];
+  if (!item) {
+    e.preventDefault();
+    return;
+  }
+  e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'bag', index: idx }));
+  e.dataTransfer.effectAllowed = 'copyMove';
+  e.target.classList.add('dragging-item');
+  const tip = document.getElementById('bagSlotHoverTip');
+  if (tip) tip.innerHTML = `<span class="text-amber-300 font-bold">正在拖拽: 【${item.name}】</span> - 拖至左上方【天罡剑匣】插槽装入，或拖到其他格位`;
+}
+
+function handleCasketDragStart(e, slotIdx) {
+  const sword = casketSwords[slotIdx];
+  if (!sword) {
+    e.preventDefault();
+    return;
+  }
+  e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'casket', index: slotIdx }));
+  e.dataTransfer.effectAllowed = 'copyMove';
+  e.target.classList.add('dragging-item');
+  const tip = document.getElementById('bagSlotHoverTip');
+  if (tip) tip.innerHTML = `<span class="text-amber-300 font-bold">从剑匣拔出: 【${sword.name}】</span> - 拖至右侧储物矩阵格位即可入包`;
+}
+
+function handleDragEnd(e) {
+  e.target.classList.remove('dragging-item');
+  document.querySelectorAll('.drag-slot-over').forEach(el => el.classList.remove('drag-slot-over'));
+}
+
+function handleSlotDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const target = e.currentTarget;
+  if (!target.classList.contains('drag-slot-over')) {
+    target.classList.add('drag-slot-over');
+  }
+}
+
+function handleSlotDragLeave(e) {
+  e.currentTarget.classList.remove('drag-slot-over');
+}
+
+// 释放到剑匣 4 插槽之一
+function handleCasketSlotDrop(e, targetSlotIdx) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-slot-over');
+  const raw = e.dataTransfer.getData('text/plain');
+  if (!raw) return;
+  let data;
+  try { data = JSON.parse(raw); } catch (err) { return; }
+
+  if (data.type === 'bag') {
+    const bagItem = activePlayerBagItems[data.index];
+    if (!bagItem) return;
+
+    // 将背包物料/武器置换进剑匣
+    const oldCasketSword = casketSwords[targetSlotIdx];
+    casketSwords[targetSlotIdx] = bagItem;
+    activePlayerBagItems[data.index] = oldCasketSword;
+
+    playUiSound('sword_draw');
+    showNotification(`【飞剑入匣】已将【${bagItem.name}】纳入天罡剑匣 [剑槽 #${targetSlotIdx + 1}]！`);
+    renderCasketInlineTray();
+    renderPlayerEquipmentModal();
+  } else if (data.type === 'casket') {
+    const sourceIdx = data.index;
+    if (sourceIdx !== targetSlotIdx) {
+      const temp = casketSwords[sourceIdx];
+      casketSwords[sourceIdx] = casketSwords[targetSlotIdx];
+      casketSwords[targetSlotIdx] = temp;
+      playUiSound('click');
+      showNotification(`【剑位调换】已调整剑槽 #${sourceIdx + 1} 与 剑槽 #${targetSlotIdx + 1} 的飞剑排序`);
+      renderCasketInlineTray();
+    }
+  }
+}
+
+// 释放到背包储物格位之一
+function handleBagSlotDrop(e, targetBagIdx) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-slot-over');
+  const raw = e.dataTransfer.getData('text/plain');
+  if (!raw) return;
+  let data;
+  try { data = JSON.parse(raw); } catch (err) { return; }
+
+  if (data.type === 'casket') {
+    const sword = casketSwords[data.index];
+    if (!sword) return;
+
+    const targetBagItem = activePlayerBagItems[targetBagIdx];
+    activePlayerBagItems[targetBagIdx] = sword;
+    casketSwords[data.index] = targetBagItem;
+
+    playUiSound('sword_draw');
+    showNotification(`【拔剑入包】已将【${sword.name}】移入储物矩阵 [格位 #${targetBagIdx + 1}]！`);
+    renderCasketInlineTray();
+    renderPlayerEquipmentModal();
+  } else if (data.type === 'bag') {
+    const sourceIdx = data.index;
+    if (sourceIdx !== targetBagIdx) {
+      const temp = activePlayerBagItems[sourceIdx];
+      activePlayerBagItems[sourceIdx] = activePlayerBagItems[targetBagIdx];
+      activePlayerBagItems[targetBagIdx] = temp;
+      playUiSound('click');
+      renderPlayerEquipmentModal();
+    }
+  }
+}
+
+// 渲染 72 格 BAG 网格 (前 32 格解锁 + 后 40 格带 X 锁定)
+function renderPlayerEquipmentModal() {
+  const container = document.getElementById('bagGrid72Container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  // 1. 前 32 格：已解锁活跃槽位 (4 行 × 8 列)
+  for (let i = 0; i < 32; i++) {
+    const item = activePlayerBagItems[i];
+    const slotDiv = document.createElement('div');
+    slotDiv.id = `bagSlot_${i}`;
+
+    if (item) {
+      slotDiv.className = `relative w-12 h-12 bg-[#09203a]/90 hover:bg-[#00f0ff]/20 border ${selectedBagSlotIdx === i ? 'border-[#00f0ff] shadow-[0_0_12px_#00f0ff] ring-1 ring-white' : 'border-[#00f0ff]/40 hover:border-[#00f0ff]'} rounded flex flex-col items-center justify-center p-1 cursor-grab active:cursor-grabbing transition group`;
+      slotDiv.draggable = true;
+      slotDiv.ondragstart = (e) => handleBagDragStart(e, i);
+      slotDiv.ondragend = handleDragEnd;
+      slotDiv.onclick = () => inspectBagItem(i, item);
+      slotDiv.title = `[已开辟] ${item.name} (${item.matId || ''}) x${item.count}\n${item.desc}\n• 可拖拽放入左上方剑匣\n• 可在背包格位间拖拽调换`;
+      slotDiv.innerHTML = `
+        <i class="${item.icon} text-lg group-hover:scale-110 transition"></i>
+        <span class="absolute bottom-0.5 right-1 text-[8px] font-mono text-cyan-200 font-bold drop-shadow">${item.count}</span>
+        <span class="absolute top-0.5 left-1 text-[6px] font-mono text-white/30">${i + 1}</span>
+      `;
+    } else {
+      slotDiv.className = 'relative w-12 h-12 bg-[#07192f]/50 border border-[#00f0ff]/20 hover:border-[#00f0ff]/50 rounded flex items-center justify-center cursor-pointer transition';
+      slotDiv.title = `[已开辟] 空置储物格 ${i + 1}\n可从剑匣或其他格位拖拽物料放入`;
+      slotDiv.onclick = () => {
+        playUiSound('click');
+        document.getElementById('bagSlotHoverTip').innerText = `【空置储物槽 #${i + 1}】可存放任意修仙物料、飞剑与法宝`;
+      };
+      slotDiv.innerHTML = `<span class="text-[7px] font-mono text-cyan-500/30">${i + 1}</span>`;
+    }
+
+    // 允许作为拖放目标
+    slotDiv.ondragover = handleSlotDragOver;
+    slotDiv.ondragleave = handleSlotDragLeave;
+    slotDiv.ondrop = (e) => handleBagSlotDrop(e, i);
+
+    container.appendChild(slotDiv);
+  }
+
+  // 额外的策划案高级物料，在天雷淬体后填充
+  const advancedBonusItems = [
+    { name: '高温合金锭', count: 32, icon: 'fa-solid fa-bars text-red-400', desc: 'BD_113冶炼舱高温所得合金材料', matId: 'MAT_026' },
+    { name: '精炼玄铁锭', count: 40, icon: 'fa-solid fa-cubes text-blue-300', desc: '高纯度玄铁精炼产物', matId: 'MAT_027' },
+    { name: '脱水生物组织', count: 18, icon: 'fa-solid fa-dna text-purple-300', desc: '灭活脱水生物标本', matId: 'MAT_028' },
+    { name: '灵根胚体', count: 1, icon: 'fa-solid fa-atom text-emerald-300', desc: '筑基主线人造灵根关键组装件', matId: 'MAT_029' },
+    { name: '导脉合金', count: 25, icon: 'fa-solid fa-microchip text-yellow-300', desc: '经脉兼容高导灵合金', matId: 'MAT_030' },
+    { name: '灵能晶石', count: 64, icon: 'fa-solid fa-gem text-cyan-300', desc: '纯净天地灵能结晶', matId: 'MAT_072' }
+  ];
+
+  // 2. 后 40 格：根据 isThunderPurified 状态决定是带 X 锁定还是全部开辟！
+  for (let j = 32; j < 72; j++) {
+    const slotDiv = document.createElement('div');
+    if (!isThunderPurified) {
+      // 锁定状态 (带 X 交叉线，Image 2 标志特征)
+      slotDiv.className = 'relative w-12 h-12 bg-[#051120]/90 border border-[#00f0ff]/20 rounded flex items-center justify-center cursor-not-allowed group hover:border-red-400/40 transition';
+      slotDiv.title = `[未开辟槽位 #${j + 1}] 点击上方【天雷淬体】引神雷淬脉解锁！`;
+      slotDiv.onclick = () => {
+        playUiSound('craft_fail');
+        showNotification(`【未开辟储物槽 #${j + 1}】点击上方【⚡ 天雷淬体】引神雷打破经脉界限！`);
+      };
+      slotDiv.innerHTML = `
+        <svg class="w-full h-full p-2.5 opacity-50 group-hover:opacity-80 transition" viewBox="0 0 36 36">
+          <line x1="4" y1="4" x2="32" y2="32" stroke="#00f0ff" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="32" y1="4" x2="4" y2="32" stroke="#00f0ff" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <span class="absolute bottom-0.5 right-1 text-[6px] font-mono text-cyan-500/20">${j + 1}</span>
+      `;
+    } else {
+      // 天雷淬体已解锁！(金光/青色开辟槽位)
+      const bonusItem = advancedBonusItems[(j - 32) % advancedBonusItems.length];
+      const hasItem = (j - 32) < advancedBonusItems.length;
+      if (hasItem && bonusItem) {
+        slotDiv.className = 'relative w-12 h-12 bg-[#0a283e]/90 hover:bg-[#00f0ff]/25 border border-amber-400/80 rounded flex flex-col items-center justify-center p-1 cursor-grab active:cursor-grabbing transition shadow-[0_0_8px_rgba(245,158,11,0.3)] group';
+        slotDiv.draggable = true;
+        slotDiv.ondragstart = (e) => handleBagDragStart(e, j);
+        slotDiv.ondragend = handleDragEnd;
+        slotDiv.onclick = () => inspectBagItem(j, bonusItem);
+        slotDiv.title = `[天雷开辟] ${bonusItem.name} x${bonusItem.count}\n${bonusItem.desc}`;
+        slotDiv.innerHTML = `
+          <i class="${bonusItem.icon} text-lg group-hover:scale-110 transition"></i>
+          <span class="absolute bottom-0.5 right-1 text-[8px] font-mono text-amber-200 font-bold drop-shadow">${bonusItem.count}</span>
+          <span class="absolute top-0.5 left-1 text-[6px] font-mono text-amber-400/70">${j + 1}</span>
+        `;
+      } else {
+        slotDiv.className = 'relative w-12 h-12 bg-[#081e32]/60 border border-cyan-400/40 hover:border-cyan-300 rounded flex items-center justify-center cursor-pointer transition';
+        slotDiv.title = `[天雷开辟] 空置储物格 ${j + 1}`;
+        slotDiv.onclick = () => {
+          playUiSound('click');
+          document.getElementById('bagSlotHoverTip').innerText = `【天雷开辟储物槽 #${j + 1}】经脉通达，可收纳万物`;
+        };
+        slotDiv.innerHTML = `<span class="text-[7px] font-mono text-cyan-300/40">${j + 1}</span>`;
+      }
+
+      // 允许作为拖放目标
+      slotDiv.ondragover = handleSlotDragOver;
+      slotDiv.ondragleave = handleSlotDragLeave;
+      slotDiv.ondrop = (e) => handleBagSlotDrop(e, j);
+    }
+    container.appendChild(slotDiv);
+  }
+
+  // 同步渲染剑匣旁边的 4 槽飞剑插槽
+  renderCasketInlineTray();
+
+  // 更新已开辟槽位计数
+  const activeCountElem = document.getElementById('bagActiveCount');
+  if (activeCountElem) activeCountElem.innerText = isThunderPurified ? '72' : '32';
+}
+
+// 点击物料查看详情
+function inspectBagItem(idx, item) {
+  playUiSound('click');
+  selectedBagSlotIdx = idx;
+  const tipElem = document.getElementById('bagSlotHoverTip');
+  if (tipElem) {
+    tipElem.innerHTML = `<span class="text-white font-bold">【${item.name}】</span> <span class="text-cyan-200">x${item.count}</span> <span class="text-white/50">(${item.matId || ''})</span> - <span class="text-cyan-300/80">${item.desc}</span>`;
+  }
+  renderPlayerEquipmentModal();
+}
+
+// 点击左侧与右侧 3D 浮空白卡
+function selectFloatingCard(name, desc) {
+  playUiSound('toggle');
+  showNotification(`【${name}】: ${desc}`);
+}
+
+// 点击人像身上的装备槽位
+function selectEquipSlot(slotType, title, desc) {
+  playUiSound('click');
+  showNotification(`已装配【${title}】: ${desc}`);
+}
+
+// 切换 Tab 背包清单 / 天元全息罗盘中枢
+let currentHoloTab = 'main'; // 'main' (角色与背包一体化), 'map', 'hub', 'craft', 'codex', 'todo', 'stats'
+let currentStatsSubTab = 'world'; // 'player' | 'world' | 'cert'
+
+// 统计面板数据 (严格对照《修仙工厂》策划案_V1_正式版：工控参数、能源负荷、煞气环保与主线进度)
+const STATS_DATA = {
+  world: [
+    { label: '电网总发电量', value: '95 MW', icon: 'fa-solid fa-bolt', cat: '动力电网', color: 'text-yellow-400' },
+    { label: '电网总用电量', value: '62 MW', icon: 'fa-solid fa-plug', cat: '能耗负载', color: 'text-[#00f0ff]' },
+    { label: '电网负荷率', value: '65.3%', icon: 'fa-solid fa-gauge-high', cat: '供电稳态', color: 'text-emerald-400' },
+    { label: '灵力引擎产热', value: '150 ☼', icon: 'fa-solid fa-fire', cat: '母座热能', color: 'text-amber-500' },
+    { label: '冶炼舱热力消耗', value: '100 ☼', icon: 'fa-solid fa-fire-burner', cat: '高温冶炼', color: 'text-orange-400' },
+    { label: '区域环境煞气值', value: '48 / 100', icon: 'fa-solid fa-skull-crossbones', cat: '环境煞气', color: 'text-purple-400' },
+    { label: '回收处理塔浓缩率', value: '100%', icon: 'fa-solid fa-filter', cat: 'BD_150环保', color: 'text-emerald-300' },
+    { label: '煞气浓缩液存量', value: '36 m³', icon: 'fa-solid fa-flask-vial', cat: 'MAT_077物流', color: 'text-purple-300' },
+    { label: '传送带物流吞吐', value: '120 件/分', icon: 'fa-solid fa-arrows-split-up-and-left', cat: '固体干线', color: 'text-sky-400' },
+    { label: '流体管网总流量', value: '45 L/分', icon: 'fa-solid fa-droplet', cat: '流体水路', color: 'text-cyan-300' }
+  ],
+  facility: [
+    { label: '采矿机 (BD_135)', value: '2 台', icon: 'fa-solid fa-mountain', cat: '采掘设备', color: 'text-amber-400' },
+    { label: '精炼炉 (BD_136)', value: '2 台', icon: 'fa-solid fa-fire-burner', cat: '冶炼生产', color: 'text-orange-400' },
+    { label: '粉碎机 (BD_137)', value: '1 台', icon: 'fa-solid fa-braille', cat: '中间件研磨', color: 'text-zinc-300' },
+    { label: '加工台 (BD_138)', value: '1 台', icon: 'fa-solid fa-screwdriver-wrench', cat: '基础机械', color: 'text-stone-300' },
+    { label: '切割机 (BD_139)', value: '1 台', icon: 'fa-solid fa-scissors', cat: '精密切削', color: 'text-yellow-300' },
+    { label: '搅拌机 (BD_143)', value: '1 台', icon: 'fa-solid fa-blender', cat: '流固混合', color: 'text-teal-400' },
+    { label: '离心机 (BD_144)', value: '1 台', icon: 'fa-solid fa-atom', cat: '多相分离', color: 'text-sky-300' },
+    { label: '组装机 (BD_146)', value: '1 台', icon: 'fa-solid fa-industry', cat: '双轨组装', color: 'text-[#00f0ff]' },
+    { label: '复合建筑母机座', value: '3 座', icon: 'fa-solid fa-cubes-stacked', cat: '引擎/营养/流体', color: 'text-emerald-400' },
+    { label: '法宝工坊 (BD_156/157)', value: '2 座', icon: 'fa-solid fa-scroll', cat: '炼宝台/渡劫台', color: 'text-amber-300' }
+  ],
+  progression: [
+    { label: '当前修士境界', value: '练气期四层', icon: 'fa-solid fa-user-astronaut', cat: '道基修为', color: 'text-cyan-300' },
+    { label: '中央处理器认证', value: '练气·第4层', icon: 'fa-solid fa-microchip', cat: '技术认证', color: 'text-amber-400' },
+    { label: '造化金身阶段供料', value: '阶段二 (金身骨架)', icon: 'fa-solid fa-child', cat: '奇观工程', color: 'text-yellow-400' },
+    { label: '人造灵根原型储备', value: '4 / 20 件', icon: 'fa-solid fa-dna', cat: '终局收束', color: 'text-rose-400' },
+    { label: '山河社稷图淬炼', value: '渡劫前置态 (待引雷)', icon: 'fa-solid fa-cloud-bolt', cat: 'ART_001法宝', color: 'text-purple-300' },
+    { label: '随身储物芥子空间', value: '32 / 72 格', icon: 'fa-solid fa-boxes-stacked', cat: '经脉容量', color: 'text-emerald-400' },
+    { label: '地脉勘探标定矿点', value: '4 处富矿', icon: 'fa-solid fa-map-location-dot', cat: '罗盘信标', color: 'text-sky-400' }
+  ]
+};
+
+// 切换统计子选项卡
+function switchStatsSubTab(subTab) {
+  playUiSound('click');
+  currentStatsSubTab = subTab;
+
+  ['world', 'facility', 'progression'].forEach(t => {
+    const btn = document.getElementById(`btnStatsTab_${t}`);
+    if (!btn) return;
+    if (t === subTab) {
+      btn.className = 'px-4 py-2 border-b-2 border-[#00f0ff] bg-[#00f0ff]/15 text-[#00f0ff] font-black text-xs transition flex items-center space-x-1.5 cursor-pointer shadow-[0_2px_10px_rgba(0,240,255,0.2)]';
+    } else {
+      btn.className = 'px-4 py-2 border-b-2 border-transparent text-white/60 hover:text-white hover:bg-white/5 font-bold text-xs transition flex items-center space-x-1.5 cursor-pointer';
+    }
+  });
+
+  renderStatsList();
+}
+
+// 渲染统计条目列表 (赛博工控遥测网格卡片)
+function renderStatsList() {
+  const container = document.getElementById('statsItemsList');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const list = STATS_DATA[currentStatsSubTab] || STATS_DATA.world;
+  const countBadge = document.getElementById('statsTotalCountBadge');
+  if (countBadge) countBadge.innerText = list.length;
+
+  list.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'bg-[#05101d]/90 hover:bg-[#091a2f] border border-[#00f0ff]/20 hover:border-[#00f0ff]/60 rounded-lg p-2.5 transition flex items-center justify-between group shadow-sm';
+    card.innerHTML = `
+      <div class="flex items-center space-x-2.5 min-w-0">
+        <div class="w-8 h-8 rounded-md bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex items-center justify-center ${item.color || 'text-[#00f0ff]'} text-sm shrink-0 group-hover:scale-110 group-hover:bg-[#00f0ff]/20 transition">
+          <i class="${item.icon}"></i>
+        </div>
+        <div class="flex flex-col min-w-0">
+          <span class="text-xs font-bold text-white/90 group-hover:text-cyan-200 transition truncate">${item.label}</span>
+          <span class="text-[9px] font-mono text-cyan-400/50 uppercase tracking-wider">${item.cat}</span>
+        </div>
+      </div>
+      <div class="text-right pl-2 shrink-0">
+        <div class="font-mono font-black text-sm ${item.color || 'text-[#00f0ff]'} drop-shadow-[0_0_6px_rgba(0,240,255,0.3)]">${item.value}</div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// =========================================================================
+// 8. 仙门开拓任务系统 (QUESTS SYSTEM - 阶段突破、宗门订单与日常悬赏)
+// =========================================================================
+let currentQuestSubTab = 'main'; // 'main' | 'sect' | 'daily'
+let trackedQuestId = 'main_01'; // 默认追踪主线一
+
+const QUESTS_DATA = {
+  main: [
+    {
+      id: 'main_01',
+      title: '【阶段一·天工基建奠基】',
+      sub: '筑基大计 · 基础采矿与金属流水线构建',
+      icon: 'fa-solid fa-industry text-amber-400',
+      badge: '主线开拓',
+      badgeColor: 'border-amber-400 text-amber-300 bg-amber-950/70',
+      desc: '于灵脉富矿处布设采矿机 (BD_101) 与精炼炉 (BD_102)，建立首条自动化流水线，完成基础工备储备。',
+      goals: [
+        { text: '开采地脉玄铁矿 (MAT_001)', current: 100, target: 100, done: true },
+        { text: '精炼工业玄铁锭 (MAT_006)', current: 100, target: 100, done: true },
+        { text: '冲压制造玄铁板 (MAT_008)', current: 100, target: 100, done: true }
+      ],
+      rewards: [
+        { name: '中品灵石', count: 1000, icon: 'fa-solid fa-gem text-cyan-300' },
+        { name: '乾坤芥子袋强化符', count: 1, icon: 'fa-solid fa-scroll text-yellow-300' }
+      ],
+      status: 'claimable' // 'in_progress' | 'claimable' | 'claimed'
+    },
+    {
+      id: 'main_02',
+      title: '【阶段二·复合灵力引擎与汲热】',
+      sub: '热能转化 · 灵力引擎 (BD_112) 与 3 联装冶炼舱',
+      icon: 'fa-solid fa-atom text-cyan-400',
+      badge: '复合母机',
+      badgeColor: 'border-cyan-400 text-cyan-300 bg-cyan-950/70',
+      desc: '建造并部署灵力引擎复合底座，在其顶部 3 个插槽中插满 BD_113 冶炼舱，借助 150☼ 核心高温冶炼耐火合金。',
+      goals: [
+        { text: '架设灵力引擎母座 (BD_112)', current: 1, target: 1, done: true },
+        { text: '挂载顶部冶炼舱插件 (BD_113)', current: 3, target: 3, done: true },
+        { text: '被动高温冶炼高级合金锭', current: 50, target: 50, done: true }
+      ],
+      rewards: [
+        { name: '中品灵石', count: 2500, icon: 'fa-solid fa-gem text-cyan-300' },
+        { name: '耐火炉芯强化图谱', count: 1, icon: 'fa-solid fa-fire text-amber-400' }
+      ],
+      status: 'claimable'
+    },
+    {
+      id: 'main_03',
+      title: '【阶段三·流固双中枢与生物矩阵】',
+      sub: '高压稳流 · 流体处理中枢 (BD_132) 与 营养基座 (BD_130)',
+      icon: 'fa-solid fa-dna text-emerald-400',
+      badge: '双母座调配',
+      badgeColor: 'border-emerald-400 text-emerald-300 bg-emerald-950/70',
+      desc: '部署流体处理中枢（顶部热插拔离心机/搅拌机）与营养基座（顶部插载培育仓/培养皿），实现高纯灵液与活性组织培殖。',
+      goals: [
+        { text: '架设流体处理中枢 (BD_132)', current: 1, target: 1, done: true },
+        { text: '插槽装配离心机/搅拌机并运转', current: 1, target: 1, done: true },
+        { text: '架设营养基座 (BD_130) 并插装培育仓', current: 1, target: 1, done: true },
+        { text: '培育高纯成熟灵草幼胚', current: 16, target: 20, done: false }
+      ],
+      rewards: [
+        { name: '上品灵石', count: 5000, icon: 'fa-solid fa-gem text-emerald-300' },
+        { name: '时间加速器超频核心', count: 1, icon: 'fa-solid fa-clock text-amber-400' }
+      ],
+      status: 'in_progress'
+    },
+    {
+      id: 'main_04',
+      title: '【阶段四·中央处理器四象大圆满】',
+      sub: '全域算力 · 青龙/朱雀/白虎/玄武 蓝图引线通达',
+      icon: 'fa-solid fa-microchip text-purple-400',
+      badge: '巅峰阵盘',
+      badgeColor: 'border-purple-400 text-purple-300 bg-purple-950/70',
+      desc: '在中央处理器连线小游戏中，满足四大象限的核心要求，引出导灵光缆逐一破除封印，连通极阳脉冲核心。',
+      goals: [
+        { text: '解锁青龙·初阶熔炼核心并通线', current: 1, target: 1, done: true },
+        { text: '解锁朱雀·高能合金增压核心', current: 1, target: 1, done: true },
+        { text: '解锁白虎·精密切削稳流核心', current: 0, target: 1, done: false },
+        { text: '解锁玄武·四象归一大圆满', current: 0, target: 1, done: false }
+      ],
+      rewards: [
+        { name: '极品金丹法宝·山河社稷图', count: 1, icon: 'fa-solid fa-crown text-yellow-400' },
+        { name: '全厂狂暴脉冲永久权柄', count: 1, icon: 'fa-solid fa-bolt text-red-400' }
+      ],
+      status: 'in_progress'
+    }
+  ],
+  sect: [
+    {
+      id: 'sect_01',
+      title: '【太乙神剑门】玄铁重板千斤急调',
+      sub: '宗门订单 · 飞剑剑胚粗铸物资调拨',
+      icon: 'fa-solid fa-shield text-sky-400',
+      badge: '宗门急调',
+      badgeColor: 'border-sky-400 text-sky-300 bg-sky-950/70',
+      desc: '太乙神剑门新招弟子大比，急需大批工业玄铁板铸造制式剑胚。请速调拨 50 块玄铁板。',
+      goals: [
+        { text: '交付玄铁板 (MAT_008)', current: 50, target: 50, item: 'iron_plate', done: true }
+      ],
+      rewards: [
+        { name: '下品灵石', count: 600, icon: 'fa-solid fa-gem text-sky-300' },
+        { name: '太乙剑意残页', count: 1, icon: 'fa-solid fa-scroll text-yellow-300' }
+      ],
+      status: 'claimable'
+    },
+    {
+      id: 'sect_02',
+      title: '【百草仙谷】高纯成熟灵草采购',
+      sub: '丹道订单 · 聚气灵丹炼制主材配额',
+      icon: 'fa-solid fa-leaf text-emerald-400',
+      badge: '炼丹供给',
+      badgeColor: 'border-emerald-400 text-emerald-300 bg-emerald-950/70',
+      desc: '百草谷长老开炉炼制百草凝元丹，急需培育仓出产的成熟灵草 20 株。',
+      goals: [
+        { text: '交付成熟灵草 (MAT_026)', current: 15, target: 20, item: 'mature_ling_grass', done: false }
+      ],
+      rewards: [
+        { name: '中品灵石', count: 1200, icon: 'fa-solid fa-gem text-emerald-300' },
+        { name: '百草灵肥配方', count: 1, icon: 'fa-solid fa-flask text-teal-300' }
+      ],
+      status: 'in_progress'
+    },
+    {
+      id: 'sect_03',
+      title: '【天机御阵阁】导灵铜片与灵磁齿轮',
+      sub: '阵道订单 · 护山大阵灵脉拓扑组件',
+      icon: 'fa-solid fa-microchip text-yellow-400',
+      badge: '天机阵道',
+      badgeColor: 'border-yellow-400 text-yellow-300 bg-yellow-950/70',
+      desc: '天机阁修缮全山灵脉大阵，需高导灵性的压延铜片 25 份与灵磁齿轮 10 份。',
+      goals: [
+        { text: '交付导灵铜片 (MAT_013)', current: 25, target: 25, item: 'ling_copper_sheet', done: true },
+        { text: '交付灵磁齿轮 (MAT_012)', current: 10, target: 10, item: 'lingci_gear', done: true }
+      ],
+      rewards: [
+        { name: '中品灵石', count: 1800, icon: 'fa-solid fa-gem text-yellow-300' },
+        { name: '阵道强化晶石', count: 2, icon: 'fa-solid fa-cubes text-purple-400' }
+      ],
+      status: 'claimable'
+    }
+  ],
+  daily: [
+    {
+      id: 'daily_01',
+      title: '【日常检修】灵力电网全荷载巡检',
+      sub: '工厂运维 · 维持发电量 ≥ 90 MW 稳态',
+      icon: 'fa-solid fa-bolt text-yellow-400',
+      badge: '日常工控',
+      badgeColor: 'border-stone-400 text-stone-300 bg-stone-900',
+      desc: '保持灵力引擎与生物发电机稳压运转，确保全区电网负载平衡。',
+      goals: [
+        { text: '全域电网发电维持 95 MW', current: 95, target: 90, done: true }
+      ],
+      rewards: [
+        { name: '下品灵石', count: 300, icon: 'fa-solid fa-gem text-cyan-200' },
+        { name: '玄铁修复合金', count: 5, icon: 'fa-solid fa-wrench text-stone-300' }
+      ],
+      status: 'claimable'
+    },
+    {
+      id: 'daily_02',
+      title: '【环保除煞】回收处理塔浓缩煞气',
+      sub: '工坊生态 · 抽取浓缩煞气 20 m³',
+      icon: 'fa-solid fa-skull text-purple-400',
+      badge: '日常除煞',
+      badgeColor: 'border-purple-400 text-purple-300 bg-purple-950/70',
+      desc: '回收工坊逸散的地煞浊气，导入回收塔浓缩为煞气浓缩液。',
+      goals: [
+        { text: '回收煞气浓缩液入管 (MAT_077)', current: 36, target: 20, done: true }
+      ],
+      rewards: [
+        { name: '下品灵石', count: 450, icon: 'fa-solid fa-gem text-purple-300' },
+        { name: '辟煞符箓', count: 2, icon: 'fa-solid fa-scroll text-yellow-400' }
+      ],
+      status: 'claimable'
+    }
+  ]
+};
+
+// 切换任务子选项卡
+function switchQuestSubTab(subTab) {
+  playUiSound('click');
+  currentQuestSubTab = subTab;
+
+  ['main', 'sect', 'daily'].forEach(t => {
+    const btn = document.getElementById(`btnQuestTab_${t}`);
+    if (!btn) return;
+    if (t === subTab) {
+      btn.className = 'px-4 py-2 border-b-2 border-amber-400 bg-amber-400/15 text-amber-300 font-black text-xs transition flex items-center space-x-1.5 cursor-pointer shadow-[0_2px_10px_rgba(245,158,11,0.2)]';
+    } else {
+      btn.className = 'px-4 py-2 border-b-2 border-transparent text-white/60 hover:text-white hover:bg-white/5 font-bold text-xs transition flex items-center space-x-1.5 cursor-pointer';
+    }
+  });
+
+  renderQuestList();
+}
+
+// 渲染任务卡片列表
+function renderQuestList() {
+  const container = document.getElementById('questCardsList');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const list = QUESTS_DATA[currentQuestSubTab] || QUESTS_DATA.main;
+
+  list.forEach(q => {
+    const card = document.createElement('div');
+    const isTracked = (trackedQuestId === q.id);
+    const isClaimable = (q.status === 'claimable');
+    const isClaimed = (q.status === 'claimed');
+
+    card.className = `p-3.5 rounded-xl border ${isTracked ? 'border-[#00f0ff] bg-[#091b2e]' : 'border-white/15 bg-[#08121f]'} hover:border-amber-400/70 transition flex flex-col justify-between space-y-2.5 shadow-md`;
+
+    // 目标项 HTML
+    let goalsHtml = '';
+    q.goals.forEach(g => {
+      const pct = Math.min(100, Math.round((g.current / g.target) * 100));
+      goalsHtml += `
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-[11px] font-mono">
+            <span class="text-white/80 flex items-center space-x-1.5">
+              <i class="fa-solid ${g.done ? 'fa-check text-emerald-400' : 'fa-circle-dot text-amber-400'} text-[9px]"></i>
+              <span>${g.text}</span>
+            </span>
+            <span class="font-bold ${g.done ? 'text-emerald-400' : 'text-amber-300'}">${g.current} / ${g.target} (${pct}%)</span>
+          </div>
+          <div class="w-full h-1.5 bg-black/60 rounded-full overflow-hidden border border-white/10">
+            <div class="h-full bg-gradient-to-r ${g.done ? 'from-emerald-500 to-teal-400' : 'from-amber-500 to-orange-400'} rounded-full transition-all duration-300" style="width: ${pct}%;"></div>
+          </div>
+        </div>
+      `;
+    });
+
+    // 奖励项 HTML
+    let rewardsHtml = '';
+    q.rewards.forEach(r => {
+      rewardsHtml += `
+        <div class="flex items-center space-x-1 px-2 py-0.5 rounded bg-black/50 border border-white/10 text-[10px] font-mono">
+          <i class="${r.icon} text-xs"></i>
+          <span class="text-white">${r.name}</span>
+          <span class="text-amber-300 font-bold">+${r.count}</span>
+        </div>
+      `;
+    });
+
+    // 交互操作按键
+    let actionBtnHtml = '';
+    if (isClaimed) {
+      actionBtnHtml = `
+        <span class="px-3 py-1.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-bold font-mono flex items-center space-x-1">
+          <i class="fa-solid fa-check-double"></i>
+          <span>已领取圆满</span>
+        </span>
+      `;
+    } else if (isClaimable) {
+      actionBtnHtml = `
+        <button onclick="claimQuestReward('${q.id}');" class="px-4 py-1.5 rounded bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-500 hover:scale-105 text-black font-black text-xs shadow-[0_0_15px_#f59e0b] cursor-pointer transition flex items-center space-x-1.5 active:scale-95 animate-pulse">
+          <i class="fa-solid fa-gift"></i>
+          <span>领取丰厚报酬</span>
+        </button>
+      `;
+    } else {
+      actionBtnHtml = `
+        <button onclick="trackQuestToHud('${q.id}');" class="px-3 py-1.5 rounded ${isTracked ? 'bg-[#00f0ff]/20 text-[#00f0ff] border border-[#00f0ff]' : 'bg-white/10 hover:bg-white/20 text-white/80'} text-xs font-bold font-mono transition cursor-pointer flex items-center space-x-1">
+          <i class="fa-solid fa-crosshairs text-xs"></i>
+          <span>${isTracked ? '追踪中' : '追踪至准星'}</span>
+        </button>
+      `;
+    }
+
+    card.innerHTML = `
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-9 h-9 rounded-lg bg-black/40 border border-white/20 flex items-center justify-center text-lg shrink-0">
+            <i class="${q.icon}"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h4 class="text-xs sm:text-sm font-black text-white font-sans">${q.title}</h4>
+              <span class="text-[9px] px-1.5 py-0.5 rounded border font-mono font-bold ${q.badgeColor}">${q.badge}</span>
+            </div>
+            <span class="text-[10px] text-cyan-300/80 font-mono">${q.sub}</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          ${actionBtnHtml}
+        </div>
+      </div>
+
+      <p class="text-[11px] text-white/70 leading-relaxed font-sans bg-black/30 p-2 rounded border border-white/5">
+        ${q.desc}
+      </p>
+
+      <!-- 目标进度项 -->
+      <div class="space-y-2 pt-1">
+        ${goalsHtml}
+      </div>
+
+      <!-- 底部奖励条 -->
+      <div class="flex items-center justify-between pt-2 border-t border-white/10">
+        <div class="flex items-center space-x-2">
+          <span class="text-[10px] text-white/50 font-mono">达成奖励:</span>
+          <div class="flex items-center space-x-1.5">
+            ${rewardsHtml}
+          </div>
+        </div>
+        ${!isClaimed && !isClaimable ? `
+          <button onclick="trackQuestToHud('${q.id}');" class="text-[10px] text-cyan-300 hover:text-white underline cursor-pointer font-mono">
+            ${isTracked ? '已在右上角常驻' : '置顶追踪'}
+          </button>
+        ` : ''}
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+// 追踪任务至 HUD
+function trackQuestToHud(questId) {
+  playUiSound('toggle');
+  trackedQuestId = questId;
+
+  let targetQuest = null;
+  Object.values(QUESTS_DATA).forEach(group => {
+    const found = group.find(q => q.id === questId);
+    if (found) targetQuest = found;
+  });
+
+  if (targetQuest) {
+    showNotification(`🎯 已将【${targetQuest.title}】设为当前常驻追踪任务！`);
+    // 同步更新右上角待办清单
+    const todoContainer = document.getElementById('todoCardsContainer');
+    if (todoContainer) {
+      todoContainer.innerHTML = `
+        <div class="bg-black/85 backdrop-blur-md border border-[#00f0ff] rounded p-2.5 flex flex-col items-end shadow-2xl">
+          <div class="flex items-center space-x-1 text-[11px] text-[#00f0ff] font-bold mb-1 font-mono">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-ping"></span>
+            <span>当前追踪: ${targetQuest.title}</span>
+          </div>
+          <div class="space-y-1 w-full text-right text-[10px] font-mono text-white/80">
+            ${targetQuest.goals.map(g => `<div>${g.text}: <strong class="${g.done ? 'text-emerald-400' : 'text-amber-300'}">${g.current}/${g.target}</strong></div>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  renderQuestList();
+}
+
+// 领取任务奖励
+function claimQuestReward(questId) {
+  playUiSound('craft');
+  let targetQuest = null;
+  Object.values(QUESTS_DATA).forEach(group => {
+    const found = group.find(q => q.id === questId);
+    if (found) targetQuest = found;
+  });
+
+  if (!targetQuest) return;
+  targetQuest.status = 'claimed';
+
+  // 奖励发放至背包或提示
+  showNotification(`🎉【开拓嘉奖】恭喜完成【${targetQuest.title}】！灵石与科技物资已妥存随身背包！功勋+200！`);
+
+  // 更新总功勋徽章
+  const badge = document.getElementById('questTotalCreditBadge');
+  if (badge) {
+    const curVal = parseInt(badge.innerText.replace(/[^0-9]/g, '')) || 1850;
+    badge.innerText = `${curVal + 200} 功勋`;
+  }
+
+  renderQuestList();
+}
+
+window.switchQuestSubTab = switchQuestSubTab;
+window.renderQuestList = renderQuestList;
+window.trackQuestToHud = trackQuestToHud;
+window.claimQuestReward = claimQuestReward;
+
+function switchHoloCompassTab(tabId) {
+  playUiSound('toggle');
+
+  // 直接打开真实专属界面，不重复维护内嵌两套假视图
+  if (tabId === 'hub') {
+    toggleInventoryModal();
+    if (typeof openCentralProcessorHUD === 'function') openCentralProcessorHUD();
+    return;
+  }
+  if (tabId === 'craft') {
+    toggleInventoryModal();
+    if (typeof toggleCraftModal === 'function') toggleCraftModal();
+    return;
+  }
+  if (tabId === 'codex') {
+    toggleInventoryModal();
+    if (typeof toggleCodexModal === 'function') toggleCodexModal();
+    return;
+  }
+
+  currentHoloTab = tabId;
+
+  // 1. 更新按钮高亮 (1:1 还原 Image 2 白色高亮发光方块)
+  document.querySelectorAll('.holo-card-btn').forEach(btn => {
+    btn.classList.remove('holo-card-active');
+  });
+  const activeBtn = document.getElementById(`btnHolo_${tabId}`);
+  if (activeBtn) {
+    activeBtn.classList.add('holo-card-active');
+  }
+
+  // 2. 切换中心视口各功能内容面板
+  document.querySelectorAll('.holo-pane').forEach(p => p.classList.add('hidden'));
+  const targetPane = document.getElementById(`holoPane_${tabId}`) || document.getElementById('holoPane_main');
+  if (targetPane) {
+    targetPane.classList.remove('hidden');
+  }
+
+  // 3. 动态更新顶栏标题 (100% 严格对齐官方策划案功能名称)
+  const tabNames = {
+    main: '角色装备与 72 格储物空间 (CHARACTER & BAG)',
+    map: '全息地脉矿脉勘舆图 (TERRITORY MAP)',
+    hub: '中央处理器境界突破与阶段授权 (CPU TERMINAL)',
+    craft: '随身手工操作台 (MANUAL CRAFT)',
+    codex: '天工法典万象百科 (CODEX ARCHIVE)',
+    todo: '建筑材料待办清单 (TODO LIST)',
+    stats: '全域统计 · 属性倍率与经营认证 (STATISTICS)',
+    quest: '仙门开拓令与宗门任务委托 (SECT QUESTS)'
+  };
+  const titleElem = document.getElementById('holoCompassModeTitle');
+  if (titleElem) {
+    titleElem.innerText = tabNames[tabId] || '天元全息灵盘中枢';
+  }
+
+  // 4. 刷新渲染
+  if (tabId === 'main') {
+    renderPlayerEquipmentModal();
+    renderCasketInlineTray();
+  } else if (tabId === 'stats') {
+    renderStatsList();
+  } else if (tabId === 'quest') {
+    renderQuestList();
+  }
+
+  showNotification(`已切换至视图: 【${(tabNames[tabId] || tabId).split(' ')[0]}】`);
+}
+
+function toggleInventoryModal(defaultTab) {
+  playUiSound('click');
+  closeOtherModals('invModal');
+  const modal = document.getElementById('invModal');
+  if (!modal) return;
+  const isOpening = modal.classList.contains('hidden');
+  modal.classList.toggle('hidden');
+  if (isOpening) {
+    // 严格确保默认必定显示角色装备与背包主界面，杜绝出现空白视口！
+    const validTab = (defaultTab && document.getElementById(`holoPane_${defaultTab}`)) ? defaultTab : 'main';
+    switchHoloCompassTab(validTab);
+    renderPlayerEquipmentModal();
+    renderCasketInlineTray();
+    showNotification('已展开【天元全息罗盘仪中枢】(角色装备与背包同屏展示)');
+  }
+}
+window.switchHoloCompassTab = switchHoloCompassTab;
+window.toggleInventoryModal = toggleInventoryModal;
+
+// 背包排序 (按策划案物料分类与数量自动排序)
+function sortPlayerBackpack() {
+  playUiSound('toggle');
+  activePlayerBagItems.sort((a, b) => {
+    if (!a) return 1;
+    if (!b) return -1;
+    return b.count - a.count;
+  });
+  renderPlayerEquipmentModal();
+  showNotification('随身背包物料已按数量自动规整排序');
+}
+
+// 罗盘模态打开状态下的 1-8 数字键快捷切换监听 (严格对齐外部功能按键)
+document.addEventListener('keydown', (e) => {
+  const modal = document.getElementById('invModal');
+  if (!modal || modal.classList.contains('hidden')) return;
+  if (document.activeElement.tagName === 'INPUT') return;
+
+  const keyMap = {
+    '1': 'main',    // 角色背包同屏
+    '2': 'map',     // 地图
+    '3': 'hub',     // 中央处理器
+    '4': 'craft',   // 手工制作
+    '5': 'codex',   // 天工法典
+    '6': 'todo',    // 待办清单
+    '7': 'stats',   // 全域统计
+    '8': 'quest'    // 任务开拓
+  };
+  if (keyMap[e.key]) {
+    e.preventDefault();
+    switchHoloCompassTab(keyMap[e.key]);
+  }
+});
+
+

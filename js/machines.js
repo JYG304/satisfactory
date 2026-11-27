@@ -102,8 +102,8 @@ function triggerTargetMachineInteract() {
 }
 
 // 机器大类分类常量 (底座为主动加工器，插件为被动加工器)
-const PASSIVE_MACHINES = ['furnace', 'crusher', 'miner', 'smelt_chamber'];
-const ACTIVE_MACHINES = ['power_engine', 'fluid_hub', 'bio_base', 'incubator', 'petri_dish', 'cutter', 'assembler', 'assembler_heavy', 'deconstructor', 'centrifuge', 'extractor', 'mixer'];
+const PASSIVE_MACHINES = ['furnace', 'crusher', 'miner', 'smelt_chamber', 'cutter'];
+const ACTIVE_MACHINES = ['power_engine', 'fluid_hub', 'bio_base', 'incubator', 'petri_dish', 'wood_nursery', 'immortal_herb_garden', 'beast_immortal_pool', 'printer', 'assembler', 'assembler_heavy', 'deconstructor', 'centrifuge', 'extractor', 'mixer', 'void_crucible', 'research_altar', 'heavy_miner', 'sky_extractor', 'furnace_mk2', 'omni_assembler', 'alchemy_furnace_mk2', 'entropy_smelter', 'recomposer_mk3', 'battle_base', 'thunder_turret', 'fusion_reactor', 'artificial_sun', 'particle_collider', 'banner_ejector', 'ascension_silo', 'immortal_receiver', 'sword_catapult', 'lotus_catcher', 'thunder_accumulator'];
 
 // 被动加工器独立状态
 let passiveInputSlot = { item: 'MAT_001', count: 100 };
@@ -152,6 +152,9 @@ function populateMachineDeviceSelector() {
   const passiveKeys = [];
   const activeKeys = [];
   const baseKeys = [];
+  const skyKeys = [];
+  const SKY_NODE_SET = new Set(['sky_rail', 'sky_merger', 'sky_splitter', 'sky_launcher', 'sky_loader', 'sky_unloader', 'sky_transfer', 'sky_receiver']);
+  const HARDWARE_AUX_SET = new Set(['fluid_hub', 'bio_base', 'belt_sprayer', 'belt_stacker', 'fusion_reactor', 'artificial_sun', 'crane_distributor']);
 
   Object.entries(XIUXIAN_BUILDINGS).forEach(([key, b]) => {
     const rcpCnt = Array.isArray(b.recipes) ? b.recipes.length : 0;
@@ -159,7 +162,9 @@ function populateMachineDeviceSelector() {
       passiveKeys.push([key, b, rcpCnt]);
     } else if (rcpCnt > 0) {
       activeKeys.push([key, b, rcpCnt]);
-    } else if (key === 'fluid_hub' || key === 'bio_base') {
+    } else if (SKY_NODE_SET.has(key)) {
+      skyKeys.push([key, b, rcpCnt]);
+    } else if (HARDWARE_AUX_SET.has(key)) {
       baseKeys.push([key, b, rcpCnt]);
     }
   });
@@ -174,8 +179,11 @@ function populateMachineDeviceSelector() {
     <optgroup label="── 被动加工器 (放啥加工啥 · 可切配方库查看全配方) ──" class="bg-[#0b1522] text-cyan-300">
       ${passiveKeys.map(item => fmtOpt(item, ' [被动]')).join('')}
     </optgroup>
-    <optgroup label="── 主动加工器 / 终局工坊 (全部 ${activeKeys.length} 台生产设备 · 192配方) ──" class="bg-[#0b1522] text-stone-200">
+    <optgroup label="── 主动加工器 / 终局工坊 (全部 ${activeKeys.length} 台生产设备) ──" class="bg-[#0b1522] text-stone-200">
       ${activeKeys.map(item => fmtOpt(item, '')).join('')}
+    </optgroup>
+    <optgroup label="── 高空灵舟天轨节点 (悬空画线 · 不占地格) ──" class="bg-[#0b1522] text-sky-300">
+      ${skyKeys.map(item => fmtOpt(item, ' [天轨]')).join('')}
     </optgroup>
     <optgroup label="── 复合母座与智能节点 ──" class="bg-[#0b1522] text-amber-300">
       ${baseKeys.map(item => fmtOpt(item, ' [母座]')).join('')}
@@ -529,12 +537,141 @@ window.undockFluidHubPlugin = undockFluidHubPlugin;
 window.mountBioBasePlugin = mountBioBasePlugin;
 window.undockBioBasePlugin = undockBioBasePlugin;
 
-// 配方表以正式 RCP_* 为主键；运行时旧 rcp_* 仍由数据桥接解析，避免存档与 UI 断链。
+// 配方表以正式 RCP_* 与设施规则 FRL_* 为双源；运行时旧 key 仍由数据桥接解析，避免存档与 UI 断链。
 function resolveRecipeDefinition(recipeId) {
-  if (typeof XIUXIAN_RECIPES === 'undefined' || !recipeId) return null;
-  if (XIUXIAN_RECIPES[recipeId]) return XIUXIAN_RECIPES[recipeId];
-  const legacyKey = (typeof XIUXIAN_CANONICAL_TO_RECIPE_KEY !== 'undefined') ? XIUXIAN_CANONICAL_TO_RECIPE_KEY[recipeId] : null;
-  return legacyKey ? XIUXIAN_RECIPES[legacyKey] || null : null;
+  if (!recipeId) return null;
+  if (typeof XIUXIAN_RECIPES !== 'undefined') {
+    if (XIUXIAN_RECIPES[recipeId]) return XIUXIAN_RECIPES[recipeId];
+    const legacyKey = (typeof XIUXIAN_CANONICAL_TO_RECIPE_KEY !== 'undefined') ? XIUXIAN_CANONICAL_TO_RECIPE_KEY[recipeId] : null;
+    if (legacyKey && XIUXIAN_RECIPES[legacyKey]) return XIUXIAN_RECIPES[legacyKey];
+  }
+  if (typeof XIUXIAN_FACILITY_RULES !== 'undefined') {
+    if (XIUXIAN_FACILITY_RULES[recipeId]) return XIUXIAN_FACILITY_RULES[recipeId];
+    const ruleKey = (typeof XIUXIAN_CANONICAL_TO_FACILITY_RULE_KEY !== 'undefined') ? XIUXIAN_CANONICAL_TO_FACILITY_RULE_KEY[recipeId] : null;
+    if (ruleKey && XIUXIAN_FACILITY_RULES[ruleKey]) return XIUXIAN_FACILITY_RULES[ruleKey];
+  }
+  return null;
+}
+
+function buildShaqiMachineBannerHtml(machineId) {
+  if (typeof window.ShaqiSystem === 'undefined') return '';
+  const st = window.ShaqiSystem.state;
+  const lvl = Math.round(st.level);
+  const tier = window.ShaqiSystem.getTierInfo(lvl);
+  const bioMult = window.ShaqiSystem.getBioSpeedMultiplier(machineId);
+  const stdMult = window.ShaqiSystem.getStandardMachineMultiplier(machineId);
+
+  if (machineId === 'banner_ejector') {
+    return `
+      <div class="p-2.5 rounded-lg bg-[#160f24] border-2 border-purple-400/70 shadow-[0_0_15px_rgba(168,85,247,0.22)] flex flex-col space-y-1">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-black text-purple-200">🌌 周天星斗大阵发射器 · BD_195 阵旗弹射器（对标戴森球·电磁轨道弹射器）</span>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/20 border border-purple-400/40 text-purple-200">星海戴森云供能</span>
+        </div>
+        <div class="text-[11px] text-purple-100/85 leading-relaxed">
+          <b>核心用途：</b>向九霄苍穹连续弹射<b>【星斗阵旗】</b>，在天外轨道编织<b>「周天星斗大阵」（戴森云）</b>，并将磅礴无线仙能定向反射给地面的<b>「仙光接引台 (BD_197)」</b>转化为全厂巨额电网供电与<b>仙界道光</b>！
+        </div>
+      </div>
+    `;
+  }
+
+  if (machineId === 'crane_distributor') {
+    return `
+      <div class="p-2.5 rounded-lg bg-[#14130a] border-2 border-amber-400/70 shadow-[0_0_15px_rgba(251,191,36,0.22)] flex flex-col space-y-1.5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center space-x-2 text-xs">
+            <i class="fa-solid fa-paper-plane text-amber-300"></i>
+            <span class="font-black text-amber-200">千纸鹤智能物流中枢 · BD_198 纸鹤赋能台（L型高空防穿模航道）</span>
+          </div>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 border border-amber-400/40 text-amber-200">巡航高度 ≥42m · 0穿模</span>
+        </div>
+        <div class="text-[11px] text-amber-100/85 leading-relaxed">
+          <b>玩家可规划路线：</b>纸鹤负责<b>基地内部跨楼层/短中距点对点精准配送与增产赋能</b>（垂直升至高空平飞再垂直降落，绝不穿模楼板与机器）。支持绑定三类任务：① <b>⚡ 聚灵符增产(+35%)</b>（自动取符空投指定丹炉/重工）；② <b>📦 跨层直运</b>（1F➔3F 免电梯直达）；③ <b>🛡️ 防线修缮</b>（为炮塔补弹并回收煞骨）。
+        </div>
+      </div>
+    `;
+  }
+
+  if (machineId === 'waste_incinerator') {
+    return `
+      <div class="p-2.5 rounded-lg bg-[#190c14] border-2 border-orange-500/70 shadow-[0_0_15px_rgba(249,115,22,0.25)] flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-fire-flame-curved text-orange-400"></i>
+          <div class="text-xs">
+            <span class="font-black text-orange-200">环境煞气调控联动 · BD_166 排煞井</span>
+            <span class="ml-2 font-mono text-[11px] ${tier.color}">当前煞气: <b>${lvl}%</b> (${tier.label})</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-1.5">
+          <button onclick="window.ShaqiSystem.setIncineratorMode('diffuse');" class="px-2 py-1 rounded text-[10px] font-bold ${st.incineratorMode === 'diffuse' ? 'bg-orange-500 text-black' : 'bg-white/10 text-white'} cursor-pointer">🔥弥漫排煞</button>
+          <button onclick="window.ShaqiSystem.setIncineratorMode('off');" class="px-2 py-1 rounded text-[10px] font-bold ${st.incineratorMode === 'off' ? 'bg-slate-500 text-white' : 'bg-white/10 text-white'} cursor-pointer">停机</button>
+          <button onclick="window.ShaqiSystem.injectWasteBoost();" class="px-2 py-1 rounded text-[10px] font-bold bg-fuchsia-600/80 hover:bg-fuchsia-500 text-white cursor-pointer">+15% 废液排煞</button>
+          <button onclick="window.ShaqiSystem.openModal();" class="px-2 py-1 rounded text-[10px] font-bold bg-cyan-500/25 border border-cyan-400/50 text-cyan-200 cursor-pointer">控煞中枢 [U]</button>
+        </div>
+      </div>
+    `;
+  }
+
+  if (machineId === 'purifier') {
+    return `
+      <div class="p-2.5 rounded-lg bg-[#09191b] border-2 border-emerald-400/70 shadow-[0_0_15px_rgba(16,185,129,0.25)] flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-tower-observation text-emerald-300"></i>
+          <div class="text-xs">
+            <span class="font-black text-emerald-200">环境煞气调控联动 · BD_150 回收处理塔</span>
+            <span class="ml-2 font-mono text-[11px] ${tier.color}">当前煞气: <b>${lvl}%</b> (${tier.label})</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-1.5">
+          <button onclick="window.ShaqiSystem.setPurifierMode('boost');" class="px-2 py-1 rounded text-[10px] font-bold ${st.purifierMode === 'boost' ? 'bg-emerald-400 text-black' : 'bg-white/10 text-white'} cursor-pointer">♜强效抽煞</button>
+          <button onclick="window.ShaqiSystem.emergencyPurify();" class="px-2 py-1 rounded text-[10px] font-bold bg-emerald-600/80 hover:bg-emerald-500 text-white cursor-pointer">💎 紧急抽煞凝晶 (-20%)</button>
+          <button onclick="window.ShaqiSystem.openModal();" class="px-2 py-1 rounded text-[10px] font-bold bg-cyan-500/25 border border-cyan-400/50 text-cyan-200 cursor-pointer">控煞中枢 [U]</button>
+        </div>
+      </div>
+    `;
+  }
+
+  if (machineId === 'bd_160') {
+    return `
+      <div class="p-2.5 rounded-lg bg-[#1a0d19] border-2 border-rose-400/70 shadow-[0_0_15px_rgba(244,63,94,0.25)] flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-crosshairs text-rose-300"></i>
+          <div class="text-xs">
+            <span class="font-black text-rose-200">环境煞气调控联动 · BD_160 煞潮诱敌收尸</span>
+            <span class="ml-2 font-mono text-[11px] ${tier.color}">煞气: <b>${lvl}%</b> (${lvl >= 60 ? '可引煞潮' : '需≥60%激活'})</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-1.5">
+          <button onclick="window.ShaqiSystem.triggerTurretHarvest();" class="px-2.5 py-1 rounded text-[10px] font-black bg-amber-500 hover:bg-amber-400 text-black cursor-pointer">⚔️ 猎杀煞潮(鹤收尸)</button>
+          <button onclick="window.ShaqiSystem.openModal();" class="px-2 py-1 rounded text-[10px] font-bold bg-cyan-500/25 border border-cyan-400/50 text-cyan-200 cursor-pointer">控煞中枢 [U]</button>
+        </div>
+      </div>
+    `;
+  }
+
+  if (bioMult > 0 && ['petri_dish', 'incubator', 'bio_base', 'wood_nursery', 'beast_pen', 'bd_163', 'alchemy_table', 'tribulation_table'].includes(machineId)) {
+    const pctText = bioMult > 1 ? `+${Math.round((bioMult - 1) * 100)}% 辐射超频生效中` : '当前清朗稳态 (×1.0 · 拉高至50%享+25%/+50%加速)';
+    return `
+      <div class="mt-2 p-2 rounded-lg bg-[#140b1f] border border-fuchsia-400/55 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-radiation text-fuchsia-300"></i>
+          <span class="font-bold text-fuchsia-200">☢️ 煞气辐射场增益</span>
+          <span class="font-mono text-[11px] ${tier.color}">煞气 ${lvl}% · ${pctText}</span>
+        </div>
+        <button onclick="window.ShaqiSystem.openModal();" class="px-2.5 py-1 rounded text-[10px] font-bold bg-fuchsia-500/30 hover:bg-fuchsia-500/50 border border-fuchsia-400/50 text-fuchsia-100 cursor-pointer">调控煞气 [U]</button>
+      </div>
+    `;
+  }
+
+  if (stdMult < 1) {
+    return `
+      <div class="p-2 rounded-lg bg-rose-950/70 border border-rose-500/70 flex items-center justify-between gap-2 text-xs">
+        <span class="font-bold text-rose-200">⚠️ 环境煞气过载 (${lvl}%)：普通工业设备效率 -30%（能耗 +25%），请开启 BD_150 回收塔泄压！</span>
+        <button onclick="window.ShaqiSystem.openModal();" class="px-2.5 py-1 rounded text-[10px] font-bold bg-rose-500 text-white cursor-pointer shrink-0">控煞泄压 [U]</button>
+      </div>
+    `;
+  }
+  return '';
 }
 
 // 渲染【生产】(Production) 视图 (动态支持 1进1出、多进双出、1进2出及多轨物料校验)
@@ -544,10 +681,16 @@ function renderMachineProdView() {
     name: '精炼玄铁锭', inputs: [{ item: 'iron_ore', count: 1, rate: 30 }], outputs: [{ item: 'iron_ingot', count: 1, rate: 30 }], timeSec: 2, power: 10
   };
 
-  // 复合建筑母座与插槽状态条 (当打开 fluid_hub, bio_base 及其挂载插件时醒目展示插拔替换)
+  // 复合建筑母座与插槽状态条 (联动环境煞气、高空灵舟天轨调度、增产喷涂与器灵巨构面板)
   const compBanner = document.getElementById('prodCompositeHeaderBanner');
   if (compBanner) {
-    if (['fluid_hub', 'mixer', 'centrifuge', 'extractor'].includes(currentMachineId)) {
+    const shaqiBannerHtml = buildShaqiMachineBannerHtml(currentMachineId);
+    const skyBannerHtml = (typeof window.SpiritShipSystem !== 'undefined') ? window.SpiritShipSystem.renderMachineBannerHtml(currentMachineId) : '';
+    const prolifBannerHtml = (typeof window.ProliferatorSystem !== 'undefined') ? window.ProliferatorSystem.renderMachineBannerHtml(currentMachineId) : '';
+    if (skyBannerHtml) {
+      compBanner.classList.remove('hidden');
+      compBanner.innerHTML = `${skyBannerHtml}${prolifBannerHtml || ''}${shaqiBannerHtml || ''}`;
+    } else if (['fluid_hub', 'mixer', 'centrifuge', 'extractor'].includes(currentMachineId)) {
       compBanner.classList.remove('hidden');
       const isHubBase = (currentMachineId === 'fluid_hub');
       compBanner.innerHTML = `
@@ -582,6 +725,7 @@ function renderMachineProdView() {
             </button>
           </div>
         </div>
+        ${shaqiBannerHtml}
       `;
     } else if (['bio_base', 'incubator', 'petri_dish'].includes(currentMachineId)) {
       compBanner.classList.remove('hidden');
@@ -618,6 +762,7 @@ function renderMachineProdView() {
             </button>
           </div>
         </div>
+        ${shaqiBannerHtml}
       `;
     } else if (currentMachineId === 'power_engine') {
       compBanner.classList.remove('hidden');
@@ -631,10 +776,29 @@ function renderMachineProdView() {
             已承载 3 联装冶炼舱 (可在场景中直接点击各舱进行操作)
           </div>
         </div>
+        ${prolifBannerHtml}
       `;
+    } else if (shaqiBannerHtml || prolifBannerHtml) {
+      compBanner.classList.remove('hidden');
+      compBanner.innerHTML = `${prolifBannerHtml || ''}${shaqiBannerHtml || ''}`;
     } else {
       compBanner.classList.add('hidden');
       compBanner.innerHTML = '';
+    }
+    if (typeof window !== 'undefined' && window.FactorySelfLoop) {
+      const ls = window.FactorySelfLoop.state;
+      const selfLoopHtml = `
+        <div class="mt-1.5 p-2 rounded-lg bg-[#06181a] border border-emerald-400/45 flex flex-wrap items-center justify-between gap-2 text-[10px]">
+          <span class="font-bold text-emerald-300">🔄 第一层内循环（成品 100% 供回工厂自己吃）：</span>
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button onclick="window.FactorySelfLoop.toggleLoop('pillLoopOn');" class="px-2 py-0.5 rounded font-bold cursor-pointer ${ls.pillLoopOn ? 'bg-amber-400 text-black' : 'bg-white/10 text-slate-400'}">💊 丹药饲仙池/纸鹤</button>
+            <button onclick="window.FactorySelfLoop.toggleLoop('altarLoopOn');" class="px-2 py-0.5 rounded font-bold cursor-pointer ${ls.altarLoopOn ? 'bg-emerald-400 text-black' : 'bg-white/10 text-slate-400'}">💧 稳脉液供祭坛续命</button>
+            <button onclick="window.FactorySelfLoop.toggleLoop('chipLoopOn');" class="px-2 py-0.5 rounded font-bold cursor-pointer ${ls.chipLoopOn ? 'bg-cyan-400 text-black' : 'bg-white/10 text-slate-400'}">🧩 芯片供阵盘超频</button>
+          </div>
+        </div>
+      `;
+      compBanner.classList.remove('hidden');
+      compBanner.innerHTML += selfLoopHtml;
     }
   }
 
@@ -774,9 +938,73 @@ function renderMachineProdView() {
     currentPower = currentPower * 2;
     currentCycle = Math.max(1, Math.round(currentCycle / 2));
   }
+  let shaqiBioMult = 1;
+  let shaqiStdMult = 1;
+  if (typeof window.ShaqiSystem !== 'undefined') {
+    shaqiBioMult = window.ShaqiSystem.getBioSpeedMultiplier(currentMachineId);
+    shaqiStdMult = window.ShaqiSystem.getStandardMachineMultiplier(currentMachineId);
+  }
+  const optMult = (typeof window.OpticalArrayHUD !== 'undefined') ? window.OpticalArrayHUD.getFactorySpeedMultiplier() : 1;
+  const infTrackMult = (typeof window.FourTrackProgression !== 'undefined' && typeof window.FourTrackProgression.getInfiniteSpeedMultiplier === 'function')
+    ? window.FourTrackProgression.getInfiniteSpeedMultiplier()
+    : 1;
+  const tierSpeedMult = (bData && bData.tierSpeedMult > 1) ? Number(bData.tierSpeedMult) : 1;
+  const prolifSpeedMult = (typeof window.ProliferatorSystem !== 'undefined') ? window.ProliferatorSystem.getSpeedMultiplier(currentMachineId) : 1;
+  const prolifOutMult = (typeof window.ProliferatorSystem !== 'undefined') ? window.ProliferatorSystem.getOutputMultiplier(currentMachineId) : 1;
+  const prolifPwrMult = (typeof window.ProliferatorSystem !== 'undefined') ? window.ProliferatorSystem.getPowerMultiplier(currentMachineId) : 1;
+  const towerMult = (typeof window.ProliferatorSystem !== 'undefined' && typeof window.ProliferatorSystem.getThermalTowerMultiplier === 'function') ? window.ProliferatorSystem.getThermalTowerMultiplier(currentMachineId) : 1;
+  const danxiaChance = (typeof window.ProliferatorSystem !== 'undefined' && typeof window.ProliferatorSystem.getDanxiaCritChance === 'function') ? window.ProliferatorSystem.getDanxiaCritChance(currentMachineId) : 0;
+  const gridMult = (typeof window.PowerGridSystem !== 'undefined' && typeof window.PowerGridSystem.getPowerThrottleMultiplier === 'function') ? window.PowerGridSystem.getPowerThrottleMultiplier() : 1;
+  const selfLoopBonus = (typeof window.FactorySelfLoop !== 'undefined' && typeof window.FactorySelfLoop.getMachineLoopBonus === 'function')
+    ? window.FactorySelfLoop.getMachineLoopBonus(currentMachineId)
+    : { speedMult: 1, outMult: 1, tags: [] };
+  if (shaqiBioMult > 1) {
+    currentCycle = Math.max(1, Math.round((currentCycle / shaqiBioMult) * 10) / 10);
+  } else if (shaqiStdMult < 1) {
+    if (currentPower > 0) currentPower = Math.round(currentPower * 1.25);
+    currentCycle = Math.round((currentCycle / shaqiStdMult) * 10) / 10;
+  }
+  if (tierSpeedMult > 1) {
+    currentCycle = Math.max(0.5, Math.round((currentCycle / tierSpeedMult) * 10) / 10);
+  }
+  if (towerMult > 1) {
+    currentCycle = Math.max(0.5, Math.round((currentCycle / towerMult) * 10) / 10);
+  }
+  if (prolifPwrMult > 1 && currentPower > 0) {
+    currentPower = Math.round(currentPower * prolifPwrMult);
+  }
+  if (prolifSpeedMult > 1) {
+    currentCycle = Math.max(0.5, Math.round((currentCycle / prolifSpeedMult) * 10) / 10);
+  }
+  if (optMult > 1) {
+    currentCycle = Math.max(0.5, Math.round((currentCycle / optMult) * 10) / 10);
+  }
+  if (infTrackMult > 1) {
+    currentCycle = Math.max(0.5, Math.round((currentCycle / infTrackMult) * 10) / 10);
+  }
+  if (gridMult > 0 && gridMult < 1) {
+    currentCycle = Math.round((currentCycle / gridMult) * 10) / 10;
+  }
+  if (selfLoopBonus.speedMult > 1) {
+    currentCycle = Math.max(0.4, Math.round((currentCycle / selfLoopBonus.speedMult) * 10) / 10);
+  }
   if (powerText) powerText.innerText = `${currentPower} MW`;
   const cycleText = document.getElementById('prodMachineCycleText');
-  if (cycleText) cycleText.innerText = `${currentCycle}秒${incubatorTimeAccelerated && currentMachineId === 'incubator' ? ' (⚡加速)' : ''}`;
+  const accelTag = (incubatorTimeAccelerated && currentMachineId === 'incubator') ? ' (⚡加速)' : '';
+  const tierTag = tierSpeedMult > 1 ? ` (⚙️世代×${tierSpeedMult})` : '';
+  const towerTag = towerMult > 1 ? ` (🏯叠炉×${towerMult})` : '';
+  const shaqiTag = shaqiBioMult > 1
+    ? ` (☢️煞潮+${Math.round((shaqiBioMult - 1) * 100)}%)`
+    : (shaqiStdMult < 1 ? ' (⚠️煞蚀-30%)' : '');
+  const optTag = optMult > 1 ? ` (🧠阵盘×${optMult.toFixed(2)})` : '';
+  const infTag = infTrackMult > 1 ? ` (🌌天道×${infTrackMult.toFixed(2)})` : '';
+  const prolifTag = (prolifSpeedMult > 1 || prolifOutMult > 1)
+    ? ` (🌫️增产/器灵 速×${prolifSpeedMult.toFixed(2)} 产×${prolifOutMult.toFixed(2)})`
+    : '';
+  const danxiaTag = danxiaChance > 0 ? ` (🔥丹霞暴击${Math.round(danxiaChance * 100)}%)` : '';
+  const gridTag = (gridMult > 0 && gridMult < 1) ? ` (🔌欠压${Math.round(gridMult * 100)}%)` : '';
+  const selfLoopTag = selfLoopBonus.tags.length > 0 ? ` (🔄${selfLoopBonus.tags.join(' · ')})` : '';
+  if (cycleText) cycleText.innerText = `${currentCycle}秒${accelTag}${tierTag}${towerTag}${shaqiTag}${optTag}${infTag}${prolifTag}${danxiaTag}${gridTag}${selfLoopTag}`;
 
   // 5. 右侧输出物料白卡容器 (支持多出，如 解构机 背面×2、离心机 左×1右×1)
   const outContainer = document.getElementById('prodOutputsContainer');
@@ -796,7 +1024,17 @@ function renderMachineProdView() {
         : 'w-[190px] h-[200px] bg-slate-100 rounded-[4px] p-3 text-stone-800 flex flex-col items-center justify-between shadow relative border border-slate-300 group hover:border-[#f5921e] transition';
 
       const portLabel = isMultiOut ? `出${idx + 1} · 背面` : (bData.outputPorts || '输出端');
-      const finalRate = (currentMachineId === 'incubator' && incubatorTimeAccelerated) ? (outp.rate * 2) : outp.rate;
+      let finalRate = (currentMachineId === 'incubator' && incubatorTimeAccelerated) ? (outp.rate * 2) : outp.rate;
+      if (tierSpeedMult > 1) finalRate = Math.round(finalRate * tierSpeedMult * 10) / 10;
+      if (towerMult > 1) finalRate = Math.round(finalRate * towerMult * 10) / 10;
+      if (shaqiBioMult > 1) finalRate = Math.round(finalRate * shaqiBioMult * 10) / 10;
+      else if (shaqiStdMult < 1) finalRate = Math.round(finalRate * shaqiStdMult * 10) / 10;
+      if (optMult > 1) finalRate = Math.round(finalRate * optMult * 10) / 10;
+      if (prolifSpeedMult > 1) finalRate = Math.round(finalRate * prolifSpeedMult * 10) / 10;
+      if (prolifOutMult > 1) finalRate = Math.round(finalRate * prolifOutMult * 10) / 10;
+      if (gridMult > 0 && gridMult < 1) finalRate = Math.round(finalRate * gridMult * 10) / 10;
+      if (selfLoopBonus.speedMult > 1) finalRate = Math.round(finalRate * selfLoopBonus.speedMult * 10) / 10;
+      if (selfLoopBonus.outMult > 1) finalRate = Math.round(finalRate * selfLoopBonus.outMult * 10) / 10;
 
       card.innerHTML = `
         <!-- 输出端口标识 -->
@@ -922,18 +1160,16 @@ function resolvePassiveMachineRecipe(machineKey, inputItemKey) {
   const bData = (typeof XIUXIAN_BUILDINGS !== 'undefined') ? XIUXIAN_BUILDINGS[machineKey] : null;
   const rcpIds = (bData && Array.isArray(bData.recipes)) ? bData.recipes : [];
   let matched = null;
-  if (typeof XIUXIAN_RECIPES !== 'undefined') {
-    for (const rid of rcpIds) {
-      const r = XIUXIAN_RECIPES[rid];
-      if (!r) continue;
-      if (Array.isArray(r.inputs) && r.inputs.some(inp => inp.item === inputItemKey)) {
-        matched = r;
-        break;
-      }
+  for (const rid of rcpIds) {
+    const r = resolveRecipeDefinition(rid);
+    if (!r) continue;
+    if (Array.isArray(r.inputs) && r.inputs.some(inp => inp.item === inputItemKey)) {
+      matched = r;
+      break;
     }
-    if (!matched && rcpIds.length > 0) {
-      matched = XIUXIAN_RECIPES[rcpIds[0]] || null;
-    }
+  }
+  if (!matched && rcpIds.length > 0) {
+    matched = resolveRecipeDefinition(rcpIds[0]);
   }
   return matched;
 }
@@ -966,7 +1202,7 @@ function renderPassiveProcessorView() {
   const matchedRcp = resolvePassiveMachineRecipe(currentMachineId, passiveInputSlot.item);
 
   if (currentMachineId === 'miner') {
-    const r = (currentMachineRecipeId && XIUXIAN_RECIPES && XIUXIAN_RECIPES[currentMachineRecipeId]) || matchedRcp;
+    const r = resolveRecipeDefinition(currentMachineRecipeId) || matchedRcp;
     const targetName = r && r.output ? r.output.name : '玄铁矿';
     if (inIcon) inIcon.className = 'fa-solid fa-mountain text-stone-300 text-3xl mb-1';
     if (inName) inName.innerText = `${targetName}脉`;
@@ -1456,7 +1692,15 @@ function collectMinerBufferOre(idx) {
   }, 4000);
 }
 
+let currentRecipeTierFilter = 'all'; // 'all' | 'mainline' | 'alternate' | 'mechanism'
+window.setMachineRecipeTierFilter = function(tier) {
+  currentRecipeTierFilter = ['all', 'mainline', 'alternate', 'mechanism'].includes(tier) ? tier : 'all';
+  if (typeof playUiSound === 'function') playUiSound('click');
+  renderRecipePickerView(document.getElementById('machRecipeSearchInput')?.value || '');
+};
+
 // 渲染【选择配方】(Recipe Select) 视图
+window.showPrunedRecipesInPicker = window.showPrunedRecipesInPicker || false;
 function renderRecipePickerView(searchQuery) {
   searchQuery = (searchQuery || '').toLowerCase().trim();
   const container = document.getElementById('machRecipeTreeContainer');
@@ -1464,17 +1708,58 @@ function renderRecipePickerView(searchQuery) {
   container.innerHTML = '';
 
   const bData = (typeof XIUXIAN_BUILDINGS !== 'undefined') ? (XIUXIAN_BUILDINGS[currentMachineId] || XIUXIAN_BUILDINGS['furnace']) : {};
-  const supportedRecipeIds = bData.recipes || (typeof XIUXIAN_RECIPES !== 'undefined' ? Object.keys(XIUXIAN_RECIPES) : []);
+  const baseIds = Array.isArray(bData.recipes) ? [...bData.recipes] : [];
+  if (typeof XIUXIAN_RECIPES !== 'undefined') {
+    const redirectMap = window.BUILDING_CORE_REDIRECT || {};
+    Object.values(XIUXIAN_RECIPES).forEach(r => {
+      const targetBld = redirectMap[r.building] || r.building;
+      if ((r.building === currentMachineId || targetBld === currentMachineId) && !baseIds.includes(r.id)) {
+        baseIds.push(r.id);
+      }
+    });
+  }
+  const supportedRecipeIds = baseIds.length > 0 ? baseIds : (typeof XIUXIAN_RECIPES !== 'undefined' ? Object.keys(XIUXIAN_RECIPES) : []);
 
-  const categorized = {};
+  const showAllRecipes = !!window.showPrunedRecipesInPicker;
+  const tierCounts = { all: 0, mainline: 0, alternate: 0, mechanism: 0 };
+  const allMatched = [];
   supportedRecipeIds.forEach(rId => {
     const r = resolveRecipeDefinition(rId);
     if (!r) return;
+    if (!showAllRecipes && window.CORE_RECIPE_KEYS && !window.CORE_RECIPE_KEYS.has(r.id)) return;
     if (searchQuery && !r.name.toLowerCase().includes(searchQuery)) return;
+    const t = r.recipeTier || 'mainline';
+    tierCounts.all += 1;
+    tierCounts[t] = (tierCounts[t] || 0) + 1;
+    allMatched.push(r);
+  });
+
+  const tierBar = document.getElementById('machRecipeTierBar');
+  if (tierBar) {
+    const pills = [
+      { id: 'all', label: `全部 (${tierCounts.all})`, activeCls: 'bg-cyan-500 text-black border-cyan-300' },
+      { id: 'mainline', label: `★ 主线必算·1物1方 (${tierCounts.mainline})`, activeCls: 'bg-emerald-500 text-black border-emerald-300' },
+      { id: 'alternate', label: `✦ 奇遇/化废替方 (${tierCounts.alternate})`, activeCls: 'bg-amber-500 text-black border-amber-300' },
+      { id: 'mechanism', label: `⚡ 设施机制 (${tierCounts.mechanism})`, activeCls: 'bg-sky-500 text-black border-sky-300' },
+    ];
+    tierBar.innerHTML = pills.map(p => {
+      const isAct = currentRecipeTierFilter === p.id;
+      return `<button onclick="setMachineRecipeTierFilter('${p.id}')" class="px-2 py-0.5 rounded text-[10px] font-bold border transition cursor-pointer ${isAct ? p.activeCls : 'bg-white/5 text-white/70 border-white/15 hover:bg-white/15'}">${p.label}</button>`;
+    }).join('') + `<button onclick="window.showPrunedRecipesInPicker=!window.showPrunedRecipesInPicker;renderRecipePickerView(document.getElementById('machRecipeSearch')?.value||'');" class="ml-auto px-2 py-0.5 rounded text-[10px] border border-white/20 bg-white/5 hover:bg-white/15 text-white/75 cursor-pointer">${showAllRecipes ? '仅看精简99方' : '显示已精简配方'}</button>`;
+  }
+
+  const categorized = {};
+  allMatched.forEach(r => {
+    const t = r.recipeTier || 'mainline';
+    if (currentRecipeTierFilter !== 'all' && t !== currentRecipeTierFilter) return;
     const cat = r.category || '通用工艺';
     if (!categorized[cat]) categorized[cat] = [];
     categorized[cat].push(r);
   });
+
+  if (Object.keys(categorized).length === 0) {
+    container.innerHTML = '<div class="text-xs text-white/45 py-8 text-center font-mono">当前筛选层级下暂无匹配配方，请点选【全部】查看</div>';
+  }
 
   Object.keys(categorized).forEach(cat => {
     const recipes = categorized[cat];
@@ -1498,6 +1783,12 @@ function renderRecipePickerView(searchQuery) {
       const outKey = (Array.isArray(r.outputs) && r.outputs[0]?.item) || (r.output && r.output.item);
       const outItem = (typeof XIUXIAN_ITEMS !== 'undefined' && XIUXIAN_ITEMS[outKey]) || { name: r.name, icon: 'fa-cube' };
       const isSelected = (r.id === selectedRecipeInPicker);
+      const t = r.recipeTier || 'mainline';
+      const badgeHtml = t === 'mainline'
+        ? '<span class="absolute top-1 left-1 px-1 rounded text-[8px] font-bold bg-emerald-500/25 text-emerald-300 border border-emerald-400/40">★主线</span>'
+        : (t === 'mechanism'
+          ? '<span class="absolute top-1 left-1 px-1 rounded text-[8px] font-bold bg-sky-500/25 text-sky-300 border border-sky-400/40">⚡机制</span>'
+          : '<span class="absolute top-1 left-1 px-1 rounded text-[8px] font-bold bg-amber-500/25 text-amber-300 border border-amber-400/40">✦替方</span>');
 
       const card = document.createElement('div');
       card.onclick = () => selectRecipeInPicker(r.id);
@@ -1505,17 +1796,18 @@ function renderRecipePickerView(searchQuery) {
         selectRecipeInPicker(r.id);
         confirmSelectedRecipeForMachine();
       };
-      card.className = `w-24 h-24 rounded flex flex-col items-center justify-center p-2 cursor-pointer transition ${
+      card.className = `relative w-24 h-24 rounded flex flex-col items-center justify-center p-2 cursor-pointer transition ${
         isSelected 
           ? 'bg-[#e0770b] border-2 border-[#ff9d24] shadow-[0_0_12px_rgba(245,146,30,0.5)]' 
           : 'bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/40'
       }`;
 
       card.innerHTML = `
-        <div class="w-12 h-12 flex items-center justify-center mb-1">
+        ${badgeHtml}
+        <div class="w-12 h-12 flex items-center justify-center mb-1 mt-1.5">
           <i class="${outItem.icon} text-2xl ${isSelected ? 'text-white' : 'text-stone-300'}"></i>
         </div>
-        <span class="text-[11px] font-bold ${isSelected ? 'text-white' : 'text-white/80'}">${r.name}</span>
+        <span class="text-[11px] font-bold truncate w-full text-center ${isSelected ? 'text-white' : 'text-white/80'}">${r.name}</span>
       `;
       grid.appendChild(card);
     });
@@ -1533,28 +1825,28 @@ function selectRecipeInPicker(recipeId) {
   selectedRecipeInPicker = recipeId;
 
   document.querySelectorAll('#machRecipeTreeContainer .w-24').forEach(c => {
-    c.className = 'w-24 h-24 rounded flex flex-col items-center justify-center p-2 cursor-pointer transition bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/40';
+    c.className = 'relative w-24 h-24 rounded flex flex-col items-center justify-center p-2 cursor-pointer transition bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/40';
   });
 
   renderSelectedRecipeDetail(recipeId);
   renderRecipePickerView(document.getElementById('machRecipeSearchInput')?.value || '');
 }
 
-// 渲染选中的配方详情 (动态支持多材料输入成本与多产物)
+// 渲染选中的配方详情 (动态支持多材料输入成本、多产物与自动配平速算卡)
 function renderSelectedRecipeDetail(recipeId) {
   const r = resolveRecipeDefinition(recipeId) || {
-    name: '赤铜线圈', desc: '导电线圈', timeSec: 2, outputs: [{ count: 2, item: 'copper_wire' }], inputs: [{ count: 1, item: 'copper_ingot' }]
+    name: '赤铜线圈', desc: '导电线圈', timeSec: 2, outputs: [{ count: 2, item: 'copper_wire', rate: 60 }], inputs: [{ count: 1, item: 'copper_ingot', rate: 30 }], recipeTier: 'mainline'
   };
 
   const inList = Array.isArray(r.inputs) && r.inputs.length > 0 
     ? r.inputs 
-    : (r.input ? [{ item: r.input.item, count: r.input.amount || 1, name: r.input.name }] : []);
+    : (r.input ? [{ item: r.input.item, count: r.input.amount || 1, rate: r.input.ratePerMin || 30, name: r.input.name }] : []);
 
   const outList = Array.isArray(r.outputs) && r.outputs.length > 0 
     ? r.outputs 
-    : (r.output ? [{ item: r.output.item, count: r.output.amount || 1, name: r.output.name }] : []);
+    : (r.output ? [{ item: r.output.item, count: r.output.amount || 1, rate: r.output.ratePerMin || 30, name: r.output.name }] : []);
 
-  const firstOut = outList[0] || { item: 'iron_ingot', count: 1 };
+  const firstOut = outList[0] || { item: 'iron_ingot', count: 1, rate: 30 };
   const outItem = (typeof XIUXIAN_ITEMS !== 'undefined' && XIUXIAN_ITEMS[firstOut.item]) || { name: r.name, desc: r.desc, icon: 'fa-cube' };
 
   const title = document.getElementById('selRecipeDetailTitle');
@@ -1581,8 +1873,12 @@ function renderSelectedRecipeDetail(recipeId) {
   const desc = document.getElementById('selRecipeDetailDesc');
   if (desc) desc.innerText = outItem.desc || r.desc || '';
 
+  const bData = (typeof XIUXIAN_BUILDINGS !== 'undefined') ? (XIUXIAN_BUILDINGS[currentMachineId] || {}) : {};
+  const tierMult = (bData && bData.tierSpeedMult > 1) ? Number(bData.tierSpeedMult) : 1;
+  const effSec = Math.round(((r.timeSec || 2) / tierMult) * 10) / 10;
+
   const timeElem = document.getElementById('selRecipeDetailTime');
-  if (timeElem) timeElem.innerText = `${r.timeSec || 2} sec`;
+  if (timeElem) timeElem.innerText = tierMult > 1 ? `${effSec} sec (原${r.timeSec || 2}s · 世代×${tierMult})` : `${r.timeSec || 2} sec`;
 
   const costContainer = document.getElementById('selRecipeDetailCostCards');
   if (costContainer) {
@@ -1601,6 +1897,40 @@ function renderSelectedRecipeDetail(recipeId) {
       `;
       costContainer.appendChild(card);
     });
+  }
+
+  const balCard = document.getElementById('selRecipeBalanceCard');
+  if (balCard) {
+    const baseOutRate = firstOut.rate || (effSec > 0 ? Math.round((firstOut.count || 1) * 60 / (r.timeSec || 2)) : 6);
+    const finalOutRate = Math.round(baseOutRate * tierMult * 10) / 10;
+    const beltNeedCount = finalOutRate > 0 ? Math.round((60 / finalOutRate) * 10) / 10 : '-';
+    const inRatesSummary = inList.length > 0
+      ? inList.map(inp => {
+          const nm = (XIUXIAN_ITEMS && XIUXIAN_ITEMS[inp.item]?.name) || inp.name || inp.item;
+          const ir = Math.round((inp.rate || Math.round((inp.count || 1) * 60 / (r.timeSec || 2))) * tierMult * 10) / 10;
+          return `${nm} <b>${ir}/分</b>`;
+        }).join(' · ')
+      : '自然采集（无料耗）';
+    const rTier = r.recipeTier || 'mainline';
+    const scrollBadge = r.scrollId
+      ? `<div class="text-[10px] text-amber-200 font-mono bg-amber-500/15 border border-amber-400/35 rounded px-1.5 py-0.5 mt-1">📜 古修残卷【${r.scrollId} · ${r.poolGroup || 'POOL'}】获取：${r.obtainWay || '遗迹探索'}</div>`
+      : '';
+    const tierNote = rTier === 'mainline'
+      ? '<span class="text-emerald-300 font-bold">★ 主线标准 (1物1方)</span>：推荐主干产线唯一标配，心算整除 60 秒'
+      : (rTier === 'mechanism'
+        ? '<span class="text-sky-300 font-bold">⚡ 设施运转机制</span>：属于设备行为（非合成配方），无需纳入合成配平算账'
+        : '<span class="text-amber-300 font-bold">✦ 古修秘传替方</span>：探索/化废可选秘方，主线可完全略过');
+
+    balCard.innerHTML = `
+      <div class="p-2.5 rounded bg-[#141a24] border border-cyan-500/30 space-y-1.5 text-[11px]">
+        <div class="flex items-center justify-between text-cyan-300 font-bold">
+          <span>⚖️ 自动化产线配平速算卡</span>
+          <span class="font-mono text-amber-300">铺满1条基础带(60/分) ≈ ${beltNeedCount} 台</span>
+        </div>
+        <div class="text-slate-300 font-mono">单机输出：<b class="text-emerald-300">${outItem.name} ${finalOutRate}/分</b> · 单机消耗：${inRatesSummary}</div>
+        <div class="text-[10px] text-slate-400 leading-snug">${tierNote}${scrollBadge}</div>
+      </div>
+    `;
   }
 }
 

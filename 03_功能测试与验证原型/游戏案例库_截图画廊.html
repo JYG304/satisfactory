@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Steam 独立游戏机制库与视觉画廊 (100 款完整标杆案例)</title>
+  <!-- 动态引入本地截图全量清单 -->
+  <script src="./GameScreenshots/manifest.js"></script>
+  <style>
+    :root {
+      --bg-main: #0c0f17;
+      --bg-card: #151a24;
+      --bg-card-hover: #1c2433;
+      --border-color: #263345;
+      --accent-color: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --tag-bg: #1e293b;
+      --tag-border: #334155;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(12, 15, 23, 0.94);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 32px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .header-title h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-title p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .search-box {
+      position: relative;
+    }
+    .search-box input {
+      background: #1e293b;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 14px 8px 34px;
+      color: #fff;
+      font-size: 0.9rem;
+      width: 240px;
+      transition: all 0.2s;
+    }
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 12px var(--accent-glow);
+      width: 280px;
+    }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 16px 32px 8px;
+      scrollbar-width: none;
+    }
+    .filter-tab {
+      background: var(--tag-bg);
+      border: 1px solid var(--tag-border);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .filter-tab:hover, .filter-tab.active {
+      color: #fff;
+      background: #2563eb;
+      border-color: #3b82f6;
+      box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
+    }
+    .container {
+      max-width: 1720px;
+      margin: 0 auto;
+      padding: 20px 32px;
+    }
+    .stats-bar {
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .mode-badge {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #4ade80;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 24px;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+      position: relative;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+      border-color: #38bdf8;
+    }
+    .card-banner {
+      width: 100%;
+      height: 180px;
+      background: #0f172a;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .card-banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    .card:hover .card-banner img {
+      transform: scale(1.04);
+    }
+    .batch-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #38bdf8;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .card-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 12px;
+    }
+    .card-header-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .steam-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: #1e293b;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .steam-link:hover {
+      color: #38bdf8;
+      border-color: #38bdf8;
+      background: #0f172a;
+    }
+    .meta-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .meta-tag {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #1e293b;
+      color: #94a3b8;
+      border: 1px solid var(--tag-border);
+    }
+    .meta-tag.highlight {
+      background: rgba(56, 189, 248, 0.12);
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+    .mechanic-desc {
+      background: #0d121c;
+      border-left: 3px solid #38bdf8;
+      padding: 8px 12px;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+    }
+    .mechanic-desc strong {
+      color: #38bdf8;
+    }
+    .screenshots-strip {
+      margin-top: auto;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-top: 8px;
+      scrollbar-width: thin;
+    }
+    .screenshot-thumb {
+      width: 72px;
+      height: 42px;
+      border-radius: 4px;
+      overflow: hidden;
+      flex-shrink: 0;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      position: relative;
+      transition: all 0.2s;
+      background: #1e293b;
+    }
+    .screenshot-thumb:hover {
+      border-color: #38bdf8;
+      transform: scale(1.08);
+      z-index: 2;
+    }
+    .screenshot-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .thumb-count-btn {
+      min-width: 68px;
+      height: 42px;
+      padding: 0 8px;
+      border-radius: 4px;
+      background: #1e293b;
+      border: 1px dashed var(--border-color);
+      color: #38bdf8;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      font-weight: 600;
+    }
+    .thumb-count-btn:hover {
+      color: #fff;
+      border-color: #38bdf8;
+      background: #2563eb;
+    }
+
+    /* Lightbox Modal */
+    .lightbox-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px 24px;
+    }
+    .lightbox-modal.active {
+      display: flex;
+    }
+    .lightbox-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #fff;
+    }
+    .lightbox-title h2 {
+      font-size: 1.3rem;
+    }
+    .lightbox-title p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .lightbox-close {
+      background: #1e293b;
+      border: 1px solid var(--border-color);
+      color: #fff;
+      font-size: 1.4rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .lightbox-close:hover {
+      background: #ef4444;
+      border-color: #ef4444;
+    }
+    .lightbox-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin: 12px 0;
+      overflow: hidden;
+    }
+    .lightbox-main img {
+      max-width: 92vw;
+      max-height: 72vh;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+      transition: opacity 0.2s ease;
+    }
+    .image-counter {
+      position: absolute;
+      bottom: 12px;
+      background: rgba(15, 23, 42, 0.8);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      color: #38bdf8;
+      border: 1px solid var(--border-color);
+    }
+    .nav-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      font-size: 1.5rem;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      z-index: 10;
+    }
+    .nav-arrow:hover {
+      background: #38bdf8;
+      color: #000;
+    }
+    .nav-prev { left: 20px; }
+    .nav-next { right: 20px; }
+    .lightbox-thumbnails {
+      display: flex;
+      justify-content: flex-start;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 10px 0;
+      max-width: 90vw;
+      margin: 0 auto;
+      scrollbar-width: thin;
+    }
+    .lb-thumb {
+      width: 100px;
+      height: 56px;
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      opacity: 0.45;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+      background: #1e293b;
+      flex-shrink: 0;
+    }
+    .lb-thumb.active {
+      opacity: 1;
+      border-color: #38bdf8;
+      transform: scale(1.05);
+    }
+    .lb-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    @media (max-width: 768px) {
+      header { padding: 12px 16px; }
+      .container { padding: 16px; }
+      .grid { grid-template-columns: 1fr; }
+      .search-box input { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <h1>🎮 Steam 独立游戏机制库与视觉画廊 (100 款完整标杆)</h1>
+    <p>全量实机图沉浸浏览 | 不限截图张数 | 支持本地磁盘离线与全屏大图轮播</p>
+  </div>
+  <div class="controls">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="搜索游戏名、类型、机制...">
+    </div>
+  </div>
+</header>
+
+<div class="filter-tabs" id="filterTabs">
+  <button class="filter-tab active" data-category="all">全部游戏 (100)</button>
+  <button class="filter-tab" data-category="batch1">1~20: 强烈拆机制 (20)</button>
+  <button class="filter-tab" data-category="batch2">21~40: 低成本商业优选 (20)</button>
+  <button class="filter-tab" data-category="batch3">41~60: 模拟经营/工厂 (20)</button>
+  <button class="filter-tab" data-category="batch4">61~80: 怪点子小体量爆款 (20)</button>
+  <button class="filter-tab" data-category="batch5">81~100: 25-26 挖掘新作 (20)</button>
+</div>
+
+<div class="container">
+  <div class="stats-bar">
+    <span id="gameCount">正在加载游戏案例...</span>
+    <div>
+      <span class="mode-badge">⚡ 全量商店实机原图模式已开启</span>
+      <span style="margin-left: 8px;">💡 提示：点击任意图片可全屏滚轮浏览该游戏在商店里的所有原画</span>
+    </div>
+  </div>
+
+  <div class="grid" id="gameGrid"></div>
+</div>
+
+<!-- Lightbox Modal -->
+<div class="lightbox-modal" id="lightbox">
+  <div class="lightbox-header">
+    <div class="lightbox-title">
+      <h2 id="lbGameTitle">Game Name</h2>
+      <p id="lbGameDesc">Mechanics info</p>
+    </div>
+    <button class="lightbox-close" id="lbClose">✕</button>
+  </div>
+  <div class="lightbox-main">
+    <button class="nav-arrow nav-prev" id="lbPrev">‹</button>
+    <img id="lbMainImage" src="" alt="Screenshot">
+    <span class="image-counter" id="lbCounter">1 / 10</span>
+    <button class="nav-arrow nav-next" id="lbNext">›</button>
+  </div>
+  <div class="lightbox-thumbnails" id="lbThumbs"></div>
+</div>
+
+<script>
+// 100 款完整独立游戏数据库
+const gamesData = [
+  // 1～20：强烈建议拆机制 (20 款)
+  { id: 4075620, dir: "001_Combolands", name: "Combolands", category: "batch1", year: "2025", team: "2人", genre: "城市建设Roguelike", core: "建筑组合产生经济", desc: "空间规划与合成机制融合，单次摆放触发连环经济收益。" },
+  { id: 3244220, dir: "002_A Game About Digging A Hole", name: "A Game About Digging A Hole", category: "batch1", year: "2025", team: "Solo", genre: "挖矿模拟", core: "一个动作撑完整循环", desc: "极致简化的交互核心，围绕简单挖掘不断强化升级满足感。" },
+  { id: 2835570, dir: "003_Buckshot Roulette", name: "Buckshot Roulette", category: "batch1", year: "2024", team: "Solo", genre: "心理博弈", core: "简单规则+风险决策", desc: "俄罗斯轮盘+道具博弈，把简单的生死概率包装成极度紧张的单局体验。" },
+  { id: 2379780, dir: "004_Balatro", name: "Balatro (小丑牌)", category: "batch1", year: "2024", team: "Solo", genre: "卡牌Roguelike", core: "普通规则重构", desc: "经典德州扑克规则接入小丑牌乘数膨胀，数值爆发爽快感天花板。" },
+  { id: 1637320, dir: "005_Dome Keeper", name: "Dome Keeper", category: "batch1", year: "2022持续热门", team: "Solo", genre: "挖矿防守", core: "时间压力双循环", desc: "地下挖矿积累资源与地上穹顶防守倒计时，构筑双重时间压迫感。" },
+  { id: 3164500, dir: "006_Schedule I", name: "Schedule I", category: "batch1", year: "2025", team: "Solo起步", genre: "经营模拟", core: "生产链成长", desc: "黑产原料加工到物流分发，清晰可验证的数值增长闭环。" },
+  { id: 3241660, dir: "007_REPO", name: "R.E.P.O.", category: "batch1", year: "2025", team: "小团队", genre: "合作恐怖", core: "物理+社交传播", desc: "搬运物理重物机制与突发恐怖事件交互，天然造就主播与联机传播笑点。" },
+  { id: 3527290, dir: "008_PEAK", name: "PEAK", category: "batch1", year: "2025", team: "小团队", genre: "合作攀爬", core: "一个动作产生大量事件", desc: "攀爬物理连接机制，队友失误、绳索摇摆产生持续不断的连带反应。" },
+  { id: 2670630, dir: "009_Supermarket Simulator", name: "Supermarket Simulator", category: "batch1", year: "2024", team: "小团队", genre: "经营模拟", core: "现实流程游戏化", desc: "进货、上架、找零、结账，把最繁琐的现实零售动作转化为心流。" },
+  { id: 1190970, dir: "010_House Flipper 2", name: "House Flipper 2", category: "batch1", year: "2023-持续", team: "小团队", genre: "装修模拟", core: "低复杂度高反馈", desc: "拆迁与清洁的高密度即时反馈，满足强迫症解压心理。" },
+  { id: 1966720, dir: "011_Lethal Company", name: "Lethal Company (致命公司)", category: "batch1", year: "2023", team: "Solo", genre: "合作恐怖逃生", core: "废品价值博弈与局域语音", desc: "限时配额重压与近距语音传播，造就极低成本高传播力爆款。" },
+  { id: 2881650, dir: "012_Content Warning", name: "Content Warning", category: "batch1", year: "2024", team: "小团队", genre: "合作摄影解谜", core: "拍摄怪物生成伪视频", desc: "把玩家受惊过程变成游戏内可分享视频，自循环传播链条。" },
+  { id: 1868140, dir: "013_Dave the Diver", name: "Dave the Diver (潜水员戴夫)", category: "batch1", year: "2023", team: "小团队", genre: "海洋探索+寿司经营", core: "昼夜双循环驱动", desc: "白天水下探险捕鱼动作，夜间日料店运营模拟，无缝交织心流体验。" },
+  { id: 646570,  dir: "014_Slay the Spire", name: "Slay the Spire (杀戮尖塔)", category: "batch1", year: "2019", team: "2人", genre: "卡牌构建Roguelike", core: "遗物与牌组构筑乘法效应", desc: "开创现代DBG卡牌架构标准，能量费用、意图预示与遗物联动。" },
+  { id: 1293830, dir: "015_Loop Hero", name: "Loop Hero (循环勇者)", category: "batch1", year: "2021", team: "4人", genre: "循环放置RPG", core: "玩家自主布设环境改变难度", desc: "主角全自动移动，玩家通过地块卡牌决定怪物刷新与资源产出。" },
+  { id: 1105420, dir: "016_Inscryption", name: "Inscryption (邪恶冥刻)", category: "batch1", year: "2021", team: "Solo", genre: "Meta卡牌解谜", core: "桌面规则打破与空间解谜", desc: "从密室打牌走向规则解构，将恐怖桌游转化为Meta叙事艺术品。" },
+  { id: 311690,  dir: "017_Enter the Gungeon", name: "Enter the Gungeon", category: "batch1", year: "2016", team: "4人", genre: "弹幕射击地牢", core: "翻桌掩体与枪支词缀", desc: "掀桌防御微创新与数百种无厘头武器，弹幕射击与Rogue极致打磨。" },
+  { id: 262060,  dir: "018_Darkest Dungeon", name: "Darkest Dungeon (暗黑地牢)", category: "batch1", year: "2016", team: "小团队", genre: "回合制克苏鲁RPG", core: "精神压力值机制", desc: "英雄也是脆弱凡人，压力爆发带来不可控绝望与反转戏剧性。" },
+  { id: 588650,  dir: "019_Dead Cells", name: "Dead Cells (死亡细胞)", category: "batch1", year: "2018", team: "小团队", genre: "RogueVania", core: "动作取消与极速位移节奏", desc: "动作帧判定打磨巅峰，高风险带来高回报的狂暴细胞狂飙体验。" },
+  { id: 252490,  dir: "020_Rust", name: "Rust", category: "batch1", year: "经典持续", team: "小团队", genre: "开放生存制造", core: "资产剥夺恐惧驱动生存社交", desc: "下线家会被抄的极端恐惧，激发出最真实残酷的人性博弈社交。" },
+
+  // 21～40：低成本但商业结构优秀 (20 款)
+  { id: 1794680, dir: "021_Vampire Survivors", name: "Vampire Survivors (吸血鬼幸存者)", category: "batch2", year: "2022", team: "Solo起步", genre: "Roguelite", core: "极低操作，高成长", desc: "放弃平A仅靠移动，全自动武器爆发数值狂潮，掀起全球品类革命。" },
+  { id: 1807600, dir: "022_20 Minutes Till Dawn", name: "20 Minutes Till Dawn", category: "batch2", year: "2022", team: "Solo", genre: "Roguelite射击", core: "小地图循环", desc: "暗黑剪影美术，精准20分钟倒计时单局，密集选择流派成型。" },
+  { id: 1942280, dir: "023_Brotato", name: "Brotato (土豆兄弟)", category: "batch2", year: "2023", team: "Solo", genre: "Roguelite射击", core: "数字成长模型", desc: "6槽武器系统+属性加点深度，数值膨胀与惩罚控制的教科书范例。" },
+  { id: 1970580, dir: "024_Backpack Hero", name: "Backpack Hero", category: "batch2", year: "2022", team: "小团队", genre: "背包策略", core: "空间管理", desc: "把暗黑整理背包升级为战斗核心，道具空间邻接与角度决定爆发。" },
+  { id: 1404850, dir: "025_Luck be a Landlord", name: "Luck be a Landlord", category: "batch2", year: "2021", team: "Solo", genre: "老虎机Roguelite", core: "单机制深化", desc: "房租倒计时催逼，用老虎机符号联动替代传统战场。" },
+  { id: 1298780, dir: "026_Stacklands", name: "Stacklands", category: "batch2", year: "2022", team: "Sokpop", genre: "卡牌村庄", core: "UI代替大量美术", desc: "把建造、烹饪、战斗全部抽象为卡牌堆叠，极度省成本的极客设计典范。" },
+  { id: 1210320, dir: "027_Potion Craft", name: "Potion Craft", category: "batch2", year: "2022", team: "小团队", genre: "炼药模拟", core: "交互系统驱动", desc: "中世纪手抄本画风，将调配药水拆解为物理研磨、搅拌与地图寻路。" },
+  { id: 2303350, dir: "028_Sticky Business", name: "Sticky Business", category: "batch2", year: "2023", team: "两人", genre: "贴纸经营", core: "轻量生产链", desc: "自定义贴纸设计+打包寄送，主打轻松治愈的微型创作循环。" },
+  { id: 1390350, dir: "029_Webbed", name: "Webbed", category: "batch2", year: "2021", team: "2人", genre: "平台动作", core: "小机制创造角色魅力", desc: "蜘蛛丝物理摆荡与织网攀登，用精巧的物理手感塑造独特生物机能。" },
+  { id: 2498600, dir: "030_Mosa Lina", name: "Mosa Lina", category: "batch2", year: "2023", team: "Solo", genre: "沙盒解谜", core: "规则驱动玩法", desc: "非对称设计的规则沉浸式模拟器，强迫玩家用完全随机道具暴力破局。" },
+  { id: 1296610, dir: "031_Peglin", name: "Peglin (哥布林弹珠)", category: "batch2", year: "2022", team: "小团队", genre: "柏青哥Roguelike", core: "弹珠物理碰撞伤害放大", desc: "将三维战斗转化为柏青哥弹球，钉子弹射次数转换为巨额暴击伤害。" },
+  { id: 1818750, dir: "032_Slice and Dice", name: "Slice & Dice", category: "batch2", year: "2022", team: "Solo", genre: "战术骰子策略", core: "骰面构筑与战局重掷", desc: "极简像素UI背后是极度严谨的骰面修改与回合制战术博弈。" },
+  { id: 915310,  dir: "033_SNKRX", name: "SNKRX", category: "batch2", year: "2021", team: "Solo", genre: "贪吃蛇自走棋", core: "贪吃蛇身位+英雄羁绊", desc: "极低开发成本，几段几何图形把经典贪吃蛇与自走棋羁绊完美结合。" },
+  { id: 2218750, dir: "034_Halls of Torment", name: "Halls of Torment (折磨之穴)", category: "batch2", year: "2023", team: "小团队", genre: "复古暗黑幸存者", core: "暗黑2视听包装幸存者", desc: "用90年代复古暗黑美术为幸存者玩法赋能，实现降维打击。" },
+  { id: 2427700, dir: "035_Backpack Battles", name: "Backpack Battles (背包乱斗)", category: "batch2", year: "2024", team: "2人", genre: "背包整理PvP", core: "异步联机背包合成自走棋", desc: "纯背包收纳构筑流派，异步对战让玩家在无时间压力下反复推敲格位。" },
+  { id: 1972440, dir: "036_Shotgun King", name: "Shotgun King (王权：陨落)", category: "batch2", year: "2022", team: "3人", genre: "规则颠覆战棋", core: "黑王持霰弹枪单挑整副棋盘", desc: "仅保留黑王一人，用装弹射击替代传统走位，老规则暴力解构。" },
+  { id: 1313140, dir: "037_Cult of the Lamb", name: "Cult of the Lamb (咩咩启示录)", category: "batch2", year: "2022", team: "小团队", genre: "教会模拟+地牢战斗", core: "信徒经营供养战斗地牢", desc: "萌系克苏鲁画风，基地经营洗脑信徒与下地牢战斗交相辉映。" },
+  { id: 2066020, dir: "038_Soulstone Survivors", name: "Soulstone Survivors", category: "batch2", year: "2022", team: "小团队", genre: "ARPG幸存者", core: "重度符文天赋与BD构建", desc: "将幸存者底层框架提升到暗黑/流放之路级别的海量流派BD深度。" },
+  { id: 2321470, dir: "039_Deep Rock Galactic Survivor", name: "Deep Rock Galactic: Survivor", category: "batch2", year: "2024", team: "小团队", genre: "挖矿生存射击", core: "地形破坏与逃生路线开凿", desc: "结合深岩银河IP，边挖矿穿墙边风筝虫潮，赋予走位全新物理维度。" },
+  { id: 2191940, dir: "040_Megabonk", name: "Megabonk (大弹射)", category: "batch2", year: "2023", team: "Solo", genre: "物理弹珠放置", core: "弹射反弹数值指数裂变", desc: "纯粹的几何反弹加成，验证单数值爆破机制的极小成本魅力。" },
+
+  // 41～60：模拟经营 / 工厂方向 (20 款)
+  { id: 1644940, dir: "041_Loddlenaut", name: "Loddlenaut", category: "batch3", year: "2023", team: "小团队", genre: "海洋清洁模拟", core: "环保循环", desc: "水下除污与生态恢复，将清理垃圾的劳动感变为生态恢复的成就感。" },
+  { id: 2198150, dir: "042_Tiny Glade", name: "Tiny Glade (迷你城堡)", category: "batch3", year: "2024", team: "2人", genre: "建造沙盒", core: "无压力创造", desc: "没有网格、没有管理、没有死亡，只有最极致的过程化生成建造反馈。" },
+  { id: 2678990, dir: "043_Minami Lane", name: "Minami Lane (南之町)", category: "batch3", year: "2024", team: "2人", genre: "街区经营", core: "小规模经营", desc: "精简而温馨的日式小街日常管理，在短流程内提供饱满的情绪价值。" },
+  { id: 2666510, dir: "044_Rustys Retirement", name: "Rusty's Retirement", category: "batch3", year: "2024", team: "Solo", genre: "挂机农场", core: "低压力成长", desc: "驻留屏幕底部的农场挂机，完美嵌入打工人和玩家的摸鱼生态。" },
+  { id: 1501610, dir: "045_Nova Lands", name: "Nova Lands", category: "batch3", year: "2023", team: "小团队", genre: "生存建造", core: "简化版自动化", desc: "2D俯视角异星开拓，小机器人自动化配送大幅缩短工厂挫败感。" },
+  { id: 983870,  dir: "046_Foundry", name: "Foundry", category: "batch3", year: "2024", team: "Channel 3", genre: "工厂自动化", core: "模块生产", desc: "第一人称立体像素工厂，打通地下矿藏到全自动物流网络。" },
+  { id: 2162800, dir: "047_Shapez 2", name: "Shapez 2 (异形工厂2)", category: "batch3", year: "2024", team: "小团队", genre: "自动化", core: "纯系统玩法", desc: "移除所有敌人和生存限制，专注几何图形切割、染色与多层轨道逻辑。" },
+  { id: 1127400, dir: "048_Mindustry", name: "Mindustry", category: "batch3", year: "2019持续", team: "Solo起步", genre: "塔防+工厂", core: "循环生产", desc: "传送带物流链直接给炮塔供给弹药，工厂产能即是国防火力。" },
+  { id: 860890,  dir: "049_Factory Town", name: "Factory Town", category: "batch3", year: "2019", team: "Solo", genre: "物流建设", core: "资源链", desc: "滑槽、管道、轨道与传送带的立体化物流交响曲。" },
+  { id: 1139980, dir: "050_Travellers Rest", name: "Travellers Rest (酒馆带师)", category: "batch3", year: "持续更新", team: "小团队", genre: "酒馆经营", core: "生活经营", desc: "自酿啤酒、农耕、装修客房到照顾客人，浓缩的中世纪酒馆经营闭环。" },
+  { id: 427520,  dir: "051_Factorio", name: "Factorio (异星工厂)", category: "batch3", year: "2020", team: "Wube", genre: "自动化工厂建造", core: "流水线与吞吐总线架构", desc: "自动化生产建造游戏的绝对始祖与行业教科书，传送带逻辑天花板。" },
+  { id: 526870,  dir: "052_Satisfactory", name: "Satisfactory (幸福工厂)", category: "batch3", year: "2024正式版", team: "Coffee Stain", genre: "第一人称工厂", core: "立体垂直工厂空间规划", desc: "3D视界下的宏伟工业美学，将复杂的自动化逻辑转化为具象机械奇观。" },
+  { id: 1366540, dir: "053_Dyson Sphere Program", name: "Dyson Sphere Program (戴森球计划)", category: "batch3", year: "2021", team: "5人团队", genre: "星际工业自动化", core: "跨星系物流与戴森球构筑", desc: "从星球地表流水线到星系级货运，亲手搭建包裹恒星的宇宙奇迹工程。" },
+  { id: 457140,  dir: "054_Oxygen Not Included", name: "Oxygen Not Included (缺氧)", category: "batch3", year: "2019", team: "Klei", genre: "太空殖民模拟", core: "热力学与气体流体物理模拟", desc: "基地热量扩散、氧气二氧化碳分层，极其真实的物理规律驱动生存经营。" },
+  { id: 294100,  dir: "055_RimWorld", name: "RimWorld (边缘世界)", category: "batch3", year: "经典持续", team: "Ludeon", genre: "殖民地生存故事机", core: "AI故事叙事导演机制", desc: "三个各怀毛病的殖民者，由AI后台计算随机灾难创造无尽跌宕传奇。" },
+  { id: 1062090, dir: "056_Timberborn", name: "Timberborn (木匠海狸)", category: "batch3", year: "2021", team: "小团队", genre: "水利城市建设", core: "垂直木建与水坝流体力学", desc: "废土上的智械海狸，筑坝蓄水抵御干旱，立体搭建摩天木制都市。" },
+  { id: 1550740, dir: "057_Captain of Industry", name: "Captain of Industry (工业巨头)", category: "batch3", year: "2022", team: "2人", genre: "重工业海岛模拟", core: "采矿地形破坏与废料填海", desc: "真实挖掘地形改变等高线，废渣填海造地，极度硬核真实的工业链条。" },
+  { id: 1455840, dir: "058_Dorfromantik", name: "Dorfromantik (筑景)", category: "batch3", year: "2022", team: "4人学生团队", genre: "休闲地块拼接", core: "六边形边缘规则契合", desc: "宁静惬意的拼图放置，通过河流、铁轨、森林边缘匹配达成无尽长河。" },
+  { id: 1336490, dir: "059_Against the Storm", name: "Against the Storm (风暴之城)", category: "batch3", year: "2023", team: "Eremite", genre: "城市建设Roguelite", core: "女王怒气倒计时与短局重开", desc: "打破建造游戏拖沓晚期瓶颈，将单局浓缩为40分钟的指令危机决策。" },
+  { id: 1284190, dir: "060_The Planet Crafter", name: "The Planet Crafter (荒星造物主)", category: "batch3", year: "2024", team: "2人", genre: "星球地球化改造", core: "大气指数驱动生态实时巨变", desc: "从荒芜红土到云雨降临、蓝天碧海生成，直观感知大自然被改造的震撼。" },
+
+  // 61～80：怪点子、小体量爆款路线 (20 款)
+  { id: 2653310, dir: "061_The Exit 8", name: "The Exit 8 (8号出口)", category: "batch4", year: "2023", team: "Solo", genre: "观察解谜", core: "几分钟规则", desc: "发现异样立即回头，无异样往前走。极简规则引发现象级心理恐怖效仿潮。" },
+  { id: 2903560, dir: "062_Platform 8", name: "Platform 8 (8号站台)", category: "batch4", year: "2024", team: "Solo", genre: "恐怖观察", core: "规则复用", desc: "将无限循环列车作为载体，延续8号出口的异变捕捉与突发危机设计。" },
+  { id: 2600140, dir: "063_Please Touch The Artwork 2", name: "Please, Touch The Artwork 2", category: "batch4", year: "2024", team: "Solo", genre: "艺术解谜", core: "低成本内容", desc: "利用公共版权古典名画作为游戏关卡，极低美术成本实现高艺术溢价。" },
+  { id: 1677770, dir: "064_The Case of the Golden Idol", name: "The Case of the Golden Idol", category: "batch4", year: "2022", team: "2人", genre: "推理", core: "信息组合", desc: "凝固死亡瞬间，通过填词还原案发现场人物动机与阴谋。" },
+  { id: 1931770, dir: "065_Chants of Sennaar", name: "Chants of Sennaar", category: "batch4", year: "2023", team: "小团队", genre: "语言解谜", core: "单核心创新", desc: "巴别塔破译失落语言，通过语境观察与笔记图画拼凑出文字意义。" },
+  { id: 1382070, dir: "066_Viewfinder", name: "Viewfinder", category: "batch4", year: "2023", team: "小团队", genre: "视觉谜题", core: "一个视觉规则", desc: "举起拍立得照片将其覆盖在现实视界中直接实体化，颠覆空间认知。" },
+  { id: 1629520, dir: "067_A Little to the Left", name: "A Little to the Left", category: "batch4", year: "2022", team: "2人", genre: "整理游戏", core: "日常行为游戏化", desc: "文具摆放、餐具归位，把人类本能的对称与整洁强迫症转化为解谜玩法。" },
+  { id: 1135690, dir: "068_Unpacking", name: "Unpacking", category: "batch4", year: "2021", team: "小团队", genre: "整理模拟", core: "空间情绪", desc: "无需一行对白，仅凭数次搬家拆箱物品的摆放，无声叙述主角十余载人生蜕变。" },
+  { id: 1491670, dir: "069_Venba", name: "Venba", category: "batch4", year: "2023", team: "小团队", genre: "料理叙事", core: "小内容高完成度", desc: "残破南印度菜谱复原，把做饭步骤与移民家庭代际隔阂精炼融为一体。" },
+  { id: 1055540, dir: "070_A Short Hike", name: "A Short Hike", category: "batch4", year: "2019", team: "Solo", genre: "探索冒险", core: "小世界设计", desc: "羽毛滑翔与微型海岛探索，小体量高密度箱庭开放世界的终极模板。" },
+  { id: 653530,  dir: "071_Return of the Obra Dinn", name: "Return of the Obra Dinn (奥伯拉丁的归来)", category: "batch4", year: "2018", team: "Lucas Pope", genre: "逻辑推理解谜", core: "死亡怀表时空定格断案", desc: "1-bit极简复古视效，凭借名册与案发定格瞬间推导整船60人死因。" },
+  { id: 239030,  dir: "072_Papers Please", name: "Papers, Please (请出示证件)", category: "batch4", year: "2013", team: "Lucas Pope", genre: "边境审核反乌托邦", core: "文档印章与道德压力博弈", desc: "将最繁琐的盖章审查公文动作，变成压在全家人生死线上的道德煎熬。" },
+  { id: 557600,  dir: "073_Gorogoa", name: "Gorogoa (画中世界)", category: "batch4", year: "2017", team: "Solo", genre: "手绘插画拼图", core: "四格画中透视嵌套重合", desc: "数千张手绘插图，通过缩放平移打破画框次元，完成无与伦比的视觉奇迹。" },
+  { id: 736260,  dir: "074_Baba Is You", name: "Baba Is You", category: "batch4", year: "2019", team: "Solo", genre: "逻辑规则重写", core: "词块推动修改关卡规则词法", desc: "推箱子变体，通过推动'WALL IS STOP'拆词，直接修改世界的物理公理。" },
+  { id: 888870,  dir: "075_Untitled Goose Game", name: "Untitled Goose Game (大鹅模拟器)", category: "batch4", year: "2019", team: "4人", genre: "恶作剧沙盒", core: "小动作搞怪引发连锁反应", desc: "扮演一只无恶不作的大白鹅，把捉弄人类的小幽默做成顶级互动戏剧。" },
+  { id: 2058190, dir: "076_Lorelei and the Laser Eyes", name: "Lorelei and the Laser Eyes", category: "batch4", year: "2024", team: "Simogo", genre: "非线性悬疑迷宫", core: "多层密码本与空间记忆谜网", desc: "错综复杂的黑白超现实解谜，把玩家智商当回事的致密艺术迷宫。" },
+  { id: 813230,  dir: "077_Animal Well", name: "Animal Well (动物井)", category: "batch4", year: "2024", team: "Solo", genre: "隐秘类银河恶魔城", core: "无战斗道具场景深层物理交互", desc: "悠悠球、泡泡枪、飞盘，极其克制的道具在多层谜题嵌套中发挥极致。" },
+  { id: 542050,  dir: "078_Donut County", name: "Donut County", category: "batch4", year: "2018", team: "Solo", genre: "物理吞噬破坏", core: "负空间地洞物理变大", desc: "控制一个越来越大的地面坑洞吞噬一切日常物品，充满童趣与破坏欲。" },
+  { id: 1291340, dir: "079_Townscaper", name: "Townscaper", category: "batch4", year: "2021", team: "Solo", genre: "过程化算法玩具", core: "毫无惩罚的点击生成反馈", desc: "完全没有目标和失败，仅靠底层强大的波函数算法将点击变成唯美小镇。" },
+  { id: 1497440, dir: "080_Cocoon", name: "Cocoon (茧)", category: "batch4", year: "2023", team: "Jeppe Carlsen", genre: "递归宇宙解谜", core: "跃入球中世界的维度嵌套", desc: "将整个世界装在一个发光球体中背负行走，在多重宇宙层级间跳跃破局。" },
+
+  // 81～100：2025～2026值得关注的小团队新作/隐藏项目 (20 款)
+  { id: 3565390, dir: "081_SIGILLUM", name: "SIGILLUM", category: "batch5", year: "2026", team: "4人", genre: "PSX恐怖", core: "复古低保真质感+西语民俗", desc: "复古PS1风格生存恐怖，利用低分辨率阴森视效制造心理压迫。" },
+  { id: 2387740, dir: "082_Light of Atlantis", name: "Light of Atlantis", category: "batch5", year: "2026", team: "3人", genre: "解谜Metroidvania", core: "水体物理+机械切换", desc: "水物理谜题与亚特兰蒂斯水下重力转换，双机器人协作破局。" },
+  { id: 3358170, dir: "083_Dodo Duckie", name: "Dodo Duckie", category: "batch5", year: "2026", team: "6人左右", genre: "解谜平台", core: "2D/3D视角瞬切", desc: "一顶魔法帽在纸片2D与立体3D空间瞬间维度折叠，拓展平台跳跃可能性。" },
+  { id: 3603900, dir: "084_Drunkonauts", name: "Drunkonauts", category: "batch5", year: "2026", team: "Solo", genre: "合作派对", core: "喷气背包混乱物理", desc: "零重力搞笑对战与太空派对，利用物理失控驱动社交欢笑。" },
+  { id: 2804680, dir: "085_Only Way is Down", name: "Only Way is Down", category: "batch5", year: "2025", team: "2人", genre: "平台挑战", core: "反向高难下落", desc: "主角猫咪从摩天工地向下探险，跌落不是重来而是更深层的空间危机。" },
+  { id: 2900050, dir: "086_Lost in Art A Miniature Realm", name: "Lost in Art: A Miniature Realm", category: "batch5", year: "2026", team: "2人", genre: "探索解谜", core: "微型波斯细密画", desc: "数字化复原古典东方与细密画，玩家直接在传世古画内部点选探索。" },
+  { id: 2935570, dir: "087_Silks of Mind", name: "Silks of Mind", category: "batch5", year: "TBA", team: "Solo", genre: "超能力解谜", core: "隔空移物动量控制", desc: "意念移物平台解谜，丝线与物理重力联动创造高速动态位移。" },
+  { id: 2451700, dir: "088_Atrion Project", name: "Atrion Project", category: "batch5", year: "2026", team: "Solo", genre: "动作平台", core: "快节奏刀锋判定", desc: "硬核砍杀与死亡重试机制，追求极致帧判定与爽快打击感。" },
+  { id: 2964000, dir: "089_Hush Hush High", name: "Hush Hush High", category: "batch5", year: "2024", team: "3人", genre: "校园模拟", core: "八卦传递与QTE反压制", desc: "憋住秘密的高校潜行，奇葩脑洞的八卦传播与防剧透心理战。" },
+  { id: 2363570, dir: "090_Rise of Jericho", name: "Rise of Jericho", category: "batch5", year: "2023", team: "小团队", genre: "城市建设", core: "古代部落文明演进", desc: "近东远古狩猎采集到定居筑城，微型2D侧视角资源循环管理。" },
+  { id: 1996010, dir: "091_Crow Country", name: "Crow Country (乌鸦森林)", category: "batch5", year: "2024", team: "2人", genre: "经典生化恐怖复古", core: "90年代固定视角怀旧解密", desc: "重现生化危机1与寂静岭初代低多边形沉浸感，小团队高口碑典范。" },
+  { id: 2141500, dir: "092_Arranger A Role-Puzzling Adventure", name: "Arranger: A Role-Puzzling Adventure", category: "batch5", year: "2024", team: "小团队", genre: "滑块矩阵RPG", core: "主角移动带动整个网格平移", desc: "没有传统移动，玩家走一步整行网格同步滑移，解谜与战斗浑然一体。" },
+  { id: 1519710, dir: "093_SCHiM", name: "SCHiM (小精灵跳跃)", category: "batch5", year: "2024", team: "2人", genre: "影子跳跃平台", core: "只能在物体投射的阴影中移动", desc: "极简纯色双色调画面，在太阳投下的飞禽走兽与车辆阴影间跳跃前进。" },
+  { id: 1983970, dir: "094_Thank Goodness Youre Here", name: "Thank Goodness You're Here!", category: "batch5", year: "2024", team: "2人", genre: "荒诞情景剧冒险", core: "英国北方俚语式搞怪互动", desc: "每一帧都是手绘动画喜剧，短小精悍却笑料拉满的满分小品。" },
+  { id: 1140440, dir: "095_Hauntii", name: "Hauntii", category: "batch5", year: "2024", team: "小团队", genre: "手绘双摇杆冒险", core: "射击灵魂附身一切生灵与死物", desc: "附身树木晃落果实，附身甲虫冲撞，画风空灵唯美的附灵解谜。" },
+  { id: 2453430, dir: "096_Botany Manor", name: "Botany Manor (波坦尼庄园)", category: "batch5", year: "2024", team: "小团队", genre: "历史植物学解谜", core: "查阅古籍研究奇幻植物花期", desc: "十九世纪维多利亚庄园，通过调配光照、土壤酸碱度催开失落奇花。" },
+  { id: 1458140, dir: "097_Pacific Drive", name: "Pacific Drive (超自然车旅)", category: "batch5", year: "2024", team: "小团队", genre: "驾驶生存探索", core: "车即生命，第一人称手搓零件", desc: "将传统生存建造的核心放在一辆破旧旅行车上，驾车逃离异常风暴。" },
+  { id: 2208820, dir: "098_Dungeons of Hinterberg", name: "Dungeons of Hinterberg", category: "batch5", year: "2024", team: "两人核心", genre: "阿尔卑斯动作冒险", core: "白天魔法地牢+黄昏小镇社交", desc: "度假胜地刷地牢，晚上与当地居民喝咖啡聊天的现代生活流冒险。" },
+  { id: 1885110, dir: "099_Cryptmaster", name: "Cryptmaster", category: "batch5", year: "2024", team: "Solo+编剧", genre: "打字地牢探索", core: "纯键盘输入词汇释放一切技能", desc: "全靠猜词拼写与NPC对话，用打字代替摇杆的极度惊艳怪点子神作。" },
+  { id: 1809540, dir: "100_Nine Sols", name: "Nine Sols (九日)", category: "batch5", year: "2024", team: "赤烛游戏", genre: "道朋克2D格挡动作", core: "只狼式拼刀与道教赛博朋克", desc: "近战格挡瞬息万变，将中国传统道家哲学与硬核类魂战斗深度结合。" }
+];
+
+// 获取该游戏实际拥有的实机截图总数
+function getGameScreenshotCount(dirName) {
+  if (window.GAME_SCREENSHOTS_MANIFEST && window.GAME_SCREENSHOTS_MANIFEST[dirName]) {
+    return window.GAME_SCREENSHOTS_MANIFEST[dirName];
+  }
+  return 10; // 默认探测 10 张
+}
+
+// 渲染画廊卡片
+const gameGrid = document.getElementById("gameGrid");
+const gameCount = document.getElementById("gameCount");
+
+function renderCards(list) {
+  gameGrid.innerHTML = "";
+  gameCount.innerText = `当前呈现 ${list.length} 款小团队神作与标杆案例 (满额 100 款)`;
+
+  list.forEach(game => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.setAttribute("data-id", game.id);
+    card.setAttribute("data-cat", game.category);
+
+    const localBase = `./GameScreenshots/${game.dir}`;
+    const localCover = `${localBase}/cover.jpg`;
+    const ssTotal = getGameScreenshotCount(game.dir);
+
+    const categoryNames = {
+      batch1: "强烈拆机制 1~20",
+      batch2: "商业优选 21~40",
+      batch3: "模拟工厂 41~60",
+      batch4: "怪点子爆款 61~80",
+      batch5: "新作挖掘 81~100"
+    };
+
+    card.innerHTML = `
+      <div class="card-banner" onclick="openLightbox(${game.id}, 0)">
+        <img src="${localCover}" alt="${game.name}" loading="lazy" onerror="this.src='https://cdn.cloudflare.steamstatic.com/steam/apps/${game.id}/header.jpg'">
+        <span class="batch-badge">${categoryNames[game.category]}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-header-info">
+          <div class="card-title">${game.name}</div>
+          <a class="steam-link" href="https://store.steampowered.com/app/${game.id}/" target="_blank" title="前往 Steam 商店">
+            <span>Steam</span> ↗
+          </a>
+        </div>
+        <div class="meta-tags">
+          <span class="meta-tag highlight">${game.year}</span>
+          <span class="meta-tag">${game.team}</span>
+          <span class="meta-tag">${game.genre}</span>
+        </div>
+        <div class="mechanic-desc">
+          <strong>核心机制：</strong>${game.core}
+          <div style="margin-top: 4px; color: #94a3b8; font-size: 0.8rem;">${game.desc}</div>
+        </div>
+        <div class="screenshots-strip" id="strip-${game.id}">
+          <div class="screenshot-thumb" onclick="openLightbox(${game.id}, 1)">
+            <img src="${localBase}/screenshot_1.jpg" alt="Shot 1" loading="lazy" onerror="this.parentElement.style.display='none'">
+          </div>
+          <div class="screenshot-thumb" onclick="openLightbox(${game.id}, 2)">
+            <img src="${localBase}/screenshot_2.jpg" alt="Shot 2" loading="lazy" onerror="this.parentElement.style.display='none'">
+          </div>
+          <div class="screenshot-thumb" onclick="openLightbox(${game.id}, 3)">
+            <img src="${localBase}/screenshot_3.jpg" alt="Shot 3" loading="lazy" onerror="this.parentElement.style.display='none'">
+          </div>
+          <div class="screenshot-thumb" onclick="openLightbox(${game.id}, 4)">
+            <img src="${localBase}/screenshot_4.jpg" alt="Shot 4" loading="lazy" onerror="this.parentElement.style.display='none'">
+          </div>
+          <div class="thumb-count-btn" onclick="openLightbox(${game.id}, 0)" title="查看该游戏在商店里的全部实机大图">
+            +${ssTotal}张全原画
+          </div>
+        </div>
+      </div>
+    `;
+
+    gameGrid.appendChild(card);
+  });
+}
+
+// 筛选逻辑
+let currentCategory = "all";
+let currentSearch = "";
+
+function applyFilters() {
+  const filtered = gamesData.filter(game => {
+    const matchCat = currentCategory === "all" || game.category === currentCategory;
+    const matchSearch = currentSearch === "" || 
+      game.name.toLowerCase().includes(currentSearch) ||
+      game.genre.toLowerCase().includes(currentSearch) ||
+      game.core.toLowerCase().includes(currentSearch) ||
+      game.desc.toLowerCase().includes(currentSearch);
+    return matchCat && matchSearch;
+  });
+  renderCards(filtered);
+}
+
+// 标签切换
+const filterTabs = document.querySelectorAll(".filter-tab");
+filterTabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+    filterTabs.forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    currentCategory = tab.getAttribute("data-category");
+    applyFilters();
+  });
+});
+
+// 实时搜索
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  currentSearch = e.target.value.trim().toLowerCase();
+  applyFilters();
+});
+
+// 全屏 Lightbox 画廊控制 (动态加载该游戏拥有的全部大图)
+const lb = document.getElementById("lightbox");
+const lbTitle = document.getElementById("lbGameTitle");
+const lbDesc = document.getElementById("lbGameDesc");
+const lbMainImg = document.getElementById("lbMainImage");
+const lbThumbs = document.getElementById("lbThumbs");
+const lbCounter = document.getElementById("lbCounter");
+let currentLbAppId = null;
+let currentLbIndex = 0;
+let currentLbImages = [];
+
+function openLightbox(appid, initialIndex = 0) {
+  const game = gamesData.find(g => g.id === appid);
+  if (!game) return;
+
+  currentLbAppId = appid;
+  currentLbIndex = initialIndex;
+  lbTitle.innerText = `${game.name} (${game.year} | ${game.team})`;
+  lbDesc.innerHTML = `<span style="color: #38bdf8;">[${game.genre}]</span> 核心机制：${game.core} —— ${game.desc}`;
+
+  const localBase = `./GameScreenshots/${game.dir}`;
+  const totalScreenshots = getGameScreenshotCount(game.dir);
+
+  // 动态组装该游戏所有的截图 (无上限)
+  currentLbImages = [`${localBase}/cover.jpg`];
+  for (let i = 1; i <= Math.max(totalScreenshots, 15); i++) {
+    currentLbImages.push(`${localBase}/screenshot_${i}.jpg`);
+  }
+
+  renderLightboxView();
+  lb.classList.add("active");
+}
+
+function renderLightboxView() {
+  if (currentLbImages.length === 0) return;
+  if (currentLbIndex < 0) currentLbIndex = currentLbImages.length - 1;
+  if (currentLbIndex >= currentLbImages.length) currentLbIndex = 0;
+
+  const currentSrc = currentLbImages[currentLbIndex];
+  lbMainImg.src = currentSrc;
+  lbCounter.innerText = `${currentLbIndex + 1} / ${currentLbImages.length}`;
+
+  lbThumbs.innerHTML = currentLbImages.map((src, idx) => `
+    <div class="lb-thumb ${idx === currentLbIndex ? 'active' : ''}" onclick="selectLbImage(${idx})">
+      <img src="${src}" alt="Thumb" loading="lazy" onerror="this.parentElement.style.display='none'">
+    </div>
+  `).join("");
+}
+
+function selectLbImage(idx) {
+  currentLbIndex = idx;
+  renderLightboxView();
+}
+
+document.getElementById("lbPrev").addEventListener("click", () => {
+  currentLbIndex--;
+  renderLightboxView();
+});
+
+document.getElementById("lbNext").addEventListener("click", () => {
+  currentLbIndex++;
+  renderLightboxView();
+});
+
+document.getElementById("lbClose").addEventListener("click", () => {
+  lb.classList.remove("active");
+});
+
+window.addEventListener("keydown", (e) => {
+  if (!lb.classList.contains("active")) return;
+  if (e.key === "Escape") lb.classList.remove("active");
+  if (e.key === "ArrowLeft") { currentLbIndex--; renderLightboxView(); }
+  if (e.key === "ArrowRight") { currentLbIndex++; renderLightboxView(); }
+});
+
+// 初始化
+renderCards(gamesData);
+</script>
+
+</body>
+</html>

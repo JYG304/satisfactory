@@ -71,10 +71,6 @@ function getPreviewMilestoneConfig(optStageId) {
 }
 
 function openHubMilestoneModal() {
-  if (typeof openTechTreeModal === 'function') {
-    openTechTreeModal();
-    return;
-  }
   playUiSound('click');
   closeOtherModals('hubMilestoneModal');
   const modal = document.getElementById('hubMilestoneModal');

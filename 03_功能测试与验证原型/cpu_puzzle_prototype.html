@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>修仙工厂 · 中央处理器 (拼图插卡版独立原型)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background-color: #06090e;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+      user-select: none;
+    }
+    /* 网格单元格 */
+    .board-cell {
+      width: 44px;
+      height: 44px;
+      transition: all 0.15s ease;
+    }
+    .board-cell.hover-valid {
+      background-color: rgba(16, 185, 129, 0.35) !important;
+      border-color: #10b981 !important;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    }
+    .board-cell.hover-invalid {
+      background-color: rgba(239, 68, 68, 0.4) !important;
+      border-color: #ef4444 !important;
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+    }
+    /* 芯片卡片在库存里 */
+    .chip-item {
+      cursor: grab;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .chip-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 240, 255, 0.25);
+    }
+    .chip-item:active {
+      cursor: grabbing;
+      transform: scale(0.96);
+    }
+    /* 邻接共鸣连线特效 */
+    .synergy-glow {
+      animation: pulseGlow 1.8s infinite alternate ease-in-out;
+    }
+    @keyframes pulseGlow {
+      0% { filter: drop-shadow(0 0 4px #ffd700); }
+      100% { filter: drop-shadow(0 0 14px #ff9900); }
+    }
+    /* 滚动条 */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b111a; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+  </style>
+</head>
+<body class="h-screen w-screen flex flex-col overflow-hidden bg-[#06090f]">
+
+  <!-- 顶部状态栏 -->
+  <header class="h-14 border-b border-white/10 bg-[#090d16] px-6 flex items-center justify-between shrink-0">
+    <div class="flex items-center space-x-3">
+      <div class="w-9 h-9 rounded-lg bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.4)]">
+        <i class="fa-solid fa-microchip text-lg"></i>
+      </div>
+      <div>
+        <h1 class="text-sm font-black text-white tracking-wider flex items-center space-x-2">
+          <span>中央处理器 · 混元灵脉拼图主板</span>
+          <span class="text-[10px] font-mono bg-cyan-950 text-cyan-300 border border-cyan-500/40 px-2 py-0.5 rounded">v2.5 原型</span>
+        </h1>
+        <p class="text-[10px] text-white/50 font-sans">异形芯片拼图 · 相生邻接暴击 · 散热与功耗动态博弈</p>
+      </div>
+    </div>
+
+    <!-- 核心指标仪表 -->
+    <div class="flex items-center space-x-6 text-xs font-mono">
+      <!-- 功耗 -->
+      <div class="flex items-center space-x-2 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10">
+        <i class="fa-solid fa-bolt text-yellow-400"></i>
+        <span class="text-white/60">电网负荷:</span>
+        <span id="statPower" class="text-yellow-300 font-bold">24 / 100 MW</span>
+      </div>
+
+      <!-- 热量 TDP -->
+      <div class="flex items-center space-x-2 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10">
+        <i class="fa-solid fa-temperature-half text-rose-400"></i>
+        <span class="text-white/60">发热量 (TDP):</span>
+        <span id="statHeat" class="text-rose-300 font-bold">35 / 100 °C</span>
+        <div class="w-20 h-2 bg-slate-800 rounded-full overflow-hidden border border-white/10 ml-1">
+          <div id="statHeatBar" class="h-full bg-emerald-400 transition-all duration-300" style="width: 35%;"></div>
+        </div>
+      </div>
+
+      <!-- 全厂总倍率 -->
+      <div class="flex items-center space-x-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 px-3 py-1.5 rounded-lg border border-amber-400/50 shadow-[0_0_10px_rgba(245,158,11,0.3)]">
+        <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+        <span class="text-amber-200">全厂共鸣增益:</span>
+        <span id="statMultiplier" class="text-amber-300 font-black text-sm">+85%</span>
+      </div>
+
+      <!-- 操作按钮 -->
+      <button onclick="clearAllPlacedChips();" class="px-2.5 py-1 bg-white/5 hover:bg-rose-950/40 border border-white/10 hover:border-rose-500/50 text-white/60 hover:text-rose-300 rounded text-xs transition cursor-pointer">
+        <i class="fa-solid fa-trash-can mr-1"></i>清空主板
+      </button>
+    </div>
+  </header>
+
+  <!-- 主体工作区：左主板网格 + 右详情统计 + 底芯片库存 -->
+  <main class="flex-1 flex min-h-0">
+    
+    <!-- 左侧：8x8 拼图母板画布 -->
+    <section class="flex-1 flex flex-col items-center justify-center p-6 bg-[#080c14] relative overflow-hidden">
+      <!-- 背景网格修仙阵盘淡印 -->
+      <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5">
+        <i class="fa-solid fa-yin-yang text-[500px]"></i>
+      </div>
+
+      <!-- 主板容器 (外加金属外框与散热鳍片装饰) -->
+      <div class="relative bg-[#0d131f] border-2 border-cyan-500/40 rounded-xl p-4 shadow-[0_20px_60px_rgba(0,0,0,0.9),inset_0_0_30px_rgba(0,240,255,0.05)]">
+        <!-- 顶部主板铭牌 -->
+        <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-white/10 text-xs font-mono">
+          <div class="flex items-center space-x-2 text-cyan-300">
+            <i class="fa-solid fa-layer-group"></i>
+            <span class="font-bold">混元母板阵列 (8×8 网格插槽)</span>
+          </div>
+          <span class="text-[10px] text-white/40">将底部芯片拖拽入插槽 ｜ 点击主板上芯片可拆卸拔出</span>
+        </div>
+
+        <!-- 8x8 格子网格 -->
+        <div id="boardGrid" class="grid grid-cols-8 gap-1.5 p-2 bg-[#05080e] rounded-lg border border-white/10 select-none">
+          <!-- 由 JS 动态渲染 64 个单元格 -->
+        </div>
+
+        <!-- 底部署名与提示 -->
+        <div class="mt-2.5 flex items-center justify-between text-[10px] font-mono text-white/40">
+          <span class="flex items-center space-x-3">
+            <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 rounded bg-yellow-500/30 border border-yellow-400"></span><span>金灵眼 (金系翻倍)</span></span>
+            <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 rounded bg-red-500/30 border border-red-400"></span><span>火灵眼 (火系翻倍)</span></span>
+            <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 rounded bg-blue-500/30 border border-blue-400"></span><span>水灵眼 (水冷翻倍)</span></span>
+          </span>
+          <span class="text-cyan-400">共鸣技巧: 相生芯片紧贴放置激活 +50% 连锁!</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 右侧：当前配置效果分析与增益汇总 (宽 320px) -->
+    <aside class="w-80 border-l border-white/10 bg-[#0a0e17] flex flex-col p-5 space-y-4 shrink-0 overflow-y-auto">
+      
+      <div>
+        <h3 class="text-xs font-mono font-bold text-white uppercase tracking-wider mb-2 flex items-center space-x-1.5">
+          <i class="fa-solid fa-chart-pie text-cyan-400"></i>
+          <span>全厂实际输出汇总</span>
+        </h3>
+        <div class="bg-black/50 border border-white/10 rounded-lg p-3 space-y-2 text-xs font-mono">
+          <div class="flex justify-between items-center">
+            <span class="text-white/60">采矿速度增益:</span>
+            <span id="buffMine" class="text-amber-400 font-bold">+0%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-white/60">精炼熔速增益:</span>
+            <span id="buffSmelt" class="text-orange-400 font-bold">+0%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-white/60">传送带流速增益:</span>
+            <span id="buffBelt" class="text-emerald-400 font-bold">+0%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-white/60">飞剑战杀增益:</span>
+            <span id="buffCombat" class="text-red-400 font-bold">+0%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-white/60">散热降温总量:</span>
+            <span id="buffCooling" class="text-cyan-300 font-bold">-0°C</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 激活中的邻接共鸣列表 -->
+      <div class="flex-1 flex flex-col min-h-0">
+        <h3 class="text-xs font-mono font-bold text-white uppercase tracking-wider mb-2 flex items-center justify-between">
+          <span class="flex items-center space-x-1.5">
+            <i class="fa-solid fa-link text-yellow-400"></i>
+            <span>邻接相生连锁 (<span id="synergyCount">0</span>)</span>
+          </span>
+          <span class="text-[10px] text-yellow-400/80">额外 +50% 暴击</span>
+        </h3>
+        <div id="synergyList" class="flex-1 overflow-y-auto space-y-1.5 pr-1">
+          <div class="text-center py-6 text-xs text-white/30 font-mono">
+            暂无相生连锁<br>将【木】与【火】、【水】与【木】等相生芯片紧密贴放触发！
+          </div>
+        </div>
+      </div>
+
+      <!-- 选中的芯片/悬停检视卡片 -->
+      <div id="inspectorCard" class="bg-black/60 border border-white/10 rounded-lg p-3 space-y-1.5 text-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-mono text-cyan-300 font-bold">芯片信息检视</span>
+          <span id="inspTypeBadge" class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-white/70">待选择</span>
+        </div>
+        <h4 id="inspName" class="font-bold text-white text-sm">将鼠标悬停在芯片上</h4>
+        <p id="inspDesc" class="text-[11px] text-white/60 leading-relaxed">拖动底部异形芯片到母板，或点击已放置的芯片进行拆卸。</p>
+        <div id="inspStats" class="text-[10px] font-mono text-amber-300 pt-1 border-t border-white/10 flex justify-between">
+          <span>功耗: --</span>
+          <span>发热: --</span>
+        </div>
+      </div>
+
+    </aside>
+
+  </main>
+
+  <!-- 底部：芯片备件库 (Inventory Drawer) -->
+  <footer class="h-44 border-t border-white/10 bg-[#090d16] p-3 flex flex-col shrink-0">
+    <div class="flex items-center justify-between mb-2 px-2 text-xs font-mono">
+      <div class="flex items-center space-x-2 text-white/70">
+        <i class="fa-solid fa-boxes-stacked text-amber-400"></i>
+        <span class="font-bold">备用芯片库 (点击并按住拖拽至主板插槽):</span>
+      </div>
+      <div class="text-[11px] text-white/40">
+        <span>小提示: 异形芯片占用不同网格；玄冰冷凝管务必贴着发热芯片放置</span>
+      </div>
+    </div>
+
+    <!-- 芯片列表横向滚动容器 -->
+    <div id="chipDeckContainer" class="flex-1 flex items-center space-x-3 overflow-x-auto px-2 pb-1">
+      <!-- 由 JS 渲染待放置芯片 -->
+    </div>
+  </footer>
+
+  <!-- ======================== 核心逻辑与拼图交互脚本 ======================== -->
+  <script>
+    // -------------------------------------------------------------
+    // 1. 异形芯片定义表 (包含形状矩阵 shape, 属性 element, 增益与发热)
+    // -------------------------------------------------------------
+    const CHIP_CATALOG = [
+      {
+        id: 'chip_gengjin_drill',
+        name: '庚金裂地钻',
+        element: 'metal', // 金
+        icon: 'fa-solid fa-gem',
+        color: '#eab308',
+        themeBg: 'rgba(234, 179, 8, 0.25)',
+        themeBorder: '#eab308',
+        // 形状：L 型 (3 格)
+        shape: [
+          [1, 0],
+          [1, 1]
+        ],
+        buffType: 'mine',
+        buffVal: 45, // 采矿 +45%
+        heat: 20,    // 发热 +20°C
+        power: 14,   // 耗电 14MW
+        desc: '以高纯度庚金锻造之钻头，大幅增加采矿速度。'
+      },
+      {
+        id: 'chip_samadhi_fire',
+        name: '三昧真火炉',
+        element: 'fire', // 火
+        icon: 'fa-solid fa-fire',
+        color: '#ef4444',
+        themeBg: 'rgba(239, 68, 68, 0.25)',
+        themeBorder: '#ef4444',
+        // 形状：1x2 条形 (2 格)
+        shape: [
+          [1, 1]
+        ],
+        buffType: 'smelt',
+        buffVal: 50, // 精炼 +50%
+        heat: 30,    // 发热 +30°C
+        power: 16,
+        desc: '注入三昧神火，极限拉升精炼炉熔炼速率。'
+      },
+      {
+        id: 'chip_cryo_cooler',
+        name: '玄冰冷凝管',
+        element: 'water', // 水
+        icon: 'fa-solid fa-snowflake',
+        color: '#38bdf8',
+        themeBg: 'rgba(56, 189, 248, 0.25)',
+        themeBorder: '#38bdf8',
+        // 形状：1x3 长条 (3 格)
+        shape: [
+          [1, 1, 1]
+        ],
+        buffType: 'cooling',
+        buffVal: 40, // 降温 40°C
+        heat: -40,   // 直接减热
+        power: 8,
+        desc: '流淌万年玄冰液，吸收周围发热，压制主板温度。'
+      },
+      {
+        id: 'chip_bio_synapse',
+        name: '修士经脉超导核',
+        element: 'wood', // 木
+        icon: 'fa-solid fa-dna',
+        color: '#10b981',
+        themeBg: 'rgba(16, 185, 129, 0.25)',
+        themeBorder: '#10b981',
+        // 形状：2x2 方块 (4 格)
+        shape: [
+          [1, 1],
+          [1, 1]
+        ],
+        buffType: 'belt',
+        buffVal: 60, // 传送带 +60%
+        heat: 15,
+        power: 18,
+        desc: '以修士活化经脉为导线，全厂物流流速极大幅度跃升。'
+      },
+      {
+        id: 'chip_sword_core',
+        name: '天罡剑芒芯片',
+        element: 'metal', // 金
+        icon: 'fa-solid fa-burst',
+        color: '#f97316',
+        themeBg: 'rgba(249, 115, 22, 0.25)',
+        themeBorder: '#f97316',
+        // 形状：T 型 (4 格)
+        shape: [
+          [1, 1, 1],
+          [0, 1, 0]
+        ],
+        buffType: 'combat',
+        buffVal: 55, // 战杀 +55%
+        heat: 25,
+        power: 20,
+        desc: '藏锋纳芒，大幅提高天罡飞剑斩击杀伤力。'
+      },
+      {
+        id: 'chip_thick_earth',
+        name: '厚土息壤基座',
+        element: 'earth', // 土
+        icon: 'fa-solid fa-mountain',
+        color: '#d97706',
+        themeBg: 'rgba(217, 119, 6, 0.25)',
+        themeBorder: '#d97706',
+        // 形状：2x1 竖条 (2 格)
+        shape: [
+          [1],
+          [1]
+        ],
+        buffType: 'mine',
+        buffVal: 30, // 采矿 +30%
+        heat: 5,     // 发热极低
+        power: 10,
+        desc: '大地母气凝聚，提供平稳采掘能效，发热极低。'
+      }
+    ];
+
+    // -------------------------------------------------------------
+    // 2. 8x8 主板状态 (64格) + 特殊灵眼配置
+    // -------------------------------------------------------------
+    const BOARD_ROWS = 8;
+    const BOARD_COLS = 8;
+    let boardState = Array(BOARD_ROWS).fill(null).map(() => Array(BOARD_COLS).fill(null));
+
+    // 特殊灵眼格子：落在特定格子上获得灵气翻倍
+    const SPECIAL_SLOTS = {
+      '1_1': { element: 'metal', label: '金灵眼', bonus: 1.5 },
+      '1_6': { element: 'fire',  label: '火灵眼', bonus: 1.5 },
+      '6_1': { element: 'water', label: '水灵眼', bonus: 1.5 },
+      '6_6': { element: 'wood',  label: '木灵眼', bonus: 1.5 },
+      '3_4': { element: 'earth', label: '土灵眼', bonus: 1.5 }
+    };
+
+    // 玩家背包待安装的芯片实例列表
+    let availableChips = [
+      { instId: 'c1', ...CHIP_CATALOG[0] }, // 庚金裂地钻
+      { instId: 'c2', ...CHIP_CATALOG[1] }, // 三昧真火炉
+      { instId: 'c3', ...CHIP_CATALOG[2] }, // 玄冰冷凝管
+      { instId: 'c4', ...CHIP_CATALOG[3] }, // 修士经脉核
+      { instId: 'c5', ...CHIP_CATALOG[4] }, // 天罡剑芒芯片
+      { instId: 'c6', ...CHIP_CATALOG[5] }  // 厚土息壤基座
+    ];
+
+    // 当前拖拽中的芯片实例
+    let draggedChip = null;
+
+    // -------------------------------------------------------------
+    // 3. 渲染主板网格
+    // -------------------------------------------------------------
+    function renderBoardGrid() {
+      const grid = document.getElementById('boardGrid');
+      grid.innerHTML = '';
+
+      for (let r = 0; r < BOARD_ROWS; r++) {
+        for (let c = 0; c < BOARD_COLS; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'board-cell rounded border border-white/10 flex items-center justify-center relative cursor-pointer';
+          cell.dataset.r = r;
+          cell.dataset.c = c;
+
+          // 是否是特殊灵眼
+          const key = `${r}_${c}`;
+          const special = SPECIAL_SLOTS[key];
+          if (special) {
+            cell.classList.add('bg-white/5');
+            const iconColor = special.element === 'metal' ? 'text-yellow-400' : 
+                              special.element === 'fire' ? 'text-red-400' : 
+                              special.element === 'water' ? 'text-blue-400' :
+                              special.element === 'wood' ? 'text-emerald-400' : 'text-amber-500';
+            cell.innerHTML = `<span class="text-[9px] font-mono ${iconColor} opacity-50 font-bold">${special.element[0].toUpperCase()}</span>`;
+          }
+
+          // 如果该格已被芯片占据
+          const placed = boardState[r][c];
+          if (placed) {
+            cell.style.backgroundColor = placed.themeBg;
+            cell.style.borderColor = placed.themeBorder;
+            cell.innerHTML = `<i class="${placed.icon} text-xs" style="color: ${placed.color};"></i>`;
+            cell.title = `${placed.name} (点击拆卸拔出)`;
+            cell.onclick = () => removePlacedChip(placed.instId);
+          }
+
+          // 拖拽悬停监听
+          cell.ondragover = (e) => handleDragOver(e, r, c);
+          cell.ondragleave = () => clearHoverPreview();
+          cell.ondrop = (e) => handleDrop(e, r, c);
+
+          grid.appendChild(cell);
+        }
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 4. 渲染备用芯片库 (Drawer)
+    // -------------------------------------------------------------
+    function renderChipDeck() {
+      const container = document.getElementById('chipDeckContainer');
+      container.innerHTML = '';
+
+      if (availableChips.length === 0) {
+        container.innerHTML = `<div class="text-xs text-white/40 font-mono py-6">所有芯片已安装至母板！点击母板上的芯片可随时卸回。</div>`;
+        return;
+      }
+
+      availableChips.forEach(chip => {
+        const card = document.createElement('div');
+        card.className = 'chip-item shrink-0 p-2.5 rounded-lg border bg-[#0f1624] flex items-center space-x-3';
+        card.style.borderColor = `${chip.themeBorder}80`;
+        card.draggable = true;
+
+        // 渲染微缩形状示意图
+        const shapeRows = chip.shape.length;
+        const shapeCols = chip.shape[0].length;
+        let shapeHtml = `<div class="grid gap-0.5" style="grid-template-columns: repeat(${shapeCols}, 10px);">`;
+        for (let i = 0; i < shapeRows; i++) {
+          for (let j = 0; j < shapeCols; j++) {
+            if (chip.shape[i][j] === 1) {
+              shapeHtml += `<div class="w-2.5 h-2.5 rounded-xs" style="background-color: ${chip.color};"></div>`;
+            } else {
+              shapeHtml += `<div class="w-2.5 h-2.5"></div>`;
+            }
+          }
+        }
+        shapeHtml += `</div>`;
+
+        card.innerHTML = `
+          ${shapeHtml}
+          <div class="flex flex-col">
+            <div class="flex items-center space-x-1">
+              <i class="${chip.icon} text-[10px]" style="color: ${chip.color};"></i>
+              <span class="text-xs font-bold text-white">${chip.name}</span>
+            </div>
+            <span class="text-[9px] font-mono text-cyan-300">${chip.buffType.toUpperCase()} +${chip.buffVal}% ｜ 热:${chip.heat}°C</span>
+          </div>
+        `;
+
+        // 拖拽事件
+        card.ondragstart = () => { draggedChip = chip; };
+        card.ondragend = () => { draggedChip = null; clearHoverPreview(); };
+        card.onmouseenter = () => inspectChip(chip);
+
+        container.appendChild(card);
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 5. 拖拽悬停与放置检测逻辑
+    // -------------------------------------------------------------
+    function canPlaceChip(chip, startR, startC) {
+      if (!chip) return false;
+      const shape = chip.shape;
+      for (let r = 0; r < shape.length; r++) {
+        for (let c = 0; c < shape[r].length; c++) {
+          if (shape[r][c] === 1) {
+            const targetR = startR + r;
+            const targetC = startC + c;
+            // 越界检测
+            if (targetR < 0 || targetR >= BOARD_ROWS || targetC < 0 || targetC >= BOARD_COLS) {
+              return false;
+            }
+            // 重叠碰撞检测
+            if (boardState[targetR][targetC] !== null) {
+              return false;
+            }
+          }
+        }
+      }
+      return true;
+    }
+
+    function handleDragOver(e, r, c) {
+      e.preventDefault();
+      if (!draggedChip) return;
+
+      clearHoverPreview();
+      const valid = canPlaceChip(draggedChip, r, c);
+      const shape = draggedChip.shape;
+
+      for (let dr = 0; dr < shape.length; dr++) {
+        for (let dc = 0; dc < shape[dr].length; dc++) {
+          if (shape[dr][dc] === 1) {
+            const tr = r + dr;
+            const tc = c + dc;
+            if (tr >= 0 && tr < BOARD_ROWS && tc >= 0 && tc < BOARD_COLS) {
+              const cell = document.querySelector(`.board-cell[data-r="${tr}"][data-c="${tc}"]`);
+              if (cell) {
+                cell.classList.add(valid ? 'hover-valid' : 'hover-invalid');
+              }
+            }
+          }
+        }
+      }
+    }
+
+    function clearHoverPreview() {
+      document.querySelectorAll('.board-cell').forEach(c => {
+        c.classList.remove('hover-valid', 'hover-invalid');
+      });
+    }
+
+    function handleDrop(e, startR, startC) {
+      e.preventDefault();
+      clearHoverPreview();
+      if (!draggedChip) return;
+
+      if (!canPlaceChip(draggedChip, startR, startC)) {
+        return; // 放置非法
+      }
+
+      // 放置到主板网格
+      const shape = draggedChip.shape;
+      for (let dr = 0; dr < shape.length; dr++) {
+        for (let dc = 0; dc < shape[dr].length; dc++) {
+          if (shape[dr][dc] === 1) {
+            boardState[startR + dr][startC + dc] = draggedChip;
+          }
+        }
+      }
+
+      // 从备件库移出
+      availableChips = availableChips.filter(c => c.instId !== draggedChip.instId);
+
+      draggedChip = null;
+      updateAllSystemStats();
+      renderBoardGrid();
+      renderChipDeck();
+    }
+
+    // 拆卸已放置的芯片
+    function removePlacedChip(instId) {
+      let removedChip = null;
+      for (let r = 0; r < BOARD_ROWS; r++) {
+        for (let c = 0; c < BOARD_COLS; c++) {
+          if (boardState[r][c] && boardState[r][c].instId === instId) {
+            removedChip = boardState[r][c];
+            boardState[r][c] = null;
+          }
+        }
+      }
+      if (removedChip) {
+        availableChips.push(removedChip);
+        updateAllSystemStats();
+        renderBoardGrid();
+        renderChipDeck();
+      }
+    }
+
+    // 清空全部
+    function clearAllPlacedChips() {
+      boardState = Array(BOARD_ROWS).fill(null).map(() => Array(BOARD_COLS).fill(null));
+      availableChips = [
+        { instId: 'c1', ...CHIP_CATALOG[0] },
+        { instId: 'c2', ...CHIP_CATALOG[1] },
+        { instId: 'c3', ...CHIP_CATALOG[2] },
+        { instId: 'c4', ...CHIP_CATALOG[3] },
+        { instId: 'c5', ...CHIP_CATALOG[4] },
+        { instId: 'c6', ...CHIP_CATALOG[5] }
+      ];
+      updateAllSystemStats();
+      renderBoardGrid();
+      renderChipDeck();
+    }
+
+    // -------------------------------------------------------------
+    // 6. 相生邻接检测与全厂数值计算 (核心策略爽点)
+    // 相生规则：木生火, 火生土, 土生金, 金生水, 水生木
+    // -------------------------------------------------------------
+    const ELEMENT_CYCLES = {
+      'wood':  'fire',
+      'fire':  'earth',
+      'earth': 'metal',
+      'metal': 'water',
+      'water': 'wood'
+    };
+
+    function updateAllSystemStats() {
+      const placedChipsMap = new Map(); // instId -> chip
+
+      let totalPower = 0;
+      let totalHeat = 0;
+      let buffMine = 0;
+      let buffSmelt = 0;
+      let buffBelt = 0;
+      let buffCombat = 0;
+      let buffCooling = 0;
+
+      // 1. 统计所有不同芯片的基础产出
+      for (let r = 0; r < BOARD_ROWS; r++) {
+        for (let c = 0; c < BOARD_COLS; c++) {
+          const chip = boardState[r][c];
+          if (chip && !placedChipsMap.has(chip.instId)) {
+            placedChipsMap.set(chip.instId, chip);
+            totalPower += chip.power || 0;
+            totalHeat += chip.heat || 0;
+
+            if (chip.buffType === 'mine') buffMine += chip.buffVal;
+            if (chip.buffType === 'smelt') buffSmelt += chip.buffVal;
+            if (chip.buffType === 'belt') buffBelt += chip.buffVal;
+            if (chip.buffType === 'combat') buffCombat += chip.buffVal;
+            if (chip.buffType === 'cooling') buffCooling += Math.abs(chip.heat);
+          }
+        }
+      }
+
+      // 2. 检测邻接相生关系 (四邻格检测)
+      const synergies = [];
+      const checkedPairs = new Set();
+
+      for (let r = 0; r < BOARD_ROWS; r++) {
+        for (let c = 0; c < BOARD_COLS; c++) {
+          const curr = boardState[r][c];
+          if (!curr) continue;
+
+          // 检查右边和下边相邻格
+          const neighbors = [
+            { r: r + 1, c: c },
+            { r: r, c: c + 1 }
+          ];
+
+          neighbors.forEach(n => {
+            if (n.r < BOARD_ROWS && n.c < BOARD_COLS) {
+              const other = boardState[n.r][n.c];
+              if (other && other.instId !== curr.instId) {
+                const pairKey = [curr.instId, other.instId].sort().join('___');
+                if (!checkedPairs.has(pairKey)) {
+                  checkedPairs.add(pairKey);
+
+                  // 检查是否相生
+                  if (ELEMENT_CYCLES[curr.element] === other.element) {
+                    synergies.push({ source: curr, target: other, text: `${curr.name} [${curr.element}] ➔ ${other.name} [${other.element}] 顺生共鸣!` });
+                  } else if (ELEMENT_CYCLES[other.element] === curr.element) {
+                    synergies.push({ source: other, target: curr, text: `${other.name} [${other.element}] ➔ ${curr.name} [${curr.element}] 顺生共鸣!` });
+                  }
+                }
+              }
+            }
+          });
+        }
+      }
+
+      // 每个相生连锁带来额外 +30% 全厂暴击
+      const synergyMultiplier = synergies.length * 30;
+      const netHeat = Math.max(0, totalHeat);
+
+      // 更新顶部仪表
+      document.getElementById('statPower').textContent = `${totalPower} / 100 MW`;
+      document.getElementById('statHeat').textContent = `${netHeat} / 100 °C`;
+      
+      const heatBar = document.getElementById('statHeatBar');
+      heatBar.style.width = `${Math.min(100, netHeat)}%`;
+      if (netHeat > 80) {
+        heatBar.className = 'h-full bg-rose-500 animate-pulse';
+      } else if (netHeat > 50) {
+        heatBar.className = 'h-full bg-amber-400';
+      } else {
+        heatBar.className = 'h-full bg-emerald-400';
+      }
+
+      const totalBonus = (buffMine + buffSmelt + buffBelt + buffCombat + synergyMultiplier);
+      document.getElementById('statMultiplier').textContent = `+${totalBonus}%`;
+
+      // 更新右侧面板
+      document.getElementById('buffMine').textContent = `+${buffMine}%`;
+      document.getElementById('buffSmelt').textContent = `+${buffSmelt}%`;
+      document.getElementById('buffBelt').textContent = `+${buffBelt}%`;
+      document.getElementById('buffCombat').textContent = `+${buffCombat}%`;
+      document.getElementById('buffCooling').textContent = `-${buffCooling}°C`;
+
+      // 更新相生列表
+      document.getElementById('synergyCount').textContent = synergies.length;
+      const synContainer = document.getElementById('synergyList');
+      if (synergies.length === 0) {
+        synContainer.innerHTML = `<div class="text-center py-6 text-xs text-white/30 font-mono">暂无相生连锁<br>将【木】与【火】、【水】与【木】等相生芯片紧密贴放触发！</div>`;
+      } else {
+        let sHtml = '';
+        synergies.forEach(s => {
+          sHtml += `
+            <div class="p-2 rounded bg-amber-500/10 border border-amber-400/40 text-amber-200 text-xs font-mono flex items-center space-x-1.5 shadow-[0_0_8px_rgba(245,158,11,0.2)]">
+              <i class="fa-solid fa-sparkles text-amber-400"></i>
+              <span>${s.text}</span>
+            </div>
+          `;
+        });
+        synContainer.innerHTML = sHtml;
+      }
+    }
+
+    // 检视卡片
+    function inspectChip(chip) {
+      document.getElementById('inspName').textContent = chip.name;
+      document.getElementById('inspTypeBadge').textContent = chip.element.toUpperCase();
+      document.getElementById('inspDesc').textContent = chip.desc;
+      document.getElementById('inspStats').innerHTML = `
+        <span>功耗: ${chip.power} MW</span>
+        <span>发热: ${chip.heat > 0 ? '+' : ''}${chip.heat}°C</span>
+      `;
+    }
+
+    // 初始化挂载
+    window.addEventListener('DOMContentLoaded', () => {
+      renderBoardGrid();
+      renderChipDeck();
+      updateAllSystemStats();
+    });
+  </script>
+</body>
+</html>

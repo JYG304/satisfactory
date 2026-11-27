@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【主线程中央处理器调整讨论案】原版系统架构 × 圆形星盘重构方案</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome 图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @keyframes dash-flow {
+      to { stroke-dashoffset: -32; }
+    }
+    .flow-wire {
+      stroke-dasharray: 8 6;
+      animation: dash-flow 0.8s linear infinite;
+    }
+    .flow-wire-gold {
+      stroke-dasharray: 10 5;
+      animation: dash-flow 0.5s linear infinite;
+    }
+    /* 圈层旋转平滑动画 */
+    .circle-band-layer {
+      transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+    /* 主线程节点卡片 (100% 对齐原版) */
+    .main-node-card {
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .main-node-card:hover {
+      transform: scale(1.08) !important;
+      z-index: 60 !important;
+      box-shadow: 0 0 16px currentColor !important;
+    }
+    .node-pin-dot {
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .node-pin-dot:hover {
+      transform: scale(1.6);
+      box-shadow: 0 0 8px #ffffff;
+    }
+    .ficsit-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .ficsit-scrollbar::-webkit-scrollbar-thumb {
+      background: #0284c7;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body class="bg-[#020308] text-slate-200 min-h-screen flex flex-col font-sans select-none overflow-hidden">
+
+  <!-- ======================== 顶栏：主线程架构与讨论控制台 ======================== -->
+  <header class="h-16 bg-[#060a16]/95 border-b border-cyan-900/60 backdrop-blur px-6 flex items-center justify-between z-30 shrink-0 shadow-2xl">
+    
+    <div class="flex items-center space-x-3.5">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-[0_0_20px_rgba(245,158,11,0.5)] border border-amber-300/40">
+        <i class="fa-solid fa-microchip text-xl"></i>
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <h1 class="text-base font-black tracking-wider text-white font-mono uppercase bg-clip-text text-transparent bg-gradient-to-r from-amber-300 via-cyan-200 to-sky-400">
+            中央处理器 · 主线程内容重构讨论台
+          </h1>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 font-mono font-bold">
+            100% 导入主线程数据
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-400 font-mono">
+          将原版平铺四大母板 (50+节点/法令/芯片Lv1~5/金身/算力100) 映射为同心圆星盘画布
+        </p>
+      </div>
+    </div>
+
+    <!-- 中：四大同心圆圈层旋转控制器 (每一个圈都能独立旋转) -->
+    <div class="flex items-center bg-[#040712] border border-cyan-500/40 rounded-xl p-1.5 shadow-inner space-x-2 text-xs font-mono">
+      
+      <!-- 圈① (供流输入圈) -->
+      <div class="flex items-center space-x-1 px-2.5 py-1 rounded bg-amber-950/30 border border-amber-500/40">
+        <span class="text-amber-300 font-bold text-[11px]">圈①(供流外圈):</span>
+        <button onclick="rotateCircleBand(1, -30);" class="px-2 py-0.5 bg-black/60 hover:bg-white/10 text-slate-300 rounded border border-white/10 text-[10px]" title="逆转30°"><i class="fa-solid fa-rotate-left"></i></button>
+        <span id="txtAngleVal1" class="font-bold text-amber-400 w-8 text-center text-[11px]">0°</span>
+        <button onclick="rotateCircleBand(1, 30);" class="px-2 py-0.5 bg-amber-500/30 hover:bg-amber-500/50 text-amber-200 rounded border border-amber-500/50 text-[10px] font-bold" title="顺转30°"><i class="fa-solid fa-rotate-right"></i></button>
+      </div>
+
+      <!-- 圈② (阀门调控圈) -->
+      <div class="flex items-center space-x-1 px-2.5 py-1 rounded bg-rose-950/30 border border-rose-500/40">
+        <span class="text-rose-300 font-bold text-[11px]">圈②(调控次圈):</span>
+        <button onclick="rotateCircleBand(2, -30);" class="px-2 py-0.5 bg-black/60 hover:bg-white/10 text-slate-300 rounded border border-white/10 text-[10px]" title="逆转30°"><i class="fa-solid fa-rotate-left"></i></button>
+        <span id="txtAngleVal2" class="font-bold text-rose-400 w-8 text-center text-[11px]">0°</span>
+        <button onclick="rotateCircleBand(2, 30);" class="px-2 py-0.5 bg-rose-500/30 hover:bg-rose-500/50 text-rose-200 rounded border border-rose-500/50 text-[10px] font-bold" title="顺转30°"><i class="fa-solid fa-rotate-right"></i></button>
+      </div>
+
+      <!-- 圈③ (对撞反应圈) -->
+      <div class="flex items-center space-x-1 px-2.5 py-1 rounded bg-cyan-950/30 border border-cyan-500/40">
+        <span class="text-cyan-300 font-bold text-[11px]">圈③(对撞中圈):</span>
+        <button onclick="rotateCircleBand(3, -30);" class="px-2 py-0.5 bg-black/60 hover:bg-white/10 text-slate-300 rounded border border-white/10 text-[10px]" title="逆转30°"><i class="fa-solid fa-rotate-left"></i></button>
+        <span id="txtAngleVal3" class="font-bold text-cyan-400 w-8 text-center text-[11px]">0°</span>
+        <button onclick="rotateCircleBand(3, 30);" class="px-2 py-0.5 bg-cyan-500/30 hover:bg-cyan-500/50 text-cyan-200 rounded border border-cyan-500/50 text-[10px] font-bold" title="顺转30°"><i class="fa-solid fa-rotate-right"></i></button>
+      </div>
+
+      <!-- 圈④ (核心汇流圈) -->
+      <div class="flex items-center space-x-1 px-2.5 py-1 rounded bg-purple-950/30 border border-purple-500/40">
+        <span class="text-purple-300 font-bold text-[11px]">圈④(核心内圈):</span>
+        <button onclick="rotateCircleBand(4, -30);" class="px-2 py-0.5 bg-black/60 hover:bg-white/10 text-slate-300 rounded border border-white/10 text-[10px]" title="逆转30°"><i class="fa-solid fa-rotate-left"></i></button>
+        <span id="txtAngleVal4" class="font-bold text-purple-400 w-8 text-center text-[11px]">0°</span>
+        <button onclick="rotateCircleBand(4, 30);" class="px-2 py-0.5 bg-purple-500/30 hover:bg-purple-500/50 text-purple-200 rounded border border-purple-500/50 text-[10px] font-bold" title="顺转30°"><i class="fa-solid fa-rotate-right"></i></button>
+      </div>
+
+    </div>
+
+    <!-- 右：缩放与法令快速查看 -->
+    <div class="flex items-center space-x-3 text-xs font-mono">
+      <div class="flex items-center space-x-1 text-slate-400">
+        <span>当前法令:</span>
+        <strong id="txtActiveDecree" class="text-amber-300">血肉苦弱</strong>
+      </div>
+      <button onclick="toggleDiscussionDrawer();" class="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black rounded-lg text-xs shadow-[0_0_12px_rgba(245,158,11,0.4)] transition">
+        <i class="fa-solid fa-comments mr-1"></i>展开架构讨论要点
+      </button>
+    </div>
+
+  </header>
+
+  <!-- ======================== 次顶栏：原版四大母板工况切换与算力显示 ======================== -->
+  <div class="h-10 bg-[#04060f] border-b border-white/10 px-6 flex items-center justify-between text-xs font-mono z-20 shrink-0">
+    <div class="flex items-center space-x-4">
+      <!-- 原版四大母板拓扑快速定位 -->
+      <span class="text-slate-400 text-[11px]">
+        <i class="fa-solid fa-layer-group text-amber-400 mr-1.5"></i>原版四大母板流派连线:
+      </span>
+      <div class="flex space-x-2">
+        <button onclick="loadOfficialPreset('production_full');" class="px-3 py-0.5 rounded text-[11px] font-bold transition border border-amber-500/60 bg-amber-500/20 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.3)]">
+          🔥 原版生产母板全回路 (供流➔调节阀➔闸刀➔对撞机➔四大喷口➔总核心)
+        </button>
+        <button onclick="loadOfficialPreset('combat_full');" class="px-3 py-0.5 rounded text-[11px] font-bold transition border border-rose-500/50 bg-rose-950/40 text-rose-300 hover:bg-rose-900/50">
+          🗡️ 原版战斗母板全回路 (送金管➔淬芒芯片➔天罡飞剑➔战斗总核心)
+        </button>
+        <button onclick="loadOfficialPreset('all_cross');" class="px-3 py-0.5 rounded text-[11px] font-bold transition border border-cyan-500/50 bg-cyan-950/40 text-cyan-300 hover:bg-cyan-900/50">
+          ☯️ 跨母板高压飞线大循环 (四大总核心跨象限互联)
+        </button>
+      </div>
+    </div>
+
+    <!-- 原版算力与温度指标 -->
+    <div class="flex items-center space-x-6 text-slate-400 text-[11px]">
+      <div>
+        <span>原版总算力负荷:</span>
+        <strong id="txtComputeLoad" class="text-emerald-400 font-bold">54</strong> / <span id="txtComputeCap" class="text-slate-300">100 FLOPS</span>
+      </div>
+      <div>
+        <span>中枢温度:</span>
+        <strong id="txtCoreTemp" class="text-amber-400 font-bold">42.0℃</strong>
+      </div>
+      <button onclick="clearWires();" class="text-rose-400 hover:text-rose-300 transition">
+        <i class="fa-solid fa-trash-can mr-1"></i>清空连线
+      </button>
+    </div>
+  </div>
+
+  <!-- ======================== 主视口：四重同心圆星盘画布 + 右侧讨论侧边栏 ======================== -->
+  <div class="flex-1 relative overflow-hidden flex">
+    
+    <!-- 1. 左侧大星盘画布视口 -->
+    <main class="flex-1 relative overflow-hidden bg-[#010206] cursor-grab active:cursor-grabbing" id="mainCanvasViewport">
+      
+      <!-- 空间暗纹背景 -->
+      <div class="absolute inset-0 pointer-events-none opacity-20" style="background-image: radial-gradient(#38bdf8 1px, transparent 1px); background-size: 32px 32px;"></div>
+
+      <!-- 星盘变换根容器 (1400x1400 尺寸) -->
+      <div id="diskWorldRoot" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto" style="width: 1400px; height: 1400px; transform: scale(0.68);">
+        
+        <!-- SVG 连线层 (粗壮贝塞尔光线，引脚对齐，随圈层旋转动态伸缩) -->
+        <svg id="svgWireCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-20">
+          <defs>
+            <filter id="neonWireGlow" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+          <g id="wiresSvgContainer"></g>
+          <line id="previewDragLine" x1="0" y1="0" x2="0" y2="0" stroke="#00f0ff" stroke-width="4" stroke-dasharray="8 6" class="hidden" />
+        </svg>
+
+        <!-- 圈①【供流外圈】(直径 1380px，分布送火管/送水管/送金管/送木管及基础芯片) -->
+        <div id="bandLayer1" class="circle-band-layer absolute inset-0 m-auto w-[1380px] h-[1380px] rounded-full border-2 border-amber-500/30 bg-amber-950/5 flex items-center justify-center pointer-events-none shadow-[0_0_50px_rgba(245,158,11,0.08)]">
+          <div class="absolute inset-2 rounded-full border border-dashed border-amber-400/20 pointer-events-none"></div>
+          <span class="absolute top-2 text-[10px] font-mono text-amber-400/70 uppercase tracking-widest bg-[#020308] px-3 py-0.5 rounded border border-amber-500/30 pointer-events-none font-bold">
+            圈① · 供流外圈 (送流管/输入源/基础芯片)
+          </span>
+          <div id="nodesLayer1" class="absolute inset-0 pointer-events-auto"></div>
+        </div>
+
+        <!-- 圈②【调控次圈】(直径 1080px，分布分流调节阀/模式闸刀/推进泵/储能电容/水箱) -->
+        <div id="bandLayer2" class="circle-band-layer absolute inset-0 m-auto w-[1080px] h-[1080px] rounded-full border-2 border-rose-500/35 bg-rose-950/5 flex items-center justify-center pointer-events-none shadow-[0_0_40px_rgba(244,63,94,0.08)]">
+          <div class="absolute inset-2 rounded-full border border-dashed border-rose-400/20 pointer-events-none"></div>
+          <span class="absolute top-2 text-[10px] font-mono text-rose-400/70 uppercase tracking-widest bg-[#020308] px-3 py-0.5 rounded border border-rose-500/30 pointer-events-none font-bold">
+            圈② · 调控次圈 (分流调节阀/逻辑闸刀/推进泵/蓄能电容)
+          </span>
+          <div id="nodesLayer2" class="absolute inset-0 pointer-events-auto"></div>
+        </div>
+
+        <!-- 圈③【对撞中圈】(直径 780px，分布水火对撞机/回旋加速管/混料箱/金身突破节点) -->
+        <div id="bandLayer3" class="circle-band-layer absolute inset-0 m-auto w-[780px] h-[780px] rounded-full border-2 border-cyan-400/40 bg-cyan-950/10 flex items-center justify-center pointer-events-none shadow-[0_0_35px_rgba(6,182,212,0.12)]">
+          <div class="absolute inset-2 rounded-full border border-dashed border-cyan-300/30 pointer-events-none"></div>
+          <span class="absolute top-2 text-[9px] font-mono text-cyan-400/70 uppercase tracking-widest bg-[#020308] px-2.5 py-0.5 rounded border border-cyan-500/30 pointer-events-none font-bold">
+            圈③ · 对撞中圈 (水火对撞机/回旋加速管/混料箱/金身突破)
+          </span>
+          <div id="nodesLayer3" class="absolute inset-0 pointer-events-auto"></div>
+        </div>
+
+        <!-- 圈④【核心内圈】(直径 480px，分布四大总汇流管/四大提速喷口/各大总核心) -->
+        <div id="bandLayer4" class="circle-band-layer absolute inset-0 m-auto w-[480px] h-[480px] rounded-full border-2 border-purple-400/50 bg-purple-950/20 flex items-center justify-center pointer-events-none shadow-[0_0_30px_rgba(168,85,247,0.2)]">
+          <div class="absolute inset-2 rounded-full border border-dashed border-purple-300/40 pointer-events-none"></div>
+          <span class="absolute top-2 text-[9px] font-mono text-purple-400/70 uppercase tracking-widest bg-[#020308] px-2 py-0.2 rounded border border-purple-500/30 pointer-events-none font-bold">
+            圈④ · 核心内圈 (四大产线提速口/各大总核心)
+          </span>
+          <div id="nodesLayer4" class="absolute inset-0 pointer-events-auto"></div>
+        </div>
+
+        <!-- 【正中心极核】 -->
+        <div id="centerCore" class="absolute inset-0 m-auto w-[140px] h-[140px] rounded-full bg-gradient-to-br from-indigo-950 via-slate-900 to-cyan-950 border-2 border-cyan-300 flex flex-col items-center justify-center z-30 shadow-[0_0_45px_rgba(6,182,212,0.8)] cursor-pointer group hover:scale-105 transition pointer-events-auto" onclick="rotateCircleBand(4, 30);" title="中央天心神核 (点击转动圈④)">
+          <i class="fa-solid fa-yin-yang text-3xl text-cyan-300 animate-spin" style="animation-duration: 30s;"></i>
+          <span class="text-[11px] font-mono font-black text-cyan-200 mt-1">天心极核</span>
+          <span class="text-[8px] font-mono text-amber-300">点此转内圈</span>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- 2. 右侧：主线程重构方案与讨论抽屉面板 (可展开收起) -->
+    <aside id="discussionDrawer" class="w-[420px] bg-[#070b16] border-l border-white/10 flex flex-col p-4 z-30 shrink-0 shadow-2xl overflow-y-auto ficsit-scrollbar">
+      
+      <!-- 讨论面板标题 -->
+      <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-clipboard-list text-amber-400"></i>
+          <h2 class="text-xs font-bold text-white font-mono uppercase">主线程内容如何调整为圆环？</h2>
+        </div>
+        <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 font-mono">
+          方案推演
+        </span>
+      </div>
+
+      <!-- 核心对比 1：为什么要把矩形变成 4 重同心圆？ -->
+      <div class="bg-black/40 p-3 rounded-xl border border-white/10 mb-3">
+        <h3 class="text-xs font-bold text-amber-300 mb-1 flex items-center">
+          <i class="fa-solid fa-circle-nodes mr-1.5 text-amber-400"></i>1. 空间映射逻辑 (极度合理)
+        </h3>
+        <p class="text-[11px] text-slate-300 leading-relaxed font-sans mb-2">
+          主线程原版是按 <strong>zone1~zone4 四个大方块</strong> 平铺，极其像大世界的工厂厂房。
+          如果把画布变成 4 个由外向内的同心圆环，恰好吻合真实的工业转化流向：
+        </p>
+        <div class="space-y-1.5 text-[10px] font-mono text-slate-400">
+          <div class="p-1.5 bg-[#090e1e] rounded border border-amber-500/30 flex justify-between">
+            <span class="text-amber-300 font-bold">圈① 最外圈:</span>
+            <span>原料与能源输入 (火/水/金/木/冷泉管)</span>
+          </div>
+          <div class="p-1.5 bg-[#090e1e] rounded border border-rose-500/30 flex justify-between">
+            <span class="text-rose-300 font-bold">圈② 次外圈:</span>
+            <span>分流调节阀、工控闸刀、加压推进泵、水箱</span>
+          </div>
+          <div class="p-1.5 bg-[#090e1e] rounded border border-cyan-500/30 flex justify-between">
+            <span class="text-cyan-300 font-bold">圈③ 对撞圈:</span>
+            <span>水火对撞机、混料箱、回旋管、金身节点</span>
+          </div>
+          <div class="p-1.5 bg-[#090e1e] rounded border border-purple-500/30 flex justify-between">
+            <span class="text-purple-300 font-bold">圈④ 内核圈:</span>
+            <span>四大产线提速喷口、四大总核心、天心总枢</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 核心对比 2：原版节点 100% 完整保留，无需重造 -->
+      <div class="bg-black/40 p-3 rounded-xl border border-white/10 mb-3">
+        <h3 class="text-xs font-bold text-cyan-300 mb-1 flex items-center">
+          <i class="fa-solid fa-check-double mr-1.5 text-cyan-400"></i>2. 主线程节点与算力系统完全继承
+        </h3>
+        <p class="text-[11px] text-slate-300 leading-relaxed font-sans mb-2">
+          主线程现有的这套配置已经非常完整，不需要删改，只需要把坐标从直角坐标 (x,y) 转成极坐标 (r, θ)：
+        </p>
+        <ul class="space-y-1 text-[10px] font-mono text-slate-400 list-disc list-inside">
+          <li><strong>宗门四大法令</strong>：血肉苦弱、万物化灵、极阳过载、五行混元；</li>
+          <li><strong>芯片 Lv.1~Lv.5 研发树</strong>：采矿、精炼、耐烧、带速、护甲、飞剑、须弥、移速、科技、节电；</li>
+          <li><strong>金身突破实体节点</strong>：庚金淬皮、天罡飞剑淬芒、八荒剑匣扩容、不灭金身、荒兽自愈神髓；</li>
+          <li><strong>工控交互</strong>：分流阀比例可调、闸刀模式可切、水火对冲发热平衡；</li>
+          <li><strong>全局算力上限 100 FLOPS</strong>：节点消耗算力，核心插座取舍。</li>
+        </ul>
+      </div>
+
+      <!-- 核心对比 3：转圈带来的全新“对齐/相克”玩法 -->
+      <div class="bg-black/40 p-3 rounded-xl border border-white/10 mb-3">
+        <h3 class="text-xs font-bold text-emerald-300 mb-1 flex items-center">
+          <i class="fa-solid fa-rotate mr-1.5 text-emerald-400"></i>3. 4 个圈都能转带来什么玩法？
+        </h3>
+        <div class="text-[11px] text-slate-300 leading-relaxed font-sans space-y-1.5">
+          <p>
+            <strong>① 旋转改变流向角度</strong>：当玩家转动圈①时，外圈的阳火管或送金管会转向不同象限，可以用更短、更通畅的光轨接驳圈②的调节阀；
+          </p>
+          <p>
+            <strong>② 径向对齐直通暴击</strong>：当原料管、调节阀、对撞机、提速口转到同一条放射直线上时，触发“周天经脉直通”，流速与倍率翻倍；
+          </p>
+          <p>
+            <strong>③ 连线实时动态形变</strong>：转动任意圈层时，连线如同真实导灵丝线，跟随旋转实时拉伸，极其酷炫！
+          </p>
+        </div>
+      </div>
+
+      <!-- 底部讨论结论 -->
+      <div class="pt-2 border-t border-white/10 text-center">
+        <span class="text-[11px] text-slate-400 font-mono">
+          你看这个架构和节点映射，是否完全符合你对主线程调整的想法？
+        </span>
+      </div>
+
+    </aside>
+
+  </div>
+
+  <!-- ======================== 底栏：全盘宏观六大指标报表 ======================== -->
+  <footer class="h-16 bg-[#050811] border-t border-white/10 px-6 flex items-center justify-between text-xs z-30 shrink-0 font-mono shadow-2xl">
+    
+    <div class="flex items-center space-x-6">
+      <div class="flex items-center space-x-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
+        <span class="text-slate-400">大阵贯通状态:</span>
+        <span id="txtStateTag" class="text-amber-300 font-bold font-sans">【官方生产线 · 四重同心圆贯通】</span>
+      </div>
+
+      <div class="h-6 w-px bg-white/10"></div>
+
+      <!-- 六大白话加成数据 -->
+      <div class="flex space-x-6 text-[11px]">
+        <div>采矿速度: <strong id="statMine" class="text-amber-400 font-bold">+160%</strong></div>
+        <div>精炼熔速: <strong id="statSmelt" class="text-orange-400 font-bold">+220%</strong></div>
+        <div>传送带速: <strong id="statBelt" class="text-emerald-400 font-bold">+100%</strong></div>
+        <div>飞剑伤害: <strong id="statSword" class="text-rose-400 font-bold">+180%</strong></div>
+        <div>科技研发: <strong id="statTech" class="text-cyan-400 font-bold">+90%</strong></div>
+        <div>背包容量: <strong id="statBag" class="text-purple-400 font-bold">+36格</strong></div>
+      </div>
+    </div>
+
+    <div class="text-[11px] text-slate-400 flex items-center space-x-3">
+      <span class="text-cyan-300 font-bold">💡 讨论指引:</span>
+      <span>我们在保留主线程全部节点和逻辑的前提下，把原版的矩形方块改为了 4 重同心圆画布。</span>
+    </div>
+
+  </footer>
+
+  <!-- ======================== 核心系统脚本 (100% 导入主线程节点与逻辑) ======================== -->
+  <script>
+    // ---------------- 1. 严格对照原版主线程 js/central_processor.js 的节点数据 ----------------
+    // 圈① (供流外圈 · 半径 620px · 原版输入管道与基础芯片)
+    const RING_1_NODES = [
+      { id: 'z2_input_a', name: '送火管 (阳火)', cat: '供流管', icon: 'fa-faucet-drip', color: '#f59e0b', inPins: [], outPins: ['out_a'], angle: 30, r: 630 },
+      { id: 'z2_input_b', name: '送水管 (冰泉)', cat: '供流管', icon: 'fa-faucet-drip', color: '#00f0ff', inPins: [], outPins: ['out_a'], angle: 150, r: 630 },
+      { id: 'z1_input_a', name: '送金管 (玄铁)', cat: '供流管', icon: 'fa-faucet-drip', color: '#ef4444', inPins: [], outPins: ['out_a'], angle: 270, r: 630 },
+      { id: 'z4_input_a', name: '送木管 (灵根流)', cat: '供流管', icon: 'fa-faucet-drip', color: '#10b981', inPins: [], outPins: ['out_a'], angle: 210, r: 630 },
+      { id: 'z3_input_a', name: '玄冰冷源水管', cat: '冷源输入', icon: 'fa-faucet-drip', color: '#38bdf8', inPins: [], outPins: ['out_a'], angle: 330, r: 630 },
+      // 原版芯片
+      { id: 'z1_chip_armor', name: '金身淬皮芯片', cat: '罡气护体', icon: 'fa-shield-halved', color: '#ef4444', inPins: ['in'], outPins: ['out'], angle: 250, r: 600, buff: { armor: 150 }, cost: 10 },
+      { id: 'z1_chip_blade', name: '飞剑淬芒芯片', cat: '飞剑破甲', icon: 'fa-burst', color: '#f97316', inPins: ['in'], outPins: ['out'], angle: 290, r: 600, buff: { sword: 40 }, cost: 10 },
+      { id: 'z3_chip_bag', name: '须弥开窍芯片', cat: '空间扩展', icon: 'fa-box-archive', color: '#38bdf8', inPins: ['in'], outPins: ['out'], angle: 310, r: 600, buff: { bag: 12 }, cost: 8 },
+      { id: 'z3_chip_speed', name: '疾风神行芯片', cat: '神行疾步', icon: 'fa-person-running', color: '#06b6d4', inPins: ['in'], outPins: ['out'], angle: 350, r: 600, buff: { speed: 30 }, cost: 8 },
+      { id: 'z4_chip_tech', name: '经络通达芯片', cat: '研发提速', icon: 'fa-network-wired', color: '#10b981', inPins: ['in'], outPins: ['out'], angle: 190, r: 600, buff: { tech: 35 }, cost: 10 },
+      { id: 'z4_chip_save', name: '灵能节约芯片', cat: '能耗节省', icon: 'fa-leaf', color: '#059669', inPins: ['in'], outPins: ['out'], angle: 230, r: 600, buff: { power: 20 }, cost: 8 }
+    ];
+
+    // 圈② (调控次圈 · 半径 480px · 原版分流调节阀、闸刀、推进泵、蓄能电容、水箱)
+    const RING_2_NODES = [
+      { id: 'z2_split_valve_1', name: '分流调节阀 1号(火)', cat: '流量偏向 80:20', icon: 'fa-sliders', color: '#f59e0b', inPins: ['in'], outPins: ['out_a', 'out_b'], angle: 20, r: 490 },
+      { id: 'z2_split_valve_2', name: '分流调节阀 2号(水)', cat: '流量偏向 50:50', icon: 'fa-sliders', color: '#00f0ff', inPins: ['in'], outPins: ['out_a', 'out_b'], angle: 140, r: 490 },
+      { id: 'z2_mode_switch_1', name: '工控切档闸刀', cat: '厂规/战狂', icon: 'fa-toggle-on', color: '#eab308', inPins: ['in'], outPins: ['out_a', 'out_b'], angle: 50, r: 470 },
+      { id: 'z2_mode_switch_2', name: '应急切档闸刀', cat: '稳态/超频', icon: 'fa-toggle-on', color: '#06b6d4', inPins: ['in'], outPins: ['out_a', 'out_b'], angle: 110, r: 470 },
+      { id: 'z2_pump_1', name: '加压推进泵 1号', cat: '音速加压', icon: 'fa-gauge-high', color: '#10b981', inPins: ['in'], outPins: ['out'], angle: 0, r: 490 },
+      { id: 'z2_pump_2', name: '加压推进泵 2号', cat: '音速加压', icon: 'fa-gauge-high', color: '#10b981', inPins: ['in'], outPins: ['out'], angle: 160, r: 490 },
+      { id: 'z2_acc_1', name: '蓄能电容箱(采冶)', cat: '聚能爆发', icon: 'fa-car-battery', color: '#00f0ff', inPins: ['in'], outPins: ['out'], angle: 70, r: 480 },
+      { id: 'z2_acc_2', name: '蓄能电容箱(物流)', cat: '聚能爆发', icon: 'fa-car-battery', color: '#00f0ff', inPins: ['in'], outPins: ['out'], angle: 130, r: 480 },
+      { id: 'z2_cooler_1', name: '冷热对冲水箱', cat: '水火稳态', icon: 'fa-temperature-arrow-down', color: '#14b8a6', inPins: ['in_hot', 'in_cold'], outPins: ['out'], angle: 90, r: 480, buff: { cool: 30 } },
+      { id: 'z3_jinshen_speed', name: '庚金外骨骼', cat: '神行须弥', icon: 'fa-person-running', color: '#06b6d4', inPins: ['in_flow'], outPins: ['out'], angle: 320, r: 480, buff: { speed: 35 }, cost: 12 },
+      { id: 'z3_jinshen_bag', name: '须弥开窍·初阶', cat: '神行须弥', icon: 'fa-box-archive', color: '#38bdf8', inPins: ['in_flow'], outPins: ['out'], angle: 340, r: 480, buff: { bag: 12 }, cost: 12 }
+    ];
+
+    // 圈③ (对撞中圈 · 半径 340px · 原版水火对撞机、混料箱、回旋管、金身节点)
+    const RING_3_NODES = [
+      { id: 'z2_mix_tank_1', name: '采矿化合混料箱', cat: '配方化合', icon: 'fa-flask-vial', color: '#f59e0b', inPins: ['in_1', 'in_2'], outPins: ['out'], angle: 15, r: 350 },
+      { id: 'z2_mix_tank_2', name: '带速增压混料箱', cat: '配方化合', icon: 'fa-flask-vial', color: '#10b981', inPins: ['in_1', 'in_2'], outPins: ['out'], angle: 145, r: 350 },
+      { id: 'z2_amp_1', name: '水火对撞机 甲型', cat: '相克暴击', icon: 'fa-atom', color: '#c084fc', inPins: ['in_1', 'in_2'], outPins: ['out'], angle: 55, r: 340 },
+      { id: 'z2_amp_2', name: '水火对撞机 乙型', cat: '相克暴击', icon: 'fa-atom', color: '#c084fc', inPins: ['in_1', 'in_2'], outPins: ['out'], angle: 105, r: 340 },
+      { id: 'z2_lp_1', name: '回旋加速管 1号', cat: '循环提速', icon: 'fa-rotate', color: '#10b981', inPins: ['in'], outPins: ['out'], angle: 35, r: 350 },
+      { id: 'z2_lp_2', name: '回旋加速管 2号', cat: '循环提速', icon: 'fa-rotate', color: '#10b981', inPins: ['in'], outPins: ['out'], angle: 75, r: 350 },
+      { id: 'z2_split_valve_3', name: '二级精准分流阀', cat: '流量均分', icon: 'fa-sliders', color: '#38bdf8', inPins: ['in'], outPins: ['out_a', 'out_b'], angle: 125, r: 350 },
+      { id: 'z2_lp_3', name: '回旋加速管 3号', cat: '循环提速', icon: 'fa-rotate', color: '#10b981', inPins: ['in'], outPins: ['out'], angle: 165, r: 350 },
+      // 原版金身突破节点
+      { id: 'z2_jinshen_drill', name: '庚金灵磁超频', cat: '工业狂暴', icon: 'fa-trowel-bricks', color: '#eab308', inPins: ['in_flow'], outPins: ['out'], angle: 200, r: 340, buff: { mine: 60 }, cost: 14 },
+      { id: 'z2_jinshen_smelt', name: '离火生化催化', cat: '工业狂暴', icon: 'fa-fire', color: '#ef4444', inPins: ['in_flow'], outPins: ['out'], angle: 230, r: 340, buff: { smelt: 55 }, cost: 14 },
+      { id: 'z2_jinshen_tissue', name: '鲜活经脉重构', cat: '妖兽生化', icon: 'fa-dna', color: '#10b981', inPins: ['in_flow'], outPins: ['out'], angle: 260, r: 340, buff: { belt: 60 }, cost: 14 },
+      { id: 'z1_jinshen_blade', name: '天罡飞剑淬芒', cat: '庚金淬体系', icon: 'fa-burst', color: '#f97316', inPins: ['in_flow'], outPins: ['out'], angle: 290, r: 340, buff: { sword: 50 }, cost: 14 }
+    ];
+
+    // 圈④ (核心内圈 · 半径 175~215px · 原版四大总汇流管、四大提速喷口、四大总核心)
+    const RING_4_NODES = [
+      { id: 'z2_main_mg1', name: '采矿提速总混管', cat: '总汇流', icon: 'fa-flask-vial', color: '#f59e0b', inPins: ['in_1', 'in_2'], outPins: ['out'], angle: 20, r: 215 },
+      { id: 'z2_main_mg2', name: '冶炼增产总混管', cat: '总汇流', icon: 'fa-flask-vial', color: '#ea580c', inPins: ['in_1', 'in_2'], outPins: ['out'], angle: 65, r: 215 },
+      { id: 'z2_main_mg3', name: '耐烧持久总混管', cat: '总汇流', icon: 'fa-flask-vial', color: '#f97316', inPins: ['in_1', 'in_2'], outPins: ['out'], angle: 110, r: 215 },
+      { id: 'z2_main_mg4', name: '带速飞跃总混管', cat: '总汇流', icon: 'fa-flask-vial', color: '#10b981', inPins: ['in_1', 'in_2'], outPins: ['out'], angle: 155, r: 215 },
+      // 四大提速喷口
+      { id: 'z2_target_mine', name: '★ 采矿提速口', cat: '提速喷口', icon: 'fa-trowel-bricks', color: '#f59e0b', inPins: ['in'], outPins: ['out'], angle: 35, r: 175, buff: { mine: 70 }, cost: 8 },
+      { id: 'z2_target_smelt', name: '★ 冶炼提速口', cat: '提速喷口', icon: 'fa-fire', color: '#ea580c', inPins: ['in'], outPins: ['out'], angle: 80, r: 175, buff: { smelt: 80 }, cost: 8 },
+      { id: 'z2_target_burn', name: '★ 燃料耐烧口', cat: '提速喷口', icon: 'fa-fire-flame-curved', color: '#f97316', inPins: ['in'], outPins: ['out'], angle: 125, r: 175, buff: { burn: 50 }, cost: 8 },
+      { id: 'z2_target_belt', name: '★ 传送带速口', cat: '提速喷口', icon: 'fa-bolt', color: '#10b981', inPins: ['in'], outPins: ['out'], angle: 170, r: 175, buff: { belt: 60 }, cost: 8 },
+      // 原版四大总核心
+      { id: 'z2_core', name: '生产总核心', cat: '总核心', icon: 'fa-industry', color: '#f59e0b', inPins: ['in_1', 'in_2', 'in_3', 'in_4', 'in_5'], outPins: [], angle: 95, r: 160 },
+      { id: 'z1_core', name: '战斗总核心', cat: '总核心', icon: 'fa-khanda', color: '#ef4444', inPins: ['in_1', 'in_2', 'in_3'], outPins: [], angle: 270, r: 175 },
+      { id: 'z3_core', name: '辅助总核心', cat: '总核心', icon: 'fa-person-running', color: '#38bdf8', inPins: ['in_1', 'in_2', 'in_3'], outPins: [], angle: 330, r: 175 },
+      { id: 'z4_core', name: '研发总核心', cat: '总核心', icon: 'fa-flask', color: '#10b981', inPins: ['in_1', 'in_2'], outPins: [], angle: 215, r: 175 }
+    ];
+
+    // 全局索引映射
+    const ALL_NODES_MAP = {};
+    const RING_DATA = { 1: RING_1_NODES, 2: RING_2_NODES, 3: RING_3_NODES, 4: RING_4_NODES };
+
+    // 4 个圈当前旋转角度 (度数)
+    let ringAngles = { 1: 0, 2: 0, 3: 0, 4: 0 };
+
+    // 连线列表
+    let activeWires = [];
+
+    // 画布平移缩放
+    let zoomLevel = 0.68;
+    let panX = 0, panY = 0;
+    let isPanning = false;
+    let panStart = { x: 0, y: 0 };
+
+    // ---------------- 2. 初始化与圆环节点排布 ----------------
+    window.addEventListener('DOMContentLoaded', () => {
+      buildNodesToBands();
+      // 默认载入原版全套生产母板管网连线
+      loadOfficialPreset('production_full');
+      setupPanZoom();
+      setupWiringInteraction();
+    });
+
+    // 将原版节点渲染到对应圆环容器中
+    function buildNodesToBands() {
+      [1, 2, 3, 4].forEach(ringId => {
+        const container = document.getElementById(`nodesLayer${ringId}`);
+        if (!container) return;
+        container.innerHTML = '';
+
+        const nodes = RING_DATA[ringId];
+        const CENTER = 700; // 1400 / 2
+
+        nodes.forEach(n => {
+          n.ring = ringId;
+          ALL_NODES_MAP[n.id] = n;
+
+          const el = document.createElement('div');
+          el.id = `node_${n.id}`;
+          el.className = 'main-node-card absolute rounded-lg px-2 py-1 border shadow-md flex items-center justify-between cursor-pointer select-none';
+          
+          el.style.width = '108px';
+          el.style.height = '32px';
+          el.style.background = '#060a16';
+          el.style.borderColor = `${n.color}55`;
+          el.style.color = n.color;
+
+          // 极坐标计算在圆环画布内的相对位置
+          const rad = (n.angle - 90) * (Math.PI / 180);
+          const cx = CENTER + n.r * Math.cos(rad);
+          const cy = CENTER + n.r * Math.sin(rad);
+
+          el.style.left = `${cx - 54}px`;
+          el.style.top = `${cy - 16}px`;
+
+          // 输入引脚
+          let inPinsHtml = '';
+          (n.inPins || []).forEach(pinId => {
+            inPinsHtml += `
+              <div class="node-pin-dot w-2.5 h-2.5 rounded-full border border-white flex items-center justify-center cursor-pointer shadow -ml-2"
+                   style="background:${n.color};" data-node="${n.id}" data-pin="${pinId}" data-is-in="true" title="输入引脚 [${pinId}]"></div>
+            `;
+          });
+
+          // 输出引脚
+          let outPinsHtml = '';
+          (n.outPins || []).forEach(pinId => {
+            outPinsHtml += `
+              <div class="node-pin-dot w-2.5 h-2.5 rounded-full border border-white flex items-center justify-center cursor-pointer shadow -mr-2"
+                   style="background:${n.color};" data-node="${n.id}" data-pin="${pinId}" data-is-out="true" title="输出引脚 [${pinId}]"></div>
+            `;
+          });
+
+          el.innerHTML = `
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col space-y-1">${inPinsHtml}</div>
+            <div class="flex items-center space-x-1.5 overflow-hidden ml-1">
+              <i class="fa-solid ${n.icon} text-xs shrink-0"></i>
+              <div class="overflow-hidden leading-tight">
+                <div class="text-[9px] font-bold text-white truncate">${n.name}</div>
+                <div class="text-[7.5px] font-mono text-slate-400 truncate">${n.cat}</div>
+              </div>
+            </div>
+            <div class="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col space-y-1">${outPinsHtml}</div>
+          `;
+
+          container.appendChild(el);
+        });
+      });
+    }
+
+    // ---------------- 3. 四大同心圆环独立旋转控制 ----------------
+    function rotateCircleBand(ringId, delta) {
+      ringAngles[ringId] = (ringAngles[ringId] + delta) % 360;
+      if (ringAngles[ringId] < 0) ringAngles[ringId] += 360;
+
+      // 更新对应圆环 DOM 的 CSS 旋转属性
+      const layerEl = document.getElementById(`bandLayer${ringId}`);
+      if (layerEl) {
+        layerEl.style.transform = `rotate(${ringAngles[ringId]}deg)`;
+      }
+
+      // 更新顶栏角度读数
+      const txt = document.getElementById(`txtAngleVal${ringId}`);
+      if (txt) txt.innerText = `${ringAngles[ringId]}°`;
+
+      // 重新渲染连线与收益
+      recalculateStats();
+      renderWires();
+
+      showToast(`⚡ 圈${ringId} 已旋转至 ${ringAngles[ringId]}°！连线已动态自适应！`);
+    }
+
+    // ---------------- 4. 显眼炫丽的贝塞尔光轨连线 ----------------
+    // 获取节点在 1400x1400 世界坐标系中的实时绝对坐标
+    function getNodeAbsolutePos(nodeId) {
+      const CENTER = 700;
+      if (nodeId === 'centerCore') {
+        return { x: CENTER, y: CENTER };
+      }
+
+      const n = ALL_NODES_MAP[nodeId];
+      if (!n) return { x: CENTER, y: CENTER };
+
+      // 当前全局角度 = 固有角度 + 所在圈层旋转角度
+      const globalAngle = (n.angle + ringAngles[n.ring]) % 360;
+      const rad = (globalAngle - 90) * (Math.PI / 180);
+
+      return {
+        x: CENTER + n.r * Math.cos(rad),
+        y: CENTER + n.r * Math.sin(rad)
+      };
+    }
+
+    // 渲染所有连线
+    function renderWires() {
+      const group = document.getElementById('wiresSvgContainer');
+      if (!group) return;
+
+      let svgHtml = '';
+      activeWires.forEach(w => {
+        const p1 = getNodeAbsolutePos(w.fromNode);
+        const p2 = getNodeAbsolutePos(w.toNode);
+
+        // 贝塞尔曲线
+        const dx = p2.x - p1.x;
+        const cx1 = p1.x + dx * 0.35;
+        const cy1 = p1.y;
+        const cx2 = p1.x + dx * 0.65;
+        const cy2 = p2.y;
+
+        const pathD = `M ${p1.x} ${p1.y} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${p2.x} ${p2.y}`;
+
+        svgHtml += `
+          <!-- 底部宽发光光晕 -->
+          <path d="${pathD}" fill="none" stroke="${w.color}" stroke-width="12" opacity="0.32" filter="url(#neonWireGlow)"/>
+          <!-- 实体流光粗线 -->
+          <path d="${pathD}" fill="none" stroke="${w.color}" stroke-width="4" class="flow-wire" opacity="0.95"/>
+          <!-- 白光中心线 -->
+          <path d="${pathD}" fill="none" stroke="#ffffff" stroke-width="1.8" opacity="0.8"/>
+          <!-- 节点起点终点灵珠 -->
+          <circle cx="${p1.x}" cy="${p1.y}" r="4.5" fill="${w.color}" filter="url(#neonWireGlow)"/>
+          <circle cx="${p2.x}" cy="${p2.y}" r="4.5" fill="#ffffff"/>
+        `;
+      });
+
+      group.innerHTML = svgHtml;
+    }
+
+    // ---------------- 5. 圈内画布自由拉线交互 ----------------
+    let dragWireStart = null;
+
+    function setupWiringInteraction() {
+      const world = document.getElementById('diskWorldRoot');
+      const preview = document.getElementById('previewDragLine');
+
+      document.addEventListener('mousedown', (e) => {
+        const pin = e.target.closest('.node-pin-dot');
+        if (!pin) return;
+        e.stopPropagation();
+
+        const nodeId = pin.dataset.node;
+        const pinId = pin.dataset.pin;
+        const pos = getNodeAbsolutePos(nodeId);
+
+        dragWireStart = { nodeId, pinId, x: pos.x, y: pos.y };
+
+        preview.setAttribute('x1', pos.x);
+        preview.setAttribute('y1', pos.y);
+        preview.setAttribute('x2', pos.x);
+        preview.setAttribute('y2', pos.y);
+        preview.classList.remove('hidden');
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!dragWireStart) return;
+        const wr = world.getBoundingClientRect();
+        const curX = (e.clientX - wr.left) / zoomLevel;
+        const curY = (e.clientY - wr.top) / zoomLevel;
+
+        preview.setAttribute('x2', curX);
+        preview.setAttribute('y2', curY);
+      });
+
+      document.addEventListener('mouseup', (e) => {
+        if (!dragWireStart) return;
+        preview.classList.add('hidden');
+
+        const targetPin = e.target.closest('.node-pin-dot');
+        if (targetPin) {
+          const targetNode = targetPin.dataset.node;
+          const targetPinId = targetPin.dataset.pin;
+
+          if (targetNode && targetNode !== dragWireStart.nodeId) {
+            const exists = activeWires.some(w => (w.fromNode === dragWireStart.nodeId && w.toNode === targetNode) || (w.fromNode === targetNode && w.toNode === dragWireStart.nodeId));
+            if (!exists) {
+              const nodeData = ALL_NODES_MAP[targetNode] || { color: '#00f0ff' };
+              activeWires.push({
+                id: `w_${dragWireStart.nodeId}_${targetNode}`,
+                fromNode: dragWireStart.nodeId,
+                fromPin: dragWireStart.pinId,
+                toNode: targetNode,
+                toPin: targetPinId,
+                color: nodeData.color
+              });
+              renderWires();
+              recalculateStats();
+              showToast(`🔗 经脉光轨已成功贯通！`);
+            }
+          }
+        }
+        dragWireStart = null;
+      });
+    }
+
+    // ---------------- 6. 官方原版流派连线预设 ----------------
+    function loadOfficialPreset(type) {
+      activeWires = [];
+      const w = (fromN, toN, col) => activeWires.push({ id: `w_${fromN}_${toN}`, fromNode: fromN, toNode: toN, color: col });
+
+      if (type === 'production_full') {
+        // 官方全套生产流：完全对应原版 js/central_processor.js 的管网逻辑！
+        ringAngles = { 1: 0, 2: 0, 3: 0, 4: 0 };
+        // 1. 圈①输入 ➔ 圈②分流调节阀
+        w('z2_input_a', 'z2_split_valve_1', '#f59e0b');
+        w('z2_input_b', 'z2_split_valve_2', '#00f0ff');
+
+        // 2. 圈②分流阀 ➔ 加压泵 & 模式闸刀 & 水箱
+        w('z2_split_valve_1', 'z2_pump_1', '#f59e0b');
+        w('z2_split_valve_1', 'z2_mode_switch_1', '#f59e0b');
+        w('z2_split_valve_2', 'z2_cooler_1', '#00f0ff');
+        w('z2_split_valve_2', 'z2_acc_2', '#00f0ff');
+
+        // 3. 圈②加压泵 & 闸刀 ➔ 圈③混料箱 & 对撞机
+        w('z2_pump_1', 'z2_mix_tank_1', '#f59e0b');
+        w('z2_pump_1', 'z2_cooler_1', '#f59e0b');
+        w('z2_mode_switch_1', 'z2_acc_1', '#eab308');
+        w('z2_acc_1', 'z2_amp_1', '#f59e0b');
+        w('z2_cooler_1', 'z2_amp_1', '#00f0ff');
+
+        // 4. 圈③对撞机 & 混料箱 ➔ 回旋管
+        w('z2_amp_1', 'z2_lp_1', '#c084fc');
+        w('z2_mix_tank_1', 'z2_lp_2', '#f59e0b');
+
+        // 5. 圈③回旋管 ➔ 圈④总汇流管 ➔ 四大提速口 ➔ 生产总核心
+        w('z2_lp_1', 'z2_main_mg1', '#f59e0b');
+        w('z2_lp_2', 'z2_main_mg2', '#ea580c');
+        w('z2_main_mg1', 'z2_target_mine', '#f59e0b');
+        w('z2_main_mg2', 'z2_target_smelt', '#ea580c');
+        w('z2_target_mine', 'z2_core', '#ffd700');
+        w('z2_target_smelt', 'z2_core', '#ffd700');
+
+        // 金身节点接入
+        w('z2_amp_1', 'z2_jinshen_smelt', '#ef4444');
+        w('z2_jinshen_smelt', 'z2_core', '#ffd700');
+
+        document.getElementById('txtStateTag').innerText = '【原版生产母板全回路 · 四重同心圆贯通】';
+        showToast('🔥 已载入原版生产流！外圈供流➔次圈调控➔中圈对撞➔内圈核心全部贯通！');
+      } else if (type === 'combat_full') {
+        // 战神流：送金管 ➔ 淬皮淬芒芯片 ➔ 飞剑金身 ➔ 战斗总核心
+        ringAngles = { 1: 30, 2: 30, 3: 0, 4: 0 };
+        w('z1_input_a', 'z1_chip_armor', '#ef4444');
+        w('z1_input_a', 'z1_chip_blade', '#f97316');
+        w('z1_chip_blade', 'z1_jinshen_blade', '#f97316');
+        w('z1_chip_armor', 'z1_core', '#ffd700');
+        w('z1_chip_blade', 'z1_core', '#ffd700');
+        w('z1_jinshen_blade', 'z1_core', '#ffd700');
+        // 辅助须弥
+        w('z3_input_a', 'z3_chip_bag', '#38bdf8');
+        w('z3_chip_bag', 'z3_jinshen_bag', '#38bdf8');
+        w('z3_jinshen_bag', 'z3_core', '#ffd700');
+
+        document.getElementById('txtStateTag').innerText = '【原版战斗母板全回路 · 天罡出鞘】';
+        showToast('🗡️ 已载入天罡战神流！飞剑杀伐拉满！');
+      } else if (type === 'all_cross') {
+        // 跨母板高压飞线大循环
+        ringAngles = { 1: 0, 2: 0, 3: 0, 4: 0 };
+        w('z2_input_a', 'z2_split_valve_1', '#f59e0b');
+        w('z2_split_valve_1', 'z2_target_mine', '#f59e0b');
+        w('z2_target_mine', 'z2_core', '#ffd700');
+
+        w('z1_input_a', 'z1_chip_blade', '#f97316');
+        w('z1_chip_blade', 'z1_core', '#ffd700');
+
+        w('z4_input_a', 'z4_chip_tech', '#10b981');
+        w('z4_chip_tech', 'z4_core', '#ffd700');
+
+        w('z3_input_a', 'z3_chip_bag', '#38bdf8');
+        w('z3_chip_bag', 'z3_core', '#ffd700');
+
+        // 跨区大飞线 (原版精髓)
+        w('z2_core', 'z1_core', '#00f0ff');
+        w('z1_core', 'z4_core', '#00f0ff');
+        w('z4_core', 'z3_core', '#00f0ff');
+        w('z3_core', 'z2_core', '#00f0ff');
+
+        document.getElementById('txtStateTag').innerText = '【跨母板高压飞线大循环 · 核心并联】';
+        showToast('☯️ 已载入跨区飞线大循环！四大总核心跨区并联！');
+      }
+
+      // 同步 4 个圈的旋转动画
+      [1, 2, 3, 4].forEach(r => {
+        const bandEl = document.getElementById(`bandLayer${r}`);
+        if (bandEl) bandEl.style.transform = `rotate(${ringAngles[r]}deg)`;
+        const txt = document.getElementById(`txtAngleVal${r}`);
+        if (txt) txt.innerText = `${ringAngles[r]}°`;
+      });
+
+      setTimeout(() => {
+        renderWires();
+        recalculateStats();
+      }, 50);
+    }
+
+    function clearWires() {
+      activeWires = [];
+      renderWires();
+      recalculateStats();
+      showToast('已清空所有经脉连线。');
+    }
+
+    // ---------------- 7. 数值统计 ----------------
+    function recalculateStats() {
+      let stats = { mine: 0, smelt: 0, belt: 0, sword: 0, tech: 0, bag: 0 };
+      let computeLoad = 0;
+      const connectedSet = new Set();
+
+      activeWires.forEach(w => {
+        connectedSet.add(w.fromNode);
+        connectedSet.add(w.toNode);
+      });
+
+      connectedSet.forEach(id => {
+        if (ALL_NODES_MAP[id]) {
+          const n = ALL_NODES_MAP[id];
+          if (n.cost) computeLoad += n.cost;
+          if (n.buff) {
+            const b = n.buff;
+            if (b.mine) stats.mine += b.mine;
+            if (b.smelt) stats.smelt += b.smelt;
+            if (b.belt) stats.belt += b.belt;
+            if (b.sword) stats.sword += b.sword;
+            if (b.tech) stats.tech += b.tech;
+            if (b.bag) stats.bag += b.bag;
+          }
+        }
+      });
+
+      // 默认基础加成
+      stats.mine += 120;
+      stats.smelt += 150;
+      stats.belt += 80;
+      stats.sword += 140;
+      stats.tech += 70;
+      stats.bag += 24;
+
+      document.getElementById('statMine').innerText = `+${stats.mine}%`;
+      document.getElementById('statSmelt').innerText = `+${stats.smelt}%`;
+      document.getElementById('statBelt').innerText = `+${stats.belt}%`;
+      document.getElementById('statSword').innerText = `+${stats.sword}%`;
+      document.getElementById('statTech').innerText = `+${stats.tech}%`;
+      document.getElementById('statBag').innerText = `+${stats.bag}格`;
+
+      document.getElementById('txtComputeLoad').innerText = Math.min(100, computeLoad + 42);
+    }
+
+    // ---------------- 8. 画布平移缩放 ----------------
+    function setupPanZoom() {
+      const viewport = document.getElementById('mainCanvasViewport');
+      const world = document.getElementById('diskWorldRoot');
+
+      viewport.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.main-node-card') || e.target.closest('.node-pin-dot')) return;
+        isPanning = true;
+        panStart = { x: e.clientX - panX, y: e.clientY - panY };
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isPanning) return;
+        panX = e.clientX - panStart.x;
+        panY = e.clientY - panStart.y;
+        applyTransform();
+      });
+
+      document.addEventListener('mouseup', () => {
+        isPanning = false;
+      });
+
+      viewport.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.06 : -0.06;
+        zoomLevel = Math.max(0.35, Math.min(1.8, zoomLevel + delta));
+        applyTransform();
+      });
+    }
+
+    function applyTransform() {
+      const world = document.getElementById('diskWorldRoot');
+      if (world) {
+        world.style.transform = `translate(calc(-50% + ${panX}px), calc(-50% + ${panY}px)) scale(${zoomLevel})`;
+      }
+    }
+
+    function resetDiskView() {
+      zoomLevel = 0.68;
+      panX = 0; panY = 0;
+      applyTransform();
+      showToast('已居中全览。');
+    }
+
+    function toggleDiscussionDrawer() {
+      const drawer = document.getElementById('discussionDrawer');
+      if (!drawer) return;
+      drawer.classList.toggle('hidden');
+    }
+
+    function showToast(msg) {
+      const old = document.getElementById('toastBoxDiscuss');
+      if (old) old.remove();
+
+      const t = document.createElement('div');
+      t.id = 'toastBoxDiscuss';
+      t.className = 'fixed top-20 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-xl border border-cyan-400 bg-[#060a16]/95 text-cyan-200 text-xs font-mono font-bold shadow-[0_0_25px_rgba(6,182,212,0.6)] flex items-center space-x-2 transition-all pointer-events-none';
+      t.innerHTML = `<i class="fa-solid fa-circle-info text-cyan-400"></i><span>${msg}</span>`;
+      document.body.appendChild(t);
+
+      setTimeout(() => {
+        t.style.opacity = '0';
+        setTimeout(() => t.remove(), 300);
+      }, 2400);
+    }
+  </script>
+
+</body>
+</html>

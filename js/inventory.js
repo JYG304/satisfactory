@@ -80,7 +80,9 @@ const ALL_HUD_MODAL_IDS = [
   'jinShenModal',
   'fabaoModal',
   'conveyorLimiterModal',
-  'logisticsConfigModal'
+  'logisticsConfigModal',
+  'shaqiControlModal',
+  'opticalArrayModal'
 ];
 
 function isAnyModalOpen() {
@@ -165,6 +167,7 @@ function buildBagItemsFromPlayerInventory() {
   const list = [];
   if (typeof XIUXIAN_ITEMS !== 'undefined') {
     Object.entries(XIUXIAN_ITEMS).forEach(([key, def]) => {
+      if (!window.showPrunedItemsInBag && window.CORE_ITEM_KEYS && !window.CORE_ITEM_KEYS.has(key)) return;
       const cnt = playerInventory[key] || 0;
       if (cnt > 0) {
         list.push({
@@ -557,14 +560,17 @@ function renderCasketInlineTray() {
   if (charCasketBadge) charCasketBadge.innerText = `${occupiedCount}`;
 }
 
-// 点击剑匣飞剑槽：拔剑出鞘设为主手佩剑
+// 点击剑匣飞剑槽：查看飞剑属性与剑匣攻速增益
 function handleCasketSlotClick(slotIdx) {
   const sword = casketSwords[slotIdx];
   if (!sword) return;
+  if (window.CombatCasket) window.CombatCasket.syncFromInventory();
   playUiSound('sword_draw');
-  showNotification(`【拔剑出鞘】主手佩剑切换为：【${sword.name}】！${sword.desc}`);
+  const sum = window.CombatCasket && window.CombatCasket.getSummary ? window.CombatCasket.getSummary() : null;
+  const spdTxt = sum ? ` · 当前装匣 ${sum.equippedCount}/4 剑 (普攻攻速 ${sum.speedMult.toFixed(2)}×)` : '';
+  showNotification(`【天罡剑匣·剑位 #${slotIdx + 1}】${sword.name}：${sword.desc || '战斗时从背后自动轮发出鞘'}${spdTxt}`);
   const activeLabel = document.getElementById('activeSwordNameLabel');
-  if (activeLabel) activeLabel.innerText = `${sword.name} (已出鞘持握)`;
+  if (activeLabel) activeLabel.innerText = `${sword.name}${spdTxt}`;
 }
 
 // =========================================================================
@@ -643,6 +649,7 @@ function handleCasketSlotDrop(e, targetSlotIdx) {
     showNotification(`【飞剑入匣】已将【${bagItem.name}】纳入天罡剑匣 [剑槽 #${targetSlotIdx + 1}]！`);
     syncBackpackFromPlayerInventory();
     renderCasketInlineTray();
+    if (window.CombatCasket) window.CombatCasket.syncFromInventory();
   } else if (data.type === 'casket') {
     const sourceIdx = data.index;
     if (sourceIdx !== targetSlotIdx) {
@@ -652,6 +659,7 @@ function handleCasketSlotDrop(e, targetSlotIdx) {
       playUiSound('click');
       showNotification(`【剑位调换】已调整剑槽 #${sourceIdx + 1} 与 剑槽 #${targetSlotIdx + 1} 的飞剑排序`);
       renderCasketInlineTray();
+      if (window.CombatCasket) window.CombatCasket.syncFromInventory();
     }
   }
 }
@@ -679,6 +687,7 @@ function handleBagSlotDrop(e, targetBagIdx) {
     showNotification(`【拔剑入包】已将【${sword.name}】放回真实储物背包！`);
     syncBackpackFromPlayerInventory();
     renderCasketInlineTray();
+    if (window.CombatCasket) window.CombatCasket.syncFromInventory();
   }
 }
 
@@ -856,6 +865,21 @@ function renderStatsList() {
   const container = document.getElementById('statsItemsList');
   if (!container) return;
   container.innerHTML = '';
+
+  if (currentStatsSubTab === 'world' && typeof window.ShaqiSystem !== 'undefined') {
+    const lvl = Math.round(window.ShaqiSystem.state.level);
+    const tier = window.ShaqiSystem.getTierInfo(lvl);
+    const purMode = window.ShaqiSystem.state.purifierMode;
+    const purLabel = purMode === 'boost' ? '强效抽煞 (150%)' : (purMode === 'normal' ? '常规净化 (100%)' : '停机待命 (0%)');
+    STATS_DATA.world.forEach(entry => {
+      if (entry.label === '区域环境煞气值') {
+        entry.value = `${lvl} / 100 (${tier.label})`;
+        entry.color = tier.tier === 'danger' ? 'text-rose-400' : (tier.tier === 'gold' ? 'text-amber-300' : 'text-purple-400');
+      } else if (entry.label === '回收处理塔浓缩率') {
+        entry.value = `${purLabel} · 凝晶${window.ShaqiSystem.state.condensedCount}`;
+      }
+    });
+  }
 
   const list = STATS_DATA[currentStatsSubTab] || STATS_DATA.world;
   const countBadge = document.getElementById('statsTotalCountBadge');

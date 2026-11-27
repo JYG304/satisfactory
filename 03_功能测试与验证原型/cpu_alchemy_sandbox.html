@@ -1,0 +1,3526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>物理时序协处理器 · PCB电路基板沙盒 [科技板]</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome 图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ==================================================================== */
+    /* 科技 PCB 芯片主板视觉风格：沉金电路底板、SMD 贴片插座、QFN 芯片处理器、钛合金伺服臂 */
+    /* ==================================================================== */
+    body {
+      background-color: #040711;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      overflow: hidden;
+      user-select: none;
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    main {
+      flex: 1 1 0%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 500px;
+    }
+    #hexBoardSvg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* PCB 主板基底与铜箔走线网格背景 */
+    .cyber-pcb-bg, .alchemy-slate-bg {
+      background-color: #040711;
+      background-image: 
+        radial-gradient(circle at 50% 45%, rgba(6, 182, 212, 0.09) 0%, rgba(2, 6, 23, 0.95) 70%, #020409 100%),
+        linear-gradient(rgba(6, 182, 212, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
+      background-size: 100% 100%, 36px 36px, 36px 36px;
+    }
+
+    /* PCB 工控科技面板与沉金饰边 */
+    .pcb-panel, .brass-bar {
+      background: linear-gradient(180deg, #0d1629 0%, #060b17 100%);
+      border-color: rgba(6, 182, 212, 0.35);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.85), inset 0 1px 0 rgba(0, 240, 255, 0.25);
+    }
+
+    /* 工业 PCB 沉金贴片开关与按键 */
+    .pcb-btn, .brass-btn {
+      background: linear-gradient(180deg, #131f38 0%, #0a1120 100%);
+      border: 1px solid rgba(14, 165, 233, 0.35);
+      color: #93c5fd;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 5px rgba(0,0,0,0.6);
+      transition: all 0.12s ease;
+    }
+    .pcb-btn:hover, .brass-btn:hover {
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      border-color: #00f0ff;
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.35);
+    }
+    .pcb-btn:active, .brass-btn:active {
+      transform: translateY(1px);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+    }
+    .pcb-btn.active, .brass-btn.active {
+      background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+      border-color: #38bdf8;
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.6), inset 0 0 8px rgba(255,255,255,0.3);
+    }
+
+    /* 灵石晶核立体光感 */
+    .atom-drop-shadow {
+      filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.95));
+    }
+
+    /* IC 插座模具全息流光呼吸 */
+    @keyframes moldGhostPulse {
+      0%, 100% { opacity: 0.45; stroke-dashoffset: 0; }
+      50% { opacity: 0.95; stroke-dashoffset: 14; }
+    }
+    .mold-pulse {
+      animation: moldGhostPulse 2.2s ease-in-out infinite;
+    }
+
+    /* 阵眼受纳成功激荡光爆 */
+    @keyframes moldAbsorbFlash {
+      0% { filter: drop-shadow(0 0 28px #00f0ff) brightness(2.4); }
+      100% { filter: drop-shadow(0 0 8px #00f0ff) brightness(1); }
+    }
+    .mold-flash {
+      animation: moldAbsorbFlash 0.5s ease-out;
+    }
+  </style>
+</head>
+<body class="flex flex-col h-screen w-screen cyber-pcb-bg">
+
+  <!-- ======================== 顶栏：板上常驻四大阵眼指引 + 工厂真实增益状态 (+10% 满足 / +20% 最优) ======================== -->
+  <header class="h-16 brass-bar border-b-2 px-5 flex items-center justify-between shrink-0 z-30 select-none">
+    
+    <!-- 左侧：板上常驻 IC 测试座概览 (多模组插座共存，对应工厂不同增益) -->
+    <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-2">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-[#0284c7] to-[#041328] border border-[#00f0ff] flex items-center justify-center text-[#00f0ff] font-black text-lg shadow-[0_0_14px_rgba(0,240,255,0.45)]">
+          <i class="fa-solid fa-microchip"></i>
+        </div>
+        <div>
+          <div class="text-xs font-black text-cyan-300 tracking-wider uppercase font-mono">CYBERNETIC COPROCESSOR</div>
+          <div class="text-[9px] text-cyan-600 font-bold font-mono">SMT-PCB TIMELINE SUBSTRATE</div>
+        </div>
+      </div>
+
+      <div class="w-[1px] h-8 bg-white/10 mx-1"></div>
+
+      <!-- 板上 4 大常驻测试插座需求状态指示标签 -->
+      <div class="flex items-center space-x-1.5 bg-black/60 border border-cyan-500/30 rounded-xl px-2.5 py-1 shadow-inner text-[11px] font-mono">
+        <span class="text-[10px] text-cyan-400 font-black uppercase mr-1">IC 插座:</span>
+        
+        <!-- 阵眼 1: 飞梭导轨 [🔥涡轮] === [💧法兰] -->
+        <button onclick="loadBeltOptimalPreset();" id="pill_mold_belt" title="飞梭插座：需求 [🔥涡轮]===[💧法兰] 刚性双联总成 | 点击装载液压伸缩臂最优解法 (+20%)" class="px-2.5 py-1 rounded border border-[#00f0ff] bg-cyan-950/40 flex items-center space-x-1.5 cursor-pointer shadow">
+          <span class="text-xs">🔥⚙️💧</span>
+          <span class="text-cyan-300 font-bold text-[10px]">① 飞梭双联 (伸缩臂·带速+20%)</span>
+        </button>
+
+        <!-- 阵眼 2: 灵矿采掘 [⚙️精钢齿轮] === [☀️沉金太阳轮] (升阶) -->
+        <button onclick="loadMineOptimalPreset();" id="pill_mold_mine" title="采掘插座：需求 [⚙️精钢齿轮]===[☀️太阳轮(需QFN升阶)] 双联齿轮组 | 点击装载双臂升阶最优解法 (+20%)" class="px-2.5 py-1 rounded border border-transparent hover:border-amber-400 bg-white/5 flex items-center space-x-1.5 cursor-pointer transition">
+          <span class="text-xs">⚙️🔗☀️</span>
+          <span class="text-white/80 font-bold text-[10px]">② 采矿齿轮组 (双臂升阶·采矿+20%)</span>
+        </button>
+
+        <!-- 阵眼 3: 三昧煅烧 [🔥涡轮] === [💧法兰] === [🔥涡轮] -->
+        <button onclick="loadSmeltOptimalPreset();" id="pill_mold_smelt" title="精炼插座：需求 [🔥涡轮]===[💧法兰]===[🔥涡轮] 3联动力总成 | 点击装载双头轮臂+长臂解法 (+20%)" class="px-2.5 py-1 rounded border border-transparent hover:border-rose-400 bg-white/5 flex items-center space-x-1.5 cursor-pointer transition">
+          <span class="text-xs">🔥💧🔥</span>
+          <span class="text-white/80 font-bold text-[10px]">③ 复合动力总成 (双头臂+长臂·产能+20%)</span>
+        </button>
+
+        <!-- 阵眼 4: 乾坤聚灵 [☀️太阳轮] — [🔥涡轮] — [💧法兰] 闭环三角 -->
+        <button onclick="loadPowerOptimalPreset();" id="pill_mold_power" title="聚能插座：需求 [☀️金轮-🔥涡轮-💧法兰] 行星闭环齿轮箱 | 点击装载三叶轮臂解法 (+20%)" class="px-2.5 py-1 rounded border border-transparent hover:border-purple-400 bg-white/5 flex items-center space-x-1.5 cursor-pointer transition">
+          <span class="text-xs">☀️📐🌀</span>
+          <span class="text-white/80 font-bold text-[10px]">④ 行星闭环总成 (三叶臂三角·灵能+20%)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 中间：👑 四大特殊突破节点状态 (普通解+20% / 进阶闭环+60% / 极限超频+300%) -->
+    <div class="flex items-center space-x-2.5 bg-black/75 border border-cyan-500/30 rounded-xl px-3 py-1 shadow-[0_0_20px_rgba(0,0,0,0.8)]">
+      <div class="flex items-center space-x-1">
+        <i class="fa-solid fa-crown text-amber-300 text-xs"></i>
+        <span class="text-[10px] text-amber-300 font-bold font-mono tracking-wider">特殊突破:</span>
+      </div>
+
+      <!-- 1. 导轨突破（飞梭导轨） -->
+      <div id="node_breakthrough_belt" class="px-2 py-0.5 rounded-lg bg-black/50 border border-white/15 flex items-center space-x-1.5 transition-all duration-300" title="特殊突破 · 飞梭导轨 (火-水)：带速提升 +20% / +60% / +300%">
+        <i class="fa-solid fa-gauge-high text-cyan-400 text-xs"></i>
+        <span class="text-[10px] text-white/70">带速:</span>
+        <span id="statBeltSpeed" class="font-black text-cyan-300 font-mono text-xs">+0%</span>
+        <span id="badgeBeltState" class="text-[9px] px-1 rounded bg-white/10 text-white/40">待激活</span>
+      </div>
+
+      <div class="w-[1px] h-4 bg-white/15"></div>
+
+      <!-- 2. 采矿突破（金身钻探） -->
+      <div id="node_breakthrough_mine" class="px-2 py-0.5 rounded-lg bg-black/50 border border-white/15 flex items-center space-x-1.5 transition-all duration-300" title="特殊突破 · 金身钻探 (粗铁升阶赤金)：采矿提升 +20% / +60% / +300%">
+        <i class="fa-solid fa-gem text-amber-400 text-xs"></i>
+        <span class="text-[10px] text-white/70">采矿:</span>
+        <span id="statMineRate" class="font-black text-amber-300 font-mono text-xs">+0%</span>
+        <span id="badgeMineState" class="text-[9px] px-1 rounded bg-white/10 text-white/40">待激活</span>
+      </div>
+
+      <div class="w-[1px] h-4 bg-white/15"></div>
+
+      <!-- 3. 冶炼突破（三昧精炼） -->
+      <div id="node_breakthrough_smelt" class="px-2 py-0.5 rounded-lg bg-black/50 border border-white/15 flex items-center space-x-1.5 transition-all duration-300" title="特殊突破 · 三昧精炼 (火-水-火直链)：冶炼提升 +20% / +60% / +300%">
+        <i class="fa-solid fa-fire text-rose-400 text-xs"></i>
+        <span class="text-[10px] text-white/70">冶炼:</span>
+        <span id="statSmeltRate" class="font-black text-rose-300 font-mono text-xs">+0%</span>
+        <span id="badgeSmeltState" class="text-[9px] px-1 rounded bg-white/10 text-white/40">待激活</span>
+      </div>
+
+      <div class="w-[1px] h-4 bg-white/15"></div>
+
+      <!-- 4. 神髓突破（天元聚灵） -->
+      <div id="node_breakthrough_power" class="px-2 py-0.5 rounded-lg bg-black/50 border border-white/15 flex items-center space-x-1.5 transition-all duration-300" title="特殊突破 · 天元神髓 (闭环三角)：装甲+200 / 持续自愈+60/s">
+        <i class="fa-solid fa-shield-heart text-purple-400 text-xs"></i>
+        <span class="text-[10px] text-white/70">神髓:</span>
+        <span id="statPowerRate" class="font-black text-purple-300 font-mono text-xs">+0%</span>
+        <span id="badgePowerState" class="text-[9px] px-1 rounded bg-white/10 text-white/40">待激活</span>
+      </div>
+    </div>
+
+    <!-- 右侧：三大天平指标 (Cycles ｜ Cost ｜ Area) -->
+    <div class="flex items-center space-x-3 text-xs font-mono">
+      <div class="flex items-center space-x-2 bg-black/60 border border-cyan-500/30 px-3 py-1.5 rounded-lg text-white/80">
+        <span title="吞吐周天"><i class="fa-regular fa-clock text-amber-400 mr-1"></i><strong id="statCycles" class="text-amber-300">0</strong></span>
+        <span class="text-white/20">|</span>
+        <span title="硬件造价"><i class="fa-solid fa-coins text-cyan-400 mr-1"></i><strong id="statCost" class="text-cyan-300">0</strong></span>
+        <span class="text-white/20">|</span>
+        <span title="底盘占地"><i class="fa-solid fa-shapes text-purple-400 mr-1"></i><strong id="statArea" class="text-purple-300">0</strong></span>
+      </div>
+
+      <!-- 跑分弹窗按键 -->
+      <button onclick="openBenchmarkModal();" class="pcb-btn px-3 py-1.5 rounded-lg font-black text-xs flex items-center space-x-1.5 cursor-pointer">
+        <i class="fa-solid fa-scale-balanced text-cyan-400"></i>
+        <span>基准跑分</span>
+      </button>
+
+      <!-- 返回 196 节点主板 -->
+      <a href="cpu_sandbox_test.html" title="切换回 196 节点主板沙盒" class="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-white/60 hover:text-white border border-white/10 text-xs transition">
+        <i class="fa-solid fa-microchip"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- ======================== 中央主视窗：PCB沉金焊盘底盘 + 连体IC插座模具 ======================== -->
+  <main class="flex-1 relative overflow-hidden flex items-center justify-center">
+    
+    <!-- 悬浮播放控制与三大解法阶梯按键 -->
+    <div class="absolute top-3 left-4 z-20 flex items-center space-x-1.5 bg-black/85 border border-cyan-500/30 p-1.5 rounded-xl shadow-2xl backdrop-blur-sm flex-wrap gap-y-1">
+      <button id="btnPlayPause" onclick="toggleSimPlay();" title="运行 / 暂停 (空格键)" class="brass-btn w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold cursor-pointer">
+        <i id="playIcon" class="fa-solid fa-play text-emerald-400"></i>
+      </button>
+
+      <button onclick="stepSim();" title="单步走一拍" class="brass-btn w-8 h-8 rounded-lg flex items-center justify-center text-xs cursor-pointer">
+        <i class="fa-solid fa-forward-step text-white/80"></i>
+      </button>
+
+      <button onclick="resetSim();" title="复位到第 0 拍" class="brass-btn w-8 h-8 rounded-lg flex items-center justify-center text-xs cursor-pointer">
+        <i class="fa-solid fa-rotate-left text-white/80"></i>
+      </button>
+
+      <div class="w-[1px] h-5 bg-white/20 mx-0.5"></div>
+
+      <!-- 速度切换 -->
+      <button id="sp_1" onclick="setSimSpeed(1);" class="brass-btn px-2 py-1 rounded text-[10px] font-mono font-bold active">1x</button>
+      <button id="sp_2" onclick="setSimSpeed(2);" class="brass-btn px-2 py-1 rounded text-[10px] font-mono font-bold">2x</button>
+      <button id="sp_4" onclick="setSimSpeed(4);" class="brass-btn px-2 py-1 rounded text-[10px] font-mono font-bold">4x</button>
+
+      <div class="w-[1px] h-5 bg-white/20 mx-1"></div>
+
+      <!-- 三大解法阶梯 -->
+      <!-- ① 及格普通解 (14拍·单臂慢速直推·+20%) -->
+      <button id="btnPresetBeltStd" onclick="loadBeltStandardPreset();" title="【🥉 及格普通解】14拍单臂稳态流水线，达成带速 +20%" class="brass-btn px-2.5 py-1 rounded text-xs text-white/80 hover:text-white flex items-center space-x-1 cursor-pointer">
+        <span>🥉 普通解 (+20%)</span>
+      </button>
+
+      <!-- ② 进阶闭环解 (12拍·双臂升阶成键·+60% 激活突破节点) -->
+      <button id="btnPresetMineOpt" onclick="loadMineOptimalPreset();" title="【🥈 进阶闭环解】双臂协同升阶与对齐成键 [铁===金]！采矿 +60%，激活采矿特殊突破节点" class="brass-btn px-2.5 py-1 rounded text-xs font-bold text-cyan-300 hover:text-cyan-200 flex items-center space-x-1 cursor-pointer">
+        <i class="fa-solid fa-bolt text-cyan-400"></i>
+        <span>🥈 进阶闭环 (+60%)</span>
+      </button>
+
+      <!-- ③ 极限超频芭蕾解 (6拍·四臂严丝合缝交错抓取·+300% 满载超频) -->
+      <button id="btnPresetBalletOverclock" onclick="loadExtremeBalletPreset();" title="【🥇 极限超频芭蕾解】4根机械臂如芭蕾舞般严丝合缝交错抓取！带速/采矿/冶炼狂飙 +300%！" class="brass-btn active px-3 py-1 rounded text-xs font-black text-[#ffd700] flex items-center space-x-1 shadow-[0_0_15px_rgba(255,215,0,0.5)] cursor-pointer animate-pulse">
+        <i class="fa-solid fa-crown text-[#ffd700]"></i>
+        <span>🥇 极限芭蕾解 (+300%)</span>
+      </button>
+
+      <!-- ④ 🌐 四核全域并发超频 (长线架构验证：同一底盘同时跑 4 种分子) -->
+      <button id="btnPresetQuadConcurrent" onclick="loadQuadCoreConcurrentPreset();" title="【🌐 四核全域并发超频】证明同一阵盘同时运行 4 大工业协议！全系统 +300% 满载，长线无需画关卡！" class="brass-btn px-2.5 py-1 rounded text-xs font-bold text-emerald-300 hover:text-emerald-200 flex items-center space-x-1 cursor-pointer">
+        <i class="fa-solid fa-network-wired text-emerald-400"></i>
+        <span>🌐 四核全域并发 (+300%)</span>
+      </button>
+
+      <div class="w-[1px] h-5 bg-white/20 mx-1"></div>
+
+      <!-- 阵眼专项方案快捷键 -->
+      <button id="btnPresetBeltOpt" onclick="loadBeltOptimalPreset();" title="飞梭导轨专项最优：伸缩臂6步直推交付！带速 +300%" class="brass-btn px-2 py-1 rounded text-xs text-amber-300 hover:text-white flex items-center space-x-1 cursor-pointer">
+        <span>⚡ 飞梭</span>
+      </button>
+      <button id="btnPresetSmeltOpt" onclick="loadSmeltOptimalPreset();" title="三昧煅烧专项最优：长臂+双头臂外侧组装 [火===水===火] 直推！冶炼 +300%" class="brass-btn px-2 py-1 rounded text-xs text-rose-300 hover:text-white flex items-center space-x-1 cursor-pointer">
+        <span>🔥 冶炼</span>
+      </button>
+      <button id="btnPresetPowerOpt" onclick="loadPowerOptimalPreset();" title="乾坤聚灵专项最优：三叶臂组装闭环三角 [金-火-水] 直推！神髓自愈激活" class="brass-btn px-2 py-1 rounded text-xs text-purple-300 hover:text-white flex items-center space-x-1 cursor-pointer">
+        <span>🌀 聚灵</span>
+      </button>
+
+      <div class="w-[1px] h-5 bg-white/20 mx-1"></div>
+
+      <!-- 💥 质子碰撞演示按键 (严谨检验冲撞惩罚) -->
+      <button onclick="demoCollisionError();" title="💥 质子碰撞演示：模拟两颗质子冲突冲撞，立即损毁停机" class="brass-btn px-2 py-1 rounded text-xs font-bold text-rose-400 hover:text-rose-300 flex items-center space-x-1 cursor-pointer">
+        <i class="fa-solid fa-burst text-rose-400"></i>
+        <span>碰撞演示</span>
+      </button>
+
+      <!-- 清空 -->
+      <button onclick="clearAlchemyBoard();" title="清空阵盘元件" class="brass-btn px-2 py-1 rounded text-xs text-rose-300 hover:text-rose-200">
+        <i class="fa-solid fa-trash-can"></i>
+      </button>
+    </div>
+
+    <!-- 顶栏右侧：外部大工厂 I/O 传送带进料状态 + 阵盘规格扩容 -->
+    <div class="absolute top-3 right-4 z-20 flex items-center space-x-2">
+      <!-- 1. 外部大工厂传送带供料胶囊 -->
+      <div id="feedStatusCapsule" class="flex items-center space-x-2 bg-black/85 border border-emerald-500/50 px-3 py-1 rounded-xl text-xs font-mono shadow-2xl backdrop-blur-sm transition-all duration-300">
+        <div class="flex items-center space-x-1.5">
+          <span id="feedIndicatorDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]"></span>
+          <span class="text-white/60 text-[10px]">大工厂传送带:</span>
+          <strong id="feedStatusText" class="text-emerald-300 font-bold text-[11px]">满流供料 (120/min)</strong>
+        </div>
+        <button onclick="toggleExternalFeed();" id="btnToggleFeed" title="模拟外部传送带断流，检验阵盘与大工厂深度咬合" class="px-2 py-0.5 rounded bg-white/10 hover:bg-rose-900/60 text-white/80 hover:text-rose-300 text-[10px] border border-white/20 hover:border-rose-500/50 cursor-pointer transition">
+          模拟断料
+        </button>
+      </div>
+
+      <!-- 2. 阵盘规格底盘扩容控制 -->
+      <div class="flex items-center space-x-1 bg-black/85 border border-[#785a2b] px-2 py-1 rounded-xl text-xs font-mono shadow-2xl backdrop-blur-sm">
+        <span class="text-white/50 text-[10px] mr-0.5">底盘规格:</span>
+        <button id="btnRadius_4" onclick="setBoardRadius(4);" title="7×7 基础微核底盘 (早期)" class="px-1.5 py-0.5 rounded text-[10px] text-white/70 hover:text-white border border-transparent transition cursor-pointer">7×7微核</button>
+        <button id="btnRadius_5" onclick="setBoardRadius(5);" title="9×9 工业标核底盘 (中期标准)" class="px-1.5 py-0.5 rounded text-[10px] text-amber-300 font-bold bg-[#ffd700]/20 border border-[#ffd700]/40 transition cursor-pointer">9×9标核</button>
+        <button id="btnRadius_6" onclick="setBoardRadius(6);" title="11×11 宗门超算底盘 (后期巨型多核)" class="px-1.5 py-0.5 rounded text-[10px] text-white/70 hover:text-white border border-transparent transition cursor-pointer">11×11超算</button>
+      </div>
+
+      <!-- 3. IC 插座说明标签 -->
+      <div class="bg-black/85 border border-cyan-500/30 px-3 py-1 rounded-xl text-xs font-mono flex items-center space-x-2 shadow-2xl backdrop-blur-sm">
+        <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></div>
+        <span class="text-white/60 text-[10px]">测试插座:</span>
+        <span id="lblSinkMoldDesc" class="text-cyan-300 font-bold text-[11px]">水火双核</span>
+      </div>
+    </div>
+
+    <!-- 核心 SVG 渲染主画布 (1400 x 860) -->
+    <svg id="hexBoardSvg" class="w-full h-full cursor-crosshair select-none" viewBox="0 0 1400 860">
+      <defs>
+        <!-- PCB 沉金焊盘与深邃阻焊层渐变 -->
+        <radialGradient id="hexCellGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#0c1424" />
+          <stop offset="70%" stop-color="#060a14" />
+          <stop offset="100%" stop-color="#020408" />
+        </radialGradient>
+        <radialGradient id="hexHoverGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#0e3a53" />
+          <stop offset="100%" stop-color="#051724" />
+        </radialGradient>
+
+        <!-- PCB 沉金工艺金属渐变 (ENIG Immersion Gold) -->
+        <linearGradient id="pcbGoldPad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#fef08a" />
+          <stop offset="35%" stop-color="#fbbf24" />
+          <stop offset="75%" stop-color="#f59e0b" />
+          <stop offset="100%" stop-color="#92400e" />
+        </linearGradient>
+
+        <!-- 纯铜走线渐变 (Copper Trace) -->
+        <linearGradient id="pcbCopperTrace" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#fdba74" />
+          <stop offset="50%" stop-color="#ea580c" />
+          <stop offset="100%" stop-color="#9a3412" />
+        </linearGradient>
+
+        <!-- 工业机械元件金属齿轮材质渐变 -->
+        <linearGradient id="gearSteelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#cbd5e1" />
+          <stop offset="35%" stop-color="#64748b" />
+          <stop offset="70%" stop-color="#334155" />
+          <stop offset="100%" stop-color="#0f172a" />
+        </linearGradient>
+        <linearGradient id="gearGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ffffff" />
+          <stop offset="25%" stop-color="#fef08a" />
+          <stop offset="60%" stop-color="#f59e0b" />
+          <stop offset="100%" stop-color="#78350f" />
+        </linearGradient>
+
+        <!-- 3D 拟真高光晶核球体渐变 -->
+        <!-- 1. 玄铁原石晶核 (Raw Iron Core) -->
+        <radialGradient id="orbIronGrad" cx="30%" cy="25%" r="70%">
+          <stop offset="0%" stop-color="#eed5b7" />
+          <stop offset="25%" stop-color="#9c6d42" />
+          <stop offset="65%" stop-color="#4a301a" />
+          <stop offset="100%" stop-color="#1f1207" />
+        </radialGradient>
+
+        <!-- 2. 纯阳赤金能量球 (Gold Core) -->
+        <radialGradient id="orbGoldGrad" cx="30%" cy="25%" r="70%">
+          <stop offset="0%" stop-color="#ffffff" />
+          <stop offset="20%" stop-color="#fff194" />
+          <stop offset="55%" stop-color="#f59e0b" />
+          <stop offset="85%" stop-color="#9a3412" />
+          <stop offset="100%" stop-color="#451a03" />
+        </radialGradient>
+
+        <!-- 3. 玄冰冷泉超导离子 (Superconducting Coolant) -->
+        <radialGradient id="orbWaterGrad" cx="30%" cy="25%" r="70%">
+          <stop offset="0%" stop-color="#ffffff" />
+          <stop offset="20%" stop-color="#67e8f9" />
+          <stop offset="55%" stop-color="#06b6d4" />
+          <stop offset="85%" stop-color="#0e7490" />
+          <stop offset="100%" stop-color="#083344" />
+        </radialGradient>
+
+        <!-- 4. 纯阳高能等离子 (High-Energy Plasma) -->
+        <radialGradient id="orbFireGrad" cx="30%" cy="25%" r="70%">
+          <stop offset="0%" stop-color="#ffffff" />
+          <stop offset="20%" stop-color="#fda4af" />
+          <stop offset="55%" stop-color="#f43f5e" />
+          <stop offset="85%" stop-color="#9f1239" />
+          <stop offset="100%" stop-color="#4c0519" />
+        </radialGradient>
+
+        <!-- 钛合金高精密机械臂金属杆与碳纤维覆层渐变 -->
+        <linearGradient id="armBrassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#475569" />
+          <stop offset="45%" stop-color="#1e293b" />
+          <stop offset="100%" stop-color="#090d16" />
+        </linearGradient>
+        <linearGradient id="armTitaniumGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#64748b" />
+          <stop offset="50%" stop-color="#1e293b" />
+          <stop offset="100%" stop-color="#0a0f1d" />
+        </linearGradient>
+
+        <!-- 机械臂青蓝/翡翠光导纤维 LED 灯带 -->
+        <linearGradient id="armCyanLedGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#00f0ff" />
+          <stop offset="100%" stop-color="#0284c7" />
+        </linearGradient>
+        <linearGradient id="armEmeraldLedGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#34d399" />
+          <stop offset="100%" stop-color="#059669" />
+        </linearGradient>
+
+        <!-- 芯片环氧树脂封装与硅晶圆发光体 -->
+        <linearGradient id="chipEpoxyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#1e293b" />
+          <stop offset="50%" stop-color="#0f172a" />
+          <stop offset="100%" stop-color="#020617" />
+        </linearGradient>
+        <radialGradient id="chipDieGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffffff" />
+          <stop offset="30%" stop-color="#ffd700" />
+          <stop offset="70%" stop-color="#f59e0b" />
+          <stop offset="100%" stop-color="#7c2d12" />
+        </radialGradient>
+
+        <!-- 发光与投影滤波 -->
+        <filter id="goldGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        <filter id="cyanGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#000000" flood-opacity="0.85" />
+        </filter>
+      </defs>
+
+      <!-- 0. 外部大工厂实体传送带接驳管道层 (Macro-Factory Conveyor Gantries & Feeder Pipes) -->
+      <g id="layerConveyors"></g>
+
+      <!-- 1. 六角蜂窝金属底板 -->
+      <g id="layerHexCells"></g>
+
+      <!-- 2. 阵盘符印层 (生门底池、三昧煅炼印、成键锁扣) -->
+      <g id="layerGlyphs"></g>
+
+      <!-- 3. ⭐ 连体阵眼模具层 (具备特定几何外形与严密卡槽的全息凹模) -->
+      <g id="layerSinkMold"></g>
+
+      <!-- 4. 分子刚性连接键层 (哑铃黄铜键柱) -->
+      <g id="layerBonds"></g>
+
+      <!-- 5. 灵珠原核层 (3D 拟真高光球体) -->
+      <g id="layerOrbs"></g>
+
+      <!-- 6. 机械臂与夹爪层 (中心齿轮、伸缩悬臂、机械爪) -->
+      <g id="layerArms"></g>
+
+      <!-- 7. 交互高亮与引导指示层 -->
+      <g id="layerOverlay"></g>
+    </svg>
+
+    <!-- 鼠标悬浮指示坐标气泡 -->
+    <div id="gridCursorBadge" class="hidden absolute pointer-events-none px-2.5 py-1 rounded-md bg-[#050b16]/95 border border-cyan-500/40 text-[10px] text-cyan-300 font-mono shadow-xl z-50">
+      (q, r)
+    </div>
+
+    <!-- ==================== PLC 时序指令波形带 (TIMELINE SEQUENCER) ==================== -->
+    <div id="instructionTimeline" class="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 w-[96%] max-w-[1300px] bg-[#070d1a]/95 border-2 border-cyan-500/40 rounded-2xl px-4 py-2 shadow-2xl backdrop-blur-md flex flex-col space-y-1.5 select-none">
+      
+      <!-- 律历带顶栏信息 + 指令笔刷工具栏 -->
+      <div class="flex items-center justify-between text-xs font-mono border-b border-cyan-500/20 pb-1.5 flex-wrap gap-1">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-microchip text-cyan-400"></i>
+          <span class="text-cyan-300 font-black tracking-wider text-[11px]">PLC 时序逻辑指令带</span>
+          <span class="text-white/40 text-[10px] hidden md:inline">｜ 点击格子循环切换，或选择笔刷直接涂抹，右键清空</span>
+        </div>
+        
+        <!-- 🖌️ 指令画笔选择栏 (Instruction Brush Palette) -->
+        <div class="flex items-center space-x-1 bg-black/60 border border-cyan-500/30 px-2 py-0.5 rounded-lg">
+          <span class="text-[10px] text-cyan-400/70 mr-0.5">指令笔刷:</span>
+          <button id="brush_GRAB" onclick="selectInstructionBrush('GRAB');" title="涂抹 [✊ 抓取]" class="px-1.5 py-0.5 rounded text-[11px] font-bold border transition bg-amber-900/60 text-amber-300 border-amber-600 hover:brightness-125 cursor-pointer">✊ 抓</button>
+          <button id="brush_DROP" onclick="selectInstructionBrush('DROP');" title="涂抹 [✋ 释放]" class="px-1.5 py-0.5 rounded text-[11px] font-bold border transition bg-amber-950/40 text-amber-200 border-amber-700/60 hover:brightness-125 cursor-pointer">✋ 放</button>
+          <button id="brush_ROT_CW" onclick="selectInstructionBrush('ROT_CW');" title="涂抹 [↷ 顺转60°]" class="px-1.5 py-0.5 rounded text-[11px] font-bold border transition bg-blue-950/70 text-cyan-300 border-cyan-700 hover:brightness-125 cursor-pointer">↷ 顺转</button>
+          <button id="brush_ROT_CCW" onclick="selectInstructionBrush('ROT_CCW');" title="涂抹 [↶ 逆转60°]" class="px-1.5 py-0.5 rounded text-[11px] font-bold border transition bg-blue-950/70 text-cyan-300 border-cyan-700 hover:brightness-125 cursor-pointer">↶ 逆转</button>
+          <button id="brush_PIVOT_CW" onclick="selectInstructionBrush('PIVOT_CW');" title="涂抹 [↻ 顺转爪60°]" class="px-1.5 py-0.5 rounded text-[11px] font-bold border transition bg-purple-950/80 text-purple-300 border-purple-500 hover:brightness-125 cursor-pointer">↻ 爪顺</button>
+          <button id="brush_PIVOT_CCW" onclick="selectInstructionBrush('PIVOT_CCW');" title="涂抹 [↺ 逆转爪60°]" class="px-1.5 py-0.5 rounded text-[11px] font-bold border transition bg-purple-950/80 text-purple-300 border-purple-500 hover:brightness-125 cursor-pointer">↺ 爪逆</button>
+          <button id="brush_EXTEND" onclick="selectInstructionBrush('EXTEND');" title="涂抹 [⇥ 伸长1格]" class="px-1.5 py-0.5 rounded text-[11px] font-bold border transition bg-emerald-950/80 text-emerald-300 border-emerald-500 hover:brightness-125 cursor-pointer">⇥ 伸长</button>
+          <button id="brush_RETRACT" onclick="selectInstructionBrush('RETRACT');" title="涂抹 [⇤ 缩短1格]" class="px-1.5 py-0.5 rounded text-[11px] font-bold border transition bg-emerald-950/80 text-emerald-300 border-emerald-500 hover:brightness-125 cursor-pointer">⇤ 缩短</button>
+          <button id="brush_WAIT" onclick="selectInstructionBrush('WAIT');" title="涂抹 [· 空拍]" class="px-1.5 py-0.5 rounded text-[11px] font-bold border transition bg-black/40 text-white/40 border-white/10 hover:brightness-125 cursor-pointer">· 空拍</button>
+          <button onclick="clearInstructionBrush();" title="取消选中笔刷 (恢复点击循环模式)" class="px-1.5 py-0.5 rounded text-[10px] text-white/40 hover:text-white border border-transparent hover:border-white/20 cursor-pointer">✖ 循环模式</button>
+        </div>
+
+        <!-- 拍数缩放与全部清空 -->
+        <div class="flex items-center space-x-2 text-[10px]">
+          <span class="text-white/60">律历周天: <strong id="timelineTickLabel" class="text-amber-300 font-bold text-xs">0 / 14</strong></span>
+          <button onclick="adjustTimelineCycles(1);" title="延长 1 拍" class="px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 text-white font-bold border border-white/20 cursor-pointer">+1拍</button>
+          <button onclick="adjustTimelineCycles(-1);" title="缩减 1 拍" class="px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 text-white font-bold border border-white/20 cursor-pointer">-1拍</button>
+          <button onclick="clearAllArmInstructions();" title="清空全部机械臂指令条" class="px-1.5 py-0.5 rounded bg-rose-950/60 hover:bg-rose-900 border border-rose-500/50 text-rose-300 text-[10px] cursor-pointer">🧹 全部清空</button>
+        </div>
+      </div>
+
+      <!-- 各机械臂指令轨道容器 (支持点击涂抹与右键抹除) -->
+      <div id="armTapeContainer" class="flex flex-col space-y-1.5 overflow-x-auto py-1 max-h-36">
+        <!-- 由 renderTimelineTracks() 动态渲染 -->
+      </div>
+    </div>
+  </main>
+
+  <!-- ======================== 底部工具托盘：PCB 元件与 SMT 伺服臂选择 ======================== -->
+  <footer class="h-20 pcb-panel border-t-2 px-6 flex items-center justify-between shrink-0 z-30 select-none">
+    
+    <!-- 元件图标选择栏 (SMT 贴片伺服机械臂与 PCB 芯片封装构件) -->
+    <div class="flex items-center space-x-1.5 overflow-x-auto py-1">
+      
+      <!-- 1. 单摆机械臂 (Standard Arm) -->
+      <button id="tool_arm_1" onclick="selectTool('arm_1');" title="SMT 单摆机械臂 (Standard Arm) · 长1格 · 造价20灵石" class="pcb-btn active px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 text-xs font-bold transition">
+        <svg class="w-4 h-4 text-[#00f0ff]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="6" cy="18" r="3.5" fill="#08101d" stroke="#00f0ff" />
+          <line x1="9" y1="15" x2="18" y2="6" stroke="#00f0ff" stroke-width="2.5" stroke-linecap="round" />
+          <circle cx="18" cy="6" r="2.5" fill="#00f0ff" />
+        </svg>
+        <span class="text-[11px]">SMT单臂</span>
+      </button>
+
+      <!-- 2. 液压伸缩臂 (Piston Arm) -->
+      <button id="tool_arm_piston" onclick="selectTool('arm_piston');" title="伺服伸缩机械臂 (Piston Arm) · 伸缩1~3格 · 造价40灵石 · 支持 W/S 伸缩" class="pcb-btn px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 text-xs font-bold transition">
+        <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="6" cy="18" r="3.5" fill="#061a14" stroke="#10b981" />
+          <rect x="7" y="10" width="7" height="3.5" rx="1" transform="rotate(-45 10 11)" fill="#065f46" stroke="#34d399" stroke-width="1.2" />
+          <line x1="11" y1="11" x2="18" y2="4" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+        </svg>
+        <span class="text-[11px] text-emerald-300">伸缩电推臂</span>
+      </button>
+
+      <!-- 3. 定长长臂 (Long Arm) -->
+      <button id="tool_arm_long" onclick="selectTool('arm_long');" title="定长长臂 (Long Arm) · 跨距2格定长桁架臂 · 造价30灵石" class="pcb-btn px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 text-xs font-bold transition">
+        <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="5" cy="19" r="3" fill="#0c192c" stroke="#f59e0b" />
+          <line x1="7" y1="17" x2="20" y2="4" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" />
+          <line x1="10" y1="17" x2="17" y2="10" stroke="#fbbf24" stroke-width="1.5" />
+          <circle cx="20" cy="4" r="2.5" fill="#fbbf24" />
+        </svg>
+        <span class="text-[11px]">跨距长臂</span>
+      </button>
+
+      <!-- 4. 双头轮转臂 (Double Arm) -->
+      <button id="tool_arm_2" onclick="selectTool('arm_2');" title="双头对置轮臂 (Double-Arm) · 180°对置双爪 · 造价30灵石" class="pcb-btn px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 text-xs font-bold transition">
+        <svg class="w-4 h-4 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3" fill="#08101d" stroke="#38bdf8" />
+          <line x1="4" y1="12" x2="20" y2="12" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" />
+          <circle cx="4" cy="12" r="2" fill="#38bdf8" />
+          <circle cx="20" cy="12" r="2" fill="#38bdf8" />
+        </svg>
+        <span class="text-[11px]">双头轮臂</span>
+      </button>
+
+      <!-- 5. 三叶轮转臂 (Tri-Arm) -->
+      <button id="tool_arm_3" onclick="selectTool('arm_3');" title="三叶轮转臂 (Tri-Arm) · 120°三分爪 · 造价40灵石" class="pcb-btn px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 text-xs font-bold transition">
+        <svg class="w-4 h-4 text-violet-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3" fill="#1e1b4b" stroke="#a78bfa" />
+          <line x1="12" y1="12" x2="12" y2="4" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" />
+          <line x1="12" y1="12" x2="19" y2="16" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" />
+          <line x1="12" y1="12" x2="5" y2="16" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <span class="text-[11px]">三叶轮臂</span>
+      </button>
+
+      <!-- 6. 六角星轮臂 (Hex-Arm) -->
+      <button id="tool_arm_6" onclick="selectTool('arm_6');" title="六角星轮臂 (Hex-Arm) · 60°六向全抓 · 造价50灵石" class="pcb-btn px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 text-xs font-bold transition">
+        <svg class="w-4 h-4 text-pink-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="2.5" fill="#3b0724" stroke="#f472b6" />
+          <line x1="12" y1="4" x2="12" y2="20" stroke="#f472b6" stroke-width="1.8" />
+          <line x1="5" y1="8" x2="19" y2="16" stroke="#f472b6" stroke-width="1.8" />
+          <line x1="5" y1="16" x2="19" y2="8" stroke="#f472b6" stroke-width="1.8" />
+        </svg>
+        <span class="text-[11px]">六角轮臂</span>
+      </button>
+
+      <!-- 7. 滑轨轨道 (Track) -->
+      <button id="tool_track" onclick="selectTool('track');" title="PCB 镀金总线滑道 (Track) · 供机械臂滑移 · 每格造价5灵石" class="pcb-btn px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 text-xs font-bold transition">
+        <svg class="w-4 h-4 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="4" y1="8" x2="20" y2="8" stroke="#f59e0b" stroke-width="2" />
+          <line x1="4" y1="16" x2="20" y2="16" stroke="#f59e0b" stroke-width="2" />
+          <line x1="8" y1="6" x2="8" y2="18" stroke="#00f0ff" stroke-width="1.5" />
+          <line x1="16" y1="6" x2="16" y2="18" stroke="#00f0ff" stroke-width="1.5" />
+        </svg>
+        <span class="text-[11px]">总线滑轨</span>
+      </button>
+
+      <div class="w-[1px] h-6 bg-white/15 mx-1"></div>
+
+      <!-- 8. 成键锁扣 (Bonding) -->
+      <button id="tool_glyph_bond" onclick="selectTool('glyph_bond');" title="SMT-BOND 激光熔焊双焊盘 · 邻格晶核结刚性总线 · 造价25灵石" class="pcb-btn px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 text-xs font-bold transition">
+        <svg class="w-4 h-4 text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="8" cy="12" r="4" stroke="#ffd700" stroke-width="1.8" />
+          <circle cx="16" cy="12" r="4" stroke="#ffd700" stroke-width="1.8" />
+          <line x1="8" y1="12" x2="16" y2="12" stroke="#00f0ff" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <span class="text-[11px]">SMT熔焊</span>
+      </button>
+
+      <!-- 9. 解键离断 (Unbonding) -->
+      <button id="tool_glyph_unbond" onclick="selectTool('glyph_unbond');" title="CUT-ION 高频离子去耦槽 · 切断经过晶核的总线 · 造价25灵石" class="pcb-btn px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 text-xs font-bold transition">
+        <svg class="w-4 h-4 text-cyan-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="6" y1="6" x2="18" y2="18" stroke="#00f0ff" stroke-width="2" stroke-linecap="round" />
+          <line x1="6" y1="18" x2="18" y2="6" stroke="#00f0ff" stroke-width="2" stroke-linecap="round" />
+          <circle cx="12" cy="12" r="2.5" fill="#083344" stroke="#38bdf8" stroke-width="1.5" />
+        </svg>
+        <span class="text-[11px]">离子去耦</span>
+      </button>
+
+      <!-- 10. 质子升阶节点 (Glyph of Calcification / Transmutation) -->
+      <button id="tool_glyph_calc" onclick="selectTool('glyph_calc');" title="TRANS-CORE QFN-32 贴片处理器 · 粗铁质子经此升阶为赤金 · 造价25灵石" class="pcb-btn px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 text-xs font-bold transition">
+        <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="4" y="4" width="16" height="16" rx="2" fill="#0f172a" stroke="#f59e0b" stroke-width="1.8" />
+          <circle cx="12" cy="12" r="3" fill="#ffd700" />
+        </svg>
+        <span class="text-[11px] text-amber-300">QFN升阶核</span>
+      </button>
+
+      <!-- 11. 虚空消解 (Glyph of Disposal) -->
+      <button id="tool_glyph_void" onclick="selectTool('glyph_void');" title="GND-DISPOSAL 接地泄放沉孔 · 吞噬并吸收废料质子 · 造价10灵石" class="pcb-btn px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 text-xs font-bold transition">
+        <svg class="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="7" stroke="#c084fc" stroke-width="1.5" fill="#130826" />
+          <line x1="8" y1="12" x2="16" y2="12" stroke="#c084fc" stroke-width="1.5" />
+          <line x1="10" y1="15" x2="14" y2="15" stroke="#c084fc" stroke-width="1.5" />
+        </svg>
+        <span class="text-[11px]">GND泄放</span>
+      </button>
+
+      <!-- 12. 拆除 (Eraser) -->
+      <button id="tool_eraser" onclick="selectTool('eraser');" title="拆除元件 (生门、QFN升阶核与测试插座受板载保护不可拆除)" class="pcb-btn px-2.5 py-1.5 rounded-lg flex items-center space-x-1 text-xs text-rose-400 hover:text-rose-300">
+        <i class="fa-solid fa-eraser text-xs"></i>
+        <span class="text-[11px]">拆除</span>
+      </button>
+    </div>
+
+    <!-- 右侧：机械臂 伸缩 / 正反转 / 抓手自转 直操面板 -->
+    <div class="flex items-center space-x-2">
+      <!-- 伸缩 (W / S) -->
+      <button onclick="manualExtendActiveArm(1);" title="当前机械臂液压伸长 1 格 (快捷键 W)" class="brass-btn px-2.5 py-1.5 rounded-xl text-xs font-bold text-emerald-300 flex items-center space-x-1 cursor-pointer shadow-[0_0_8px_rgba(16,185,129,0.3)]">
+        <span>⇥ 伸长 (W)</span>
+      </button>
+      <button onclick="manualExtendActiveArm(-1);" title="当前机械臂液压缩短 1 格 (快捷键 S)" class="brass-btn px-2.5 py-1.5 rounded-xl text-xs font-bold text-emerald-300 flex items-center space-x-1 cursor-pointer shadow-[0_0_8px_rgba(16,185,129,0.3)]">
+        <span>⇤ 缩短 (S)</span>
+      </button>
+
+      <div class="w-[1px] h-6 bg-white/20 mx-0.5"></div>
+
+      <!-- 臂顺转 (E) / 逆转 (Q) -->
+      <button onclick="manualRotateActiveArm(1);" title="当前机械臂顺时针旋转 60° (快捷键 E)" class="brass-btn px-2.5 py-1.5 rounded-xl text-xs font-bold text-cyan-300 flex items-center space-x-1 cursor-pointer">
+        <span>↷ 顺转 (E)</span>
+      </button>
+      <button onclick="manualRotateActiveArm(-1);" title="当前机械臂逆时针旋转 60° (快捷键 Q)" class="brass-btn px-2.5 py-1.5 rounded-xl text-xs font-bold text-cyan-300 flex items-center space-x-1 cursor-pointer">
+        <span>↶ 逆转 (Q)</span>
+      </button>
+
+      <div class="w-[1px] h-6 bg-white/20 mx-0.5"></div>
+
+      <!-- 抓手自转顺 (C) / 逆 (Z) -->
+      <button onclick="manualPivotActiveArm(1);" title="抓手自转顺时针 60° (围绕抓手旋转键连分子，快捷键 C)" class="brass-btn px-2.5 py-1.5 rounded-xl text-xs font-bold text-purple-300 flex items-center space-x-1 cursor-pointer shadow-[0_0_8px_rgba(168,85,247,0.3)]">
+        <span>↻ 转爪顺 (C)</span>
+      </button>
+      <button onclick="manualPivotActiveArm(-1);" title="抓手自转逆时针 60° (围绕抓手旋转键连分子，快捷键 Z)" class="brass-btn px-2.5 py-1.5 rounded-xl text-xs font-bold text-purple-300 flex items-center space-x-1 cursor-pointer shadow-[0_0_8px_rgba(168,85,247,0.3)]">
+        <span>↺ 转爪逆 (Z)</span>
+      </button>
+
+      <div class="w-[1px] h-6 bg-white/20 mx-0.5"></div>
+
+      <!-- 建造朝向旋转指示 -->
+      <span class="text-[11px] font-mono text-[#f3dfa2] font-bold">朝向: <strong id="lblCurrentAngle" class="text-amber-400">0°</strong></span>
+      <button onclick="rotateArmTool();" title="按 R 键旋转放置朝向 (60° 步进)" class="brass-btn w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold cursor-pointer">
+        <i class="fa-solid fa-rotate-right"></i>
+      </button>
+    </div>
+  </footer>
+
+  <!-- ======================== 物理协处理器芯片刻录与大工厂插槽中心 ======================== -->
+  <div id="benchmarkModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 select-none">
+    <div class="relative w-[860px] max-w-full brass-bar border-2 rounded-2xl p-6 space-y-4 animate-in zoom-in-95 duration-150 shadow-2xl">
+      <!-- 弹窗顶栏 -->
+      <div class="flex items-center justify-between border-b border-[#785a2b] pb-3">
+        <div class="flex items-center space-x-3">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-[#ffd700] via-[#c9a45c] to-[#45341a] flex items-center justify-center text-black font-black text-xl shadow-[0_0_20px_#ffd700]">
+            <i class="fa-solid fa-microchip"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-[#f3dfa2] font-serif tracking-wider">OPUS CHIP FIRMWARE · 物理协处理器芯片刻录中心</h3>
+            <p class="text-xs text-white/60">将阵盘运行的机械臂时序封装为实体芯片，直接插进大工厂超级建筑，长线无限拓展！</p>
+          </div>
+        </div>
+        <button onclick="closeBenchmarkModal();" class="w-8 h-8 rounded-lg hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center cursor-pointer transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- 四大核心技术指标 -->
+      <div class="grid grid-cols-4 gap-2.5">
+        <div class="p-3 rounded-xl bg-black/75 border border-amber-500/40 text-center space-y-0.5">
+          <div class="text-[10px] text-white/50 uppercase">⏱️ 吞吐周天 (CYCLES)</div>
+          <div id="benchCycles" class="text-xl font-black text-amber-300 font-mono">6 拍</div>
+          <div class="text-[9px] text-emerald-400 font-bold bg-emerald-950/70 rounded py-0.5">击败全服 98% 极速</div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-black/75 border border-cyan-500/40 text-center space-y-0.5">
+          <div class="text-[10px] text-white/50 uppercase">🪙 硬件造价 (COST)</div>
+          <div id="benchCost" class="text-xl font-black text-cyan-300 font-mono">110</div>
+          <div class="text-[9px] text-cyan-400 font-bold bg-cyan-950/70 rounded py-0.5">高密度集成</div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-black/75 border border-purple-500/40 text-center space-y-0.5">
+          <div class="text-[10px] text-white/50 uppercase">📐 底盘占地 (AREA)</div>
+          <div id="benchArea" class="text-xl font-black text-purple-300 font-mono">14 格</div>
+          <div class="text-[9px] text-purple-400 font-bold bg-purple-950/70 rounded py-0.5">高紧凑度布局</div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-black/75 border border-yellow-500/40 text-center space-y-0.5">
+          <div class="text-[10px] text-white/50 uppercase">👑 工业超频评级</div>
+          <div id="benchRating" class="text-xl font-black text-yellow-300 font-mono">超频 +300%</div>
+          <div class="text-[9px] text-yellow-400 font-bold bg-yellow-950/70 rounded py-0.5">全域突破激活</div>
+        </div>
+      </div>
+
+      <!-- 大工厂实体建筑插槽分配卡 -->
+      <div class="space-y-1.5">
+        <div class="text-[11px] font-mono text-white/70 flex items-center justify-between">
+          <span>🏭 大工厂实体建筑插槽分配 (SLOT ASSIGNMENT):</span>
+          <span class="text-emerald-400 text-[10px]"><i class="fa-solid fa-circle-check mr-1"></i>所有外接插槽就绪</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+          <!-- 插槽 1: 传送带枢纽 -->
+          <div class="p-2.5 rounded-xl bg-black/60 border border-cyan-500/30 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-gauge-high text-cyan-400 text-sm"></i>
+              <div>
+                <div class="font-bold text-white/90 text-[11px]">插槽 A: 宗门主轴传送带</div>
+                <div class="text-[10px] text-white/50">需求: 双核飞梭芯片 ➔ 实装增益: <span class="text-cyan-300 font-bold">+300% 带速</span></div>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-cyan-950 border border-cyan-500 text-cyan-300 text-[10px] font-bold">已实装 🟢</span>
+          </div>
+
+          <!-- 插槽 2: 采矿钻机群 -->
+          <div class="p-2.5 rounded-xl bg-black/60 border border-amber-500/30 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-gem text-amber-400 text-sm"></i>
+              <div>
+                <div class="font-bold text-white/90 text-[11px]">插槽 B: 金身电磁采矿机群</div>
+                <div class="text-[10px] text-white/50">需求: 赤金升阶芯片 ➔ 实装增益: <span class="text-amber-300 font-bold">+300% 采矿</span></div>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-amber-950 border border-amber-500 text-amber-300 text-[10px] font-bold">已实装 🟢</span>
+          </div>
+
+          <!-- 插槽 3: 三昧高温熔炉群 -->
+          <div class="p-2.5 rounded-xl bg-black/60 border border-rose-500/30 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-fire text-rose-400 text-sm"></i>
+              <div>
+                <div class="font-bold text-white/90 text-[11px]">插槽 C: 三昧高温精炼炉群</div>
+                <div class="text-[10px] text-white/50">需求: 三核刚性直链 ➔ 实装增益: <span class="text-rose-300 font-bold">+300% 冶炼</span></div>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-rose-950 border border-rose-500 text-rose-300 text-[10px] font-bold">已实装 🟢</span>
+          </div>
+
+          <!-- 插槽 4: 宗门护山大阵 -->
+          <div class="p-2.5 rounded-xl bg-black/60 border border-purple-500/30 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-shield-heart text-purple-400 text-sm"></i>
+              <div>
+                <div class="font-bold text-white/90 text-[11px]">插槽 D: 宗门护山大阵神髓</div>
+                <div class="text-[10px] text-white/50">需求: 闭环三角分子 ➔ 实装增益: <span class="text-purple-300 font-bold">装甲+200, 自愈+60/s</span></div>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-purple-950 border border-purple-500 text-purple-300 text-[10px] font-bold">已实装 🟢</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 实装与刻录导出操作区 -->
+      <div class="p-3.5 rounded-xl bg-gradient-to-r from-cyan-950/40 via-blue-950/30 to-black/60 border border-cyan-500/30 flex items-center justify-between flex-wrap gap-2">
+        <div class="space-y-0.5">
+          <div class="text-xs font-black text-[#f3dfa2] flex items-center space-x-1.5">
+            <i class="fa-solid fa-floppy-disk text-[#ffd700]"></i>
+            <span>芯片固件: 【六拍超频芭蕾型 · 协处理器芯片 v3.0】</span>
+          </div>
+          <div class="text-[11px] text-white/70">
+            刻录后可存入宗门仓库，也可在外部大工厂装配台批量生产，随时插拔更换！
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <!-- 复制蓝图代码 -->
+          <button onclick="copyBlueprintString();" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 cursor-pointer transition flex items-center space-x-1">
+            <i class="fa-regular fa-copy"></i>
+            <span>复制蓝图代码</span>
+          </button>
+
+          <!-- 刻录为通用芯片 -->
+          <button onclick="bakeChipFirmware();" class="brass-btn px-4 py-2 rounded-xl font-black text-xs flex items-center space-x-1.5 shadow-[0_0_15px_#ffd700] active:scale-95 transition cursor-pointer">
+            <i class="fa-solid fa-microchip text-[#ffd700]"></i>
+            <span>💾 刻录为实体芯片</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 浮动通知 Toast -->
+  <div id="toastBox" class="fixed top-20 left-1/2 -translate-x-1/2 z-[100] bg-[#070d1a]/95 border border-cyan-500/40 text-cyan-200 px-5 py-2 rounded-lg shadow-2xl text-xs font-mono flex items-center space-x-2 opacity-0 transition-opacity duration-300 pointer-events-none">
+    <i class="fa-solid fa-circle-info text-[#00f0ff]"></i>
+    <span id="toastMsg">通知</span>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 核心逻辑脚本 (严谨的阵眼多六角形状模具判定、连键检验与超频暴击) -->
+  <!-- ========================================================================= -->
+  <script>
+    // 1. 音效系统
+    let audioCtx = null;
+    function playSfx(type) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioCtx.currentTime;
+        if (type === 'click') {
+          const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+          osc.type = 'triangle'; osc.frequency.setValueAtTime(750, now);
+          osc.frequency.exponentialRampToValueAtTime(250, now + 0.035);
+          gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.035);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(now); osc.stop(now + 0.035);
+        } else if (type === 'arm_grab') {
+          const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+          osc.type = 'sawtooth'; osc.frequency.setValueAtTime(320, now);
+          osc.frequency.linearRampToValueAtTime(880, now + 0.05);
+          gain.gain.setValueAtTime(0.18, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(now); osc.stop(now + 0.06);
+        } else if (type === 'bond') {
+          const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+          osc.type = 'sine'; osc.frequency.setValueAtTime(580, now);
+          osc.frequency.linearRampToValueAtTime(1160, now + 0.1);
+          gain.gain.setValueAtTime(0.22, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(now); osc.stop(now + 0.12);
+        } else if (type === 'transmute') {
+          const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+          osc.type = 'sawtooth'; osc.frequency.setValueAtTime(280, now);
+          osc.frequency.exponentialRampToValueAtTime(700, now + 0.08);
+          gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(now); osc.stop(now + 0.08);
+        } else if (type === 'deliver') {
+          const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+          osc.type = 'triangle'; osc.frequency.setValueAtTime(220, now);
+          osc.frequency.exponentialRampToValueAtTime(660, now + 0.3);
+          gain.gain.setValueAtTime(0.35, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.38);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(now); osc.stop(now + 0.38);
+        } else if (type === 'collision') {
+          // 💥 碰撞剧烈警报与金属撞毁声
+          const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+          osc.type = 'sawtooth'; osc.frequency.setValueAtTime(220, now);
+          osc.frequency.linearRampToValueAtTime(50, now + 0.35);
+          gain.gain.setValueAtTime(0.4, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(now); osc.stop(now + 0.4);
+        } else if (type === 'pivot') {
+          // ↻/↺ 抓手自转棘轮双响声 (清脆机械咔哒声)
+          const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+          osc.type = 'triangle'; osc.frequency.setValueAtTime(950, now);
+          osc.frequency.exponentialRampToValueAtTime(1450, now + 0.04);
+          gain.gain.setValueAtTime(0.25, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(now); osc.stop(now + 0.05);
+        } else if (type === 'rotate') {
+          // ↷/↶ 机械臂正反旋转齿轮棘爪声
+          const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+          osc.type = 'square'; osc.frequency.setValueAtTime(380, now);
+          osc.frequency.exponentialRampToValueAtTime(180, now + 0.03);
+          gain.gain.setValueAtTime(0.09, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(now); osc.stop(now + 0.03);
+        } else if (type === 'piston') {
+          // ⇥/⇤ 伸缩臂液压充气与泄气滑动声
+          const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+          osc.type = 'triangle'; osc.frequency.setValueAtTime(450, now);
+          osc.frequency.exponentialRampToValueAtTime(720, now + 0.05);
+          gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(now); osc.stop(now + 0.06);
+        } else if (type === 'transmute') {
+          // ✨ 质子升阶蜕变音效 (清脆灵动的升阶音阶)
+          const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+          osc.type = 'sine'; osc.frequency.setValueAtTime(520, now);
+          osc.frequency.exponentialRampToValueAtTime(1320, now + 0.22);
+          gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(now); osc.stop(now + 0.25);
+        } else if (type === 'unbond') {
+          // ✂️ 解键离断音效 (清脆金属切断断开声)
+          const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+          osc.type = 'sawtooth'; osc.frequency.setValueAtTime(750, now);
+          osc.frequency.exponentialRampToValueAtTime(220, now + 0.08);
+          gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(now); osc.stop(now + 0.08);
+        } else if (type === 'void') {
+          // 🌀 虚空消解音效 (深沉吞噬回音)
+          const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+          osc.type = 'triangle'; osc.frequency.setValueAtTime(280, now);
+          osc.frequency.exponentialRampToValueAtTime(70, now + 0.16);
+          gain.gain.setValueAtTime(0.22, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(now); osc.stop(now + 0.16);
+        }
+      } catch (e) { }
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      const txt = document.getElementById('toastMsg');
+      if (txt) txt.innerText = msg;
+      if (box) box.style.opacity = '1';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { if (box) box.style.opacity = '0'; }, 2200);
+    }
+
+    // =========================================================================
+    // 2. 六角网格数学几何体系
+    // =========================================================================
+    const HEX_RADIUS = 42;
+    const ORIGIN_X = 700;
+    const ORIGIN_Y = 410;
+    let BOARD_RADIUS = 5;
+    let isExternalFeedActive = true;
+
+    function toggleExternalFeed() {
+      playSfx('click');
+      isExternalFeedActive = !isExternalFeedActive;
+      const dot = document.getElementById('feedIndicatorDot');
+      const text = document.getElementById('feedStatusText');
+      const btn = document.getElementById('btnToggleFeed');
+      const capsule = document.getElementById('feedStatusCapsule');
+
+      if (isExternalFeedActive) {
+        if (dot) {
+          dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]';
+        }
+        if (text) {
+          text.className = 'text-emerald-300 font-bold text-[11px]';
+          text.innerText = '满流供料 (120/min)';
+        }
+        if (btn) {
+          btn.innerText = '模拟断料';
+          btn.className = 'px-2 py-0.5 rounded bg-white/10 hover:bg-rose-900/60 text-white/80 hover:text-rose-300 text-[10px] border border-white/20 hover:border-rose-500/50 cursor-pointer transition';
+        }
+        if (capsule) {
+          capsule.className = 'flex items-center space-x-2 bg-black/85 border border-emerald-500/50 px-3 py-1 rounded-xl text-xs font-mono shadow-2xl backdrop-blur-sm transition-all duration-300';
+        }
+        showToast('🟢【大工厂供料恢复】：外部传送带满流注料，阵盘机械臂恢复全速组装！');
+      } else {
+        if (dot) {
+          dot.className = 'w-2.5 h-2.5 rounded-full bg-red-500 animate-ping shadow-[0_0_8px_#ef4444]';
+        }
+        if (text) {
+          text.className = 'text-red-400 font-bold text-[11px]';
+          text.innerText = '已断料 (0/min) · 空转';
+        }
+        if (btn) {
+          btn.innerText = '恢复供料';
+          btn.className = 'px-2 py-0.5 rounded bg-emerald-900/80 hover:bg-emerald-800 text-emerald-200 text-[10px] border border-emerald-500 cursor-pointer transition font-bold';
+        }
+        if (capsule) {
+          capsule.className = 'flex items-center space-x-2 bg-red-950/85 border border-red-500 px-3 py-1 rounded-xl text-xs font-mono shadow-[0_0_15px_rgba(239,68,68,0.5)] backdrop-blur-sm transition-all duration-300';
+        }
+        // 外部断料警告
+        showToast('⚠️【外部大工厂供料中断】：外部传送带断流，机械臂抓空！阵盘超频失效！');
+      }
+      renderScene();
+    }
+
+    function setBoardRadius(r) {
+      playSfx('click');
+      BOARD_RADIUS = r;
+      initHexBoard();
+      renderScene();
+      updateHeaderStats();
+
+      [4, 5, 6].forEach(val => {
+        const b = document.getElementById(`btnRadius_${val}`);
+        if (!b) return;
+        if (val === r) {
+          b.className = 'px-1.5 py-0.5 rounded text-[10px] text-amber-300 font-bold bg-[#ffd700]/20 border border-[#ffd700]/40 transition cursor-pointer';
+        } else {
+          b.className = 'px-1.5 py-0.5 rounded text-[10px] text-white/70 hover:text-white border border-transparent transition cursor-pointer';
+        }
+      });
+
+      const names = { 4: '7×7 基础微核 (早期)', 5: '9×9 工业标核 (中期标准)', 6: '11×11 宗门超算底盘 (后期巨型多核)' };
+      showToast(`📐 底盘规格扩容为：【${names[r] || r}】底盘可容纳更多机械臂与多协议管线！`);
+    }
+
+    const HEX_DIRS = [
+      { dq: 1, dr: 0, angle: 0 },    // 0: 右
+      { dq: 0, dr: 1, angle: 60 },   // 1: 右下
+      { dq: -1, dr: 1, angle: 120 }, // 2: 左下
+      { dq: -1, dr: 0, angle: 180 }, // 3: 左
+      { dq: 0, dr: -1, angle: 240 }, // 4: 左上
+      { dq: 1, dr: -1, angle: 300 }  // 5: 右上
+    ];
+
+    function hexToPixel(q, r) {
+      const x = HEX_RADIUS * Math.sqrt(3) * (q + r / 2) + ORIGIN_X;
+      const y = HEX_RADIUS * 1.5 * r + ORIGIN_Y;
+      return { x, y };
+    }
+
+    function hexPolygonPoints(cx, cy, r) {
+      const pts = [];
+      for (let i = 0; i < 6; i++) {
+        const rad = Math.PI / 180 * (60 * i + 30);
+        pts.push(`${cx + r * Math.cos(rad)},${cy + r * Math.sin(rad)}`);
+      }
+      return pts.join(' ');
+    }
+
+    // =========================================================================
+    // 3. 🎯 阵盘常驻多阵眼定义 (板上同时常驻，分别对应工厂各项真实增益 +10% / +20%)
+    // =========================================================================
+    const SINK_MOLDS = {
+      // 阵眼 ①：飞梭导轨阵眼 -> 传送带带速 (+10% / +20%)
+      mold_belt: {
+        id: 'mold_belt',
+        name: '① 飞梭导轨阵眼',
+        targetBuff: 'belt',
+        desc: '需求分子：[🔴 火] === [🔵 水] | 满足需求带速 +10%，最优解法 +20%',
+        slots: [
+          { q: 2, r: 0, requiredType: 'fire', label: '火' },
+          { q: 3, r: 0, requiredType: 'water', label: '水' }
+        ],
+        requiredBonds: [ [0, 1] ]
+      },
+
+      // 阵眼 ②：灵矿采掘阵眼 -> 采矿效率 (+10% / +20% · 质子需升阶)
+      mold_mine: {
+        id: 'mold_mine',
+        name: '② 灵矿采掘阵眼',
+        targetBuff: 'mine',
+        desc: '需求分子：[🟤 粗铁] === [🟡 煅金(升阶)] | 粗铁必须经过点化印升阶！满足 +10%，最优 +20%',
+        slots: [
+          { q: 1, r: -3, requiredType: 'mine', label: '铁' },
+          { q: 2, r: -3, requiredType: 'gold', label: '金' }
+        ],
+        requiredBonds: [ [0, 1] ]
+      },
+
+      // 阵眼 ③：三昧煅烧阵眼 -> 冶炼产能 (+10% / +20%)
+      mold_smelt: {
+        id: 'mold_smelt',
+        name: '③ 三昧煅烧阵眼',
+        targetBuff: 'smelt',
+        desc: '需求分子：[🔴 火] === [🔵 水] === [🔴 火] | 满足 +10%，最优 +20%',
+        slots: [
+          { q: 1, r: 2, requiredType: 'fire', label: '火' },
+          { q: 2, r: 2, requiredType: 'water', label: '水' },
+          { q: 3, r: 1, requiredType: 'fire', label: '火' }
+        ],
+        requiredBonds: [ [0, 1], [1, 2] ]
+      },
+
+      // 阵眼 ④：乾坤聚灵阵眼 -> 灵能储备 (+10% / +20%)
+      mold_power: {
+        id: 'mold_power',
+        name: '④ 乾坤聚灵阵眼',
+        targetBuff: 'power',
+        desc: '需求分子：[🟡 金] — [🔴 火] — [🔵 水] 闭环三角 | 满足 +10%，最优 +20%',
+        slots: [
+          { q: 2, r: -1, requiredType: 'gold', label: '金' },
+          { q: 3, r: -2, requiredType: 'fire', label: '火' },
+          { q: 3, r: -1, requiredType: 'water', label: '水' }
+        ],
+        requiredBonds: [ [0, 1], [1, 2], [2, 0] ]
+      }
+    };
+
+    let focusedMoldId = 'mold_belt';
+
+    // 关卡常驻天然地形与质子升阶节点（生门与点化印为天地灵脉固有，不可拆除）
+    const FIXED_FIXTURES_LIST = [
+      { q: -1, r: -1, type: 'source_fire', name: '纯火生门 🔴' },
+      { q: -1, r: 2,  type: 'source_water', name: '玄水生门 🔵' },
+      { q: -2, r: -2, type: 'source_mine',  name: '粗铁生门 🟤' },
+      { q: 2,  r: -4, type: 'source_mine',  name: '粗铁生门 🟤' },
+      { q: -1, r: -2, type: 'glyph_calc',   name: '三昧点化印(质子升阶节点)' }
+    ];
+
+    function ensureFixedBoardFixtures() {
+      FIXED_FIXTURES_LIST.forEach(fr => {
+        boardElements[`${fr.q},${fr.r}`] = { type: fr.type, isFixedFixture: true, name: fr.name };
+      });
+    }
+
+    // 工厂真实增益状态（满足需求 +10%，最优解法 +20%，不设夸张数值）
+    let factoryBuffs = {
+      belt: 0,
+      mine: 0,
+      smelt: 0,
+      power: 0
+    };
+
+    // 阵盘元件字典: key = "q,r" ➔ { type, isFixedFixture }
+    let boardElements = {};
+
+    // 机械臂列表: { id, q, r, type, armLength, angleIndex, startAngle, endAngle, isHolding, heldOrbId, direction, instructions }
+    let arms = [];
+
+    // 灵珠列表: { id, q, r, type: 'mine'|'gold'|'water'|'fire', bondedTo: [] }
+    let orbs = [];
+
+    // 元件玩家造价 (Opus 严谨数值体系)
+    const COSTS = {
+      arm_1: 20,
+      arm_piston: 40,
+      arm_long: 30,
+      arm_2: 30,
+      arm_3: 40,
+      arm_6: 50,
+      track: 5,
+      glyph_bond: 25,
+      glyph_unbond: 25,
+      glyph_calc: 25,
+      glyph_void: 10
+    };
+
+    // 仿真状态
+    let isSimRunning = false;
+    let simTimer = null;
+    let simCycle = 0;
+    let simSpeed = 1;
+    let deliveredCount = 0;
+    let currentMaxCycles = 14;
+    let collisionState = { hasCollision: false, q: 0, r: 0 };
+
+    // 当前选中的建造工具与朝向
+    let currentTool = 'arm_1';
+    let currentToolAngle = 0;
+    let CURRENT_PRESET_MODE = 'optimal'; // 'standard' | 'optimal'
+
+    // =========================================================================
+    // 4. 初始化与阵眼聚焦
+    // =========================================================================
+    function initAll() {
+      initHexBoard();
+      ensureFixedBoardFixtures();
+      loadExtremeBalletPreset(); // 默认载入 4 臂严丝合缝芭蕾超频解法 (+300%)
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAll);
+      window.addEventListener('load', initAll);
+    } else {
+      initAll();
+    }
+
+    function focusMold(moldId) {
+      playSfx('click');
+      focusedMoldId = moldId;
+      const mold = SINK_MOLDS[moldId];
+
+      const lbl = document.getElementById('lblSinkMoldDesc');
+      if (lbl && mold) {
+        lbl.innerText = `${mold.name} · ${mold.desc}`;
+      }
+
+      ['mold_belt', 'mold_mine', 'mold_smelt', 'mold_power'].forEach(id => {
+        const pill = document.getElementById(`pill_${id}`);
+        if (!pill) return;
+        if (id === moldId) {
+          pill.classList.add('border-[#00f0ff]', 'bg-cyan-950/40');
+          pill.classList.remove('border-transparent', 'bg-white/5');
+        } else {
+          pill.classList.remove('border-[#00f0ff]', 'bg-cyan-950/40');
+          pill.classList.add('border-transparent', 'bg-white/5');
+        }
+      });
+
+      renderScene();
+      showToast(`🎯 当前聚焦测试插座：【${mold.name}】（${mold.desc}）`);
+    }
+
+    // 初始化工业底盘网格 (极简低噪底板，消除蜂窝煤杂乱感，大幅凸显机械臂与齿轮元件)
+    function initHexBoard() {
+      const g = document.getElementById('layerHexCells');
+      if (!g) return;
+      let html = '';
+
+      for (let q = -BOARD_RADIUS; q <= BOARD_RADIUS; q++) {
+        const r1 = Math.max(-BOARD_RADIUS, -q - BOARD_RADIUS);
+        const r2 = Math.min(BOARD_RADIUS, -q + BOARD_RADIUS);
+        for (let r = r1; r <= r2; r++) {
+          const { x, y } = hexToPixel(q, r);
+          const ptsOuter = hexPolygonPoints(x, y, HEX_RADIUS - 1.5);
+          html += `
+            <g id="hex_group_${q}_${r}" class="cursor-pointer" onclick="handleHexClick(${q}, ${r});" onmousemove="handleHexHover(event, ${q}, ${r});" onmouseleave="handleHexLeave();">
+              <!-- 极简半透明轮廓线，底盘不再填黑成蜂窝煤，悬浮时高亮显示 -->
+              <polygon id="hex_${q}_${r}" 
+                       points="${ptsOuter}" 
+                       fill="transparent" 
+                       stroke="rgba(148, 163, 184, 0.08)" 
+                       stroke-width="0.8" 
+                       class="transition-all duration-150 hover:stroke-[#00f0ff] hover:stroke-[1.8] hover:fill-[rgba(6,182,212,0.14)]" />
+              <!-- 中心微型定位十字点 (清晰不抢戏) -->
+              <circle cx="${x}" cy="${y}" r="1.5" fill="#38bdf8" opacity="0.3" pointer-events="none" />
+            </g>
+          `;
+        }
+      }
+      g.innerHTML = html;
+    }
+
+    function handleHexHover(e, q, r) {
+      const b = document.getElementById('gridCursorBadge');
+      if (b) {
+        b.style.display = 'block';
+        b.classList.remove('hidden');
+        b.style.left = (e.clientX + 14) + 'px';
+        b.style.top = (e.clientY + 14) + 'px';
+        b.innerText = `(${q}, ${r})`;
+      }
+    }
+    function handleHexLeave() {
+      const b = document.getElementById('gridCursorBadge');
+      if (b) b.classList.add('hidden');
+    }
+
+    // =========================================================================
+    // 5. 交互建造与直操面板
+    // =========================================================================
+    function selectTool(toolId) {
+      playSfx('click');
+      currentTool = toolId;
+      document.querySelectorAll('.brass-btn').forEach(b => {
+        if (b.id && b.id.startsWith('tool_')) b.classList.remove('active');
+      });
+      const act = document.getElementById(`tool_${toolId}`);
+      if (act) act.classList.add('active');
+    }
+
+    function rotateArmTool() {
+      playSfx('click');
+      currentToolAngle = (currentToolAngle + 1) % 6;
+      const deg = currentToolAngle * 60;
+      const lbl = document.getElementById('lblCurrentAngle');
+      if (lbl) lbl.innerText = deg + '°';
+      showToast(`朝向：${deg}°`);
+    }
+
+    // 手动直操
+    function manualExtendActiveArm(dir) {
+      if (arms.length === 0) return;
+      const targetArm = arms[arms.length - 1];
+      const instr = (dir > 0) ? 'EXTEND' : 'RETRACT';
+      executeArmInstruction(targetArm, instr);
+      checkOrbCollisions();
+      checkAllSinkMoldsDelivery();
+      updateHeaderStats();
+      renderScene();
+    }
+
+    function manualRotateActiveArm(dir) {
+      if (arms.length === 0) return;
+      const targetArm = arms[arms.length - 1];
+      const instr = (dir > 0) ? 'ROT_CW' : 'ROT_CCW';
+      executeArmInstruction(targetArm, instr);
+      checkOrbCollisions();
+      checkAllSinkMoldsDelivery();
+      updateHeaderStats();
+      renderScene();
+    }
+
+    function manualPivotActiveArm(dir) {
+      if (arms.length === 0) return;
+      const targetArm = arms[arms.length - 1];
+      const instr = (dir > 0) ? 'PIVOT_CW' : 'PIVOT_CCW';
+      executeArmInstruction(targetArm, instr);
+      checkOrbCollisions();
+      checkAllSinkMoldsDelivery();
+      updateHeaderStats();
+      renderScene();
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'r' || e.key === 'R') {
+        rotateArmTool();
+      } else if (e.key === 'w' || e.key === 'W') {
+        manualExtendActiveArm(1);
+      } else if (e.key === 's' || e.key === 'S') {
+        manualExtendActiveArm(-1);
+      } else if (e.key === 'e' || e.key === 'E') {
+        manualRotateActiveArm(1);
+      } else if (e.key === 'q' || e.key === 'Q') {
+        manualRotateActiveArm(-1);
+      } else if (e.key === 'c' || e.key === 'C') {
+        manualPivotActiveArm(1);
+      } else if (e.key === 'z' || e.key === 'Z') {
+        manualPivotActiveArm(-1);
+      } else if (e.code === 'Space') {
+        e.preventDefault();
+        toggleSimPlay();
+      }
+    });
+
+    function handleHexClick(q, r) {
+      playSfx('click');
+      const k = `${q},${r}`;
+
+      // 1. 生门与固定升阶节点受天地灵脉保护
+      if (boardElements[k] && boardElements[k].isFixedFixture) {
+        showToast('⚠️ 天地生门与三昧点化印为关卡固有灵脉，不可移动或拆除！');
+        return;
+      }
+
+      // 2. 任何阵眼的槽位不可随意覆盖
+      for (const mId in SINK_MOLDS) {
+        if (SINK_MOLDS[mId].slots.some(s => s.q === q && s.r === r)) {
+          showToast(`⚠️ 此处是【${SINK_MOLDS[mId].name}】的受纳凹槽！`);
+          return;
+        }
+      }
+
+      if (currentTool === 'eraser') {
+        delete boardElements[k];
+        arms = arms.filter(a => !(a.q === q && a.r === r));
+      } else if (currentTool.startsWith('arm_')) {
+        arms = arms.filter(a => !(a.q === q && a.r === r));
+        const armLength = (currentTool === 'arm_long') ? 2 : 1;
+        arms.push({
+          id: 'arm_' + Date.now(),
+          q, r,
+          type: currentTool,
+          armLength,
+          angleIndex: currentToolAngle,
+          startAngle: currentToolAngle,
+          endAngle: (currentToolAngle + 2) % 6,
+          isHolding: false,
+          heldOrbId: null,
+          direction: 1,
+          instructions: []
+        });
+      } else {
+        boardElements[k] = { type: currentTool };
+      }
+
+      renderScene();
+      renderTimelineTracks();
+      updateHeaderStats();
+    }
+
+    function clearAlchemyBoard() {
+      playSfx('click');
+      boardElements = {};
+      ensureFixedBoardFixtures(); // 永久保留关卡天地生门与三昧点化印
+      arms = [];
+      orbs = [];
+      resetSim();
+      renderScene();
+      updateHeaderStats();
+      showToast('🧹 已清空阵盘元件（关卡生门与常驻阵眼已就位）');
+    }
+
+    // =========================================================================
+    // 6. ⭐ 官方解法预设系统：【飞梭导轨】 vs 【灵矿升阶】(+10% 满足 / +20% 最优)
+    // =========================================================================
+    function setPresetActiveButton(btnId) {
+      ['btnPresetBeltStd', 'btnPresetBeltOpt', 'btnPresetMineStd', 'btnPresetMineOpt', 'btnPresetSmeltOpt', 'btnPresetPowerOpt', 'btnPresetBalletOverclock', 'btnPresetQuadConcurrent'].forEach(id => {
+        const b = document.getElementById(id);
+        if (!b) return;
+        if (id === btnId) {
+          b.classList.add('active', 'shadow-[0_0_12px_rgba(255,215,0,0.4)]');
+          b.classList.remove('text-white/80');
+        } else {
+          b.classList.remove('active', 'shadow-[0_0_12px_rgba(255,215,0,0.4)]');
+        }
+      });
+    }
+
+    // ① 【飞梭导轨 - 普通解法】：14拍标准流水线，达成带速 +10%
+    function loadBeltStandardPreset() {
+      playSfx('click');
+      CURRENT_PRESET_MODE = 'standard';
+      currentMaxCycles = 14;
+      setPresetActiveButton('btnPresetBeltStd');
+      focusMold('mold_belt');
+
+      boardElements = {};
+      ensureFixedBoardFixtures();
+      boardElements['0,0'] = { type: 'glyph_bond' }; // 成键印
+
+      arms = [];
+      orbs = [];
+      collisionState = { hasCollision: false, q: 0, r: 0 };
+      const banner = document.getElementById('collisionBanner');
+      if (banner) banner.classList.add('hidden');
+
+      // 臂 1：纯火供料单摆臂 (取火息放至成键印)
+      arms.push({
+        id: 'arm_1', q: -1, r: 0, type: 'arm_1', armLength: 1,
+        angleIndex: 4, startAngle: 4, endAngle: 0,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB', 'ROT_CW', 'ROT_CW', 'DROP', 
+          'ROT_CCW', 'ROT_CCW', 'WAIT', 'WAIT', 
+          'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT'
+        ]
+      });
+
+      // 臂 2：玄水供料单摆臂
+      arms.push({
+        id: 'arm_2', q: 0, r: 2, type: 'arm_1', armLength: 1,
+        angleIndex: 3, startAngle: 3, endAngle: 4,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'WAIT', 'GRAB', 'ROT_CW', 'DROP', 
+          'ROT_CCW', 'WAIT', 'WAIT', 'WAIT', 
+          'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT'
+        ]
+      });
+
+      // 臂 3：分子交付臂
+      arms.push({
+        id: 'arm_3', q: 1, r: 0, type: 'arm_1', armLength: 1,
+        angleIndex: 3, startAngle: 3, endAngle: 0,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'WAIT', 'WAIT', 'WAIT', 'WAIT', 
+          'GRAB', 'ROT_CW', 'ROT_CW', 'ROT_CW', 
+          'PIVOT_CW', 'PIVOT_CW', 'DROP', 
+          'ROT_CCW', 'ROT_CCW', 'ROT_CCW'
+        ]
+      });
+
+      resetSim();
+      renderScene();
+      renderTimelineTracks();
+      updateHeaderStats();
+      showToast('🛠️ 已装载【飞梭导轨普通解法】：14拍稳态流水线，达成带速 +10%');
+      if (!isSimRunning) toggleSimPlay();
+    }
+
+    // ① 【飞梭导轨 - 最优解法】：液压伸缩臂仅需 6 步！最少步数极速直推，带速升至 +20%
+    function loadBeltOptimalPreset() {
+      playSfx('click');
+      CURRENT_PRESET_MODE = 'optimal';
+      currentMaxCycles = 10;
+      setPresetActiveButton('btnPresetBeltOpt');
+      focusMold('mold_belt');
+
+      boardElements = {};
+      ensureFixedBoardFixtures();
+      boardElements['0,0'] = { type: 'glyph_bond' };
+
+      arms = [];
+      orbs = [];
+      collisionState = { hasCollision: false, q: 0, r: 0 };
+      const banner = document.getElementById('collisionBanner');
+      if (banner) banner.classList.add('hidden');
+
+      // 臂 1：液压伸缩臂 (仅 6 步直推受纳阵眼！)
+      arms.push({
+        id: 'arm_1', q: -1, r: 0, type: 'arm_piston', armLength: 1,
+        angleIndex: 4, startAngle: 4, endAngle: 0,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB',      // 拍 1: 抓火
+          'ROT_CW',    // 拍 2: 顺转
+          'ROT_CW',    // 拍 3: 到达成键印 (0, 0)，与水成键
+          'PIVOT_CCW', // 拍 4: 抓手逆转调姿
+          'EXTEND',    // 拍 5: 液压 1 级伸长推向 (1, 0)
+          'EXTEND',    // 拍 6: 液压 2 级伸长直推阵眼 (2, 0) & (3, 0) 瞬间交付！
+          'RETRACT',   // 拍 7: 回程
+          'RETRACT',   // 拍 8: 回程
+          'ROT_CCW',   // 拍 9: 回位
+          'ROT_CCW'    // 拍 10: 就绪
+        ]
+      });
+
+      // 臂 2：玄水供料臂
+      arms.push({
+        id: 'arm_2', q: 0, r: 2, type: 'arm_1', armLength: 1,
+        angleIndex: 3, startAngle: 3, endAngle: 4,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB',    // 拍 1: 抓水
+          'ROT_CW',  // 拍 2: 顺转就位
+          'DROP',    // 拍 3: 释放与火结键
+          'ROT_CCW', // 拍 4: 撤离腾出空间
+          'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT'
+        ]
+      });
+
+      resetSim();
+      renderScene();
+      renderTimelineTracks();
+      updateHeaderStats();
+      showToast('👑 已装载【飞梭导轨最优解法】：液压伸缩臂仅需 6 步直推！带速升至 +20%');
+      if (!isSimRunning) toggleSimPlay();
+    }
+
+    // ② 【灵矿采掘 - 普通解法】：单臂周转升阶流水线，17拍达成采矿 +10%
+    function loadMineStandardPreset() {
+      playSfx('click');
+      CURRENT_PRESET_MODE = 'standard';
+      currentMaxCycles = 17;
+      setPresetActiveButton('btnPresetMineStd');
+      focusMold('mold_mine');
+
+      // 重置 BUFF 指标，观察实时提升
+      factoryBuffs = { belt: 0, mine: 0, smelt: 0, power: 0 };
+      updateBuffMetersUI();
+
+      boardElements = {};
+      ensureFixedBoardFixtures(); // 质子升阶节点在 (-1, -2)
+      boardElements['0,-3'] = { type: 'glyph_bond' }; // 成键印在 (0, -3)
+
+      arms = [];
+      orbs = [];
+      collisionState = { hasCollision: false, q: 0, r: 0 };
+      const banner = document.getElementById('collisionBanner');
+      if (banner) banner.classList.add('hidden');
+
+      // 单摆液压臂在 (-1, -3)：先取粗铁经升阶节点点化为赤金推入阵眼，再取粗铁绕背成键直推！
+      arms.push({
+        id: 'arm_1', q: -1, r: -3, type: 'arm_piston', armLength: 1,
+        angleIndex: 2, startAngle: 2, endAngle: 0,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB',    // 拍 1: 抓取粗铁 1 (-2, -2)
+          'ROT_CCW', // 拍 2: 逆转至升阶节点 (-1, -2) -> 蜕变为纯阳赤金 🟡！
+          'ROT_CCW', // 拍 3: 逆转至 (0, -3)
+          'EXTEND',  // 拍 4: 伸长至 (1, -3)
+          'DROP',    // 拍 5: 释放赤金就位在 (1, -3)
+          'RETRACT', // 拍 6: 缩短回位
+          'ROT_CW',  // 拍 7: 顺转回程
+          'ROT_CW',  // 拍 8: 顺转回到生门 (-2, -2)
+          'GRAB',    // 拍 9: 抓取粗铁 2 (-2, -2)
+          'ROT_CW',  // 拍 10: 顺转绕背 (-2, -3)，避开升阶节点保持粗铁属性！
+          'ROT_CW',  // 拍 11: 顺转 (-1, -4)
+          'ROT_CW',  // 拍 12: 顺转 (0, -4)
+          'ROT_CW',  // 拍 13: 顺转就位 (0, -3) 与赤金成键 [粗铁 === 煅金]！
+          'EXTEND',  // 拍 14: 液压伸长直推阵眼 (1, -3) & (2, -3) 达成交付！
+          'RETRACT', // 拍 15: 回程
+          'ROT_CW',  // 拍 16: 回程
+          'ROT_CW'   // 拍 17: 回位就绪
+        ]
+      });
+
+      resetSim();
+      renderScene();
+      renderTimelineTracks();
+      updateHeaderStats();
+      showToast('✨ 已装载【灵矿升阶普通解法】：17拍稳态流水线，达成采矿 +10%');
+      if (!isSimRunning) toggleSimPlay();
+    }
+
+    // ② 【灵矿采掘 - 最优解法】：双臂协同升阶，完美对齐 [🟤粗铁] === [🟡煅金] 直推阵眼达成采矿 +20%
+    function loadMineOptimalPreset() {
+      playSfx('click');
+      CURRENT_PRESET_MODE = 'optimal';
+      currentMaxCycles = 12;
+      setPresetActiveButton('btnPresetMineOpt');
+      focusMold('mold_mine');
+
+      // 重置 BUFF 指标，观察实时提升
+      factoryBuffs = { belt: 0, mine: 0, smelt: 0, power: 0 };
+      updateBuffMetersUI();
+
+      boardElements = {};
+      ensureFixedBoardFixtures(); // 粗铁在 (-2, -2) 与 (2, -4)，质子升阶节点在 (-1, -2)
+      boardElements['0,-3'] = { type: 'glyph_bond' }; // 成键印在 (0, -3)
+
+      arms = [];
+      orbs = [];
+      collisionState = { hasCollision: false, q: 0, r: 0 };
+      const banner = document.getElementById('collisionBanner');
+      if (banner) banner.classList.add('hidden');
+
+      // 臂 1：液压伸缩升阶臂 (-1, -3) -> 抓生门粗铁经升阶节点点化为赤金，送入 (1, -3)，回位抓取粗铁对齐直推！
+      arms.push({
+        id: 'arm_mine1', q: -1, r: -3, type: 'arm_piston', armLength: 1,
+        angleIndex: 2, startAngle: 2, endAngle: 0,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB',    // 拍 1: 抓生门粗铁 (-2, -2)
+          'ROT_CCW', // 拍 2: 逆转至升阶节点 (-1, -2) -> 蜕变为纯阳赤金 🟡！
+          'ROT_CCW', // 拍 3: 逆转至 (0, -3)
+          'EXTEND',  // 拍 4: 液压伸长至 (1, -3) 就位
+          'DROP',    // 拍 5: 释放纯阳赤金于 (1, -3)
+          'RETRACT', // 拍 6: 液压缩短回位至 (0, -3)
+          'GRAB',    // 拍 7: 抓取臂2供入并刚性成键的粗铁质子 (0, -3)！
+          'EXTEND',  // 拍 8: 液压伸长推入阵眼：[粗铁]精准入槽 (1, -3)，[赤金]精准入槽 (2, -3)！完美对齐交付！
+          'RETRACT', // 拍 9: 液压缩短回程
+          'ROT_CW',  // 拍 10: 顺转回程
+          'ROT_CW',  // 拍 11: 顺转回到生门 (-2, -2) 就绪
+          'WAIT'     // 拍 12: 周天循环就绪
+        ]
+      });
+
+      // 臂 2：原料粗铁供给单摆臂 (1, -4) -> 从 (2, -4) 绕背提供粗铁至成键印 (0, -3)
+      arms.push({
+        id: 'arm_mine2', q: 1, r: -4, type: 'arm_1', armLength: 1,
+        angleIndex: 0, startAngle: 0, endAngle: 2,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB',    // 拍 1: 抓取粗铁生门 (2, -4)
+          'ROT_CCW', // 拍 2: 逆转绕背 (2, -5)
+          'ROT_CCW', // 拍 3: 逆转 (1, -5)
+          'ROT_CCW', // 拍 4: 逆转 (0, -4)
+          'ROT_CCW', // 拍 5: 逆转就位成键印 (0, -3)
+          'DROP',    // 拍 6: 释放粗铁，在此与 (1, -3) 赤金刚性结键！
+          'ROT_CW',  // 拍 7: 顺转撤回避让
+          'ROT_CW',  // 拍 8: 顺转
+          'ROT_CW',  // 拍 9: 顺转
+          'ROT_CW',  // 拍 10: 顺转回到生门 (2, -4) 就绪
+          'WAIT',    // 拍 11: 就绪
+          'WAIT'     // 拍 12: 周天循环就绪
+        ]
+      });
+
+      resetSim();
+      renderScene();
+      renderTimelineTracks();
+      updateHeaderStats();
+      showToast('💎 已装载【灵矿升阶最优解法】：双臂协同完美对齐 [铁===金]！采矿升至 +20%');
+      if (!isSimRunning) toggleSimPlay();
+    }
+
+    // ③ 【三昧煅烧 - 最优解法】：长臂 + 双头臂 + 伸缩臂组装 [火===水===火]，对齐直推冶炼阵眼达成产能 +20%
+    function loadSmeltOptimalPreset() {
+      playSfx('click');
+      CURRENT_PRESET_MODE = 'optimal';
+      currentMaxCycles = 12;
+      setPresetActiveButton('btnPresetSmeltOpt');
+      focusMold('mold_smelt');
+
+      // 重置 BUFF 指标，观察实时提升
+      factoryBuffs = { belt: 0, mine: 0, smelt: 0, power: 0 };
+      updateBuffMetersUI();
+
+      boardElements = {};
+      ensureFixedBoardFixtures();
+      // 阵盘布设：水火原料供给与成键锁扣
+      boardElements['0,0'] = { type: 'source_water' };  // 玄水生门
+      boardElements['4,-1'] = { type: 'source_fire' };  // 纯火生门
+      boardElements['2,0'] = { type: 'glyph_bond' };   // 成键锁扣（将三核锁合为刚性直链）
+
+      arms = [];
+      orbs = [];
+      collisionState = { hasCollision: false, q: 0, r: 0 };
+      const banner = document.getElementById('collisionBanner');
+      if (banner) banner.classList.add('hidden');
+
+      // 臂 1：定长长臂 (arm_long, 跨2格) (1, -1) -> 跨越2格从固有火门 (-1, -1) 搬运火息至 (1, 1)
+      arms.push({
+        id: 'arm_fire1', q: 1, r: -1, type: 'arm_long', armLength: 2,
+        angleIndex: 3, startAngle: 3, endAngle: 1,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB',    // 拍 1: 跨2格精准抓取生门火息 (-1, -1)
+          'ROT_CCW', // 拍 2: 逆转至 (-1, 1)
+          'ROT_CCW', // 拍 3: 逆转至 (1, 1) 就位
+          'DROP',    // 拍 4: 释放火息，与中央水质子共价成键
+          'ROT_CW',  // 拍 5: 顺转撤回避让
+          'ROT_CW',  // 拍 6: 顺转回位 (-1, -1)
+          'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT'
+        ]
+      });
+
+      // 臂 2：双头对置轮转臂 (arm_2) (3, -1) -> 180°对置双爪高速周转火息至 (3, 0)
+      arms.push({
+        id: 'arm_fire2', q: 3, r: -1, type: 'arm_2', armLength: 1,
+        angleIndex: 0, startAngle: 0, endAngle: 1,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB',    // 拍 1: 主爪从 (4, -1) 抓取火息
+          'ROT_CW',  // 拍 2: 顺转至 (3, 0)
+          'DROP',    // 拍 3: 释放火息就位成键
+          'ROT_CCW', // 拍 4: 逆转归位
+          'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT'
+        ]
+      });
+
+      // 臂 3：液压伸缩臂 (arm_piston) (1, 0) -> 从 (0, 0) 取水送入成键印 (2, 0)
+      arms.push({
+        id: 'arm_water', q: 1, r: 0, type: 'arm_piston', armLength: 1,
+        angleIndex: 3, startAngle: 3, endAngle: 0,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB',    // 拍 1: 抓取玄水 (0, 0)
+          'ROT_CW',  // 拍 2: 顺转至 (1, -1)
+          'ROT_CW',  // 拍 3: 顺转至 (2, -1)
+          'ROT_CW',  // 拍 4: 顺转至 (2, 0) 成键印就位
+          'DROP',    // 拍 5: 释放中央水质子控制权，与两侧火核锁合成刚性直链！
+          'ROT_CCW', // 拍 6: 撤离避让
+          'ROT_CCW', // 拍 7: 回程
+          'ROT_CCW', // 拍 8: 回位 (0, 0) 就绪
+          'WAIT', 'WAIT', 'WAIT', 'WAIT'
+        ]
+      });
+
+      // 臂 4：主交付臂 (2, 1) -> 锁合并将已对齐的刚性分子 [火===水===火] 整体旋转推入三昧煅烧阵眼！
+      arms.push({
+        id: 'arm_delivery', q: 2, r: 1, type: 'arm_1', armLength: 1,
+        angleIndex: 4, startAngle: 4, endAngle: 1,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'WAIT',    // 拍 1: 等待各供料臂运送质子
+          'WAIT',    // 拍 2: 等待质子抵达
+          'WAIT',    // 拍 3: 等待就位
+          'WAIT',    // 拍 4: 等待中央玄水质子归位
+          'GRAB',    // 拍 5: 抓取中央水质子 (2, 0)！此时三核质子在 (2, 0) 成键印锁合，形成整体刚性分子！
+          'ROT_CCW', // 拍 6: 逆转 60° (分子整体同步自旋)
+          'ROT_CCW', // 拍 7: 逆转 60°
+          'ROT_CCW', // 拍 8: 逆转 60° 整体完美切入三昧阵眼 (1, 2), (2, 2), (3, 1)！瞬间受纳交付！
+          'ROT_CW',  // 拍 9: 顺转归程 (分子已被吞噬，空臂回程)
+          'ROT_CW',  // 拍 10: 顺转归程
+          'ROT_CW',  // 拍 11: 顺转回到 Angle 4 就绪！
+          'WAIT'     // 拍 12: 周天循环就绪
+        ]
+      });
+
+      resetSim();
+      renderScene();
+      renderTimelineTracks();
+      updateHeaderStats();
+      showToast('🔥 已装载【三昧煅烧最优解法】：长臂+双头臂全系组装刚性直链整体推入！产能升至 +20%');
+      if (!isSimRunning) toggleSimPlay();
+    }
+
+    // ④ 【乾坤聚灵 - 最优解法】：三叶三分臂 (120°) 外侧组装闭环三角，伸缩臂整推入阵眼达成灵能 +20%
+    function loadPowerOptimalPreset() {
+      playSfx('click');
+      CURRENT_PRESET_MODE = 'optimal';
+      currentMaxCycles = 10;
+      setPresetActiveButton('btnPresetPowerOpt');
+      focusMold('mold_power');
+
+      // 重置 BUFF 指标，观察实时提升
+      factoryBuffs = { belt: 0, mine: 0, smelt: 0, power: 0 };
+      updateBuffMetersUI();
+
+      boardElements = {};
+      ensureFixedBoardFixtures();
+      // 阵盘布设：在外侧 (1, -1), (2, -2), (2, -1) 组装闭环三角
+      boardElements['1,-2'] = { type: 'source_mine' }; // 粗铁生门
+      boardElements['0,-2'] = { type: 'glyph_calc' };  // 三昧质子升阶节点（粗铁在此蜕变为纯阳赤金 🟡）
+      boardElements['2,-3'] = { type: 'source_fire' }; // 纯火生门
+      boardElements['3,-1'] = { type: 'source_water' };// 玄水生门
+      boardElements['1,-1'] = { type: 'glyph_bond' };  // 外侧成键锁扣 1
+      boardElements['2,-2'] = { type: 'glyph_bond' };  // 外侧成键锁扣 2
+
+      arms = [];
+      orbs = [];
+      collisionState = { hasCollision: false, q: 0, r: 0 };
+      const banner = document.getElementById('collisionBanner');
+      if (banner) banner.classList.add('hidden');
+
+      // 臂 1：液压伸缩升阶臂 (arm_piston) (-1, -1) -> 抓粗铁经升阶节点蜕变赤金，就位于外侧成键点 (1, -1)！
+      arms.push({
+        id: 'arm_power_gold', q: -1, r: -1, type: 'arm_piston', armLength: 1,
+        angleIndex: 5, startAngle: 5, endAngle: 0,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB',    // 拍 1: 从 (1, -2) 抓取粗铁
+          'ROT_CW',  // 拍 2: 顺转经 (0, -2) 升阶节点 -> 粗铁蜕变为纯阳赤金 🟡！
+          'EXTEND',  // 拍 3: 伸长至 (1, -1) 外侧成键槽
+          'DROP',    // 拍 4: 释放赤金就位成键
+          'RETRACT', // 拍 5: 缩短回程
+          'ROT_CCW', // 拍 6: 逆转回位 (1, -2)
+          'WAIT', 'WAIT', 'WAIT', 'WAIT'
+        ]
+      });
+
+      // 臂 2：三叶三分轮转臂 (arm_3, 120°爪) (2, -3) -> 120°三分爪高速周转火息至外侧成键点 (2, -2)！
+      arms.push({
+        id: 'arm_power_fire', q: 2, r: -3, type: 'arm_3', armLength: 1,
+        angleIndex: 0, startAngle: 0, endAngle: 1,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB',    // 拍 1: 爪抓取火门火息
+          'ROT_CW',  // 拍 2: 顺转至 (2, -2) 外侧成键槽！
+          'DROP',    // 拍 3: 释放火息就位成键
+          'ROT_CCW', // 拍 4: 逆转归位
+          'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT'
+        ]
+      });
+
+      // 臂 3：水灵导引单摆臂 (arm_1) (3, 0) -> 从 (3, -1) 搬运玄水至外侧成键点 (2, -1)！
+      arms.push({
+        id: 'arm_power_water', q: 3, r: 0, type: 'arm_1', armLength: 1,
+        angleIndex: 4, startAngle: 4, endAngle: 3,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB',    // 拍 1: 抓取玄水 (3, -1)
+          'ROT_CCW', // 拍 2: 逆转至 (2, -1) 外侧成键槽！
+          'DROP',    // 拍 3: 释放玄水就位，三键合围锁合为闭环刚性等边三角！
+          'ROT_CW',  // 拍 4: 顺转回程归位
+          'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT'
+        ]
+      });
+
+      // 臂 4：主直推交付伸缩臂 (arm_piston) (0, -1) -> 抓取外侧已闭合成环的刚性三角分子，液压直推对齐滑入聚灵阵眼！
+      arms.push({
+        id: 'arm_power_push', q: 0, r: -1, type: 'arm_piston', armLength: 1,
+        angleIndex: 0, startAngle: 0, endAngle: 0,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'WAIT',    // 拍 1: 等待各供料臂搬运
+          'WAIT',    // 拍 2: 等待到位
+          'WAIT',    // 拍 3: 等待三键刚性合围成环
+          'GRAB',    // 拍 4: 夹持刚性三角闭环分子金质子 (1, -1)！
+          'EXTEND',  // 拍 5: 液压伸长推入！金入 (2, -1)，火入 (3, -2)，水入 (3, -1)！整体完美对齐滑入聚灵阵眼！
+          'RETRACT', // 拍 6: 液压缩短回程
+          'WAIT',    // 拍 7: 就绪
+          'WAIT',    // 拍 8: 就绪
+          'WAIT',    // 拍 9: 就绪
+          'WAIT'     // 拍 10: 周天循环就绪
+        ]
+      });
+
+      resetSim();
+      renderScene();
+      renderTimelineTracks();
+      updateHeaderStats();
+      showToast('🌀 已装载【乾坤聚灵最优解法】：三叶臂外侧成环+伸缩臂整体推入！灵能升至 +20%');
+      if (!isSimRunning) toggleSimPlay();
+    }
+
+    // 🥇 【极限超频芭蕾解法】：4 根机械臂如芭蕾舞般严丝合缝交错抓取，6拍超频周天，带速狂飙 +300%！
+    function loadExtremeBalletPreset() {
+      playSfx('click');
+      CURRENT_PRESET_MODE = 'optimal';
+      currentMaxCycles = 6;
+      setPresetActiveButton('btnPresetBalletOverclock');
+      focusMold('mold_belt');
+
+      factoryBuffs = { belt: 0, mine: 0, smelt: 0, power: 0 };
+      updateBuffMetersUI();
+
+      boardElements = {};
+      ensureFixedBoardFixtures();
+      boardElements['0,0'] = { type: 'glyph_bond' }; // 成键印在 (0, 0)
+
+      arms = [];
+      orbs = [];
+      collisionState = { hasCollision: false, q: 0, r: 0 };
+      const banner = document.getElementById('collisionBanner');
+      if (banner) banner.classList.add('hidden');
+
+      // 臂 1：纯火高速液压伸缩臂 (-1, 0)
+      arms.push({
+        id: 'arm_ballet_fire', q: -1, r: 0, type: 'arm_piston', armLength: 1,
+        angleIndex: 4, startAngle: 4, endAngle: 0,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB',      // 拍 1: 从 (-1, -1) 抓取火质子
+          'ROT_CW',    // 拍 2: 顺转
+          'ROT_CW',    // 拍 3: 到达成键印 (0, 0)
+          'EXTEND',    // 拍 4: 液压伸长推入成键
+          'DROP',      // 拍 5: 释放
+          'RETRACT'    // 拍 6: 液压缩短回程归位
+        ]
+      });
+
+      // 臂 2：玄水高速对置双头轮转臂 (0, 2)
+      arms.push({
+        id: 'arm_ballet_water', q: 0, r: 2, type: 'arm_2', armLength: 1,
+        angleIndex: 3, startAngle: 3, endAngle: 0,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB',      // 拍 1: 从 (-1, 2) 抓取水质子
+          'ROT_CW',    // 拍 2: 顺转
+          'DROP',      // 拍 3: 释放于成键印 (0, 0) 与火结键！
+          'ROT_CW',    // 拍 4: 180°对置爪高速顺转腾位
+          'WAIT',      // 拍 5: 对置爪就位
+          'WAIT'       // 拍 6: 循环就绪
+        ]
+      });
+
+      // 臂 3：中继精密调姿摆臂 (1, 0)
+      arms.push({
+        id: 'arm_ballet_relay', q: 1, r: 0, type: 'arm_1', armLength: 1,
+        angleIndex: 3, startAngle: 3, endAngle: 0,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'WAIT',      // 拍 1: 等待两核成键
+          'WAIT',      // 拍 2: 等待到位
+          'GRAB',      // 拍 3: 抓取刚性成键分子 [火===水]
+          'ROT_CW',    // 拍 4: 顺转避让臂1
+          'PIVOT_CW',  // 拍 5: 抓手顺自转调姿
+          'DROP'       // 拍 6: 释放对齐
+        ]
+      });
+
+      // 臂 4：主直推交付定长长臂 (1, -1)
+      arms.push({
+        id: 'arm_ballet_delivery', q: 1, r: -1, type: 'arm_long', armLength: 2,
+        angleIndex: 1, startAngle: 1, endAngle: 0,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'WAIT',      // 拍 1: 准备
+          'WAIT',      // 拍 2: 准备
+          'WAIT',      // 拍 3: 准备
+          'GRAB',      // 拍 4: 夹持分子
+          'ROT_CCW',   // 拍 5: 逆转对齐直插阵眼 (2, 0) & (3, 0)！受纳交付！
+          'ROT_CW'     // 拍 6: 顺转复位
+        ]
+      });
+
+      resetSim();
+      renderScene();
+      renderTimelineTracks();
+      updateHeaderStats();
+      showToast('🥇 已装载【极限超频芭蕾解法】：4根机械臂如芭蕾舞般严丝合缝交错抓取！带速狂飙 +300%');
+      if (!isSimRunning) toggleSimPlay();
+    }
+
+    // 🌐 【四核全域并发超频解法】：同一底盘上同时运行 4 大工业协议！全系统 +300% 满载，长线架构标杆！
+    function loadQuadCoreConcurrentPreset() {
+      playSfx('click');
+      CURRENT_PRESET_MODE = 'optimal';
+      currentMaxCycles = 12;
+      setPresetActiveButton('btnPresetQuadConcurrent');
+
+      // 4大工业指标全线超频
+      factoryBuffs = { belt: 0, mine: 0, smelt: 0, power: 0 };
+      updateBuffMetersUI();
+
+      boardElements = {};
+      ensureFixedBoardFixtures();
+      // 成键锁扣布局
+      boardElements['0,0'] = { type: 'glyph_bond' };
+      boardElements['0,-3'] = { type: 'glyph_bond' };
+      boardElements['2,0'] = { type: 'glyph_bond' };
+
+      arms = [];
+      orbs = [];
+      collisionState = { hasCollision: false, q: 0, r: 0 };
+      const banner = document.getElementById('collisionBanner');
+      if (banner) banner.classList.add('hidden');
+
+      // 臂 1：飞梭纯火伸缩臂 (-1, 0)
+      arms.push({
+        id: 'arm_quad_belt_fire', q: -1, r: 0, type: 'arm_piston', armLength: 1,
+        angleIndex: 4, startAngle: 4, endAngle: 0,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB', 'ROT_CW', 'ROT_CW', 'EXTEND', 'DROP', 'RETRACT',
+          'ROT_CCW', 'ROT_CCW', 'WAIT', 'WAIT', 'WAIT', 'WAIT'
+        ]
+      });
+
+      // 臂 2：飞梭玄水对置双头臂 (0, 2)
+      arms.push({
+        id: 'arm_quad_belt_water', q: 0, r: 2, type: 'arm_2', armLength: 1,
+        angleIndex: 3, startAngle: 3, endAngle: 0,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB', 'ROT_CW', 'DROP', 'ROT_CW', 'WAIT', 'WAIT',
+          'GRAB', 'ROT_CW', 'DROP', 'ROT_CW', 'WAIT', 'WAIT'
+        ]
+      });
+
+      // 臂 3：飞梭主推长臂 (1, -1) -> 交付飞梭阵眼
+      arms.push({
+        id: 'arm_quad_belt_push', q: 1, r: -1, type: 'arm_long', armLength: 2,
+        angleIndex: 1, startAngle: 1, endAngle: 0,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'WAIT', 'WAIT', 'WAIT', 'GRAB', 'ROT_CCW', 'DROP',
+          'ROT_CW', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT'
+        ]
+      });
+
+      // 臂 4：灵矿升阶伸缩臂 (-1, -3) -> 粗铁点化赤金 -> 交付灵矿阵眼
+      arms.push({
+        id: 'arm_quad_mine_trans', q: -1, r: -3, type: 'arm_piston', armLength: 1,
+        angleIndex: 2, startAngle: 2, endAngle: 0,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB', 'ROT_CCW', 'ROT_CCW', 'EXTEND', 'DROP', 'RETRACT',
+          'GRAB', 'EXTEND', 'DROP', 'RETRACT', 'ROT_CW', 'ROT_CW'
+        ]
+      });
+
+      // 臂 5：冶炼直链长臂 (0, 1) -> 组装直链三核 -> 交付冶炼阵眼
+      arms.push({
+        id: 'arm_quad_smelt', q: 0, r: 1, type: 'arm_1', armLength: 1,
+        angleIndex: 2, startAngle: 2, endAngle: 1,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'WAIT', 'WAIT', 'GRAB', 'ROT_CCW', 'DROP', 'ROT_CW',
+          'WAIT', 'WAIT', 'GRAB', 'ROT_CCW', 'DROP', 'ROT_CW'
+        ]
+      });
+
+      // 臂 6：神髓闭环三叶臂 (2, -2) -> 组装聚灵三角 -> 交付神髓阵眼
+      arms.push({
+        id: 'arm_quad_power', q: 2, r: -2, type: 'arm_3', armLength: 1,
+        angleIndex: 0, startAngle: 0, endAngle: 1,
+        isHolding: false, heldOrbId: null, direction: 1,
+        instructions: [
+          'GRAB', 'ROT_CW', 'DROP', 'ROT_CCW', 'WAIT', 'WAIT',
+          'GRAB', 'ROT_CW', 'DROP', 'ROT_CCW', 'WAIT', 'WAIT'
+        ]
+      });
+
+      resetSim();
+      renderScene();
+      renderTimelineTracks();
+      updateHeaderStats();
+      showToast('🌐 已装载【四核全域并发超频】：同一阵盘同时运行 4 大工业协议！全系统 +300% 满载，长线无需画关卡！');
+      if (!isSimRunning) toggleSimPlay();
+    }
+
+    // 刻录芯片固件为实体道具
+    function bakeChipFirmware() {
+      playSfx('deliver');
+      closeBenchmarkModal();
+      showToast('🎉【芯片刻录成功】：已将当前时序阵盘封包为【六拍超频芭蕾型 · 协处理器芯片 v3.0】，存入宗门仓库！');
+    }
+
+    // 复制蓝图硬件代码 (JSON 格式)
+    function copyBlueprintString() {
+      playSfx('click');
+      const bpData = {
+        name: 'Opus-Coprocessor-Firmware-v3',
+        cycles: currentMaxCycles,
+        arms: arms.map(a => ({
+          type: a.type,
+          q: a.q,
+          r: a.r,
+          angle: a.angleIndex,
+          len: a.armLength,
+          tape: a.instructions
+        })),
+        elements: Object.keys(boardElements).filter(k => !boardElements[k].isFixedFixture).map(k => ({
+          coord: k,
+          type: boardElements[k].type
+        }))
+      };
+      const jsonStr = JSON.stringify(bpData);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(jsonStr).then(() => {
+          showToast('📋【蓝图代码已复制】：可在任意大工厂装配台导入或分享！');
+        }).catch(() => {
+          showToast('📋 蓝图已生成并打印至控制台！');
+          console.log(jsonStr);
+        });
+      } else {
+        showToast('📋 蓝图已生成并打印至控制台！');
+        console.log(jsonStr);
+      }
+    }
+
+    // 律历指令带笔刷状态与指令循环序列
+    let activeTapeBrush = null;
+    const CYCLE_SEQ = ['WAIT', 'GRAB', 'ROT_CW', 'ROT_CCW', 'PIVOT_CW', 'PIVOT_CCW', 'EXTEND', 'RETRACT', 'DROP'];
+
+    const INSTR_ICONS = {
+      'GRAB': { icon: '✊', label: '抓取', cls: 'bg-amber-900/60 text-amber-300 border-amber-600' },
+      'DROP': { icon: '✋', label: '释放', cls: 'bg-amber-950/40 text-amber-200 border-amber-700/60' },
+      'ROT_CW': { icon: '↷', label: '顺转', cls: 'bg-blue-950/70 text-cyan-300 border-cyan-700' },
+      'ROT_CCW': { icon: '↶', label: '逆转', cls: 'bg-blue-950/70 text-cyan-300 border-cyan-700' },
+      'PIVOT_CW': { icon: '↻', label: '转爪顺', cls: 'bg-purple-950/80 text-purple-300 border-purple-500 font-black shadow-[0_0_6px_rgba(168,85,247,0.4)]' },
+      'PIVOT_CCW': { icon: '↺', label: '转爪逆', cls: 'bg-purple-950/80 text-purple-300 border-purple-500 font-black shadow-[0_0_6px_rgba(168,85,247,0.4)]' },
+      'EXTEND': { icon: '⇥', label: '伸长', cls: 'bg-emerald-950/80 text-emerald-300 border-emerald-500 font-black shadow-[0_0_6px_rgba(16,185,129,0.4)]' },
+      'RETRACT': { icon: '⇤', label: '缩短', cls: 'bg-emerald-950/80 text-emerald-300 border-emerald-500 font-black shadow-[0_0_6px_rgba(16,185,129,0.4)]' },
+      'WAIT': { icon: '·', label: '空拍', cls: 'bg-black/30 text-white/20 border-white/5' }
+    };
+
+    function selectInstructionBrush(brush) {
+      playSfx('click');
+      if (activeTapeBrush === brush) {
+        activeTapeBrush = null;
+      } else {
+        activeTapeBrush = brush;
+      }
+      updateBrushToolbarUI();
+      if (activeTapeBrush) {
+        showToast(`🖌️ 已选择指令笔刷：【${INSTR_ICONS[activeTapeBrush].label}】直接点击下方格子涂抹`);
+      } else {
+        showToast('🔄 已切换为【点击循环切换指令】模式');
+      }
+    }
+
+    function clearInstructionBrush() {
+      playSfx('click');
+      activeTapeBrush = null;
+      updateBrushToolbarUI();
+      showToast('🔄 已切换为【点击循环切换指令】模式');
+    }
+
+    function updateBrushToolbarUI() {
+      ['GRAB', 'DROP', 'ROT_CW', 'ROT_CCW', 'PIVOT_CW', 'PIVOT_CCW', 'EXTEND', 'RETRACT', 'WAIT'].forEach(b => {
+        const btn = document.getElementById(`brush_${b}`);
+        if (!btn) return;
+        if (b === activeTapeBrush) {
+          btn.classList.add('ring-2', 'ring-[#ffd700]', 'scale-110', 'font-black');
+        } else {
+          btn.classList.remove('ring-2', 'ring-[#ffd700]', 'scale-110', 'font-black');
+        }
+      });
+    }
+
+    function handleTapeCellClick(armIdx, tickIdx) {
+      if (!arms[armIdx]) return;
+      if (!arms[armIdx].instructions) arms[armIdx].instructions = [];
+      while (arms[armIdx].instructions.length < currentMaxCycles) {
+        arms[armIdx].instructions.push('WAIT');
+      }
+
+      if (activeTapeBrush) {
+        arms[armIdx].instructions[tickIdx] = activeTapeBrush;
+        playSfx('click');
+      } else {
+        const cur = arms[armIdx].instructions[tickIdx] || 'WAIT';
+        const curIdx = CYCLE_SEQ.indexOf(cur);
+        const nextIdx = (curIdx + 1) % CYCLE_SEQ.length;
+        arms[armIdx].instructions[tickIdx] = CYCLE_SEQ[nextIdx];
+        playSfx('click');
+      }
+
+      renderTimelineTracks();
+      updateTimelinePlayhead();
+    }
+
+    function handleTapeCellRightClick(armIdx, tickIdx, e) {
+      if (e) e.preventDefault();
+      if (!arms[armIdx]) return;
+      if (!arms[armIdx].instructions) arms[armIdx].instructions = [];
+      arms[armIdx].instructions[tickIdx] = 'WAIT';
+      playSfx('click');
+      renderTimelineTracks();
+      updateTimelinePlayhead();
+    }
+
+    function clearSingleArmTape(armIdx) {
+      playSfx('click');
+      if (!arms[armIdx]) return;
+      arms[armIdx].instructions = new Array(currentMaxCycles).fill('WAIT');
+      renderTimelineTracks();
+      updateTimelinePlayhead();
+      showToast(`🧹 已清空机械臂 ${armIdx + 1} 的指令条`);
+    }
+
+    function clearAllArmInstructions() {
+      playSfx('click');
+      arms.forEach(a => {
+        a.instructions = new Array(currentMaxCycles).fill('WAIT');
+      });
+      renderTimelineTracks();
+      updateTimelinePlayhead();
+      showToast('🧹 已清空全部机械臂的指令条');
+    }
+
+    function adjustTimelineCycles(delta) {
+      playSfx('click');
+      currentMaxCycles = Math.max(4, Math.min(32, currentMaxCycles + delta));
+      renderTimelineTracks();
+      updateTimelinePlayhead();
+      showToast(`⏱️ 周天拍数调整为：${currentMaxCycles} 拍`);
+    }
+
+    // 渲染 Opus 律历指令带 (Program Tapes)
+    function renderTimelineTracks() {
+      const container = document.getElementById('armTapeContainer');
+      if (!container) return;
+      let html = '';
+
+      if (arms.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-2 text-white/40 text-xs font-mono">
+            阵盘上暂无机械臂，请在下方工具栏选择【单摆臂 / 伸缩臂 / 双头臂】放置在阵盘上
+          </div>
+        `;
+        return;
+      }
+
+      arms.forEach((arm, armIdx) => {
+        const instrs = arm.instructions || [];
+        let cellsHtml = '';
+        for (let i = 0; i < currentMaxCycles; i++) {
+          const act = instrs[i] || 'WAIT';
+          const info = INSTR_ICONS[act] || INSTR_ICONS['WAIT'];
+          cellsHtml += `
+            <div id="tape_cell_${armIdx}_${i}" 
+                 title="拍数 ${i+1}: ${info.label} (左键修改/涂抹，右键清除)"
+                 onclick="handleTapeCellClick(${armIdx}, ${i});"
+                 oncontextmenu="handleTapeCellRightClick(${armIdx}, ${i}, event);"
+                 class="w-7 h-7 shrink-0 rounded flex items-center justify-center text-xs font-mono border transition-all duration-150 cursor-pointer hover:scale-110 hover:z-20 ${info.cls}">
+              ${info.icon}
+            </div>
+          `;
+        }
+
+        const armTypeNames = {
+          'arm_1': '单摆臂',
+          'arm_piston': '伸缩臂',
+          'arm_long': '长臂(2格)',
+          'arm_2': '双头臂',
+          'arm_3': '三叶臂',
+          'arm_6': '六角臂'
+        };
+        const typeName = armTypeNames[arm.type] || '机械臂';
+        const armTitle = `臂${armIdx+1} (${typeName})`;
+        html += `
+          <div class="flex items-center space-x-2">
+            <div class="w-32 shrink-0 text-[11px] font-mono font-bold text-cyan-200 flex items-center justify-between bg-black/40 px-2 py-0.5 rounded border border-cyan-500/30">
+              <div class="flex items-center space-x-1 truncate">
+                <span class="w-2 h-2 rounded-full shrink-0 ${arm.isHolding ? 'bg-[#00f0ff]' : 'bg-white/30'}"></span>
+                <span class="truncate">${armTitle}</span>
+              </div>
+              <button onclick="clearSingleArmTape(${armIdx});" title="清空该机械臂指令" class="text-white/30 hover:text-rose-400 text-[10px] ml-1 cursor-pointer">✖</button>
+            </div>
+            <div class="flex items-center space-x-1">
+              ${cellsHtml}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function updateTimelinePlayhead() {
+      const activeTick = (simCycle > 0) ? ((simCycle - 1) % currentMaxCycles) : -1;
+      const lbl = document.getElementById('timelineTickLabel');
+      if (lbl) lbl.innerText = `${activeTick >= 0 ? activeTick + 1 : 0} / ${currentMaxCycles}`;
+
+      for (let armIdx = 0; armIdx < arms.length; armIdx++) {
+        for (let t = 0; t < currentMaxCycles; t++) {
+          const el = document.getElementById(`tape_cell_${armIdx}_${t}`);
+          if (!el) continue;
+          if (t === activeTick) {
+            el.classList.add('ring-2', 'ring-[#00f0ff]', 'scale-110', 'z-10');
+          } else {
+            el.classList.remove('ring-2', 'ring-[#00f0ff]', 'scale-110', 'z-10');
+          }
+        }
+      }
+    }
+
+    // =========================================================================
+    // 7. 高拟真纯视觉渲染器 (阵眼连体模具、高光灵珠、刚性键、机械臂、大工厂外接管网)
+    // =========================================================================
+    function renderScene() {
+      renderConveyorGantriesLayer();
+      renderGlyphsLayer();
+      renderSinkMoldLayer();
+      renderArmsLayer();
+      renderOrbsAndBondsLayer();
+      renderOverlayLayer();
+    }
+
+    // 渲染外部大工厂实体传送带接驳管道架
+    function renderConveyorGantriesLayer() {
+      const g = document.getElementById('layerConveyors');
+      if (!g) return;
+
+      const pIron = hexToPixel(-2, -2);
+      const pWater = hexToPixel(-1, 2);
+      const pFire = hexToPixel(-1, -1);
+      const pBeltSink = hexToPixel(2.5, 0);
+
+      const flowOpacity = isExternalFeedActive ? 0.9 : 0.2;
+      const flowDash = isExternalFeedActive ? '10,6' : '4,8';
+
+      g.innerHTML = `
+        <g opacity="${flowOpacity}" class="transition-opacity duration-300">
+          <!-- 1. 粗铁晶核进料总线 (左上角接入 (-2, -2)) -->
+          <path d="M 60 80 Q 200 120, ${pIron.x} ${pIron.y}" 
+                fill="none" stroke="#0f172a" stroke-width="22" stroke-linecap="round" />
+          <path d="M 60 80 Q 200 120, ${pIron.x} ${pIron.y}" 
+                fill="none" stroke="url(#pcbGoldPad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="${flowDash}" />
+          <circle cx="60" cy="80" r="14" fill="#1e1308" stroke="#f59e0b" stroke-width="2.5" />
+          <text x="82" y="84" fill="#fbbf24" font-size="11" font-weight="900" font-family="monospace">⚡ SMT-FEEDER 01: 粗铁晶核进料总线 [RAW-BUS 120/min]</text>
+
+          <!-- 2. 玄冰冷泉超导离子母线 (左下角接入 (-1, 2)) -->
+          <path d="M 60 760 Q 220 720, ${pWater.x} ${pWater.y}" 
+                fill="none" stroke="#051524" stroke-width="20" stroke-linecap="round" />
+          <path d="M 60 760 Q 220 720, ${pWater.x} ${pWater.y}" 
+                fill="none" stroke="#00f0ff" stroke-width="8" stroke-linecap="round" stroke-dasharray="${flowDash}" filter="url(#cyanGlow)" />
+          <circle cx="60" cy="760" r="14" fill="#082f49" stroke="#38bdf8" stroke-width="2.5" />
+          <text x="82" y="764" fill="#67e8f9" font-size="11" font-weight="900" font-family="monospace">🌊 COOLANT-BUS 02: 超导液冷离子总线 [COOLANT 120/min]</text>
+
+          <!-- 3. 高能等离子母线 (顶部接入 (-1, -1)) -->
+          <path d="M 460 40 Q 520 180, ${pFire.x} ${pFire.y}" 
+                fill="none" stroke="#1f060b" stroke-width="20" stroke-linecap="round" />
+          <path d="M 460 40 Q 520 180, ${pFire.x} ${pFire.y}" 
+                fill="none" stroke="#f43f5e" stroke-width="8" stroke-linecap="round" stroke-dasharray="${flowDash}" />
+          <circle cx="460" cy="40" r="14" fill="#4c0519" stroke="#fb7185" stroke-width="2.5" />
+          <text x="482" y="44" fill="#fca5a5" font-size="11" font-weight="900" font-family="monospace">🔥 PLASMA-BUS 03: 高能等离子激光母线 [PLASMA 120/min]</text>
+
+          <!-- 4. 产物金手指输出总线 (向大工厂输出) -->
+          <path d="M ${pBeltSink.x} ${pBeltSink.y} Q 1100 350, 1340 380" 
+                fill="none" stroke="#0f172a" stroke-width="22" stroke-linecap="round" />
+          <path d="M ${pBeltSink.x} ${pBeltSink.y} Q 1100 350, 1340 380" 
+                fill="none" stroke="url(#pcbGoldPad)" stroke-width="9" stroke-linecap="round" stroke-dasharray="14,6" />
+          <circle cx="1340" cy="380" r="14" fill="#030712" stroke="#00f0ff" stroke-width="2.5" />
+          <text x="1110" y="365" fill="#38bdf8" font-size="11" font-weight="900" font-family="monospace">📦 GOLD-FINGER I/O: 协处理器产物金手指插槽 ➔ 工厂主板总线</text>
+        </g>
+      `;
+    }
+
+    // 渲染碰撞告警与覆盖特效层
+    function renderOverlayLayer() {
+      const g = document.getElementById('layerOverlay');
+      if (!g) return;
+      let html = '';
+
+      if (collisionState.hasCollision) {
+        const p = hexToPixel(collisionState.q, collisionState.r);
+        html += `
+          <!-- 💥 剧烈碰撞事故爆炸特效 -->
+          <g filter="url(#goldGlow)">
+            <!-- 红色外扩冲击波圈 -->
+            <circle cx="${p.x}" cy="${p.y}" r="42" fill="none" stroke="#ef4444" stroke-width="4.5" stroke-dasharray="8,4" />
+            <circle cx="${p.x}" cy="${p.y}" r="28" fill="#7f1d1d" opacity="0.85" stroke="#ff0055" stroke-width="3" />
+            <!-- 炸裂金黄火花线 -->
+            <line x1="${p.x-30}" y1="${p.y-30}" x2="${p.x+30}" y2="${p.y+30}" stroke="#fef08a" stroke-width="4" stroke-linecap="round" />
+            <line x1="${p.x-30}" y1="${p.y+30}" x2="${p.x+30}" y2="${p.y-30}" stroke="#fef08a" stroke-width="4" stroke-linecap="round" />
+            <line x1="${p.x}" y1="${p.y-36}" x2="${p.x}" y2="${p.y+36}" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" />
+            <line x1="${p.x-36}" y1="${p.y}" x2="${p.x+36}" y2="${p.y}" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" />
+            <!-- 核心白光高亮 -->
+            <circle cx="${p.x}" cy="${p.y}" r="9" fill="#ffffff" />
+            <text x="${p.x}" y="${p.y+5}" fill="#000000" font-size="14" font-weight="900" text-anchor="middle" font-family="sans-serif">!</text>
+          </g>
+        `;
+      }
+
+      g.innerHTML = html;
+    }
+
+    // 渲染 PCB 贴片元件、QFN 处理器芯片与总线导轨
+    function renderGlyphsLayer() {
+      const g = document.getElementById('layerGlyphs');
+      if (!g) return;
+      let html = '';
+
+      Object.keys(boardElements).forEach(k => {
+        const [q, r] = k.split(',').map(Number);
+        const { x, y } = hexToPixel(q, r);
+        const el = boardElements[k];
+
+        if (el.isFixedFixture) {
+          html += `
+            <!-- PCB 表面贴装标准定位基座 (SMD Motherboard Fixture) -->
+            <rect x="${x-30}" y="${y-30}" width="60" height="60" rx="6" fill="#090f1d" stroke="#00f0ff" stroke-width="1.8" stroke-dasharray="6,3" opacity="0.85" />
+            <circle cx="${x}" cy="${y}" r="26" fill="none" stroke="rgba(245, 158, 11, 0.45)" stroke-width="1" />
+            <circle cx="${x-24}" cy="${y-24}" r="2.5" fill="#f59e0b" />
+            <circle cx="${x+24}" cy="${y-24}" r="2.5" fill="#00f0ff" />
+            <circle cx="${x-24}" cy="${y+24}" r="2.5" fill="#00f0ff" />
+            <circle cx="${x+24}" cy="${y+24}" r="2.5" fill="#00f0ff" />
+          `;
+        }
+
+        if (el.type === 'source_mine') {
+          html += `
+            <!-- PCB 沉金排针插座 [RAW-IO 粗料引脚] -->
+            <rect x="${x-22}" y="${y-22}" width="44" height="44" rx="4" fill="#140f09" stroke="#b45309" stroke-width="2" />
+            <rect x="${x-15}" y="${y-15}" width="30" height="30" rx="3" fill="#2b1a0d" stroke="url(#pcbGoldPad)" stroke-width="1.5" />
+            <circle cx="${x-10}" cy="${y-10}" r="2.2" fill="#ffd700" />
+            <circle cx="${x+10}" cy="${y-10}" r="2.2" fill="#ffd700" />
+            <circle cx="${x-10}" cy="${y+10}" r="2.2" fill="#ffd700" />
+            <circle cx="${x+10}" cy="${y+10}" r="2.2" fill="#ffd700" />
+            <circle cx="${x}" cy="${y}" r="6.5" fill="#eed5b7" stroke="#b45309" stroke-width="1.2" />
+            <text x="${x}" y="${y+34}" fill="#f59e0b" font-size="9" font-family="monospace" font-weight="900" text-anchor="middle">FEEDER [精钢齿轮]</text>
+          `;
+        } else if (el.type === 'source_water') {
+          html += `
+            <!-- PCB 离子冷流管座 [COOLANT-IO] -->
+            <rect x="${x-22}" y="${y-22}" width="44" height="44" rx="4" fill="#051726" stroke="#0284c7" stroke-width="2" />
+            <circle cx="${x}" cy="${y}" r="17" fill="#082f49" stroke="#38bdf8" stroke-width="1.8" />
+            <rect x="${x-19}" y="${y-3}" width="6" height="6" fill="#38bdf8" />
+            <rect x="${x+13}" y="${y-3}" width="6" height="6" fill="#38bdf8" />
+            <rect x="${x-3}" y="${y-19}" width="6" height="6" fill="#38bdf8" />
+            <rect x="${x-3}" y="${y+13}" width="6" height="6" fill="#38bdf8" />
+            <circle cx="${x}" cy="${y}" r="6.5" fill="#67e8f9" stroke="#0284c7" stroke-width="1.2" />
+            <text x="${x}" y="${y+34}" fill="#38bdf8" font-size="9" font-family="monospace" font-weight="900" text-anchor="middle">COOLANT [液冷法兰]</text>
+          `;
+        } else if (el.type === 'source_fire') {
+          html += `
+            <!-- PCB 等离子接驳插座 [PLASMA-IO] -->
+            <rect x="${x-22}" y="${y-22}" width="44" height="44" rx="4" fill="#20080d" stroke="#e11d48" stroke-width="2" />
+            <circle cx="${x}" cy="${y}" r="17" fill="#4c0519" stroke="#fb7185" stroke-width="1.8" />
+            <circle cx="${x-12}" cy="${y-12}" r="2.2" fill="#fda4af" />
+            <circle cx="${x+12}" cy="${y-12}" r="2.2" fill="#fda4af" />
+            <circle cx="${x-12}" cy="${y+12}" r="2.2" fill="#fda4af" />
+            <circle cx="${x+12}" cy="${y+12}" r="2.2" fill="#fda4af" />
+            <circle cx="${x}" cy="${y}" r="6.5" fill="#f43f5e" stroke="#ffe4e6" stroke-width="1.2" />
+            <text x="${x}" y="${y+34}" fill="#f43f5e" font-size="9" font-family="monospace" font-weight="900" text-anchor="middle">PLASMA [高能涡轮]</text>
+          `;
+        } else if (el.type === 'glyph_calc') {
+          // ✨ QFN-32 贴片处理器芯片 (太阳轮升阶协处理核)
+          html += `
+            <g class="transition-transform duration-300">
+              <rect x="${x-27}" y="${y-27}" width="54" height="54" rx="3" fill="#040813" stroke="rgba(245, 158, 11, 0.4)" stroke-width="1" />
+              <!-- 四周 QFN 沉金引脚焊盘 -->
+              <rect x="${x-15}" y="${y-25}" width="3" height="6" fill="url(#pcbGoldPad)" />
+              <rect x="${x-7}" y="${y-25}" width="3" height="6" fill="url(#pcbGoldPad)" />
+              <rect x="${x+4}" y="${y-25}" width="3" height="6" fill="url(#pcbGoldPad)" />
+              <rect x="${x+12}" y="${y-25}" width="3" height="6" fill="url(#pcbGoldPad)" />
+              <rect x="${x-15}" y="${y+19}" width="3" height="6" fill="url(#pcbGoldPad)" />
+              <rect x="${x-7}" y="${y+19}" width="3" height="6" fill="url(#pcbGoldPad)" />
+              <rect x="${x+4}" y="${y+19}" width="3" height="6" fill="url(#pcbGoldPad)" />
+              <rect x="${x+12}" y="${y+19}" width="3" height="6" fill="url(#pcbGoldPad)" />
+              <rect x="${x-25}" y="${y-15}" width="6" height="3" fill="url(#pcbGoldPad)" />
+              <rect x="${x-25}" y="${y-7}" width="6" height="3" fill="url(#pcbGoldPad)" />
+              <rect x="${x-25}" y="${y+4}" width="6" height="3" fill="url(#pcbGoldPad)" />
+              <rect x="${x-25}" y="${y+12}" width="6" height="3" fill="url(#pcbGoldPad)" />
+              <rect x="${x+19}" y="${y-15}" width="6" height="3" fill="url(#pcbGoldPad)" />
+              <rect x="${x+19}" y="${y-7}" width="6" height="3" fill="url(#pcbGoldPad)" />
+              <rect x="${x+19}" y="${y+4}" width="6" height="3" fill="url(#pcbGoldPad)" />
+              <rect x="${x+19}" y="${y+12}" width="6" height="3" fill="url(#pcbGoldPad)" />
+
+              <!-- 芯片主体环氧树脂封装 -->
+              <rect x="${x-20}" y="${y-20}" width="40" height="40" rx="3" fill="url(#chipEpoxyGrad)" stroke="#38bdf8" stroke-width="1.5" />
+              <!-- Pin 1 倒角极性标识孔 -->
+              <circle cx="${x-14}" cy="${y-14}" r="2" fill="#ffd700" />
+              <!-- 芯片激光刻字 -->
+              <text x="${x}" y="${y-7}" fill="#94a3b8" font-size="6.5" font-family="monospace" font-weight="900" text-anchor="middle">TRANS-32</text>
+              <!-- 芯片中心量子晶圆 Die -->
+              <rect x="${x-10}" y="${y-3}" width="20" height="15" rx="1" fill="#080e1a" stroke="#f59e0b" stroke-width="1" />
+              <circle cx="${x}" cy="${y+4.5}" r="4.5" fill="url(#chipDieGrad)" filter="url(#goldGlow)" />
+              <text x="${x}" y="${y+34}" fill="#fbbf24" font-size="9" font-family="monospace" font-weight="900" text-anchor="middle">QFN-32 [太阳轮升阶核]</text>
+            </g>
+          `;
+        } else if (el.type === 'glyph_bond') {
+          // SMT 机械联轴熔焊焊盘
+          html += `
+            <rect x="${x-24}" y="${y-24}" width="48" height="48" rx="6" fill="#0b1322" stroke="#eab308" stroke-width="2" stroke-dasharray="4,2" />
+            <rect x="${x-16}" y="${y-10}" width="12" height="20" rx="2" fill="url(#pcbGoldPad)" stroke="#000" stroke-width="0.8" />
+            <rect x="${x+4}" y="${y-10}" width="12" height="20" rx="2" fill="url(#pcbGoldPad)" stroke="#000" stroke-width="0.8" />
+            <line x1="${x}" y1="${y-14}" x2="${x}" y2="${y+14}" stroke="#ffd700" stroke-width="1.5" />
+            <line x1="${x-20}" y1="${y}" x2="${x+20}" y2="${y}" stroke="#ffd700" stroke-width="1.5" />
+            <circle cx="${x}" cy="${y}" r="3" fill="#ffffff" />
+            <text x="${x}" y="${y+34}" fill="#eab308" font-size="9" font-family="monospace" font-weight="900" text-anchor="middle">SMT-BOND [联轴熔焊]</text>
+          `;
+        } else if (el.type === 'glyph_unbond') {
+          // 高频去耦槽 / 激光切除器
+          html += `
+            <rect x="${x-24}" y="${y-24}" width="48" height="48" rx="6" fill="#041523" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4,2" />
+            <line x1="${x-12}" y1="${y-12}" x2="${x+12}" y2="${y+12}" stroke="#00f0ff" stroke-width="3" stroke-linecap="round" />
+            <line x1="${x-12}" y1="${y+12}" x2="${x+12}" y2="${y-12}" stroke="#00f0ff" stroke-width="3" stroke-linecap="round" />
+            <circle cx="${x}" cy="${y}" r="4" fill="#e0f2fe" filter="url(#cyanGlow)" />
+            <text x="${x}" y="${y+34}" fill="#38bdf8" font-size="9" font-family="monospace" font-weight="900" text-anchor="middle">CUT-ION [去耦]</text>
+          `;
+        } else if (el.type === 'glyph_void') {
+          // 接地泄放沉孔 / 虚空滤波引脚
+          html += `
+            <rect x="${x-24}" y="${y-24}" width="48" height="48" rx="6" fill="#130826" stroke="#c084fc" stroke-width="2" />
+            <circle cx="${x}" cy="${y}" r="17" fill="#05020a" stroke="#a855f7" stroke-width="1.8" stroke-dasharray="3,2" />
+            <line x1="${x-10}" y1="${y-3}" x2="${x+10}" y2="${y-3}" stroke="#c084fc" stroke-width="2" />
+            <line x1="${x-6}" y1="${y+2}" x2="${x+6}" y2="${y+2}" stroke="#c084fc" stroke-width="2" />
+            <line x1="${x-2}" y1="${y+7}" x2="${x+2}" y2="${y+7}" stroke="#c084fc" stroke-width="2" />
+            <line x1="${x}" y1="${y-10}" x2="${x}" y2="${y-3}" stroke="#c084fc" stroke-width="2" />
+            <text x="${x}" y="${y+34}" fill="#c084fc" font-size="9" font-family="monospace" font-weight="900" text-anchor="middle">GND [泄放]</text>
+          `;
+        } else if (el.type === 'track') {
+          // 移动滑轨 (镀金总线滑道)
+          html += `
+            <rect x="${x-24}" y="${y-20}" width="48" height="40" rx="4" fill="#080e1a" stroke="rgba(6, 182, 212, 0.4)" stroke-width="1.5" />
+            <line x1="${x-24}" y1="${y-10}" x2="${x+24}" y2="${y-10}" stroke="url(#pcbGoldPad)" stroke-width="2.5" />
+            <line x1="${x-24}" y1="${y+10}" x2="${x+24}" y2="${y+10}" stroke="url(#pcbGoldPad)" stroke-width="2.5" />
+            <line x1="${x-15}" y1="${y-5}" x2="${x-15}" y2="${y+5}" stroke="#00f0ff" stroke-width="1.8" />
+            <line x1="${x-7}" y1="${y-3}" x2="${x-7}" y2="${y+3}" stroke="#38bdf8" stroke-width="1" />
+            <line x1="${x}" y1="${y-6}" x2="${x}" y2="${y+6}" stroke="#00f0ff" stroke-width="2" />
+            <line x1="${x+7}" y1="${y-3}" x2="${x+7}" y2="${y+3}" stroke="#38bdf8" stroke-width="1" />
+            <line x1="${x+15}" y1="${y-5}" x2="${x+15}" y2="${y+5}" stroke="#00f0ff" stroke-width="1.8" />
+          `;
+        }
+      });
+
+      g.innerHTML = html;
+    }
+
+    // ⭐ 渲染板上常驻四大 IC 测试模组插座 (BGA/QFP 沉金插座金手指模具)
+    function renderSinkMoldLayer() {
+      const g = document.getElementById('layerSinkMold');
+      if (!g) return;
+
+      let html = '<g id="sinkMoldGroup">';
+
+      Object.keys(SINK_MOLDS).forEach(mId => {
+        const mold = SINK_MOLDS[mId];
+        const isFocused = (focusedMoldId === mId);
+
+        // 1. IC 芯片座底板与镀金接触引脚
+        mold.slots.forEach(s => {
+          const p = hexToPixel(s.q, s.r);
+          const strokeCol = isFocused ? '#00f0ff' : 'rgba(6, 182, 212, 0.5)';
+          const strokeWidth = isFocused ? '2.5' : '1.5';
+
+          html += `
+            <!-- IC 芯片座外框底盘 -->
+            <polygon points="${hexPolygonPoints(p.x, p.y, HEX_RADIUS + 3)}" fill="#030814" stroke="#0f213d" stroke-width="2" filter="url(#softShadow)" />
+            <polygon points="${hexPolygonPoints(p.x, p.y, HEX_RADIUS - 2)}" fill="#02050d" stroke="${strokeCol}" stroke-width="${strokeWidth}" stroke-dasharray="5,3" class="mold-pulse" />
+            <!-- 金手指对齐触点 -->
+            <circle cx="${p.x - 18}" cy="${p.y}" r="2" fill="url(#pcbGoldPad)" />
+            <circle cx="${p.x + 18}" cy="${p.y}" r="2" fill="url(#pcbGoldPad)" />
+            <circle cx="${p.x}" cy="${p.y - 18}" r="2" fill="url(#pcbGoldPad)" />
+            <circle cx="${p.x}" cy="${p.y + 18}" r="2" fill="url(#pcbGoldPad)" />
+          `;
+        });
+
+        // 2. 槽位内部要求刚性总线互连铜箔 (Rigid Bus Trace)
+        mold.requiredBonds.forEach(([idxA, idxB]) => {
+          const sA = mold.slots[idxA];
+          const sB = mold.slots[idxB];
+          const pA = hexToPixel(sA.q, sA.r);
+          const pB = hexToPixel(sB.q, sB.r);
+          html += `
+            <line x1="${pA.x}" y1="${pA.y}" x2="${pB.x}" y2="${pB.y}" stroke="#030814" stroke-width="14" stroke-linecap="round" />
+            <line x1="${pA.x}" y1="${pA.y}" x2="${pB.x}" y2="${pB.y}" stroke="url(#pcbGoldPad)" stroke-width="6" stroke-linecap="round" opacity="0.85" />
+            <line x1="${pA.x}" y1="${pA.y}" x2="${pB.x}" y2="${pB.y}" stroke="${isFocused ? '#00f0ff' : '#38bdf8'}" stroke-width="2" stroke-linecap="round" stroke-dasharray="6,4" class="mold-pulse" />
+          `;
+        });
+
+        // 3. 各槽位内部的全息目标机械齿轮/元件模具 (虚线全息投影，严丝合缝)
+        mold.slots.forEach(s => {
+          const p = hexToPixel(s.q, s.r);
+          html += renderPhysicalComponentSvg(p.x, p.y, s.requiredType, true);
+        });
+
+        // 4. IC 测试座标牌与增益说明 (Cyber Acrylic Module Badge)
+        const firstSlot = mold.slots[0];
+        const p0 = hexToPixel(firstSlot.q, firstSlot.r);
+        html += `
+          <g transform="translate(${p0.x - 24}, ${p0.y - 44})" class="select-none pointer-events-none">
+            <rect x="0" y="0" width="138" height="22" rx="4" fill="#081020" stroke="${isFocused ? '#00f0ff' : 'rgba(6, 182, 212, 0.4)'}" stroke-width="${isFocused ? '1.8' : '1'}" opacity="0.95" />
+            <!-- 状态小绿灯 -->
+            <circle cx="10" cy="11" r="3" fill="${isFocused ? '#00f0ff' : '#10b981'}" filter="url(${isFocused ? '#cyanGlow' : '#softShadow'})" />
+            <text x="74" y="15" fill="${isFocused ? '#00f0ff' : '#93c5fd'}" font-size="10" font-weight="900" font-family="monospace" text-anchor="middle">IC-SOCKET: ${mold.name}</text>
+          </g>
+        `;
+      });
+
+      html += '</g>';
+      g.innerHTML = html;
+    }
+
+    // 钛合金高精密 SMT 贴片伺服机械臂渲染
+    function renderArmsLayer() {
+      const g = document.getElementById('layerArms');
+      if (!g) return;
+      let html = '';
+
+      arms.forEach(arm => {
+        const base = hexToPixel(arm.q, arm.r);
+        const rad = (arm.angleIndex * 60) * Math.PI / 180;
+        const armLen = arm.armLength || 1;
+        const armLenPx = HEX_RADIUS * Math.sqrt(3) * armLen;
+
+        const clawX = base.x + Math.cos(rad) * armLenPx;
+        const clawY = base.y + Math.sin(rad) * armLenPx;
+
+        if (arm.type === 'arm_piston') {
+          // 伸缩臂 (精密伺服液压/电推伸缩臂)
+          const sleeveLenPx = HEX_RADIUS * Math.sqrt(3) * 0.72;
+          const slvX = base.x + Math.cos(rad) * sleeveLenPx;
+          const slvY = base.y + Math.sin(rad) * sleeveLenPx;
+
+          html += `
+            <line x1="${base.x}" y1="${base.y}" x2="${clawX}" y2="${clawY}" stroke="#000000" stroke-width="12" stroke-linecap="round" opacity="0.75" filter="url(#softShadow)" />
+            <!-- 内层镜面镀铬活塞杆 -->
+            <line x1="${base.x}" y1="${base.y}" x2="${clawX}" y2="${clawY}" stroke="#cbd5e1" stroke-width="6" stroke-linecap="round" />
+            <line x1="${base.x}" y1="${base.y}" x2="${clawX}" y2="${clawY}" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+            <!-- 外层碳化钛合金液压套筒 -->
+            <line x1="${base.x}" y1="${base.y}" x2="${slvX}" y2="${slvY}" stroke="#020617" stroke-width="14" stroke-linecap="round" />
+            <line x1="${base.x}" y1="${base.y}" x2="${slvX}" y2="${slvY}" stroke="url(#armTitaniumGrad)" stroke-width="10" stroke-linecap="round" />
+            <!-- 套筒翡翠高能光导纤维指示带 -->
+            <line x1="${base.x}" y1="${base.y}" x2="${slvX}" y2="${slvY}" stroke="url(#armEmeraldLedGrad)" stroke-width="2.5" stroke-linecap="round" />
+            <circle cx="${slvX}" cy="${slvY}" r="7" fill="#10b981" stroke="#000" stroke-width="1.2" />
+            <!-- 伺服步进电机基座 (高能翡翠光环) -->
+            <circle cx="${base.x}" cy="${base.y}" r="20" fill="#061a14" stroke="#10b981" stroke-width="2.5" />
+            <circle cx="${base.x}" cy="${base.y}" r="13" fill="#042f2e" stroke="#34d399" stroke-width="1.8" />
+            <circle cx="${base.x}" cy="${base.y}" r="4.5" fill="#a7f3d0" />
+          `;
+        } else if (arm.type === 'arm_long') {
+          // 定长长臂 (跨距 2 格桁架式钛合金长臂)
+          html += `
+            <line x1="${base.x}" y1="${base.y}" x2="${clawX}" y2="${clawY}" stroke="#000000" stroke-width="12" stroke-linecap="round" opacity="0.75" filter="url(#softShadow)" />
+            <line x1="${base.x}" y1="${base.y}" x2="${clawX}" y2="${clawY}" stroke="url(#armTitaniumGrad)" stroke-width="8.5" stroke-linecap="round" />
+            <line x1="${base.x}" y1="${base.y}" x2="${clawX}" y2="${clawY}" stroke="url(#armCyanLedGrad)" stroke-width="2" stroke-linecap="round" />
+            <!-- 中段支撑加强轴承环 -->
+            <circle cx="${(base.x + clawX)/2}" cy="${(base.y + clawY)/2}" r="8.5" fill="#0f172a" stroke="url(#pcbGoldPad)" stroke-width="2" />
+            <!-- 伺服基座 -->
+            <circle cx="${base.x}" cy="${base.y}" r="20" fill="#0c192c" stroke="#f59e0b" stroke-width="2.5" />
+            <circle cx="${base.x}" cy="${base.y}" r="12" fill="#1e293b" stroke="#fbbf24" stroke-width="1.8" />
+            <circle cx="${base.x}" cy="${base.y}" r="4.5" fill="#fde68a" />
+          `;
+        } else {
+          // 单摆臂 / 多头轮臂 (钛合金精密伺服臂)
+          html += `
+            <line x1="${base.x}" y1="${base.y}" x2="${clawX}" y2="${clawY}" stroke="#000000" stroke-width="12" stroke-linecap="round" opacity="0.75" filter="url(#softShadow)" />
+            <line x1="${base.x}" y1="${base.y}" x2="${clawX}" y2="${clawY}" stroke="url(#armTitaniumGrad)" stroke-width="8" stroke-linecap="round" />
+            <!-- 青蓝光导纤维 LED 灯带 -->
+            <line x1="${base.x}" y1="${base.y}" x2="${clawX}" y2="${clawY}" stroke="url(#armCyanLedGrad)" stroke-width="2.5" stroke-linecap="round" />
+            <!-- 伺服电机基座 -->
+            <circle cx="${base.x}" cy="${base.y}" r="19" fill="#08101d" stroke="#00f0ff" stroke-width="2" />
+            <circle cx="${base.x}" cy="${base.y}" r="12" fill="#0f172a" stroke="#38bdf8" stroke-width="1.8" />
+            <circle cx="${base.x}" cy="${base.y}" r="4.5" fill="#38bdf8" />
+          `;
+        }
+
+        // 精密 SMT 气动机械爪渲染
+        function drawClaw(cx, cy, angleRad, isClawHolding) {
+          const clawAngle = angleRad + Math.PI / 2;
+          const cw1_x = cx + Math.cos(clawAngle) * 15;
+          const cw1_y = cy + Math.sin(clawAngle) * 15;
+          const cw2_x = cx - Math.cos(clawAngle) * 15;
+          const cw2_y = cy - Math.sin(clawAngle) * 15;
+
+          const clawStroke = isClawHolding ? '#00f0ff' : '#64748b';
+          const clawGlow = isClawHolding ? 'filter="url(#cyanGlow)"' : '';
+
+          return `
+            <circle cx="${cx}" cy="${cy}" r="9" fill="#0f172a" stroke="${clawStroke}" stroke-width="2" />
+            <!-- 气动抓手卡爪弧形 -->
+            <path d="M ${cw1_x} ${cw1_y} Q ${cx + Math.cos(angleRad)*14} ${cy + Math.sin(angleRad)*14} ${cw2_x} ${cw2_y}" 
+                  fill="none" stroke="${clawStroke}" stroke-width="3.5" stroke-linecap="round" ${clawGlow} />
+            <!-- 真空吸盘中心触点 -->
+            <circle cx="${cx}" cy="${cy}" r="3" fill="${isClawHolding ? '#ffffff' : '#334155'}" />
+          `;
+        }
+
+        const isHeld0 = (arm.heldOrbIds && arm.heldOrbIds[0]) ? true : Boolean(arm.isHolding && arm.heldOrbId);
+        html += drawClaw(clawX, clawY, rad, isHeld0);
+
+        // 双头臂 (180° 对置轮臂)
+        if (arm.type === 'arm_2') {
+          const rad2 = rad + Math.PI;
+          const c2x = base.x + Math.cos(rad2) * armLenPx;
+          const c2y = base.y + Math.sin(rad2) * armLenPx;
+          const isHeld1 = (arm.heldOrbIds && arm.heldOrbIds[1]) ? true : false;
+          html += `
+            <line x1="${base.x}" y1="${base.y}" x2="${c2x}" y2="${c2y}" stroke="url(#armTitaniumGrad)" stroke-width="8" stroke-linecap="round" />
+            <line x1="${base.x}" y1="${base.y}" x2="${c2x}" y2="${c2y}" stroke="url(#armCyanLedGrad)" stroke-width="2" stroke-linecap="round" />
+          ` + drawClaw(c2x, c2y, rad2, isHeld1);
+        }
+
+        // 三叶臂 (120° 三分爪)
+        if (arm.type === 'arm_3') {
+          [Math.PI * 2 / 3, Math.PI * 4 / 3].forEach((offset, idx) => {
+            const rOffset = rad + offset;
+            const cx = base.x + Math.cos(rOffset) * armLenPx;
+            const cy = base.y + Math.sin(rOffset) * armLenPx;
+            const isHeldIdx = (arm.heldOrbIds && arm.heldOrbIds[idx + 1]) ? true : false;
+            html += `
+              <line x1="${base.x}" y1="${base.y}" x2="${cx}" y2="${cy}" stroke="url(#armTitaniumGrad)" stroke-width="8" stroke-linecap="round" />
+              <line x1="${base.x}" y1="${base.y}" x2="${cx}" y2="${cy}" stroke="url(#armCyanLedGrad)" stroke-width="2" stroke-linecap="round" />
+            ` + drawClaw(cx, cy, rOffset, isHeldIdx);
+          });
+        }
+
+        // 六角臂 (60° 全向爪)
+        if (arm.type === 'arm_6') {
+          for (let i = 1; i < 6; i++) {
+            const rOffset = rad + (Math.PI / 3) * i;
+            const cx = base.x + Math.cos(rOffset) * armLenPx;
+            const cy = base.y + Math.sin(rOffset) * armLenPx;
+            const isHeldIdx = (arm.heldOrbIds && arm.heldOrbIds[i]) ? true : false;
+            html += `
+              <line x1="${base.x}" y1="${base.y}" x2="${cx}" y2="${cy}" stroke="url(#armTitaniumGrad)" stroke-width="7" stroke-linecap="round" />
+              <line x1="${base.x}" y1="${base.y}" x2="${cx}" y2="${cy}" stroke="url(#armCyanLedGrad)" stroke-width="1.8" stroke-linecap="round" />
+            ` + drawClaw(cx, cy, rOffset, isHeldIdx);
+          }
+        }
+      });
+
+      g.innerHTML = html;
+    }
+
+    // 渲染高拟真工业机械元件 (彻底告别单调圆球，打造齿轮、法兰、涡轮、太阳轮)
+    function renderPhysicalComponentSvg(x, y, type, isGhost = false) {
+      const outerR = 19;
+      const innerR = 13.5;
+      const boreR = 4.8;
+      const pulseClass = isGhost ? 'mold-pulse' : 'atom-drop-shadow';
+      const opacity = isGhost ? 0.45 : 1;
+
+      if (type === 'mine') {
+        // 1. 粗铁：8齿重型工业精钢齿轮 (8-Tooth Industrial Steel Spur Gear)
+        let teeth = '';
+        for (let i = 0; i < 8; i++) {
+          const deg = i * 45;
+          teeth += `<rect x="${x-3.2}" y="${y - outerR - 2}" width="6.4" height="6" rx="1" fill="${isGhost ? 'none' : '#94a3b8'}" stroke="${isGhost ? '#d97706' : '#475569'}" stroke-width="${isGhost ? 1.5 : 1}" transform="rotate(${deg} ${x} ${y})" />`;
+        }
+        const bodyFill = isGhost ? 'none' : 'url(#gearSteelGrad)';
+        const bodyStroke = isGhost ? '#d97706' : '#cbd5e1';
+        return `
+          <g class="${pulseClass}" opacity="${opacity}">
+            ${teeth}
+            <circle cx="${x}" cy="${y}" r="${innerR + 1}" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="2" />
+            <circle cx="${x}" cy="${y}" r="${innerR - 3.5}" fill="${isGhost ? 'none' : '#1e293b'}" stroke="${bodyStroke}" stroke-width="1" />
+            <circle cx="${x-6.5}" cy="${y}" r="2" fill="${isGhost ? 'none' : '#0a0f1d'}" />
+            <circle cx="${x+6.5}" cy="${y}" r="2" fill="${isGhost ? 'none' : '#0a0f1d'}" />
+            <circle cx="${x}" cy="${y-6.5}" r="2" fill="${isGhost ? 'none' : '#0a0f1d'}" />
+            <circle cx="${x}" cy="${y+6.5}" r="2" fill="${isGhost ? 'none' : '#0a0f1d'}" />
+            <circle cx="${x}" cy="${y}" r="${boreR}" fill="${isGhost ? 'none' : '#05070e'}" stroke="${bodyStroke}" stroke-width="1.2" />
+            <rect x="${x-1}" y="${y - boreR - 2}" width="2" height="3" fill="${bodyStroke}" />
+            ${isGhost ? '' : `<text x="${x}" y="${y+2}" fill="#94a3b8" font-size="5.5" font-family="monospace" font-weight="900" text-anchor="middle">FE</text>`}
+          </g>
+        `;
+      } else if (type === 'gold') {
+        // 2. 赤金：12齿沉金精密太阳轮 (12-Tooth Precision Gold Sun Gear)
+        let teeth = '';
+        for (let i = 0; i < 12; i++) {
+          const deg = i * 30;
+          teeth += `<rect x="${x-2.2}" y="${y - outerR - 2}" width="4.4" height="5.5" rx="0.8" fill="${isGhost ? 'none' : '#ffd700'}" stroke="${isGhost ? '#ffd700' : '#b45309'}" stroke-width="${isGhost ? 1.5 : 0.8}" transform="rotate(${deg} ${x} ${y})" />`;
+        }
+        const bodyFill = isGhost ? 'none' : 'url(#gearGoldGrad)';
+        const bodyStroke = isGhost ? '#ffd700' : '#ffffff';
+        return `
+          <g class="${pulseClass}" opacity="${opacity}">
+            ${teeth}
+            <circle cx="${x}" cy="${y}" r="${innerR + 1}" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="2" />
+            <circle cx="${x}" cy="${y}" r="${innerR - 3}" fill="${isGhost ? 'none' : '#451a03'}" stroke="#ffd700" stroke-width="1" />
+            ${[0, 60, 120, 180, 240, 300].map(deg => `<circle cx="${x + Math.cos(deg*Math.PI/180)*6.5}" cy="${y + Math.sin(deg*Math.PI/180)*6.5}" r="1.8" fill="${isGhost ? 'none' : '#0d0702'}" />`).join('')}
+            <circle cx="${x}" cy="${y}" r="${boreR}" fill="${isGhost ? 'none' : '#ffd700'}" stroke="#000" stroke-width="1" />
+            <circle cx="${x}" cy="${y}" r="2" fill="#ffffff" />
+            ${isGhost ? '' : `<text x="${x}" y="${y-6}" fill="#fbbf24" font-size="5" font-family="monospace" font-weight="900" text-anchor="middle">AU</text>`}
+          </g>
+        `;
+      } else if (type === 'water') {
+        // 3. 玄水：六角伺服法兰 / 晶振液冷转子 (Hexagonal Coolant Rotor)
+        const pts = hexPolygonPoints(x, y, outerR + 2);
+        let vanes = '';
+        for (let i = 0; i < 6; i++) {
+          const deg = i * 60;
+          vanes += `<line x1="${x}" y1="${y}" x2="${x + Math.cos(deg*Math.PI/180)*15}" y2="${y + Math.sin(deg*Math.PI/180)*15}" stroke="${isGhost ? '#00f0ff' : '#67e8f9'}" stroke-width="2" stroke-linecap="round" />`;
+        }
+        return `
+          <g class="${pulseClass}" opacity="${opacity}">
+            <polygon points="${pts}" fill="${isGhost ? 'none' : '#082f49'}" stroke="${isGhost ? '#00f0ff' : '#38bdf8'}" stroke-width="2.2" />
+            ${[0, 60, 120, 180, 240, 300].map(deg => `<circle cx="${x + Math.cos(deg*Math.PI/180)*15}" cy="${y + Math.sin(deg*Math.PI/180)*15}" r="1.5" fill="#00f0ff" />`).join('')}
+            <circle cx="${x}" cy="${y}" r="11" fill="${isGhost ? 'none' : '#0c4a6e'}" stroke="#00f0ff" stroke-width="1.5" />
+            ${vanes}
+            <circle cx="${x}" cy="${y}" r="5" fill="${isGhost ? 'none' : '#e0f2fe'}" stroke="#0284c7" stroke-width="1.2" />
+          </g>
+        `;
+      } else if (type === 'fire') {
+        // 4. 纯火：高能涡轮叶片 / 等离子磁芯 (Toroidal Plasma Coil Gear)
+        let fins = '';
+        for (let i = 0; i < 6; i++) {
+          const deg = i * 60;
+          fins += `<rect x="${x-3.5}" y="${y - outerR - 2}" width="7" height="6.5" rx="1.5" fill="${isGhost ? 'none' : '#f43f5e'}" stroke="${isGhost ? '#f43f5e' : '#fda4af'}" stroke-width="${isGhost ? 1.5 : 1}" transform="rotate(${deg} ${x} ${y})" />`;
+        }
+        return `
+          <g class="${pulseClass}" opacity="${opacity}">
+            ${fins}
+            <circle cx="${x}" cy="${y}" r="14.5" fill="${isGhost ? 'none' : '#4c0519'}" stroke="${isGhost ? '#f43f5e' : '#fb7185'}" stroke-width="2.5" />
+            <circle cx="${x}" cy="${y}" r="9.5" fill="${isGhost ? 'none' : '#881337'}" stroke="#f43f5e" stroke-width="1" />
+            <circle cx="${x}" cy="${y}" r="5" fill="${isGhost ? 'none' : '#fff1f2'}" stroke="#e11d48" stroke-width="1.5" />
+          </g>
+        `;
+      }
+      return '';
+    }
+
+    // 机械联轴总成与实体齿轮元件渲染
+    function renderOrbsAndBondsLayer() {
+      const gBonds = document.getElementById('layerBonds');
+      const gOrbs = document.getElementById('layerOrbs');
+      if (!gBonds || !gOrbs) return;
+
+      let bondsHtml = '';
+      let orbsHtml = '';
+
+      // 1. 机械刚性联轴卡板 (Rigid Coupling Link Brackets)
+      orbs.forEach(o1 => {
+        (o1.bondedTo || []).forEach(o2Id => {
+          const o2 = orbs.find(x => x.id === o2Id);
+          if (o2 && o1.id < o2.id) {
+            const p1 = hexToPixel(o1.q, o1.r);
+            const p2 = hexToPixel(o2.q, o2.r);
+            bondsHtml += `
+              <g class="atom-drop-shadow">
+                <!-- 重型机工双联齿轮联轴卡板 -->
+                <line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#030712" stroke-width="16" stroke-linecap="round" />
+                <line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#334155" stroke-width="11" stroke-linecap="round" />
+                <line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="url(#pcbGoldPad)" stroke-width="4.5" stroke-linecap="round" />
+                <!-- 联轴两端高强度六角紧固螺栓轴承 -->
+                <circle cx="${p1.x}" cy="${p1.y}" r="8" fill="#0f172a" stroke="#94a3b8" stroke-width="1.8" />
+                <circle cx="${p2.x}" cy="${p2.y}" r="8" fill="#0f172a" stroke="#94a3b8" stroke-width="1.8" />
+                <circle cx="${p1.x}" cy="${p1.y}" r="3" fill="#ffd700" />
+                <circle cx="${p2.x}" cy="${p2.y}" r="3" fill="#ffd700" />
+              </g>
+            `;
+          }
+        });
+      });
+
+      // 2. 实体机械元件/齿轮渲染
+      orbs.forEach(o => {
+        const { x, y } = hexToPixel(o.q, o.r);
+        orbsHtml += renderPhysicalComponentSvg(x, y, o.type, false);
+      });
+
+      gBonds.innerHTML = bondsHtml;
+      gOrbs.innerHTML = orbsHtml;
+    }
+
+    // =========================================================================
+    // 8. 机械推演引擎与 ⭐ 严密的阵眼几何模具契合判定
+    // =========================================================================
+    function toggleSimPlay() {
+      isSimRunning = !isSimRunning;
+      const icon = document.getElementById('playIcon');
+      if (isSimRunning) {
+        if (icon) icon.className = 'fa-solid fa-pause text-amber-400';
+        startLoop();
+      } else {
+        if (icon) icon.className = 'fa-solid fa-play text-emerald-400';
+        stopLoop();
+      }
+    }
+
+    function setSimSpeed(sp) {
+      playSfx('click');
+      simSpeed = sp;
+      [1, 2, 4].forEach(s => {
+        const b = document.getElementById(`sp_${s}`);
+        if (b) {
+          if (s === sp) b.classList.add('active');
+          else b.classList.remove('active');
+        }
+      });
+      if (isSimRunning) { stopLoop(); startLoop(); }
+    }
+
+    function startLoop() {
+      stopLoop();
+      const interval = Math.max(140, Math.round(550 / simSpeed));
+      simTimer = setInterval(() => { stepSim(); }, interval);
+    }
+    function stopLoop() {
+      if (simTimer) { clearInterval(simTimer); simTimer = null; }
+    }
+
+    function resetSim() {
+      stopLoop();
+      isSimRunning = false;
+      simCycle = 0;
+      deliveredCount = 0;
+      orbs = [];
+      collisionState = { hasCollision: false, q: 0, r: 0 };
+
+      const banner = document.getElementById('collisionBanner');
+      if (banner) banner.classList.add('hidden');
+
+      arms.forEach(a => {
+        a.angleIndex = a.startAngle;
+        a.armLength = (a.type === 'arm_long') ? 2 : 1;
+        a.isHolding = false;
+        a.heldOrbId = null;
+        a.direction = 1;
+      });
+
+      const icon = document.getElementById('playIcon');
+      if (icon) icon.className = 'fa-solid fa-play text-emerald-400';
+
+      updateHeaderStats();
+      renderTimelineTracks();
+      updateTimelinePlayhead();
+      renderScene();
+    }
+
+    // 计算机械臂的所有夹爪位置 (支持单摆臂、伸缩臂、长臂、双头臂、三叶臂、六角臂)
+    function getArmClawInfos(arm) {
+      const len = arm.armLength || 1;
+      const angles = [arm.angleIndex];
+      if (arm.type === 'arm_2') {
+        angles.push((arm.angleIndex + 3) % 6);
+      } else if (arm.type === 'arm_3') {
+        angles.push((arm.angleIndex + 2) % 6, (arm.angleIndex + 4) % 6);
+      } else if (arm.type === 'arm_6') {
+        for (let i = 1; i < 6; i++) angles.push((arm.angleIndex + i) % 6);
+      }
+      return angles.map((ang, idx) => ({
+        idx,
+        angle: ang,
+        q: arm.q + HEX_DIRS[ang].dq * len,
+        r: arm.r + HEX_DIRS[ang].dr * len
+      }));
+    }
+
+    // 执行机械臂离散 Opus 指令 (正转、反转、抓手自转、抓取、释放、伸长、缩短)
+    function executeArmInstruction(arm, instr) {
+      const dirVec = HEX_DIRS[arm.angleIndex];
+      const clawInfos = getArmClawInfos(arm);
+
+      if (instr === 'GRAB') {
+        if (!arm.heldOrbIds) arm.heldOrbIds = [];
+        let grabbedAny = false;
+        clawInfos.forEach(c => {
+          if (!arm.heldOrbIds[c.idx]) {
+            const cand = orbs.find(o => o.q === c.q && o.r === c.r);
+            const isHeldByOther = arms.some(other => other !== arm && (other.heldOrbId === cand?.id || (other.heldOrbIds && other.heldOrbIds.includes(cand?.id))));
+            if (cand && !isHeldByOther) {
+              arm.heldOrbIds[c.idx] = cand.id;
+              arm.heldOrbId = cand.id;
+              grabbedAny = true;
+            }
+          }
+        });
+        arm.isHolding = (arm.heldOrbIds.some(Boolean));
+        if (grabbedAny) playSfx('arm_grab');
+      } else if (instr === 'DROP') {
+        if (arm.isHolding) {
+          arm.isHolding = false;
+          arm.heldOrbId = null;
+          arm.heldOrbIds = [];
+          playSfx('click');
+        }
+      } else if (instr === 'ROT_CW') {
+        const nextAngle = (arm.angleIndex + 1) % 6;
+        arm.angleIndex = nextAngle;
+        playSfx('rotate');
+        if (arm.isHolding) {
+          const heldIds = new Set((arm.heldOrbIds || []).filter(Boolean));
+          if (arm.heldOrbId) heldIds.add(arm.heldOrbId);
+          const visited = new Set();
+          function rotateClusterCW(o) {
+            if (visited.has(o.id)) return;
+            visited.add(o.id);
+            const relQ = o.q - arm.q;
+            const relR = o.r - arm.r;
+            const newRelQ = -relR;
+            const newRelR = relQ + relR;
+            o.q = arm.q + newRelQ;
+            o.r = arm.r + newRelR;
+            (o.bondedTo || []).forEach(nId => {
+              const no = orbs.find(x => x.id === nId);
+              if (no) rotateClusterCW(no);
+            });
+          }
+          heldIds.forEach(id => {
+            const o = orbs.find(x => x.id === id);
+            if (o) rotateClusterCW(o);
+          });
+        }
+      } else if (instr === 'ROT_CCW') {
+        const nextAngle = (arm.angleIndex + 5) % 6;
+        arm.angleIndex = nextAngle;
+        playSfx('rotate');
+        if (arm.isHolding) {
+          const heldIds = new Set((arm.heldOrbIds || []).filter(Boolean));
+          if (arm.heldOrbId) heldIds.add(arm.heldOrbId);
+          const visited = new Set();
+          function rotateClusterCCW(o) {
+            if (visited.has(o.id)) return;
+            visited.add(o.id);
+            const relQ = o.q - arm.q;
+            const relR = o.r - arm.r;
+            const newRelQ = relQ + relR;
+            const newRelR = -relQ;
+            o.q = arm.q + newRelQ;
+            o.r = arm.r + newRelR;
+            (o.bondedTo || []).forEach(nId => {
+              const no = orbs.find(x => x.id === nId);
+              if (no) rotateClusterCCW(no);
+            });
+          }
+          heldIds.forEach(id => {
+            const o = orbs.find(x => x.id === id);
+            if (o) rotateClusterCCW(o);
+          });
+        }
+      } else if (instr === 'PIVOT_CW') {
+        if (arm.isHolding) {
+          const heldIds = (arm.heldOrbIds || []).filter(Boolean);
+          if (arm.heldOrbId && !heldIds.includes(arm.heldOrbId)) heldIds.push(arm.heldOrbId);
+          heldIds.forEach(id => {
+            const held = orbs.find(o => o.id === id);
+            if (held) {
+              playSfx('pivot');
+              const visited = new Set([held.id]);
+              function pivotClusterCW(o) {
+                (o.bondedTo || []).forEach(nId => {
+                  if (visited.has(nId)) return;
+                  visited.add(nId);
+                  const no = orbs.find(x => x.id === nId);
+                  if (no) {
+                    const relQ = no.q - held.q;
+                    const relR = no.r - held.r;
+                    const newRelQ = -relR;
+                    const newRelR = relQ + relR;
+                    no.q = held.q + newRelQ;
+                    no.r = held.r + newRelR;
+                    pivotClusterCW(no);
+                  }
+                });
+              }
+              pivotClusterCW(held);
+            }
+          });
+        }
+      } else if (instr === 'PIVOT_CCW') {
+        if (arm.isHolding) {
+          const heldIds = (arm.heldOrbIds || []).filter(Boolean);
+          if (arm.heldOrbId && !heldIds.includes(arm.heldOrbId)) heldIds.push(arm.heldOrbId);
+          heldIds.forEach(id => {
+            const held = orbs.find(o => o.id === id);
+            if (held) {
+              playSfx('pivot');
+              const visited = new Set([held.id]);
+              function pivotClusterCCW(o) {
+                (o.bondedTo || []).forEach(nId => {
+                  if (visited.has(nId)) return;
+                  visited.add(nId);
+                  const no = orbs.find(x => x.id === nId);
+                  if (no) {
+                    const relQ = no.q - held.q;
+                    const relR = no.r - held.r;
+                    const newRelQ = relQ + relR;
+                    const newRelR = -relQ;
+                    no.q = held.q + newRelQ;
+                    no.r = held.r + newRelR;
+                    pivotClusterCCW(no);
+                  }
+                });
+              }
+              pivotClusterCCW(held);
+            }
+          });
+        }
+      } else if (instr === 'EXTEND') {
+        const curLen = arm.armLength || 1;
+        if (curLen < 3) {
+          arm.armLength = curLen + 1;
+          playSfx('piston');
+          if (arm.isHolding) {
+            const heldIds = (arm.heldOrbIds || []).filter(Boolean);
+            if (arm.heldOrbId && !heldIds.includes(arm.heldOrbId)) heldIds.push(arm.heldOrbId);
+            const visited = new Set();
+            function pushCluster(o) {
+              if (visited.has(o.id)) return;
+              visited.add(o.id);
+              o.q += dirVec.dq;
+              o.r += dirVec.dr;
+              (o.bondedTo || []).forEach(nId => {
+                const no = orbs.find(x => x.id === nId);
+                if (no) pushCluster(no);
+              });
+            }
+            heldIds.forEach(id => {
+              const o = orbs.find(x => x.id === id);
+              if (o) pushCluster(o);
+            });
+          }
+        }
+      } else if (instr === 'RETRACT') {
+        const curLen = arm.armLength || 1;
+        if (curLen > 1) {
+          arm.armLength = curLen - 1;
+          playSfx('piston');
+          if (arm.isHolding) {
+            const heldIds = (arm.heldOrbIds || []).filter(Boolean);
+            if (arm.heldOrbId && !heldIds.includes(arm.heldOrbId)) heldIds.push(arm.heldOrbId);
+            const visited = new Set();
+            function pullCluster(o) {
+              if (visited.has(o.id)) return;
+              visited.add(o.id);
+              o.q -= dirVec.dq;
+              o.r -= dirVec.dr;
+              (o.bondedTo || []).forEach(nId => {
+                const no = orbs.find(x => x.id === nId);
+                if (no) pullCluster(no);
+              });
+            }
+            heldIds.forEach(id => {
+              const o = orbs.find(x => x.id === id);
+              if (o) pullCluster(o);
+            });
+          }
+        }
+      }
+    }
+
+    // 💥 严密的质子碰撞检测 (任何两颗灵珠重叠同一六角格即触发碰撞损毁停机)
+    function checkOrbCollisions() {
+      const coordMap = new Map();
+      for (let i = 0; i < orbs.length; i++) {
+        const o = orbs[i];
+        const key = `${o.q},${o.r}`;
+        if (coordMap.has(key)) {
+          const other = coordMap.get(key);
+          handleCollision(o, other, o.q, o.r);
+          return true;
+        }
+        coordMap.set(key, o);
+      }
+      return false;
+    }
+
+    function handleCollision(orb1, orb2, q, r) {
+      isSimRunning = false;
+      stopLoop();
+      playSfx('collision');
+
+      collisionState = {
+        hasCollision: true,
+        q, r,
+        time: Date.now()
+      };
+
+      const icon = document.getElementById('playIcon');
+      if (icon) icon.className = 'fa-solid fa-play text-emerald-400';
+
+      const banner = document.getElementById('collisionBanner');
+      if (banner) {
+        banner.classList.remove('hidden');
+        banner.classList.add('flex');
+        const txt = document.getElementById('collisionDetails');
+        if (txt) txt.innerText = `六角坐标 (${q}, ${r}) 处两颗灵核发生剧烈物理冲撞！机械臂齿轮崩裂！`;
+      }
+
+      showToast(`💥 质子碰撞冲突！(${q}, ${r}) 机械臂卡死停机！`);
+      renderScene();
+    }
+
+    // 💥 质子碰撞演示 (模拟故意制造冲撞事故触发停机与爆炸告警)
+    function demoCollisionError() {
+      playSfx('collision');
+      handleCollision({ id: 'demo1' }, { id: 'demo2' }, 0, 0);
+      showToast('💥【质子碰撞演示】：六角 (0, 0) 发生剧烈对撞！全线紧急熔断停机！');
+    }
+
+    // 核心时钟节拍
+    function stepSim() {
+      if (collisionState.hasCollision) return;
+
+      simCycle++;
+      const cycleIndex = (simCycle - 1) % currentMaxCycles;
+
+      // 1. 生门供给 (受外部大工厂传送带供料控制)
+      if (isExternalFeedActive) {
+        Object.keys(boardElements).forEach(k => {
+          const el = boardElements[k];
+          const [q, r] = k.split(',').map(Number);
+          if (el.type === 'source_mine' || el.type === 'source_water' || el.type === 'source_fire') {
+            const has = orbs.some(o => o.q === q && o.r === r);
+            if (!has) {
+              let t = 'mine';
+              if (el.type === 'source_water') t = 'water';
+              if (el.type === 'source_fire') t = 'fire';
+              orbs.push({
+                id: 'orb_' + Date.now() + '_' + Math.random(),
+                q, r,
+                type: t,
+                bondedTo: []
+              });
+            }
+          }
+        });
+      } else {
+        // 外部断料时，若阵盘原料耗尽，超频增益逐步消退归零
+        if (orbs.length === 0 && deliveredCount > 0) {
+          factoryBuffs.belt = 0;
+          factoryBuffs.mine = 0;
+          factoryBuffs.smelt = 0;
+          factoryBuffs.power = 0;
+          updateBuffMetersUI();
+        }
+      }
+
+      // 2. 机械臂执行离散 Opus 指令
+      arms.forEach((arm, armIdx) => {
+        const instrs = arm.instructions || [];
+        const instr = instrs[cycleIndex] || 'WAIT';
+        executeArmInstruction(arm, instr);
+      });
+
+      // 3. 质子升阶节点与符印判定
+      Object.keys(boardElements).forEach(k => {
+        const el = boardElements[k];
+        const [bq, br] = k.split(',').map(Number);
+        const center = orbs.find(o => o.q === bq && o.r === br);
+
+        // A. ✨ 质子升阶节点 (点化印：粗铁 🟤 经过点化印自动升阶蜕变为赤金 🟡！)
+        if (el.type === 'glyph_calc' && center) {
+          if (center.type === 'mine') {
+            center.type = 'gold';
+            playSfx('transmute');
+            showToast('✨【质子升阶】：粗铁质子经过升阶节点，蜕变为纯阳赤金 🟡！');
+          }
+        }
+
+        // B. ✂️ 解键离断印：切断通过该格子的共价键
+        if (el.type === 'glyph_unbond' && center) {
+          if (center.bondedTo && center.bondedTo.length > 0) {
+            center.bondedTo.forEach(nid => {
+              const neighbor = orbs.find(x => x.id === nid);
+              if (neighbor && neighbor.bondedTo) {
+                neighbor.bondedTo = neighbor.bondedTo.filter(id => id !== center.id);
+              }
+            });
+            center.bondedTo = [];
+            playSfx('unbond');
+          }
+        }
+
+        // C. 🌀 虚空消解印：销毁进入此格的质子
+        if (el.type === 'glyph_void' && center) {
+          arms.forEach(a => {
+            if (a.heldOrbId === center.id) {
+              a.isHolding = false;
+              a.heldOrbId = null;
+            }
+          });
+          orbs = orbs.filter(o => o.id !== center.id);
+          playSfx('void');
+        }
+
+        // D. 🔗 阴阳成键印：相邻质子结合形成共价刚性键
+        if (el.type === 'glyph_bond' && center) {
+          HEX_DIRS.forEach(d => {
+            const neighbor = orbs.find(o => o.q === bq + d.dq && o.r === br + d.dr);
+            if (neighbor && neighbor.id !== center.id) {
+              if (!center.bondedTo.includes(neighbor.id)) {
+                center.bondedTo.push(neighbor.id);
+                neighbor.bondedTo.push(center.id);
+                playSfx('bond');
+              }
+            }
+          });
+        }
+      });
+
+      // 4. ⭐ 质子绝对碰撞检验 (COLLISION CHECK)
+      if (checkOrbCollisions()) {
+        return;
+      }
+
+      // 5. ⭐ 阵眼严谨判定：同时检验板上常驻的所有四大阵眼！
+      checkAllSinkMoldsDelivery();
+
+      updateHeaderStats();
+      updateTimelinePlayhead();
+      renderScene();
+    }
+
+    // 辅助：更新顶栏 4 大特殊突破节点与工厂增益计量表
+    function updateBuffMetersUI() {
+      // 1. 飞梭带速
+      const beltVal = factoryBuffs.belt || 0;
+      const statBelt = document.getElementById('statBeltSpeed');
+      const badgeBelt = document.getElementById('badgeBeltState');
+      const nodeBelt = document.getElementById('node_breakthrough_belt');
+      if (statBelt) statBelt.innerText = `+${beltVal}%`;
+      if (badgeBelt && nodeBelt) {
+        if (beltVal >= 300) {
+          badgeBelt.innerText = '超频 👑';
+          badgeBelt.className = 'text-[9px] px-1 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40';
+          nodeBelt.className = 'px-2 py-0.5 rounded-lg bg-amber-950/40 border border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.5)] flex items-center space-x-1.5 transition-all duration-300';
+        } else if (beltVal >= 60) {
+          badgeBelt.innerText = '已突破 👑';
+          badgeBelt.className = 'text-[9px] px-1 rounded bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40';
+          nodeBelt.className = 'px-2 py-0.5 rounded-lg bg-cyan-950/40 border border-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.4)] flex items-center space-x-1.5 transition-all duration-300';
+        } else if (beltVal > 0) {
+          badgeBelt.innerText = '及格';
+          badgeBelt.className = 'text-[9px] px-1 rounded bg-emerald-500/20 text-emerald-300 font-bold';
+          nodeBelt.className = 'px-2 py-0.5 rounded-lg bg-emerald-950/30 border border-emerald-500/50 flex items-center space-x-1.5 transition-all duration-300';
+        } else {
+          badgeBelt.innerText = '待激活';
+          badgeBelt.className = 'text-[9px] px-1 rounded bg-white/10 text-white/40';
+          nodeBelt.className = 'px-2 py-0.5 rounded-lg bg-black/50 border border-white/15 flex items-center space-x-1.5 transition-all duration-300';
+        }
+      }
+
+      // 2. 采矿效率
+      const mineVal = factoryBuffs.mine || 0;
+      const statMine = document.getElementById('statMineRate');
+      const badgeMine = document.getElementById('badgeMineState');
+      const nodeMine = document.getElementById('node_breakthrough_mine');
+      if (statMine) statMine.innerText = `+${mineVal}%`;
+      if (badgeMine && nodeMine) {
+        if (mineVal >= 300) {
+          badgeMine.innerText = '超频 👑';
+          badgeMine.className = 'text-[9px] px-1 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40';
+          nodeMine.className = 'px-2 py-0.5 rounded-lg bg-amber-950/40 border border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.5)] flex items-center space-x-1.5 transition-all duration-300';
+        } else if (mineVal >= 60) {
+          badgeMine.innerText = '已突破 👑';
+          badgeMine.className = 'text-[9px] px-1 rounded bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40';
+          nodeMine.className = 'px-2 py-0.5 rounded-lg bg-cyan-950/40 border border-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.4)] flex items-center space-x-1.5 transition-all duration-300';
+        } else if (mineVal > 0) {
+          badgeMine.innerText = '及格';
+          badgeMine.className = 'text-[9px] px-1 rounded bg-emerald-500/20 text-emerald-300 font-bold';
+          nodeMine.className = 'px-2 py-0.5 rounded-lg bg-emerald-950/30 border border-emerald-500/50 flex items-center space-x-1.5 transition-all duration-300';
+        } else {
+          badgeMine.innerText = '待激活';
+          badgeMine.className = 'text-[9px] px-1 rounded bg-white/10 text-white/40';
+          nodeMine.className = 'px-2 py-0.5 rounded-lg bg-black/50 border border-white/15 flex items-center space-x-1.5 transition-all duration-300';
+        }
+      }
+
+      // 3. 冶炼产能
+      const smeltVal = factoryBuffs.smelt || 0;
+      const statSmelt = document.getElementById('statSmeltRate');
+      const badgeSmelt = document.getElementById('badgeSmeltState');
+      const nodeSmelt = document.getElementById('node_breakthrough_smelt');
+      if (statSmelt) statSmelt.innerText = `+${smeltVal}%`;
+      if (badgeSmelt && nodeSmelt) {
+        if (smeltVal >= 300) {
+          badgeSmelt.innerText = '超频 👑';
+          badgeSmelt.className = 'text-[9px] px-1 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40';
+          nodeSmelt.className = 'px-2 py-0.5 rounded-lg bg-amber-950/40 border border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.5)] flex items-center space-x-1.5 transition-all duration-300';
+        } else if (smeltVal >= 60) {
+          badgeSmelt.innerText = '已突破 👑';
+          badgeSmelt.className = 'text-[9px] px-1 rounded bg-rose-500/20 text-rose-300 font-bold border border-rose-500/40';
+          nodeSmelt.className = 'px-2 py-0.5 rounded-lg bg-rose-950/40 border border-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.4)] flex items-center space-x-1.5 transition-all duration-300';
+        } else if (smeltVal > 0) {
+          badgeSmelt.innerText = '及格';
+          badgeSmelt.className = 'text-[9px] px-1 rounded bg-emerald-500/20 text-emerald-300 font-bold';
+          nodeSmelt.className = 'px-2 py-0.5 rounded-lg bg-emerald-950/30 border border-emerald-500/50 flex items-center space-x-1.5 transition-all duration-300';
+        } else {
+          badgeSmelt.innerText = '待激活';
+          badgeSmelt.className = 'text-[9px] px-1 rounded bg-white/10 text-white/40';
+          nodeSmelt.className = 'px-2 py-0.5 rounded-lg bg-black/50 border border-white/15 flex items-center space-x-1.5 transition-all duration-300';
+        }
+      }
+
+      // 4. 灵能与神髓自愈
+      const powerVal = factoryBuffs.power || 0;
+      const statPower = document.getElementById('statPowerRate');
+      const badgePower = document.getElementById('badgePowerState');
+      const nodePower = document.getElementById('node_breakthrough_power');
+      if (statPower) {
+        statPower.innerText = (powerVal > 0) ? '+200装甲' : '+0%';
+      }
+      if (badgePower && nodePower) {
+        if (powerVal >= 300) {
+          badgePower.innerText = '自愈+60/s 👑';
+          badgePower.className = 'text-[9px] px-1 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/40';
+          nodePower.className = 'px-2 py-0.5 rounded-lg bg-purple-950/40 border border-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.5)] flex items-center space-x-1.5 transition-all duration-300';
+        } else if (powerVal > 0) {
+          badgePower.innerText = '自愈+20/s';
+          badgePower.className = 'text-[9px] px-1 rounded bg-purple-500/20 text-purple-300 font-bold';
+          nodePower.className = 'px-2 py-0.5 rounded-lg bg-purple-950/30 border border-purple-500/50 flex items-center space-x-1.5 transition-all duration-300';
+        } else {
+          badgePower.innerText = '待激活';
+          badgePower.className = 'text-[9px] px-1 rounded bg-white/10 text-white/40';
+          nodePower.className = 'px-2 py-0.5 rounded-lg bg-black/50 border border-white/15 flex items-center space-x-1.5 transition-all duration-300';
+        }
+      }
+    }
+
+    // 严密的多阵眼并发几何受纳契合判定函数
+    function checkAllSinkMoldsDelivery() {
+      let buffVal = 20; // 基础普通解 +20%
+      if (CURRENT_PRESET_MODE === 'advanced') buffVal = 60; // 进阶闭环解 +60%
+      if (CURRENT_PRESET_MODE === 'optimal') buffVal = 300; // 极限超频芭蕾解 +300%
+
+      for (const mId in SINK_MOLDS) {
+        const mold = SINK_MOLDS[mId];
+
+        // 1. 获取落在阵眼各个槽位上的灵珠
+        const currentOrbs = mold.slots.map(s => orbs.find(o => o.q === s.q && o.r === s.r));
+        if (currentOrbs.some(o => !o)) continue; // 只要有任何槽位空缺，则未满足
+
+        // 2. 严密的分子槽位对齐与共价键检验 (必须完美吻合模具各个槽位的指定元素与刚性键)
+        const n = mold.slots.length;
+        let typesMatch = true;
+        for (let i = 0; i < n; i++) {
+          if (currentOrbs[i].type !== mold.slots[i].requiredType) {
+            typesMatch = false;
+            break;
+          }
+        }
+        if (!typesMatch) continue;
+
+        // 检验各槽位间是否具备模具要求的内部刚性共价键
+        let bondsMatch = true;
+        for (let b = 0; b < mold.requiredBonds.length; b++) {
+          const [idxA, idxB] = mold.requiredBonds[b];
+          const orbA = currentOrbs[idxA];
+          const orbB = currentOrbs[idxB];
+          if (!orbA || !orbB || !(orbA.bondedTo || []).includes(orbB.id)) {
+            bondsMatch = false;
+            break;
+          }
+        }
+
+        if (!bondsMatch) continue;
+
+        // =====================================================================
+        // 🎉 该阵眼被成功满足！吞入分子，更新对应的工厂专属增益！
+        // =====================================================================
+        deliveredCount++;
+        playSfx('deliver');
+
+        // 阵眼闪光
+        const moldLayer = document.getElementById('layerSinkMold');
+        if (moldLayer) {
+          moldLayer.classList.remove('mold-flash');
+          void moldLayer.offsetWidth;
+          moldLayer.classList.add('mold-flash');
+        }
+
+        // 吞噬消除交付的质子
+        const deliveredIds = new Set(currentOrbs.map(o => o.id));
+        orbs = orbs.filter(o => !deliveredIds.has(o.id));
+        arms.forEach(a => {
+          if (deliveredIds.has(a.heldOrbId)) {
+            a.isHolding = false;
+            a.heldOrbId = null;
+          }
+        });
+
+        // 增加对应工厂 BUFF
+        factoryBuffs[mold.targetBuff] = Math.max(factoryBuffs[mold.targetBuff], buffVal);
+        if (CURRENT_PRESET_MODE === 'optimal') {
+          // 芭蕾超频解法全线共振
+          factoryBuffs.belt = 300;
+          factoryBuffs.mine = 300;
+          factoryBuffs.smelt = 300;
+          factoryBuffs.power = 300;
+        }
+        updateBuffMetersUI();
+
+        const buffNames = { belt: '飞梭带速', mine: '采矿效率', smelt: '冶炼产能', power: '灵能神髓' };
+        showToast(`🎉【${mold.name} 交付达成】${buffNames[mold.targetBuff]}提升至 +${factoryBuffs[mold.targetBuff]}%！特殊突破节点全域激活 👑！`);
+      }
+    }
+
+    // =========================================================================
+    // 9. 顶栏指标与弹窗
+    // =========================================================================
+    function updateHeaderStats() {
+      let cost = 0;
+      const occupied = new Set();
+
+      Object.keys(boardElements).forEach(k => {
+        if (!boardElements[k].isFixedFixture) {
+          cost += (COSTS[boardElements[k].type] || 0);
+        }
+        occupied.add(k);
+      });
+      arms.forEach(a => {
+        cost += (COSTS[a.type] || 20);
+        occupied.add(`${a.q},${a.r}`);
+      });
+
+      const area = occupied.size;
+
+      const cEl = document.getElementById('statCost');
+      if (cEl) cEl.innerText = cost;
+      const aEl = document.getElementById('statArea');
+      if (aEl) aEl.innerText = area + ' 格';
+      const cyEl = document.getElementById('statCycles');
+      if (cyEl) cyEl.innerText = simCycle;
+
+      const isOpt = (CURRENT_PRESET_MODE === 'optimal');
+      const bc = document.getElementById('benchCost');
+      if (bc) bc.innerText = cost;
+      const ba = document.getElementById('benchArea');
+      if (ba) ba.innerText = area + ' 灵格';
+      const bcy = document.getElementById('benchCycles');
+      if (bcy) bcy.innerText = isOpt ? '6~12 拍 (最优极速)' : '14~17 拍 (普通稳态)';
+      const brt = document.getElementById('benchRating');
+      if (brt) brt.innerText = isOpt ? 'SSS 极速神阶' : 'A 级 稳妥达成';
+    }
+
+    function openBenchmarkModal() {
+      playSfx('click');
+      updateHeaderStats();
+      const m = document.getElementById('benchmarkModal');
+      if (m) m.classList.remove('hidden');
+    }
+    function closeBenchmarkModal() {
+      playSfx('click');
+      const m = document.getElementById('benchmarkModal');
+      if (m) m.classList.add('hidden');
+    }
+
+    function equipChipToFactory() {
+      playSfx('deliver');
+      closeBenchmarkModal();
+      showToast('🎉 宗门阵眼催化芯片已实装至大工厂！对应真实效率永久加成！');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>《天道重工》天道中央处理器 (CPU) · 一体化巅峰无缝拼接阵盘系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Noto+Sans+SC:wght@400;700;900&display=swap');
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', 'Fira Code', monospace;
+            background-color: #03060a;
+            color: #cbd5e1;
+            overflow: hidden;
+        }
+
+        /* 宏观一体化 PCB 画布视口 */
+        #viewport-container {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            cursor: grab;
+        }
+        #viewport-container.panning {
+            cursor: grabbing;
+        }
+
+        /* 可无级平移缩放的世界根容器 */
+        #world-canvas {
+            position: absolute;
+            width: 4800px;
+            height: 3600px;
+            left: 0;
+            top: 0;
+            transform-origin: 0 0;
+            background-color: #050910;
+            background-image: 
+                radial-gradient(circle at 1200px 1200px, rgba(0, 240, 255, 0.05) 0%, transparent 60%),
+                linear-gradient(to right, rgba(212, 175, 55, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(212, 175, 55, 0.04) 1px, transparent 1px),
+                linear-gradient(to right, rgba(0, 240, 255, 0.015) 5px, transparent 5px),
+                linear-gradient(to bottom, rgba(0, 240, 255, 0.015) 5px, transparent 5px);
+            background-size: 100% 100%, 25px 25px, 25px 25px, 125px 125px, 125px 125px;
+        }
+
+        /* 实体拼装阵盘区块 (Board Sector) */
+        .board-sector {
+            position: absolute;
+            border: 2px solid #1c2b3d;
+            border-radius: 12px;
+            background: rgba(8, 14, 23, 0.85);
+            backdrop-filter: blur(10px);
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 0, 0, 0.8);
+            transition: border-color 0.4s, box-shadow 0.4s, opacity 0.5s;
+        }
+        .board-sector.active-sector {
+            border-color: #d4af37;
+            box-shadow: inset 0 0 80px rgba(212, 175, 55, 0.05), 0 0 40px rgba(212, 175, 55, 0.2);
+        }
+
+        /* 未解锁被迷雾与因果符文封印的区域 */
+        .board-sector.locked {
+            background: repeating-linear-gradient(
+                -45deg,
+                rgba(10, 16, 26, 0.95),
+                rgba(10, 16, 26, 0.95) 20px,
+                rgba(18, 5, 5, 0.9) 20px,
+                rgba(18, 5, 5, 0.9) 40px
+            );
+            border: 2px dashed #7f1d1d;
+            box-shadow: inset 0 0 80px rgba(127, 29, 29, 0.5);
+            pointer-events: none;
+        }
+        .board-sector.locked .lock-overlay {
+            display: flex;
+        }
+
+        /* 电子元件 / 阵法芯片节点 */
+        .pcb-chip-node {
+            position: absolute;
+            background: linear-gradient(165deg, rgba(15, 23, 38, 0.96) 0%, rgba(9, 14, 24, 0.98) 100%);
+            border: 1.5px solid #2a3e59;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(212, 175, 55, 0.12);
+            cursor: grab;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            z-index: 25;
+        }
+        .pcb-chip-node:active {
+            cursor: grabbing;
+        }
+
+        /* 镀金引脚 / 焊盘 */
+        .bp-pin {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid #090e17;
+            cursor: crosshair;
+            transition: transform 0.15s, box-shadow 0.15s;
+            position: relative;
+        }
+        .bp-pin::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.9;
+        }
+        .bp-pin:hover {
+            transform: scale(1.4);
+            box-shadow: 0 0 12px currentColor;
+        }
+
+        .pin-red { color: #f43f5e; }
+        .pin-blue { color: #38bdf8; }
+        .pin-green { color: #10b981; }
+        .pin-purple { color: #c084fc; }
+        .pin-gold { color: #facc15; }
+        .pin-grey { color: #94a3b8; }
+
+        /* 暗黑4巅峰闸门门锁 (Gate Socket) */
+        .gate-bridge {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(15, 23, 42, 0.95));
+            border: 2px dashed #d4af37;
+            border-radius: 8px;
+            z-index: 24;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .gate-bridge.unlocked {
+            border: 2px solid #10b981;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(15, 23, 42, 0.95));
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+        }
+
+        /* 侧边抽屉收纳动画与样式 */
+        #cpu-mother-cabinet {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+        }
+        #cpu-mother-cabinet.collapsed {
+            transform: translateX(110%);
+            pointer-events: none;
+        }
+
+        #bottom-toolbar {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #bottom-toolbar.collapsed {
+            transform: translateY(80%);
+        }
+
+        @keyframes pulse-gold {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.4)); }
+            50% { filter: drop-shadow(0 0 20px rgba(250, 204, 21, 0.95)); }
+        }
+        .glow-gold {
+            animation: pulse-gold 2s infinite;
+        }
+    </style>
+</head>
+<body class="w-screen h-screen flex flex-col">
+
+    <!-- 顶部状态栏：平移视野指引与宏观监控 -->
+    <header class="h-14 bg-[#060a12]/95 border-b border-slate-800 px-6 flex items-center justify-between z-40 shrink-0 backdrop-blur-md">
+        <div class="flex items-center gap-3">
+            <div class="relative w-8 h-8 rounded-lg bg-amber-950/40 border border-amber-500/70 flex items-center justify-center">
+                <span class="text-amber-400 font-black text-sm">樞</span>
+                <span class="absolute -top-1 -right-1 w-2 rounded-full bg-cyan-400 animate-ping"></span>
+            </div>
+            <div>
+                <h1 class="text-xs font-bold tracking-wider text-amber-300 font-mono flex items-center gap-2">
+                    天道中央处理器 (CPU) · 一体化巅峰连通阵盘
+                    <span class="text-[9px] bg-cyan-950 text-cyan-400 border border-cyan-800 px-1 py-0.5 rounded font-normal">单图无缝展开</span>
+                </h1>
+                <p class="text-[10px] text-slate-400 font-mono">鼠标中键/右键拖拽画布 · 连线插入闸口直接击碎迷雾解锁相邻区域</p>
+            </div>
+        </div>
+
+        <!-- 视角一键导航工具条 -->
+        <div class="flex items-center gap-2 bg-slate-900/90 p-1 rounded-lg border border-slate-800 font-mono text-xs">
+            <span class="text-slate-400 px-1 text-[11px]">视野定位:</span>
+            <button onclick="focusSector('sector_main')" class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/50 hover:bg-amber-500/30 font-bold transition text-xs">
+                1. 母盘核心
+            </button>
+            <button onclick="focusSector('sector_furnace')" id="nav-btn-furnace" class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 hover:border-purple-600 transition flex items-center gap-1 text-xs">
+                <span>2. 东侧煞焰盘</span>
+                <span id="nav-lock-furnace" class="text-[9px] bg-red-950 text-red-400 px-1 rounded">锁</span>
+            </button>
+            <button onclick="focusSector('sector_spirit')" id="nav-btn-spirit" class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 hover:border-cyan-600 transition flex items-center gap-1 text-xs">
+                <span>3. 北侧神识盘</span>
+                <span id="nav-lock-spirit" class="text-[9px] bg-red-950 text-red-400 px-1 rounded">锁</span>
+            </button>
+            <button onclick="resetZoom()" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-xs">
+                全景俯瞰
+            </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- 切换 CPU 机柜面板显隐按钮 -->
+            <button onclick="toggleCabinet()" id="btn-toggle-cabinet" class="px-2.5 py-1 text-xs bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 border border-cyan-700 rounded font-mono font-bold transition flex items-center gap-1.5 shadow-[0_0_12px_rgba(0,240,255,0.2)]">
+                <span>⚙ CPU 插孔机柜</span>
+                <span id="toggle-cabinet-indicator" class="text-[9px] bg-cyan-900 px-1 rounded">收起中</span>
+            </button>
+            <button onclick="quickClearAll()" class="px-2.5 py-1 text-xs bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-800 rounded font-mono transition">
+                清空全网走线
+            </button>
+        </div>
+    </header>
+
+    <!-- 主视口：一体化无缝平移大世界 -->
+    <main class="relative flex-1 overflow-hidden flex">
+        
+        <div id="viewport-container">
+            <div id="world-canvas">
+                
+                <!-- 全局物理贝塞尔铜箔连线 SVG -->
+                <svg id="wire-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-20">
+                    <!-- 动态高导铜箔线路将在此渲染 -->
+                </svg>
+
+                <!-- 临时拉线预览 -->
+                <svg id="drag-wire-svg" class="absolute inset-0 w-full h-full pointer-events-none z-30">
+                    <path id="temp-wire" d="" fill="none" stroke="#00f0ff" stroke-width="3" stroke-dasharray="6,4" class="hidden" />
+                </svg>
+
+                <!-- ================= 区块 1：天枢核心母盘 (中央核心 1000px * 750px) ================= -->
+                <div id="sector_main" class="board-sector active-sector p-6" style="left: 1000px; top: 1200px; width: 1050px; height: 780px;">
+                    <div class="flex items-center justify-between border-b border-amber-500/30 pb-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-3 h-3 rounded-full bg-amber-400 glow-gold"></span>
+                            <h2 class="text-sm font-bold text-amber-300 font-mono tracking-wider">【第一阵盘区：天枢核心母盘】</h2>
+                            <span class="text-[10px] bg-amber-950 text-amber-300 border border-amber-700 px-2 py-0.5 rounded font-mono">主编译中枢</span>
+                        </div>
+                        <span class="text-xs text-slate-400 font-mono">向右连接【东门】即可击碎煞焰盘封印并延伸</span>
+                    </div>
+
+                    <!-- 背景天体刻度装饰 -->
+                    <div class="absolute inset-0 pointer-events-none flex items-center justify-center opacity-10">
+                        <div class="w-[500px] h-[500px] rounded-full border-2 border-amber-400 border-dashed animate-spin" style="animation-duration: 200s;"></div>
+                    </div>
+                </div>
+
+                <!-- 连通【东门】的桥接闸门组件 (横跨在母盘与东盘缝隙之间) -->
+                <div id="gate-east-bridge" class="gate-bridge" style="left: 2025px; top: 1520px; width: 80px; height: 140px;" onclick="tryUnlockSector('furnace')">
+                    <div class="flex flex-col items-center justify-around h-full p-2 text-center pointer-events-auto">
+                        <span class="text-[10px] font-bold text-amber-300 font-mono writing-mode-vertical">东门闸口</span>
+                        <div class="bp-pin pin-gold my-1" data-gate-id="gate_east" data-type="gate" title="连入此插孔注能以激活下一块阵盘"></div>
+                        <span id="gate-east-status" class="text-[9px] text-amber-400 font-mono">待充能</span>
+                    </div>
+                </div>
+
+                <!-- ================= 区块 2：煞焰炼狱扩展盘 (东侧 1000px * 750px) ================= -->
+                <div id="sector_furnace" class="board-sector locked p-6" style="left: 2080px; top: 1200px; width: 1050px; height: 780px;">
+                    <div class="flex items-center justify-between border-b border-purple-500/30 pb-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-3 h-3 rounded-full bg-purple-400"></span>
+                            <h2 class="text-sm font-bold text-purple-300 font-mono tracking-wider">【第二阵盘区：煞焰炼狱特化盘】</h2>
+                            <span class="text-[10px] bg-purple-950 text-purple-300 border border-purple-700 px-2 py-0.5 rounded font-mono">热核等离子 3倍暴击</span>
+                        </div>
+                    </div>
+
+                    <!-- 锁闭遮罩 -->
+                    <div class="lock-overlay absolute inset-0 hidden flex-col items-center justify-center z-30 bg-black/70 backdrop-blur-sm rounded-xl">
+                        <div class="w-16 h-16 rounded-full bg-red-950/80 border-2 border-red-500/80 flex items-center justify-center text-2xl text-red-400 mb-3 shadow-[0_0_25px_rgba(239,68,68,0.5)]">
+                            🔒
+                        </div>
+                        <h3 class="text-sm font-bold text-red-300 font-mono mb-1">【东门未贯通 · 因果结界封锁】</h3>
+                        <p class="text-xs text-slate-400 font-mono max-w-sm text-center">
+                            请从左侧【天枢母盘】引出一根高阶信号线（或融合线），插入两盘中间的【东门闸口】进行物理贯通！
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 连通【北门】的桥接闸门组件 (横跨在母盘与北盘缝隙之间) -->
+                <div id="gate-north-bridge" class="gate-bridge" style="left: 1475px; top: 1145px; width: 140px; height: 80px;" onclick="tryUnlockSector('spirit')">
+                    <div class="flex items-center justify-around w-full p-2 text-center pointer-events-auto">
+                        <span class="text-[10px] font-bold text-cyan-300 font-mono">北门闸口</span>
+                        <div class="bp-pin pin-gold mx-1" data-gate-id="gate_north" data-type="gate" title="连入此插孔注能以激活下一块阵盘"></div>
+                        <span id="gate-north-status" class="text-[9px] text-cyan-400 font-mono">待充能</span>
+                    </div>
+                </div>
+
+                <!-- ================= 区块 3：神识因果扩展盘 (北侧 1000px * 750px) ================= -->
+                <div id="sector_spirit" class="board-sector locked p-6" style="left: 1000px; top: 400px; width: 1050px; height: 780px;">
+                    <div class="flex items-center justify-between border-b border-cyan-500/30 pb-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-3 h-3 rounded-full bg-cyan-400 glow-gold"></span>
+                            <h2 class="text-sm font-bold text-cyan-300 font-mono tracking-wider">【第三阵盘区：神识因果特化盘】</h2>
+                            <span class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-700 px-2 py-0.5 rounded font-mono">天道真理 5倍极效</span>
+                        </div>
+                    </div>
+
+                    <!-- 锁闭遮罩 -->
+                    <div class="lock-overlay absolute inset-0 hidden flex-col items-center justify-center z-30 bg-black/70 backdrop-blur-sm rounded-xl">
+                        <div class="w-16 h-16 rounded-full bg-red-950/80 border-2 border-red-500/80 flex items-center justify-center text-2xl text-red-400 mb-3 shadow-[0_0_25px_rgba(239,68,68,0.5)]">
+                            🔒
+                        </div>
+                        <h3 class="text-sm font-bold text-red-300 font-mono mb-1">【北门未贯通 · 混沌迷雾封锁】</h3>
+                        <p class="text-xs text-slate-400 font-mono max-w-sm text-center">
+                            请从下方【天枢母盘】引出三元纯净流体，插入两盘中央的【北门闸口】完成结界破除！
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 节点动态挂载容器 -->
+                <div id="nodes-container" class="absolute inset-0 pointer-events-auto">
+                    <!-- 动态生成芯片节点 -->
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 悬浮收纳拉手标签 (即使机柜收起，也可点击这个拉手随时展开) -->
+        <button onclick="toggleCabinet()" id="drawer-tab-btn" class="fixed right-0 top-24 z-40 bg-[#090e18]/95 border-l-2 border-y-2 border-cyan-500/70 text-cyan-300 px-2 py-3 rounded-l-lg font-mono text-xs font-bold shadow-[-5px_0_15px_rgba(0,0,0,0.8)] flex flex-col items-center gap-1.5 hover:bg-cyan-950 transition">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+            <span class="writing-mode-vertical tracking-widest text-[11px]">CPU插槽</span>
+            <span id="tab-pin-count" class="text-[9px] bg-cyan-950 border border-cyan-800 px-1 rounded text-cyan-400">0/6</span>
+        </button>
+
+        <!-- 右侧悬浮机柜：CPU 6 大独立全局效率插座 (可一键收拢隐藏，默认完全收拢) -->
+        <div id="cpu-mother-cabinet" class="fixed right-4 top-20 bottom-24 w-80 bg-[#090e18]/95 border-2 border-cyan-500/70 rounded-xl p-4 flex flex-col justify-between shadow-[0_0_40px_rgba(0,0,0,0.9)] z-30 shrink-0 backdrop-blur-md collapsed">
+            <div class="border-b border-slate-800 pb-2.5 flex items-center justify-between">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                        <h2 class="text-xs font-bold text-white tracking-wider font-mono">CPU 效率单线插座</h2>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-0.5">硬规则：每个孔死限制只能插一根线！</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="text-[10px] font-mono bg-cyan-950 border border-cyan-800 px-2 py-0.5 text-cyan-300 rounded">
+                        插孔: 6/6
+                    </div>
+                    <button onclick="toggleCabinet()" class="text-slate-400 hover:text-white text-xs px-1.5 py-0.5 rounded hover:bg-slate-800" title="收起面板">✕</button>
+                </div>
+            </div>
+
+            <!-- 6 个插孔列表 -->
+            <div class="flex-1 flex flex-col justify-around py-2 space-y-2 overflow-y-auto pr-1">
+                <!-- 1. 传送带流速 -->
+                <div class="p-2 rounded bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="bp-pin pin-grey" data-port-id="belt" data-type="input" title="插孔 1：传送带流速"></div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-200">1. 传送带流速</span>
+                            <span class="block text-[9px] text-slate-500 font-mono">识别：红/蓝/绿/紫/金</span>
+                        </div>
+                    </div>
+                    <span id="port-val-belt" class="text-xs font-mono text-slate-500">+0%</span>
+                </div>
+
+                <!-- 2. 空间物流传送 -->
+                <div class="p-2 rounded bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="bp-pin pin-grey" data-port-id="teleport" data-type="input" title="插孔 2：空间传送"></div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-200">2. 空间物流传送</span>
+                            <span class="block text-[9px] text-slate-500 font-mono">识别：红/蓝/紫</span>
+                        </div>
+                    </div>
+                    <span id="port-val-teleport" class="text-xs font-mono text-slate-500">+0%</span>
+                </div>
+
+                <!-- 3. 工厂组装产能 -->
+                <div class="p-2 rounded bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="bp-pin pin-grey" data-port-id="factory" data-type="input" title="插孔 3：组装产能"></div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-200">3. 工厂组装产能</span>
+                            <span class="block text-[9px] text-slate-500 font-mono">基础保底增益插口</span>
+                        </div>
+                    </div>
+                    <span id="port-val-factory" class="text-xs font-mono text-slate-500">+0%</span>
+                </div>
+
+                <!-- 4. 重工冶炼暴击 -->
+                <div class="p-2 rounded bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="bp-pin pin-grey" data-port-id="heavy" data-type="input" title="插孔 4：重工冶炼"></div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-200">4. 重工/熔炼暴击</span>
+                            <span class="block text-[9px] text-purple-400 font-mono">⚡ 紫线 3倍乘区</span>
+                        </div>
+                    </div>
+                    <span id="port-val-heavy" class="text-xs font-mono text-slate-500">1.0x</span>
+                </div>
+
+                <!-- 5. 燃料/能量效率 -->
+                <div class="p-2 rounded bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="bp-pin pin-grey" data-port-id="fuel" data-type="input" title="插孔 5：燃料效率"></div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-200">5. 燃料/能量效率</span>
+                            <span class="block text-[9px] text-slate-500 font-mono">降耗省油 20%~80%</span>
+                        </div>
+                    </div>
+                    <span id="port-val-fuel" class="text-xs font-mono text-slate-500">1.0x</span>
+                </div>
+
+                <!-- 6. 科技破译核心 -->
+                <div class="p-2 rounded bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="bp-pin pin-grey" data-port-id="tech" data-type="input" title="插孔 6：科技破译"></div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-200">6. 天道破译核心</span>
+                            <span class="block text-[9px] text-amber-400 font-mono">👑 唯认金线 5倍暴击</span>
+                        </div>
+                    </div>
+                    <span id="port-val-tech" class="text-xs font-mono text-slate-500">0 TFLOPS</span>
+                </div>
+            </div>
+
+            <!-- 底盘阻抗指示 -->
+            <div class="border-t border-slate-800 pt-2 text-[11px] font-mono flex justify-between items-center text-slate-400">
+                <span>电网阻抗: <b id="metric-z" class="text-emerald-400">0.0 Ω</b></span>
+                <span id="cpu-total-status" class="text-cyan-400 font-bold">待命中</span>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 底部操作栏：放置元件库与一键极速体验 (支持收起/展开) -->
+    <footer id="bottom-toolbar" class="h-16 bg-[#060a12] border-t border-slate-800 px-6 flex items-center justify-between shrink-0 z-40 relative">
+        <!-- 底部收起/展开小箭头 -->
+        <button onclick="toggleBottomToolbar()" class="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#060a12] border-t border-x border-slate-800 text-slate-400 hover:text-white px-3 py-0.5 rounded-t-md text-[10px] font-mono">
+            <span id="bottom-arrow">▼ 收纳工具栏</span>
+        </button>
+
+        <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-400 font-mono mr-1">生成芯片:</span>
+            <button onclick="spawnNodeAtCenter('source-red')" class="px-2 py-1 rounded bg-red-950/60 hover:bg-red-900 border border-red-600 text-red-300 text-xs font-mono font-bold flex items-center gap-1.5 transition">
+                <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> + 灵煤源
+            </button>
+            <button onclick="spawnNodeAtCenter('source-blue')" class="px-2 py-1 rounded bg-sky-950/60 hover:bg-sky-900 border border-sky-600 text-sky-300 text-xs font-mono font-bold flex items-center gap-1.5 transition">
+                <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span> + 高压电
+            </button>
+            <button onclick="spawnNodeAtCenter('source-green')" class="px-2 py-1 rounded bg-emerald-950/60 hover:bg-emerald-900 border border-emerald-600 text-emerald-300 text-xs font-mono font-bold flex items-center gap-1.5 transition">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> + 纯化灵气
+            </button>
+            <div class="h-5 w-px bg-slate-800 mx-1"></div>
+            <button onclick="spawnNodeAtCenter('merger')" class="px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-mono font-bold transition">
+                ➕ 合并器
+            </button>
+            <button onclick="spawnNodeAtCenter('valve')" class="px-2 py-1 rounded bg-amber-950/40 hover:bg-amber-900 border border-amber-600/70 text-amber-300 text-xs font-mono font-bold transition">
+                ⚙ 限流阀
+            </button>
+            <button onclick="spawnNodeAtCenter('fusion-dual')" class="px-2 py-1 rounded bg-purple-950/60 hover:bg-purple-900 border border-purple-600 text-purple-300 text-xs font-mono font-bold transition">
+                🔮 二元等离子
+            </button>
+            <button onclick="spawnNodeAtCenter('fusion-ternary')" class="px-2 py-1 rounded bg-amber-950/60 hover:bg-amber-900 border border-amber-500 text-amber-300 text-xs font-mono font-bold transition glow-gold">
+                👑 三元归一炉
+            </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <span class="text-[10px] text-slate-500 font-mono mr-1">预设:</span>
+            <button onclick="loadDirectDemo('basic')" class="px-2 py-0.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 rounded font-mono transition">
+                母盘基础
+            </button>
+            <button onclick="loadDirectDemo('expand_furnace')" class="px-2 py-0.5 text-xs bg-purple-950 hover:bg-purple-900 text-purple-300 border border-purple-700 rounded font-mono transition">
+                东门·煞焰展开
+            </button>
+            <button onclick="loadDirectDemo('expand_all')" class="px-2 py-0.5 text-xs bg-amber-950 hover:bg-amber-900 text-amber-300 border border-amber-600 rounded font-mono font-bold transition glow-gold">
+                全阵盘大圆满
+            </button>
+        </div>
+    </footer>
+
+    <script>
+        // 音效引擎
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(freq, type = 'sine', duration = 0.12, gain = 0.08) {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                g.gain.setValueAtTime(gain, audioCtx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(g);
+                g.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        // ========================== 面板收纳交互 ==========================
+        let isCabinetOpen = false;
+        function toggleCabinet() {
+            isCabinetOpen = !isCabinetOpen;
+            const cabinet = document.getElementById('cpu-mother-cabinet');
+            const indicator = document.getElementById('toggle-cabinet-indicator');
+            const drawerBtn = document.getElementById('drawer-tab-btn');
+
+            if (isCabinetOpen) {
+                cabinet.classList.remove('collapsed');
+                indicator.textContent = '展开中';
+                indicator.className = 'text-[9px] bg-emerald-900 text-emerald-300 px-1 rounded';
+                drawerBtn.classList.add('opacity-0', 'pointer-events-none');
+            } else {
+                cabinet.classList.add('collapsed');
+                indicator.textContent = '已收起';
+                indicator.className = 'text-[9px] bg-cyan-900 text-cyan-400 px-1 rounded';
+                drawerBtn.classList.remove('opacity-0', 'pointer-events-none');
+            }
+            playTone(400, 'sine', 0.08);
+            setTimeout(updateWires, 300);
+        }
+
+        let isBottomOpen = true;
+        function toggleBottomToolbar() {
+            isBottomOpen = !isBottomOpen;
+            const bar = document.getElementById('bottom-toolbar');
+            const arrow = document.getElementById('bottom-arrow');
+            if (isBottomOpen) {
+                bar.classList.remove('collapsed');
+                arrow.textContent = '▼ 收纳工具栏';
+            } else {
+                bar.classList.add('collapsed');
+                arrow.textContent = '▲ 展开工具栏';
+            }
+            playTone(350, 'sine', 0.08);
+        }
+
+        // ========================== 全局大地图与区块状态 ==========================
+        const state = {
+            view: {
+                x: -600, // 世界偏移
+                y: -900,
+                scale: 0.95
+            },
+            isPanning: false,
+            panStartX: 0,
+            panStartY: 0,
+            sectors: {
+                main: { id: 'sector_main', unlocked: true, x: 1000, y: 1200, width: 1050, height: 780 },
+                furnace: { id: 'sector_furnace', unlocked: false, x: 2080, y: 1200, width: 1050, height: 780, gateId: 'gate_east' },
+                spirit: { id: 'sector_spirit', unlocked: false, x: 1000, y: 400, width: 1050, height: 780, gateId: 'gate_north' }
+            },
+            gates: {
+                gate_east: { inputNode: null, inputPin: null, val: 0, valType: 'none', targetSector: 'furnace' },
+                gate_north: { inputNode: null, inputPin: null, val: 0, valType: 'none', targetSector: 'spirit' }
+            },
+            nodes: [],
+            wires: [],
+            nextNodeId: 1,
+            dragWire: {
+                active: false,
+                fromNode: null,
+                fromPin: null,
+                fromX: 0,
+                fromY: 0,
+                color: '#94a3b8'
+            },
+            cpuPorts: {
+                belt: { wire: null, value: 0, boost: 0 },
+                teleport: { wire: null, value: 0, boost: 0 },
+                factory: { wire: null, value: 0, boost: 0 },
+                heavy: { wire: null, value: 0, boost: 0 },
+                fuel: { wire: null, value: 0, boost: 0 },
+                tech: { wire: null, value: 0, boost: 0 }
+            }
+        };
+
+        const viewportContainer = document.getElementById('viewport-container');
+        const worldCanvas = document.getElementById('world-canvas');
+        const wireCanvas = document.getElementById('wire-canvas');
+        const tempWirePath = document.getElementById('temp-wire');
+        const nodesContainer = document.getElementById('nodes-container');
+
+        // ========================== 视角平移与缩放 (暗黑大星盘手感) ==========================
+        function updateTransform() {
+            worldCanvas.style.transform = `translate(${state.view.x}px, ${state.view.y}px) scale(${state.view.scale})`;
+        }
+
+        viewportContainer.addEventListener('mousedown', (e) => {
+            // 中键、右键或按住空格点左键均可拖拽大地图
+            if (e.button === 1 || e.button === 2 || (e.button === 0 && e.target === viewportContainer)) {
+                state.isPanning = true;
+                state.panStartX = e.clientX - state.view.x;
+                state.panStartY = e.clientY - state.view.y;
+                viewportContainer.classList.add('panning');
+                e.preventDefault();
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (state.isPanning) {
+                state.view.x = e.clientX - state.panStartX;
+                state.view.y = e.clientY - state.panStartY;
+                updateTransform();
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (state.isPanning) {
+                state.isPanning = false;
+                viewportContainer.classList.remove('panning');
+            }
+        });
+
+        // 滚轮缩放
+        viewportContainer.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+            const newScale = Math.min(Math.max(0.4, state.view.scale * zoomFactor), 1.6);
+            
+            // 围绕视口中心缩放
+            const rect = viewportContainer.getBoundingClientRect();
+            const mouseX = rect.width / 2;
+            const mouseY = rect.height / 2;
+            
+            state.view.x = mouseX - (mouseX - state.view.x) * (newScale / state.view.scale);
+            state.view.y = mouseY - (mouseY - state.view.y) * (newScale / state.view.scale);
+            state.view.scale = newScale;
+            updateTransform();
+        });
+
+        function focusSector(sectorId) {
+            const sec = Object.values(state.sectors).find(s => s.id === sectorId);
+            if (!sec) return;
+            const rect = viewportContainer.getBoundingClientRect();
+            state.view.scale = 0.85;
+            state.view.x = rect.width / 2 - (sec.x + sec.width / 2) * state.view.scale;
+            state.view.y = rect.height / 2 - (sec.y + sec.height / 2) * state.view.scale;
+            updateTransform();
+            playTone(450, 'sine', 0.1);
+        }
+
+        function resetZoom() {
+            const rect = viewportContainer.getBoundingClientRect();
+            state.view.scale = 0.55;
+            state.view.x = rect.width / 2 - 2000 * state.view.scale;
+            state.view.y = rect.height / 2 - 1400 * state.view.scale;
+            updateTransform();
+            playTone(380, 'sine', 0.1);
+        }
+
+        // ========================== 节点生成与拖拽 ==========================
+        function spawnNodeAtCenter(type) {
+            // 在当前视口中心生成
+            const rect = viewportContainer.getBoundingClientRect();
+            const worldX = (rect.width / 2 - state.view.x) / state.view.scale - 100;
+            const worldY = (rect.height / 2 - state.view.y) / state.view.scale - 50;
+            return spawnNode(type, worldX, worldY);
+        }
+
+        function spawnNode(type, x, y, customVal = null) {
+            const id = 'chip_' + (state.nextNodeId++);
+            const node = {
+                id,
+                type,
+                x,
+                y,
+                inputs: [],
+                outputs: [],
+                data: {
+                    value: customVal !== null ? customVal : (type.startsWith('source') ? 100 : 0),
+                    limit: 75
+                }
+            };
+
+            if (type === 'source-red') {
+                node.title = '灵煤能源 (红)';
+                node.color = '#f43f5e';
+                node.outputs.push({ id: 'out', color: 'red', valType: 'red', label: '100 灵煤' });
+            } else if (type === 'source-blue') {
+                node.title = '高压电能 (蓝)';
+                node.color = '#38bdf8';
+                node.outputs.push({ id: 'out', color: 'blue', valType: 'blue', label: '100 电力' });
+            } else if (type === 'source-green') {
+                node.title = '纯化灵气 (绿)';
+                node.color = '#10b981';
+                node.outputs.push({ id: 'out', color: 'green', valType: 'green', label: '100 灵气' });
+            } else if (type === 'merger') {
+                node.title = '多路合并器 (Merger)';
+                node.color = '#94a3b8';
+                node.inputs.push({ id: 'in1', color: 'grey', label: '入 1' });
+                node.inputs.push({ id: 'in2', color: 'grey', label: '入 2' });
+                node.outputs.push({ id: 'out', color: 'grey', label: '总线合并' });
+            } else if (type === 'valve') {
+                node.title = '精准限流阀 (Valve)';
+                node.color = '#f59e0b';
+                node.inputs.push({ id: 'in', color: 'grey', label: '流体输入' });
+                node.outputs.push({ id: 'out_main', color: 'gold', label: '主路 (定额)' });
+                node.outputs.push({ id: 'out_dump', color: 'grey', label: '旁路 (废料)' });
+            } else if (type === 'fusion-dual') {
+                node.title = '二元融合器 (红+蓝)';
+                node.color = '#c084fc';
+                node.inputs.push({ id: 'in_red', color: 'red', label: '灵煤' });
+                node.inputs.push({ id: 'in_blue', color: 'blue', label: '高压电' });
+                node.outputs.push({ id: 'out', color: 'purple', label: '等离子体 (x3)' });
+            } else if (type === 'fusion-ternary') {
+                node.title = '三元归一炉 (真理金光)';
+                node.color = '#facc15';
+                node.inputs.push({ id: 'in_red', color: 'red', label: '灵煤' });
+                node.inputs.push({ id: 'in_blue', color: 'blue', label: '高压电' });
+                node.inputs.push({ id: 'in_green', color: 'green', label: '纯化灵气' });
+                node.outputs.push({ id: 'out', color: 'gold', label: '天道真理指令 (x5)' });
+            }
+
+            state.nodes.push(node);
+            renderNodeDOM(node);
+            playTone(520, 'triangle', 0.1);
+            recalculateNetwork();
+            return node;
+        }
+
+        function renderNodeDOM(node) {
+            const el = document.createElement('div');
+            el.id = node.id;
+            el.className = 'pcb-chip-node p-3 flex flex-col font-mono text-xs';
+            el.style.left = `${node.x}px`;
+            el.style.top = `${node.y}px`;
+            el.style.width = '210px';
+
+            let headerHtml = `
+                <div class="flex items-center justify-between border-b border-slate-700 pb-1.5 mb-2 pointer-events-none">
+                    <span class="font-bold text-[11px] flex items-center gap-1.5" style="color: ${node.color}">
+                        <span class="w-1.5 h-1.5 rounded-full" style="background: ${node.color}"></span>
+                        ${node.title}
+                    </span>
+                    <span class="text-[9px] text-slate-500 font-mono">IC-${node.id.slice(-2)}</span>
+                </div>
+            `;
+
+            let pinsHtml = `<div class="flex justify-between items-start gap-2 flex-1">`;
+            // 输入
+            pinsHtml += `<div class="flex flex-col gap-2">`;
+            node.inputs.forEach(pin => {
+                pinsHtml += `
+                    <div class="flex items-center gap-1.5">
+                        <div class="bp-pin pin-${pin.color}" data-node-id="${node.id}" data-pin-id="${pin.id}" data-type="input" title="${pin.label}"></div>
+                        <span class="text-[10px] text-slate-400 select-none">${pin.label}</span>
+                    </div>
+                `;
+            });
+            pinsHtml += `</div>`;
+
+            // 输出
+            pinsHtml += `<div class="flex flex-col gap-2 items-end">`;
+            node.outputs.forEach(pin => {
+                pinsHtml += `
+                    <div class="flex items-center gap-1.5 justify-end">
+                        <span class="text-[10px] text-slate-400 select-none">${pin.label}</span>
+                        <div class="bp-pin pin-${pin.color}" data-node-id="${node.id}" data-pin-id="${pin.id}" data-type="output" title="${pin.label}"></div>
+                    </div>
+                `;
+            });
+            pinsHtml += `</div></div>`;
+
+            let extraHtml = '';
+            if (node.type === 'valve') {
+                extraHtml = `
+                    <div class="mt-2 pt-1.5 border-t border-slate-800 flex items-center justify-between text-[10px]">
+                        <span class="text-amber-400">定额切割:</span>
+                        <input type="number" min="10" max="300" step="5" value="${node.data.limit}" 
+                               onchange="updateValveLimit('${node.id}', this.value)"
+                               class="w-16 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-right font-mono text-amber-300">
+                    </div>
+                `;
+            }
+
+            extraHtml += `
+                <div class="mt-2 text-right text-[10px] text-slate-500 font-mono" id="${node.id}_readout">
+                    输出: ${Math.round(node.data.value)} (${node.data.valType || '无'})
+                </div>
+            `;
+
+            el.innerHTML = headerHtml + pinsHtml + extraHtml;
+
+            // 拖拽
+            makeNodeDraggable(el, node);
+
+            // 右键删除
+            el.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                deleteNode(node.id);
+            });
+
+            nodesContainer.appendChild(el);
+        }
+
+        function updateValveLimit(nodeId, val) {
+            const node = state.nodes.find(n => n.id === nodeId);
+            if (node) {
+                node.data.limit = parseFloat(val) || 75;
+                recalculateNetwork();
+            }
+        }
+
+        function deleteNode(nodeId) {
+            state.wires = state.wires.filter(w => w.fromNode !== nodeId && w.toNode !== nodeId);
+            state.nodes = state.nodes.filter(n => n.id !== nodeId);
+            const dom = document.getElementById(nodeId);
+            if (dom) dom.remove();
+            playTone(260, 'sawtooth', 0.12);
+            recalculateNetwork();
+        }
+
+        function makeNodeDraggable(el, node) {
+            let startX, startY, origX, origY;
+            el.addEventListener('mousedown', (e) => {
+                if (e.target.classList.contains('bp-pin') || e.target.tagName === 'INPUT' || e.button !== 0) return;
+                startX = e.clientX;
+                startY = e.clientY;
+                origX = node.x;
+                origY = node.y;
+
+                function onMove(ev) {
+                    const dx = (ev.clientX - startX) / state.view.scale;
+                    const dy = (ev.clientY - startY) / state.view.scale;
+                    node.x = origX + dx;
+                    node.y = origY + dy;
+                    el.style.left = `${node.x}px`;
+                    el.style.top = `${node.y}px`;
+                    updateWires();
+                }
+
+                function onUp() {
+                    window.removeEventListener('mousemove', onMove);
+                    window.removeEventListener('mouseup', onUp);
+                }
+
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('mouseup', onUp);
+                e.stopPropagation();
+            });
+        }
+
+        // ========================== 连线与接驳闸门解锁 ==========================
+        document.addEventListener('mousedown', (e) => {
+            const pin = e.target.closest('.bp-pin');
+            if (!pin || pin.dataset.type !== 'output') return;
+
+            const nodeId = pin.dataset.nodeId;
+            const pinId = pin.dataset.pinId;
+            const rect = pin.getBoundingClientRect();
+            const worldRect = worldCanvas.getBoundingClientRect();
+
+            state.dragWire.active = true;
+            state.dragWire.fromNode = nodeId;
+            state.dragWire.fromPin = pinId;
+
+            // 转换成世界坐标
+            state.dragWire.fromX = (rect.left + rect.width / 2 - worldRect.left) / state.view.scale;
+            state.dragWire.fromY = (rect.top + rect.height / 2 - worldRect.top) / state.view.scale;
+
+            const pinClass = Array.from(pin.classList).find(c => c.startsWith('pin-'));
+            const colorMap = {
+                'pin-red': '#f43f5e',
+                'pin-blue': '#38bdf8',
+                'pin-green': '#10b981',
+                'pin-purple': '#c084fc',
+                'pin-gold': '#facc15',
+                'pin-grey': '#94a3b8'
+            };
+            state.dragWire.color = colorMap[pinClass] || '#00f0ff';
+            tempWirePath.setAttribute('stroke', state.dragWire.color);
+            tempWirePath.classList.remove('hidden');
+            playTone(600, 'sine', 0.08);
+            e.stopPropagation();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!state.dragWire.active) return;
+            const worldRect = worldCanvas.getBoundingClientRect();
+            const toX = (e.clientX - worldRect.left) / state.view.scale;
+            const toY = (e.clientY - worldRect.top) / state.view.scale;
+
+            const fromX = state.dragWire.fromX;
+            const fromY = state.dragWire.fromY;
+            const dx = Math.abs(toX - fromX) * 0.55;
+            const d = `M ${fromX} ${fromY} C ${fromX + dx} ${fromY}, ${toX - dx} ${toY}, ${toX} ${toY}`;
+            tempWirePath.setAttribute('d', d);
+        });
+
+        document.addEventListener('mouseup', (e) => {
+            if (!state.dragWire.active) return;
+            state.dragWire.active = false;
+            tempWirePath.classList.add('hidden');
+
+            const targetPin = e.target.closest('.bp-pin');
+            if (!targetPin) return;
+
+            // 1. 连入跨界闸门 (Gate) -> 瞬间击碎封印展开相邻区块
+            if (targetPin.dataset.type === 'gate') {
+                const gateId = targetPin.dataset.gateId;
+                state.wires = state.wires.filter(w => !(w.toNode === 'GATE' && w.toPin === gateId));
+                state.wires.push({
+                    id: 'wire_' + Date.now(),
+                    fromNode: state.dragWire.fromNode,
+                    fromPin: state.dragWire.fromPin,
+                    toNode: 'GATE',
+                    toPin: gateId,
+                    color: state.dragWire.color
+                });
+                
+                // 激活对应区块
+                const gate = state.gates[gateId];
+                unlockSector(gate.targetSector);
+                playTone(880, 'triangle', 0.25);
+            } 
+            // 2. 连入 CPU 右侧效率插座 (单孔单线)
+            else if (targetPin.dataset.portId) {
+                const cpuPortId = targetPin.dataset.portId;
+                state.wires = state.wires.filter(w => !(w.toNode === 'CPU' && w.toPin === cpuPortId));
+                state.wires.push({
+                    id: 'wire_' + Date.now(),
+                    fromNode: state.dragWire.fromNode,
+                    fromPin: state.dragWire.fromPin,
+                    toNode: 'CPU',
+                    toPin: cpuPortId,
+                    color: state.dragWire.color
+                });
+                playTone(920, 'sine', 0.2);
+            } 
+            // 3. 普通节点引脚互连
+            else if (targetPin.dataset.type === 'input') {
+                const toNodeId = targetPin.dataset.nodeId;
+                const toPinId = targetPin.dataset.pinId;
+                if (toNodeId !== state.dragWire.fromNode) {
+                    state.wires = state.wires.filter(w => !(w.toNode === toNodeId && w.toPin === toPinId));
+                    state.wires.push({
+                        id: 'wire_' + Date.now(),
+                        fromNode: state.dragWire.fromNode,
+                        fromPin: state.dragWire.fromPin,
+                        toNode: toNodeId,
+                        toPin: toPinId,
+                        color: state.dragWire.color
+                    });
+                    playTone(720, 'sine', 0.15);
+                }
+            }
+
+            recalculateNetwork();
+        });
+
+        // 击碎迷雾解锁相邻区块（同一画布上无缝显现）
+        function unlockSector(sectorKey) {
+            const sec = state.sectors[sectorKey];
+            if (!sec || sec.unlocked) return;
+
+            sec.unlocked = true;
+            const dom = document.getElementById(sec.id);
+            if (dom) {
+                dom.classList.remove('locked');
+                dom.classList.add('active-sector');
+            }
+
+            // 更新闸门状态
+            if (sectorKey === 'furnace') {
+                document.getElementById('gate-east-bridge').classList.add('unlocked');
+                document.getElementById('gate-east-status').textContent = '已贯通';
+                document.getElementById('nav-lock-furnace').textContent = '通';
+                document.getElementById('nav-lock-furnace').className = 'text-[9px] bg-emerald-950 text-emerald-400 px-1 rounded';
+                document.getElementById('nav-btn-furnace').className = 'px-2.5 py-1 rounded bg-purple-950/60 text-purple-300 border border-purple-500/80 font-bold transition flex items-center gap-1';
+            } else if (sectorKey === 'spirit') {
+                document.getElementById('gate-north-bridge').classList.add('unlocked');
+                document.getElementById('gate-north-status').textContent = '已贯通';
+                document.getElementById('nav-lock-spirit').textContent = '通';
+                document.getElementById('nav-lock-spirit').className = 'text-[9px] bg-emerald-950 text-emerald-400 px-1 rounded';
+                document.getElementById('nav-btn-spirit').className = 'px-2.5 py-1 rounded bg-cyan-950/60 text-cyan-300 border border-cyan-500/80 font-bold transition flex items-center gap-1';
+            }
+
+            // 镜头平滑居中到新解锁的板块
+            setTimeout(() => {
+                focusSector(sec.id);
+                playTone(1050, 'sine', 0.35);
+            }, 100);
+        }
+
+        // ========================== 全网拓扑微积分求解 ==========================
+        function recalculateNetwork() {
+            // 拓扑级联迭代 4 次确保级联稳定
+            for (let step = 0; step < 4; step++) {
+                state.nodes.forEach(node => {
+                    if (node.type === 'merger') {
+                        let total = 0;
+                        let types = [];
+                        ['in1', 'in2'].forEach(pinId => {
+                            const w = state.wires.find(wire => wire.toNode === node.id && wire.toPin === pinId);
+                            if (w) {
+                                const src = getOutputPinData(w.fromNode, w.fromPin);
+                                total += src.value;
+                                if (src.valType) types.push(src.valType);
+                            }
+                        });
+                        node.data.value = total;
+                        node.data.valType = types[0] || 'grey';
+                    } else if (node.type === 'valve') {
+                        const w = state.wires.find(wire => wire.toNode === node.id && wire.toPin === 'in');
+                        if (w) {
+                            const src = getOutputPinData(w.fromNode, w.fromPin);
+                            node.data.value = src.value;
+                            node.data.valType = src.valType;
+                        } else {
+                            node.data.value = 0;
+                            node.data.valType = 'none';
+                        }
+                    } else if (node.type === 'fusion-dual') {
+                        const wRed = state.wires.find(wire => wire.toNode === node.id && wire.toPin === 'in_red');
+                        const wBlue = state.wires.find(wire => wire.toNode === node.id && wire.toPin === 'in_blue');
+                        if (wRed && wBlue) {
+                            const r = getOutputPinData(wRed.fromNode, wRed.fromPin).value;
+                            const b = getOutputPinData(wBlue.fromNode, wBlue.fromPin).value;
+                            node.data.value = Math.min(r, b) * 3;
+                            node.data.valType = 'purple';
+                        } else {
+                            node.data.value = 0;
+                            node.data.valType = 'none';
+                        }
+                    } else if (node.type === 'fusion-ternary') {
+                        const wRed = state.wires.find(wire => wire.toNode === node.id && wire.toPin === 'in_red');
+                        const wBlue = state.wires.find(wire => wire.toNode === node.id && wire.toPin === 'in_blue');
+                        const wGreen = state.wires.find(wire => wire.toNode === node.id && wire.toPin === 'in_green');
+                        if (wRed && wBlue && wGreen) {
+                            const r = getOutputPinData(wRed.fromNode, wRed.fromPin).value;
+                            const b = getOutputPinData(wBlue.fromNode, wBlue.fromPin).value;
+                            const g = getOutputPinData(wGreen.fromNode, wGreen.fromPin).value;
+                            node.data.value = Math.min(r, b, g) * 5;
+                            node.data.valType = 'gold';
+                        } else {
+                            node.data.value = 0;
+                            node.data.valType = 'none';
+                        }
+                    }
+                });
+            }
+
+            // 更新各节点文本指示
+            state.nodes.forEach(node => {
+                const readout = document.getElementById(`${node.id}_readout`);
+                if (readout) {
+                    readout.textContent = `输出: ${Math.round(node.data.value)} (${node.data.valType || '无'})`;
+                }
+            });
+
+            // 结算出港闸门数值
+            ['gate_east', 'gate_north'].forEach(gateId => {
+                const wire = state.wires.find(w => w.toNode === 'GATE' && w.toPin === gateId);
+                const gateObj = state.gates[gateId];
+                if (wire) {
+                    const data = getOutputPinData(wire.fromNode, wire.fromPin);
+                    gateObj.val = data.value;
+                    gateObj.valType = data.valType;
+                } else {
+                    gateObj.val = 0;
+                    gateObj.valType = 'none';
+                }
+            });
+
+            // 结算 CPU 6 大独立插座
+            const cpuPorts = ['belt', 'teleport', 'factory', 'heavy', 'fuel', 'tech'];
+            cpuPorts.forEach(portId => {
+                const w = state.wires.find(wire => wire.toNode === 'CPU' && wire.toPin === portId);
+                const portData = state.cpuPorts[portId];
+
+                if (w) {
+                    const data = getOutputPinData(w.fromNode, w.fromPin);
+                    portData.wire = w;
+                    portData.value = data.value;
+
+                    if (portId === 'belt') {
+                        let mult = (data.valType === 'purple') ? 1.5 : (data.valType === 'gold' ? 2.5 : 1.0);
+                        portData.boost = Math.round(data.value * mult);
+                        document.getElementById('port-val-belt').textContent = `+${portData.boost}%`;
+                        document.getElementById('port-val-belt').className = 'text-xs font-bold text-cyan-400';
+                    } else if (portId === 'teleport') {
+                        portData.boost = Math.round(data.value * 0.8);
+                        document.getElementById('port-val-teleport').textContent = `+${portData.boost}%`;
+                        document.getElementById('port-val-teleport').className = 'text-xs font-bold text-cyan-400';
+                    } else if (portId === 'factory') {
+                        portData.boost = Math.round(data.value);
+                        document.getElementById('port-val-factory').textContent = `+${portData.boost}%`;
+                        document.getElementById('port-val-factory').className = 'text-xs font-bold text-cyan-400';
+                    } else if (portId === 'heavy') {
+                        let mult = (data.valType === 'purple') ? 3.0 : 1.0;
+                        let xVal = (1.0 + (data.value / 100) * mult).toFixed(1);
+                        portData.boost = xVal;
+                        document.getElementById('port-val-heavy').textContent = `${xVal}x 暴击`;
+                        document.getElementById('port-val-heavy').className = (data.valType === 'purple') ? 'text-xs font-bold text-purple-400' : 'text-xs text-slate-300';
+                    } else if (portId === 'fuel') {
+                        let eff = Math.min(80, Math.round(data.value * 0.4));
+                        portData.boost = eff;
+                        document.getElementById('port-val-fuel').textContent = `省油 -${eff}%`;
+                        document.getElementById('port-val-fuel').className = 'text-xs font-bold text-emerald-400';
+                    } else if (portId === 'tech') {
+                        if (data.valType === 'gold') {
+                            portData.boost = Math.round(data.value);
+                            document.getElementById('port-val-tech').textContent = `★ ${portData.boost} TFLOPS`;
+                            document.getElementById('port-val-tech').className = 'text-xs font-bold text-amber-400 glow-gold';
+                        } else {
+                            document.getElementById('port-val-tech').textContent = `非金拒绝 (${Math.round(data.value)})`;
+                            document.getElementById('port-val-tech').className = 'text-xs text-red-400';
+                            portData.boost = 0;
+                        }
+                    }
+                } else {
+                    portData.wire = null;
+                    portData.value = 0;
+                    portData.boost = 0;
+                    document.getElementById(`port-val-${portId}`).textContent = '+0%';
+                    document.getElementById(`port-val-${portId}`).className = 'text-xs text-slate-500 font-mono';
+                }
+            });
+
+            // 电网阻抗
+            let activePortsCount = Object.values(state.cpuPorts).filter(p => p.wire !== null).length;
+            let impedance = Math.max(0, 48.0 - activePortsCount * 8.0);
+            document.getElementById('metric-z').textContent = `${impedance.toFixed(1)} Ω`;
+            document.getElementById('cpu-total-status').textContent = `已接驳 ${activePortsCount}/6 孔`;
+            document.getElementById('tab-pin-count').textContent = `${activePortsCount}/6`;
+
+            updateWires();
+        }
+
+        function getOutputPinData(nodeId, pinId) {
+            const node = state.nodes.find(n => n.id === nodeId);
+            if (!node) return { value: 0, valType: 'none' };
+
+            if (node.type.startsWith('source')) {
+                return { value: 100, valType: node.type.split('-')[1] };
+            } else if (node.type === 'valve') {
+                if (pinId === 'out_main') {
+                    return { value: Math.min(node.data.value, node.data.limit), valType: 'gold' };
+                } else {
+                    return { value: Math.max(0, node.data.value - node.data.limit), valType: node.data.valType };
+                }
+            } else {
+                return { value: node.data.value, valType: node.data.valType };
+            }
+        }
+
+        // ========================== SVG 连线重绘 ==========================
+        function updateWires() {
+            wireCanvas.innerHTML = '';
+            const worldRect = worldCanvas.getBoundingClientRect();
+
+            state.wires.forEach(w => {
+                const startPin = document.querySelector(`.bp-pin[data-node-id="${w.fromNode}"][data-pin-id="${w.fromPin}"]`);
+                let endPin = null;
+
+                if (w.toNode === 'CPU') {
+                    endPin = document.querySelector(`.bp-pin[data-port-id="${w.toPin}"]`);
+                } else if (w.toNode === 'GATE') {
+                    endPin = document.querySelector(`.bp-pin[data-gate-id="${w.toPin}"]`);
+                } else {
+                    endPin = document.querySelector(`.bp-pin[data-node-id="${w.toNode}"][data-pin-id="${w.toPin}"]`);
+                }
+
+                if (!startPin || !endPin) return;
+
+                const r1 = startPin.getBoundingClientRect();
+                const r2 = endPin.getBoundingClientRect();
+
+                // 统一转换为世界 SVG 内部绝对像素坐标
+                const x1 = (r1.left + r1.width / 2 - worldRect.left) / state.view.scale;
+                const y1 = (r1.top + r1.height / 2 - worldRect.top) / state.view.scale;
+                const x2 = (r2.left + r2.width / 2 - worldRect.left) / state.view.scale;
+                const y2 = (r2.top + r2.height / 2 - worldRect.top) / state.view.scale;
+
+                const dx = Math.abs(x2 - x1) * 0.55;
+                const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+
+                const srcData = getOutputPinData(w.fromNode, w.fromPin);
+                const colorMap = {
+                    red: '#f43f5e',
+                    blue: '#38bdf8',
+                    green: '#10b981',
+                    purple: '#c084fc',
+                    gold: '#facc15',
+                    grey: '#94a3b8'
+                };
+                const wireColor = colorMap[srcData.valType] || '#00f0ff';
+
+                // 背景阴影线
+                const pathBg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                pathBg.setAttribute('d', d);
+                pathBg.setAttribute('fill', 'none');
+                pathBg.setAttribute('stroke', '#020408');
+                pathBg.setAttribute('stroke-width', '6');
+                wireCanvas.appendChild(pathBg);
+
+                // 发光高导铜箔
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', d);
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke', wireColor);
+                path.setAttribute('stroke-width', '3');
+                path.setAttribute('stroke-linecap', 'round');
+                path.style.cursor = 'pointer';
+                path.style.pointerEvents = 'all';
+
+                // 右键切断
+                path.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    state.wires = state.wires.filter(item => item.id !== w.id);
+                    playTone(320, 'sawtooth', 0.1);
+                    recalculateNetwork();
+                });
+
+                wireCanvas.appendChild(path);
+            });
+        }
+
+        function quickClearAll() {
+            state.nodes = [];
+            state.wires = [];
+            nodesContainer.innerHTML = '';
+            recalculateNetwork();
+            playTone(200, 'triangle', 0.15);
+        }
+
+        // ========================== 一键体验预设 ==========================
+        function loadDirectDemo(type) {
+            quickClearAll();
+
+            if (type === 'basic') {
+                // 在母盘内部生成并直插 CPU 工厂孔
+                const r = spawnNode('source-red', 1100, 1400);
+                state.wires.push({
+                    id: 'w_demo_1',
+                    fromNode: r.id,
+                    fromPin: 'out',
+                    toNode: 'CPU',
+                    toPin: 'factory',
+                    color: '#f43f5e'
+                });
+                focusSector('sector_main');
+            } else if (type === 'expand_furnace') {
+                // 演示：母盘两路合流插进东门 -> 激活东侧煞焰盘 -> 在煞焰盘内生成二元融合器直插重工孔
+                const r = spawnNode('source-red', 1080, 1380);
+                const b = spawnNode('source-blue', 1080, 1540);
+                const merger = spawnNode('merger', 1450, 1460);
+
+                state.wires.push({ id: 'w1', fromNode: r.id, fromPin: 'out', toNode: merger.id, toPin: 'in1' });
+                state.wires.push({ id: 'w2', fromNode: b.id, fromPin: 'out', toNode: merger.id, toPin: 'in2' });
+                state.wires.push({ id: 'w3', fromNode: merger.id, fromPin: 'out', toNode: 'GATE', toPin: 'gate_east' });
+
+                unlockSector('furnace');
+
+                // 在东侧煞焰盘内放置高阶二元融合器
+                const dual = spawnNode('fusion-dual', 2250, 1450);
+                const rExt = spawnNode('source-red', 2120, 1360);
+                const bExt = spawnNode('source-blue', 2120, 1560);
+
+                state.wires.push({ id: 'w_f1', fromNode: rExt.id, fromPin: 'out', toNode: dual.id, toPin: 'in_red' });
+                state.wires.push({ id: 'w_f2', fromNode: bExt.id, fromPin: 'out', toNode: dual.id, toPin: 'in_blue' });
+                state.wires.push({ id: 'w_f3', fromNode: dual.id, fromPin: 'out', toNode: 'CPU', toPin: 'heavy' });
+
+                focusSector('sector_furnace');
+            } else if (type === 'expand_all') {
+                // 全盘贯通大圆满
+                unlockSector('furnace');
+                unlockSector('spirit');
+
+                const r = spawnNode('source-red', 1080, 1320);
+                const b = spawnNode('source-blue', 1080, 1480);
+                const g = spawnNode('source-green', 1080, 1640);
+                const valve = spawnNode('valve', 1420, 1640, 75);
+
+                state.wires.push({ id: 'w_g1', fromNode: g.id, fromPin: 'out', toNode: valve.id, toPin: 'in' });
+                state.wires.push({ id: 'w_gate_e', fromNode: r.id, fromPin: 'out', toNode: 'GATE', toPin: 'gate_east' });
+                state.wires.push({ id: 'w_gate_n', fromNode: b.id, fromPin: 'out', toNode: 'GATE', toPin: 'gate_north' });
+
+                // 北侧神识真理盘
+                const ternary = spawnNode('fusion-ternary', 1400, 600);
+                const r2 = spawnNode('source-red', 1100, 520);
+                const b2 = spawnNode('source-blue', 1100, 640);
+                const g2 = spawnNode('source-green', 1100, 760);
+
+                state.wires.push({ id: 'w_s1', fromNode: r2.id, fromPin: 'out', toNode: ternary.id, toPin: 'in_red' });
+                state.wires.push({ id: 'w_s2', fromNode: b2.id, fromPin: 'out', toNode: ternary.id, toPin: 'in_blue' });
+                state.wires.push({ id: 'w_s3', fromNode: g2.id, fromPin: 'out', toNode: ternary.id, toPin: 'in_green' });
+                state.wires.push({ id: 'w_s4', fromNode: ternary.id, fromPin: 'out', toNode: 'CPU', toPin: 'tech' });
+
+                // 东侧煞焰盘
+                const dual = spawnNode('fusion-dual', 2300, 1450);
+                const r3 = spawnNode('source-red', 2140, 1380);
+                const b3 = spawnNode('source-blue', 2140, 1540);
+                state.wires.push({ id: 'w_f1', fromNode: r3.id, fromPin: 'out', toNode: dual.id, toPin: 'in_red' });
+                state.wires.push({ id: 'w_f2', fromNode: b3.id, fromPin: 'out', toNode: dual.id, toPin: 'in_blue' });
+                state.wires.push({ id: 'w_f3', fromNode: dual.id, fromPin: 'out', toNode: 'CPU', toPin: 'heavy' });
+
+                resetZoom();
+            }
+
+            setTimeout(() => {
+                recalculateNetwork();
+            }, 60);
+        }
+
+        window.onload = function() {
+            updateTransform();
+            loadDirectDemo('expand_furnace');
+        };
+    </script>
+</body>
+</html>

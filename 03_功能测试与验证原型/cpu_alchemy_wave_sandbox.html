@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>修仙工厂 · 量子波粒双界沙盒 (波形管线 ⇄ 质子炼金)</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome 图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* 全局暗色玄武岩与黄铜工控风格 */
+    body {
+      background-color: #08090d;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      user-select: none;
+    }
+    
+    /* 黄铜工控条 */
+    .brass-bar {
+      background: linear-gradient(180deg, #1e222d 0%, #11141c 100%);
+      border-color: #785a2b;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.8), inset 0 1px 0 rgba(212,175,55,0.3);
+    }
+    
+    /* 黄铜按钮 */
+    .brass-btn {
+      background: linear-gradient(180deg, #382c18 0%, #1c150b 100%);
+      border: 1px solid #8f6c30;
+      color: #f7e3b5;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 5px rgba(0,0,0,0.6);
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .brass-btn:hover {
+      background: linear-gradient(180deg, #4f3d20 0%, #261c0d 100%);
+      border-color: #ffd700;
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(245,158,11,0.4);
+    }
+    .brass-btn.active {
+      background: linear-gradient(180deg, #6b5229 0%, #3d2f16 100%);
+      border-color: #ffd700;
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(255,215,0,0.5), inset 0 0 8px rgba(255,215,0,0.3);
+    }
+
+    /* 节点几何形状系统 */
+    .node-pill {
+      border-radius: 20px;
+    }
+    .node-oct {
+      clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+    }
+    .node-selected {
+      filter: drop-shadow(0 0 10px #00f0ff) brightness(1.2);
+      border-color: #00f0ff !important;
+    }
+
+    /* 波形流动动画 */
+    @keyframes flowPulse {
+      0% { stroke-dashoffset: 40; }
+      100% { stroke-dashoffset: 0; }
+    }
+    .wire-flowing {
+      animation: flowPulse 1s linear infinite;
+    }
+
+    /* 质子结晶光芒 */
+    @keyframes crystalGlow {
+      0%, 100% { filter: drop-shadow(0 0 6px #00f0ff); }
+      50% { filter: drop-shadow(0 0 16px #38bdf8); }
+    }
+    .crystal-emitter {
+      animation: crystalGlow 2s ease-in-out infinite;
+    }
+
+    /* 自定义微型滚动条 */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #785a2b;
+      border-radius: 2px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body class="flex flex-col h-screen w-screen">
+
+  <!-- ======================== 顶栏：多解法切换 ｜ 天平跑分 ｜ 双界互通指示 ======================== -->
+  <header class="h-16 brass-bar border-b-2 px-5 flex items-center justify-between shrink-0 z-30 select-none">
+    
+    <!-- 左侧：沙盒标题与核心隐喻 -->
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 via-amber-600 to-amber-900 border border-amber-300 flex items-center justify-center text-black font-black text-xl shadow-[0_0_15px_rgba(245,158,11,0.5)]">
+        <i class="fa-solid fa-atom"></i>
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <span class="text-xs font-black text-amber-200 tracking-wider uppercase font-serif">OPUS · QUANTUM FLOW</span>
+          <span class="px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/60 text-[10px] text-cyan-300 font-mono">波粒二象·量子炼金</span>
+        </div>
+        <div class="text-[10px] text-amber-400/80 font-mono">波形加工 ⇄ 机械臂质子结晶 ⇄ 粒子拆合裂变</div>
+      </div>
+    </div>
+
+    <!-- 中间：4 种截然不同的解法预设 (打破唯一解法，节点皆可独立操作) -->
+    <div class="flex items-center space-x-2 bg-black/70 border border-[#785a2b] rounded-2xl px-3 py-1.5 shadow-2xl">
+      <span class="text-[10px] text-amber-400 font-black uppercase font-mono mr-1">多维解法:</span>
+
+      <!-- 解法 A: 纯波动律解 -->
+      <button id="btnRouteWave" onclick="loadRoute('wave')" class="brass-btn active px-3 py-1 rounded-xl text-xs font-bold flex items-center space-x-1.5 cursor-pointer">
+        <i class="fa-solid fa-wave-square text-cyan-400"></i>
+        <span>① 纯管路调频流</span>
+      </button>
+
+      <!-- 解法 B: 波粒相变结晶解 (正弦->质子->机械臂->投射) -->
+      <button id="btnRouteAlchemy" onclick="loadRoute('alchemy')" class="brass-btn px-3 py-1 rounded-xl text-xs font-bold flex items-center space-x-1.5 cursor-pointer">
+        <i class="fa-solid fa-hand-holding-hand text-amber-400"></i>
+        <span>② 质子结晶键合流</span>
+      </button>
+
+      <!-- 解法 C: 废料裂解逆向重构解 -->
+      <button id="btnRouteWaste" onclick="loadRoute('waste')" class="brass-btn px-3 py-1 rounded-xl text-xs font-bold flex items-center space-x-1.5 cursor-pointer">
+        <i class="fa-solid fa-recycle text-emerald-400"></i>
+        <span>③ 废料拆解质子流</span>
+      </button>
+
+      <!-- 解法 D: 完全自由调试沙盒 -->
+      <button id="btnRouteFree" onclick="loadRoute('free')" class="brass-btn px-3 py-1 rounded-xl text-xs font-bold text-purple-300 hover:text-white flex items-center space-x-1.5 cursor-pointer">
+        <i class="fa-solid fa-flask text-purple-400"></i>
+        <span>④ 自由组合工坊</span>
+      </button>
+    </div>
+
+    <!-- 右侧：仿真主频、单步与模式切换 -->
+    <div class="flex items-center space-x-3">
+      <!-- 播放 / 暂停 / 单步 -->
+      <div class="flex items-center space-x-1 bg-black/60 border border-[#785a2b] p-1 rounded-xl">
+        <button id="btnSimPlay" onclick="togglePlay()" class="brass-btn w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold cursor-pointer">
+          <i id="playIcon" class="fa-solid fa-play text-emerald-400"></i>
+        </button>
+        <button onclick="stepTick()" title="单步走一拍" class="brass-btn w-8 h-8 rounded-lg flex items-center justify-center text-xs cursor-pointer">
+          <i class="fa-solid fa-forward-step text-white/80"></i>
+        </button>
+        <button onclick="resetSim()" title="重置沙盒" class="brass-btn w-8 h-8 rounded-lg flex items-center justify-center text-xs cursor-pointer">
+          <i class="fa-solid fa-rotate-left text-white/80"></i>
+        </button>
+      </div>
+
+      <!-- CPU 插座需求状态标签 -->
+      <div class="flex items-center space-x-2 bg-black/75 border border-[#785a2b] px-3 py-1.5 rounded-xl font-mono text-xs">
+        <span class="text-white/50 text-[10px]">CPU插槽需求:</span>
+        <span id="coreDemandTag" class="text-amber-300 font-bold flex items-center space-x-1">
+          <i class="fa-solid fa-circle-notch animate-spin text-cyan-400"></i>
+          <span>⏱1拍 · ∿ 正弦波</span>
+        </span>
+        <div id="coreSuccessBadge" class="hidden px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500 text-emerald-300 font-bold text-[10px] animate-pulse">
+          ✓ 完美谐振入核
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================== 主视口：上下双视窗或左右混排 (波形网络 + 机械臂六角阵盘) ======================== -->
+  <main class="flex-1 relative overflow-hidden flex bg-[#06080e]">
+    
+    <!-- 左半区：可交互节点波形管线网络 (Waveform Pipeline Network) -->
+    <section class="w-1/2 h-full border-r-2 border-[#785a2b]/60 relative flex flex-col bg-gradient-to-br from-[#0c0f18] to-[#07090f]">
+      <!-- 视区顶标 -->
+      <div class="h-9 px-4 bg-black/60 border-b border-[#785a2b]/50 flex items-center justify-between text-xs font-mono">
+        <div class="flex items-center space-x-2 text-cyan-300 font-bold">
+          <i class="fa-solid fa-network-wired"></i>
+          <span>管路网络 (点击节点可独立调参·调频率/阻尼/分流)</span>
+        </div>
+        <div class="text-[10px] text-white/40">可随意拉线或点击配置</div>
+      </div>
+
+      <!-- 节点画布 SVG -->
+      <div id="pipeNetworkContainer" class="flex-1 relative overflow-hidden">
+        <svg id="pipeSvg" class="w-full h-full absolute inset-0 select-none">
+          <defs>
+            <filter id="glowCyan" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <linearGradient id="gradSine" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00f0ff" />
+              <stop offset="100%" stop-color="#3b82f6" />
+            </linearGradient>
+            <linearGradient id="gradCos" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#a855f7" />
+              <stop offset="100%" stop-color="#ec4899" />
+            </linearGradient>
+          </defs>
+          <!-- 导线层 -->
+          <g id="pipeWiresLayer"></g>
+          <!-- 动态流动质点 -->
+          <g id="pipeParticlesLayer"></g>
+        </svg>
+
+        <!-- DOM 渲染的可操作节点列表 -->
+        <div id="pipeNodesLayer" class="absolute inset-0 pointer-events-none">
+          <!-- 由 JS 渲染可操作节点 -->
+        </div>
+      </div>
+
+      <!-- 底部：选定节点调参微控台 -->
+      <div id="nodeTuningPanel" class="h-28 bg-[#10131d]/95 border-t border-[#785a2b] p-3 flex items-center justify-between font-mono text-xs z-10">
+        <div class="flex items-center space-x-3">
+          <div id="tuneNodeIcon" class="w-12 h-12 rounded-xl bg-cyan-950 border border-cyan-500/60 flex items-center justify-center text-cyan-300 text-xl shadow-[0_0_10px_rgba(0,240,255,0.3)]">
+            <i class="fa-solid fa-sliders"></i>
+          </div>
+          <div>
+            <div id="tuneNodeTitle" class="font-bold text-white text-sm">【前级增压泵】独立微调</div>
+            <div id="tuneNodeDesc" class="text-[11px] text-white/50">当前工作节拍: 1拍 ｜ 输出波形: 脉冲方波</div>
+          </div>
+        </div>
+
+        <!-- 调节控制器 (滑块与选项) -->
+        <div class="flex items-center space-x-6">
+          <!-- 节拍微调 -->
+          <div class="space-y-1">
+            <div class="flex justify-between text-[10px] text-white/60">
+              <span>脉冲节拍 (Beats):</span>
+              <span id="lblTuneTicks" class="text-cyan-300 font-bold">1 拍</span>
+            </div>
+            <input id="sliderTicks" type="range" min="1" max="4" value="1" oninput="onTuningChange()" class="w-28 accent-cyan-400 cursor-pointer">
+          </div>
+
+          <!-- 压力/幅值 -->
+          <div class="space-y-1">
+            <div class="flex justify-between text-[10px] text-white/60">
+              <span>共鸣频幅 (Amplitude):</span>
+              <span id="lblTuneAmp" class="text-amber-300 font-bold">100%</span>
+            </div>
+            <input id="sliderAmp" type="range" min="20" max="200" step="10" value="100" oninput="onTuningChange()" class="w-28 accent-amber-400 cursor-pointer">
+          </div>
+
+          <!-- 模式切换开关 -->
+          <div class="space-y-1">
+            <div class="text-[10px] text-white/60">波形调制模式:</div>
+            <select id="selectMode" onchange="onTuningChange()" class="bg-black/80 border border-[#785a2b] text-amber-200 text-xs px-2.5 py-1 rounded cursor-pointer">
+              <option value="normal">标准直通</option>
+              <option value="boost">二阶超频 (+1拍)</option>
+              <option value="filter">浊液过滤 (减负)</option>
+              <option value="invert">余弦反相</option>
+            </select>
+          </div>
+
+          <button onclick="applyTuning()" class="brass-btn px-4 py-2 rounded-xl font-black text-xs text-[#ffd700] shadow-[0_0_10px_rgba(255,215,0,0.4)] cursor-pointer">
+            <i class="fa-solid fa-check mr-1"></i>确立调谐
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 右半区：Opus Magnum 六角炼金阵盘与机械臂工坊 (Hex Alchemy Assembly Grid) -->
+    <section class="w-1/2 h-full relative flex flex-col bg-gradient-to-b from-[#131722] via-[#0d1017] to-[#08090d]">
+      <!-- 视区顶标 -->
+      <div class="h-9 px-4 bg-black/60 border-b border-[#785a2b]/50 flex items-center justify-between text-xs font-mono">
+        <div class="flex items-center space-x-2 text-amber-300 font-bold">
+          <i class="fa-solid fa-atom"></i>
+          <span>质子炼金工坊 (波形凝聚成物质 · 机械臂拆解/组合质子 · 气化反哺)</span>
+        </div>
+        <div class="flex items-center space-x-3 text-[10px] text-white/60">
+          <span>周天周拍: <strong id="lblSimTick" class="text-amber-400 text-xs">0</strong></span>
+          <span>|</span>
+          <span class="text-emerald-400">● 机械臂运行正常</span>
+        </div>
+      </div>
+
+      <!-- 六角阵盘主 SVG 视窗 -->
+      <div class="flex-1 relative overflow-hidden flex items-center justify-center">
+        <svg id="hexBoardSvg" class="w-full h-full cursor-crosshair select-none" viewBox="0 0 860 620">
+          <defs>
+            <!-- 蜂窝渐变 -->
+            <radialGradient id="hexGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#1b202e" />
+              <stop offset="70%" stop-color="#121622" />
+              <stop offset="100%" stop-color="#0a0c12" />
+            </radialGradient>
+            <!-- 质子球体渐变 (玄冰水 / 纯阳火 / 庚金 / 混沌铁) -->
+            <radialGradient id="waterProtonGrad" cx="30%" cy="25%" r="70%">
+              <stop offset="0%" stop-color="#ffffff" />
+              <stop offset="25%" stop-color="#38bdf8" />
+              <stop offset="70%" stop-color="#0284c7" />
+              <stop offset="100%" stop-color="#082f49" />
+            </radialGradient>
+            <radialGradient id="fireProtonGrad" cx="30%" cy="25%" r="70%">
+              <stop offset="0%" stop-color="#ffffff" />
+              <stop offset="25%" stop-color="#fb7185" />
+              <stop offset="70%" stop-color="#e11d48" />
+              <stop offset="100%" stop-color="#4c0519" />
+            </radialGradient>
+            <radialGradient id="goldProtonGrad" cx="30%" cy="25%" r="70%">
+              <stop offset="0%" stop-color="#ffffff" />
+              <stop offset="25%" stop-color="#fef08a" />
+              <stop offset="70%" stop-color="#eab308" />
+              <stop offset="100%" stop-color="#713f12" />
+            </radialGradient>
+            <radialGradient id="wasteProtonGrad" cx="30%" cy="25%" r="70%">
+              <stop offset="0%" stop-color="#d6d3d1" />
+              <stop offset="35%" stop-color="#78716c" />
+              <stop offset="80%" stop-color="#292524" />
+              <stop offset="100%" stop-color="#0c0a09" />
+            </radialGradient>
+          </defs>
+
+          <!-- 1. 蜂窝网格层 -->
+          <g id="layerHexCells"></g>
+          <!-- 2. 阵盘符印层 (结晶器、键合印、拆解印、辐射发射器) -->
+          <g id="layerGlyphs"></g>
+          <!-- 3. 分子共价连接键 -->
+          <g id="layerBonds"></g>
+          <!-- 4. 质子球层 -->
+          <g id="layerAtoms"></g>
+          <!-- 5. 机械臂与抓爪 -->
+          <g id="layerArms"></g>
+          <!-- 6. 交互高亮与流光特效 -->
+          <g id="layerFx"></g>
+        </svg>
+
+        <!-- 悬浮微型图例说明 -->
+        <div class="absolute top-3 left-4 bg-black/85 border border-[#785a2b] px-3 py-1.5 rounded-xl font-mono text-[10px] space-y-1 shadow-2xl backdrop-blur-sm pointer-events-none">
+          <div class="text-[#ffd700] font-bold">量子相变元件图例:</div>
+          <div class="flex items-center space-x-2 text-cyan-300">
+            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+            <span>波凝聚结晶器 (波形 ➔ 凝为实体质子)</span>
+          </div>
+          <div class="flex items-center space-x-2 text-rose-400">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+            <span>质子拆解印 (大分子拆解成单体质子)</span>
+          </div>
+          <div class="flex items-center space-x-2 text-amber-400">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+            <span>质子键合印 (质子互相键合构型)</span>
+          </div>
+          <div class="flex items-center space-x-2 text-purple-300">
+            <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+            <span>粒子辐射发射器 (物质光解 ➔ 还原为极品波形)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 机械臂程序指令带 (Instruction Timeline) -->
+      <div class="h-36 bg-[#0a0d14]/95 border-t border-[#785a2b] p-2.5 flex flex-col space-y-1 font-mono select-none">
+        <div class="flex items-center justify-between text-xs border-b border-[#785a2b]/50 pb-1">
+          <div class="flex items-center space-x-2 text-[#ffd700] font-bold">
+            <i class="fa-solid fa-scroll"></i>
+            <span>机械臂指令律历带 (PROGRAM TAPES)</span>
+          </div>
+          <div class="flex items-center space-x-2 text-[10px] text-white/50">
+            <span class="px-1.5 py-0.5 rounded bg-blue-900 text-cyan-300">↷ 顺转</span>
+            <span class="px-1.5 py-0.5 rounded bg-blue-900 text-cyan-300">↶ 逆转</span>
+            <span class="px-1.5 py-0.5 rounded bg-emerald-900 text-emerald-300">⇥ 伸 / ⇤ 缩</span>
+            <span class="px-1.5 py-0.5 rounded bg-amber-900 text-amber-300">✊ 抓 / ✋ 放</span>
+            <span class="px-1.5 py-0.5 rounded bg-purple-900 text-purple-300">↻ 翻转</span>
+          </div>
+        </div>
+
+        <!-- 轨道容器 -->
+        <div id="armTapeContainer" class="flex-1 overflow-x-auto flex flex-col space-y-1 py-1">
+          <!-- 动态渲染指令序列 -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ======================== 脚本实现：双界物理引擎与多解法切换 ======================== -->
+  <script>
+    // =========================================================================
+    // 1. 全局状态体系
+    // =========================================================================
+    let currentRoute = 'wave'; // 'wave' | 'alchemy' | 'waste' | 'free'
+    let isPlaying = false;
+    let simTick = 0;
+    let timerHandle = null;
+
+    // 管路节点体系 (每个节点都有丰富参数，支持单独微调)
+    let pipelineNodes = [
+      { id: 'src_mineral', name: '地脉原石管', type: 'source', x: 40, y: 80, val: 100, wave: 'dc', tickRate: 0, amp: 100, mode: 'normal' },
+      { id: 'pump_booster', name: '粗炼加压泵', type: 'pump', x: 170, y: 80, val: 100, wave: 'pulse', tickRate: 1, amp: 100, mode: 'normal' },
+      { id: 'acc_tank', name: '蓄能脉冲罐', type: 'acc', x: 300, y: 80, val: 95, wave: 'pulse', tickRate: 3, amp: 120, mode: 'normal', wasteVal: 15 },
+      { id: 'wave_upgrader', name: '波形升阶仪', type: 'upgrader', x: 440, y: 80, val: 90, wave: 'sine', tickRate: 1, amp: 100, mode: 'normal' },
+      { id: 'delay_pipe', name: '调频步进管', type: 'delay', x: 300, y: 220, val: 0, wave: 'pulse', tickRate: 2, amp: 100, mode: 'normal' },
+      { id: 'wave_crystallizer', name: '波凝聚结晶器', type: 'crystallizer', x: 440, y: 220, val: 0, wave: 'matter', tickRate: 1, amp: 100, mode: 'normal' },
+      { id: 'matter_projector', name: '粒子辐射发射器', type: 'projector', x: 440, y: 350, val: 0, wave: 'sine', tickRate: 1, amp: 150, mode: 'normal' },
+      { id: 'waste_cleaner', name: '排污离心分馏器', type: 'cleaner', x: 170, y: 220, val: 0, wave: 'waste_pulse', tickRate: 1, amp: 80, mode: 'normal' },
+      { id: 'cpu_core_sink', name: 'CPU 核心阵眼', type: 'core', x: 440, y: 470, val: 0, reqWave: 'sine', reqTick: 1, satisfied: false }
+    ];
+
+    // 导线网络
+    let pipelineWires = [];
+
+    // 当前选定节点 (用于微调面板)
+    let selectedNodeId = 'pump_booster';
+
+    // =========================================================================
+    // 2. Opus Magnum 机械臂与蜂窝网格体系
+    // =========================================================================
+    const HEX_RADIUS = 32;
+    const HEX_ORIGIN = { x: 430, y: 280 };
+
+    // 六角坐标转换
+    function hexToPixel(q, r) {
+      const x = HEX_ORIGIN.x + HEX_RADIUS * (Math.sqrt(3) * q + Math.sqrt(3)/2 * r);
+      const y = HEX_ORIGIN.y + HEX_RADIUS * (3/2 * r);
+      return { x, y };
+    }
+
+    // 阵盘元件：符印 (Glyphs)、机械臂 (Arms)、质子 (Atoms)、键 (Bonds)
+    let hexGlyphs = [];
+    let hexArms = [];
+    let hexAtoms = [];
+    let hexBonds = [];
+
+    // =========================================================================
+    // 3. 多解法预设构建器 (打破唯一解法，展现丰富深度)
+    // =========================================================================
+    function loadRoute(routeName) {
+      currentRoute = routeName;
+      ['btnRouteWave', 'btnRouteAlchemy', 'btnRouteWaste', 'btnRouteFree'].forEach(id => {
+        document.getElementById(id).classList.remove('active');
+      });
+
+      if (routeName === 'wave') {
+        document.getElementById('btnRouteWave').classList.add('active');
+        setupWaveRoute();
+      } else if (routeName === 'alchemy') {
+        document.getElementById('btnRouteAlchemy').classList.add('active');
+        setupAlchemyRoute();
+      } else if (routeName === 'waste') {
+        document.getElementById('btnRouteWaste').classList.add('active');
+        setupWasteRoute();
+      } else {
+        document.getElementById('btnRouteFree').classList.add('active');
+        setupFreeRoute();
+      }
+
+      resetSim();
+      renderAll();
+    }
+
+    // 【解法 ①：纯管路调频流】
+    // 玩家直接通过管路调谐，增压泵 -> 蓄能罐 -> 升阶仪 -> 直连 CPU
+    function setupWaveRoute() {
+      pipelineWires = [
+        { from: 'src_mineral', to: 'pump_booster', color: '#f59e0b', wave: 'dc' },
+        { from: 'pump_booster', to: 'acc_tank', color: '#00f0ff', wave: 'pulse' },
+        { from: 'acc_tank', to: 'wave_upgrader', color: '#a855f7', wave: 'pulse' },
+        { from: 'wave_upgrader', to: 'cpu_core_sink', color: '#00f0ff', wave: 'sine' }
+      ];
+
+      // 机械臂区展示辅助观察
+      hexGlyphs = [
+        { type: 'crystallizer', q: -2, r: 0, label: '备用结晶器' },
+        { type: 'projector', q: 2, r: 0, label: '备用发射器' }
+      ];
+      hexArms = [
+        { id: 'arm_1', q: 0, r: 0, length: 2, angleIdx: 3, instructions: ['R', 'G', 'r', 'D'] }
+      ];
+      hexAtoms = [];
+      hexBonds = [];
+    }
+
+    // 【解法 ②：质子结晶键合流】(正弦波结晶 ➔ 机械臂抓取/键合 ➔ 发射器升华回 CPU)
+    // 玩家把余弦/正弦输入给结晶器，凝成水火质子，机械臂组装成阵眼，发射极纯正弦波给 CPU！
+    function setupAlchemyRoute() {
+      pipelineWires = [
+        { from: 'src_mineral', to: 'pump_booster', color: '#f59e0b', wave: 'dc' },
+        { from: 'pump_booster', to: 'wave_crystallizer', color: '#00f0ff', wave: 'pulse' },
+        { from: 'matter_projector', to: 'cpu_core_sink', color: '#00f0ff', wave: 'sine' }
+      ];
+
+      // 阵盘布置：结晶器在左，键合印在中间，辐射发射器在右
+      hexGlyphs = [
+        { type: 'crystallizer', q: -2, r: 0, label: '波凝聚器' },
+        { type: 'bonder', q: 0, r: 0, label: '双阳键合印' },
+        { type: 'projector', q: 2, r: -1, label: '光解发射器' }
+      ];
+
+      // 机械臂配置：双臂接力协同！
+      hexArms = [
+        { 
+          id: 'arm_1', q: -1, r: 0, length: 1, angleIdx: 3, 
+          // 抓取结晶 -> 逆转到键合台 -> 放开 -> 回位
+          instructions: ['G', 'r', 'D', 'R', 'G', 'r', 'D', 'R'] 
+        },
+        { 
+          id: 'arm_2', q: 1, r: -1, length: 1, angleIdx: 4, 
+          // 抓取键合后的高能分子 -> 送入发射器 -> 激发正弦波
+          instructions: ['-', 'G', 'R', 'D', '-', 'G', 'R', 'D'] 
+        }
+      ];
+
+      hexAtoms = [
+        { id: 'atm_1', q: -2, r: 0, element: 'water' },
+        { id: 'atm_2', q: -2, r: 0, element: 'fire' }
+      ];
+      hexBonds = [];
+    }
+
+    // 【解法 ③：废料裂解质子流】(排污口结晶 ➔ 拆解印分解杂质 ➔ 提纯煅金发射回 CPU)
+    function setupWasteRoute() {
+      pipelineWires = [
+        { from: 'src_mineral', to: 'pump_booster', color: '#f59e0b', wave: 'dc' },
+        { from: 'pump_booster', to: 'acc_tank', color: '#00f0ff', wave: 'pulse' },
+        { from: 'acc_tank', to: 'waste_cleaner', color: '#ef4444', wave: 'waste_pulse' },
+        { from: 'waste_cleaner', to: 'wave_crystallizer', color: '#78716c', wave: 'waste_pulse' },
+        { from: 'matter_projector', to: 'cpu_core_sink', color: '#00f0ff', wave: 'sine' }
+      ];
+
+      // 阵盘配备拆解印 (Cleaver) 与升阶炼金印
+      hexGlyphs = [
+        { type: 'crystallizer', q: -2, r: 0, label: '浊液凝固器' },
+        { type: 'cleaver', q: 0, r: 0, label: '灵能拆解印' },
+        { type: 'projector', q: 2, r: 0, label: '纯金辐射器' }
+      ];
+
+      hexArms = [
+        { 
+          id: 'arm_cleaner', q: -1, r: 0, length: 1, angleIdx: 3,
+          // 抓浊液 -> 送拆解印剥离杂质 -> 交付发射器
+          instructions: ['G', 'r', 'E', 'D', 'R', 'e', '-', '-']
+        }
+      ];
+
+      hexAtoms = [
+        { id: 'atm_waste', q: -2, r: 0, element: 'waste' }
+      ];
+      hexBonds = [];
+    }
+
+    // 【解法 ④：自由搭建工坊】
+    function setupFreeRoute() {
+      setupWaveRoute();
+    }
+
+    // =========================================================================
+    // 4. 渲染核心：左侧管路网络与节点
+    // =========================================================================
+    function renderPipelineNetwork() {
+      const wiresLayer = document.getElementById('pipeWiresLayer');
+      const nodesLayer = document.getElementById('pipeNodesLayer');
+      wiresLayer.innerHTML = '';
+      nodesLayer.innerHTML = '';
+
+      // 1. 渲染导线
+      pipelineWires.forEach((w, idx) => {
+        const fromNode = pipelineNodes.find(n => n.id === w.from);
+        const toNode = pipelineNodes.find(n => n.id === w.to);
+        if (!fromNode || !toNode) return;
+
+        const pathD = `M ${fromNode.x + 45} ${fromNode.y + 25} C ${fromNode.x + 100} ${fromNode.y + 25}, ${toNode.x - 50} ${toNode.y + 25}, ${toNode.x + 45} ${toNode.y + 25}`;
+        
+        // 底层粗管路
+        const bgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        bgPath.setAttribute('d', pathD);
+        bgPath.setAttribute('stroke', '#1a2233');
+        bgPath.setAttribute('stroke-width', '8');
+        bgPath.setAttribute('fill', 'none');
+        wiresLayer.appendChild(bgPath);
+
+        // 顶层流光波形线
+        const flowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        flowPath.setAttribute('d', pathD);
+        flowPath.setAttribute('stroke', w.color);
+        flowPath.setAttribute('stroke-width', '3');
+        flowPath.setAttribute('fill', 'none');
+        flowPath.setAttribute('stroke-dasharray', w.wave === 'sine' ? '8 4' : (w.wave === 'pulse' ? '14 6' : 'none'));
+        flowPath.setAttribute('class', isPlaying ? 'wire-flowing' : '');
+        wiresLayer.appendChild(flowPath);
+      });
+
+      // 2. 渲染 DOM 可点击节点
+      pipelineNodes.forEach(node => {
+        const div = document.createElement('div');
+        div.className = `absolute pointer-events-auto p-2.5 rounded-xl border flex flex-col justify-between cursor-pointer transition-all ${selectedNodeId === node.id ? 'border-[#00f0ff] shadow-[0_0_15px_rgba(0,240,255,0.4)] bg-[#131b2c]' : 'border-[#785a2b]/70 hover:border-amber-400/80 bg-[#0e121c]/90'}`;
+        div.style.left = `${node.x}px`;
+        div.style.top = `${node.y}px`;
+        div.style.width = '120px';
+        div.style.height = '60px';
+        div.onclick = () => selectNodeForTuning(node.id);
+
+        let iconStr = 'fa-gauge';
+        let colorStr = '#00f0ff';
+        if (node.type === 'source') { iconStr = 'fa-gem'; colorStr = '#f59e0b'; }
+        else if (node.type === 'acc') { iconStr = 'fa-car-battery'; colorStr = '#38bdf8'; }
+        else if (node.type === 'upgrader') { iconStr = 'fa-wave-square'; colorStr = '#c084fc'; }
+        else if (node.type === 'crystallizer') { iconStr = 'fa-snowflake'; colorStr = '#00f0ff'; }
+        else if (node.type === 'projector') { iconStr = 'fa-sun'; colorStr = '#eab308'; }
+        else if (node.type === 'core') { iconStr = 'fa-microchip'; colorStr = '#ffd700'; }
+
+        div.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-white tracking-wide truncate">${node.name}</span>
+            <i class="fa-solid ${iconStr} text-xs" style="color: ${colorStr}"></i>
+          </div>
+          <div class="flex items-center justify-between text-[10px] font-mono text-white/50">
+            <span>${node.wave.toUpperCase()}</span>
+            <span class="text-amber-300 font-bold">${node.tickRate} 拍</span>
+          </div>
+        `;
+        nodesLayer.appendChild(div);
+      });
+    }
+
+    // 点击节点展示微调控制台
+    function selectNodeForTuning(nodeId) {
+      selectedNodeId = nodeId;
+      const n = pipelineNodes.find(x => x.id === nodeId);
+      if (!n) return;
+
+      document.getElementById('tuneNodeTitle').innerText = `【${n.name}】独立控制台`;
+      document.getElementById('tuneNodeDesc').innerText = `当前工作拍: ${n.tickRate} 拍 ｜ 波形: ${n.wave} ｜ 模式: ${n.mode}`;
+      document.getElementById('sliderTicks').value = n.tickRate || 1;
+      document.getElementById('lblTuneTicks').innerText = `${n.tickRate || 1} 拍`;
+      document.getElementById('sliderAmp').value = n.amp || 100;
+      document.getElementById('lblTuneAmp').innerText = `${n.amp || 100}%`;
+      document.getElementById('selectMode').value = n.mode || 'normal';
+
+      renderPipelineNetwork();
+    }
+
+    function onTuningChange() {
+      const n = pipelineNodes.find(x => x.id === selectedNodeId);
+      if (!n) return;
+
+      const ticks = parseInt(document.getElementById('sliderTicks').value);
+      const amp = parseInt(document.getElementById('sliderAmp').value);
+      const mode = document.getElementById('selectMode').value;
+
+      document.getElementById('lblTuneTicks').innerText = `${ticks} 拍`;
+      document.getElementById('lblTuneAmp').innerText = `${amp}%`;
+
+      n.tickRate = ticks;
+      n.amp = amp;
+      n.mode = mode;
+      
+      // 动态联动判定
+      evaluateCpuSatisfaction();
+      renderPipelineNetwork();
+    }
+
+    function applyTuning() {
+      evaluateCpuSatisfaction();
+      renderPipelineNetwork();
+    }
+
+    // =========================================================================
+    // 5. 渲染核心：右侧 Opus 炼金阵盘与机械臂
+    // =========================================================================
+    function renderHexBoard() {
+      const layerHex = document.getElementById('layerHexCells');
+      const layerGlyphs = document.getElementById('layerGlyphs');
+      const layerAtoms = document.getElementById('layerAtoms');
+      const layerArms = document.getElementById('layerArms');
+      const layerBonds = document.getElementById('layerBonds');
+
+      layerHex.innerHTML = '';
+      layerGlyphs.innerHTML = '';
+      layerAtoms.innerHTML = '';
+      layerArms.innerHTML = '';
+      layerBonds.innerHTML = '';
+
+      // 1. 渲染六角网格 (-3 到 3)
+      for (let q = -3; q <= 3; q++) {
+        for (let r = -3; r <= 3; r++) {
+          if (Math.abs(q + r) <= 3) {
+            const pt = hexToPixel(q, r);
+            const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            poly.setAttribute('points', getHexPoints(pt.x, pt.y, HEX_RADIUS - 2));
+            poly.setAttribute('fill', 'url(#hexGrad)');
+            poly.setAttribute('stroke', '#3a2b16');
+            poly.setAttribute('stroke-width', '1.5');
+            poly.setAttribute('class', 'hover:stroke-amber-400 transition-colors');
+            layerHex.appendChild(poly);
+          }
+        }
+      }
+
+      // 2. 渲染符印 (Glyphs)
+      hexGlyphs.forEach(g => {
+        const pt = hexToPixel(g.q, g.r);
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        
+        let color = '#00f0ff';
+        let iconText = '∿ 结晶';
+        if (g.type === 'bonder') { color = '#f59e0b'; iconText = '⚯ 键合'; }
+        if (g.type === 'cleaver') { color = '#f43f5e'; iconText = '✂ 拆解'; }
+        if (g.type === 'projector') { color = '#a855f7'; iconText = '☀ 辐射'; }
+
+        group.innerHTML = `
+          <circle cx="${pt.x}" cy="${pt.y}" r="${HEX_RADIUS - 4}" fill="${color}" fill-opacity="0.12" stroke="${color}" stroke-width="2" stroke-dasharray="4 2"/>
+          <text x="${pt.x}" y="${pt.y + 4}" fill="${color}" font-size="11" font-weight="900" text-anchor="middle" font-family="monospace">${iconText}</text>
+        `;
+        layerGlyphs.appendChild(group);
+      });
+
+      // 3. 渲染质子 (Atoms)
+      hexAtoms.forEach(atm => {
+        const pt = hexToPixel(atm.q, atm.r);
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        
+        let fillGrad = 'url(#waterProtonGrad)';
+        let borderCol = '#38bdf8';
+        if (atm.element === 'fire') { fillGrad = 'url(#fireProtonGrad)'; borderCol = '#f43f5e'; }
+        if (atm.element === 'gold') { fillGrad = 'url(#goldProtonGrad)'; borderCol = '#ffd700'; }
+        if (atm.element === 'waste') { fillGrad = 'url(#wasteProtonGrad)'; borderCol = '#a8a29e'; }
+
+        group.innerHTML = `
+          <circle cx="${pt.x}" cy="${pt.y}" r="17" fill="${fillGrad}" stroke="${borderCol}" stroke-width="2" class="atom-drop-shadow"/>
+          <circle cx="${pt.x - 4}" cy="${pt.y - 4}" r="5" fill="#ffffff" fill-opacity="0.5"/>
+        `;
+        layerAtoms.appendChild(group);
+      });
+
+      // 4. 渲染机械臂 (Arms)
+      hexArms.forEach(arm => {
+        const basePt = hexToPixel(arm.q, arm.r);
+        const angleDeg = arm.angleIdx * 60;
+        const rad = (angleDeg * Math.PI) / 180;
+        const reachDist = arm.length * HEX_RADIUS * Math.sqrt(3);
+        const tipX = basePt.x + reachDist * Math.cos(rad);
+        const tipY = basePt.y + reachDist * Math.sin(rad);
+
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        group.innerHTML = `
+          <!-- 悬臂杆 -->
+          <line x1="${basePt.x}" y1="${basePt.y}" x2="${tipX}" y2="${tipY}" stroke="#d4af37" stroke-width="6" stroke-linecap="round"/>
+          <line x1="${basePt.x}" y1="${basePt.y}" x2="${tipX}" y2="${tipY}" stroke="#8e6f3e" stroke-width="2" stroke-linecap="round"/>
+          <!-- 底座黄铜齿轮 -->
+          <circle cx="${basePt.x}" cy="${basePt.y}" r="12" fill="#2d2212" stroke="#ffd700" stroke-width="2.5"/>
+          <circle cx="${basePt.x}" cy="${basePt.y}" r="4" fill="#ffd700"/>
+          <!-- 机械抓爪 -->
+          <circle cx="${tipX}" cy="${tipY}" r="9" fill="#1c160e" stroke="#ffd700" stroke-width="2"/>
+          <circle cx="${tipX}" cy="${tipY}" r="3" fill="#00f0ff"/>
+        `;
+        layerArms.appendChild(group);
+      });
+    }
+
+    function getHexPoints(cx, cy, r) {
+      let pts = [];
+      for (let i = 0; i < 6; i++) {
+        const a = (60 * i) * Math.PI / 180;
+        pts.push(`${cx + r * Math.cos(a)},${cy + r * Math.sin(a)}`);
+      }
+      return pts.join(' ');
+    }
+
+    // =========================================================================
+    // 6. 机械臂律历带渲染与步进驱动 (Instruction Tape)
+    // =========================================================================
+    function renderTimelineTracks() {
+      const container = document.getElementById('armTapeContainer');
+      container.innerHTML = '';
+
+      hexArms.forEach((arm, armIdx) => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center space-x-2 text-xs font-mono';
+        
+        let tapeHtml = `<div class="w-16 text-amber-300 font-bold shrink-0">臂 #${armIdx + 1}:</div><div class="flex items-center space-x-1">`;
+        
+        arm.instructions.forEach((ins, stepIdx) => {
+          const isCurrent = (simTick % arm.instructions.length) === stepIdx;
+          let badgeColor = 'bg-white/10 text-white/70 border-white/20';
+          if (ins === 'R') badgeColor = 'bg-blue-950 text-cyan-300 border-cyan-500';
+          if (ins === 'r') badgeColor = 'bg-blue-950 text-cyan-300 border-cyan-500';
+          if (ins === 'G') badgeColor = 'bg-amber-950 text-amber-300 border-amber-500 font-black';
+          if (ins === 'D') badgeColor = 'bg-amber-950 text-amber-300 border-amber-500 font-black';
+
+          tapeHtml += `
+            <div class="w-7 h-7 rounded border flex items-center justify-center font-bold text-xs ${badgeColor} ${isCurrent ? 'ring-2 ring-[#ffd700] scale-110' : ''}">
+              ${ins}
+            </div>
+          `;
+        });
+        tapeHtml += `</div>`;
+        row.innerHTML = tapeHtml;
+        container.appendChild(row);
+      });
+    }
+
+    // =========================================================================
+    // 7. 仿真步进主循环 (管路脉冲与机械臂统一协同运转)
+    // =========================================================================
+    function stepTick() {
+      simTick++;
+      document.getElementById('lblSimTick').innerText = simTick;
+
+      // 1. 机械臂步进执行
+      hexArms.forEach(arm => {
+        if (!arm.instructions || arm.instructions.length === 0) return;
+        const currentIns = arm.instructions[simTick % arm.instructions.length];
+        executeArmInstruction(arm, currentIns);
+      });
+
+      // 2. 管路网络求值
+      evaluateCpuSatisfaction();
+
+      renderAll();
+    }
+
+    function executeArmInstruction(arm, ins) {
+      if (ins === 'R') {
+        arm.angleIdx = (arm.angleIdx + 1) % 6; // 顺转 60°
+      } else if (ins === 'r') {
+        arm.angleIdx = (arm.angleIdx + 5) % 6; // 逆转 60°
+      } else if (ins === 'E') {
+        if (arm.length < 3) arm.length++; // 伸长
+      } else if (ins === 'e') {
+        if (arm.length > 1) arm.length--; // 缩短
+      } else if (ins === 'G') {
+        // 抓取逻辑
+      } else if (ins === 'D') {
+        // 放下逻辑
+      }
+    }
+
+    // 检查 CPU 满意度 (解法判定)
+    function evaluateCpuSatisfaction() {
+      let isSatisfied = false;
+
+      if (currentRoute === 'wave') {
+        // 纯管路流：升阶仪输出正弦波且工作在 1 拍
+        const upgrader = pipelineNodes.find(n => n.id === 'wave_upgrader');
+        if (upgrader && upgrader.wave === 'sine' && upgrader.tickRate === 1) {
+          isSatisfied = true;
+        }
+      } else if (currentRoute === 'alchemy') {
+        // 质子结晶流：发射器有能量输入
+        isSatisfied = true;
+      } else if (currentRoute === 'waste') {
+        // 废料重构流
+        isSatisfied = true;
+      } else {
+        isSatisfied = true;
+      }
+
+      const badge = document.getElementById('coreSuccessBadge');
+      if (isSatisfied) {
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    function togglePlay() {
+      isPlaying = !isPlaying;
+      const btn = document.getElementById('btnSimPlay');
+      const icon = document.getElementById('playIcon');
+
+      if (isPlaying) {
+        icon.className = 'fa-solid fa-pause text-amber-400';
+        btn.classList.add('active');
+        timerHandle = setInterval(stepTick, 800);
+      } else {
+        icon.className = 'fa-solid fa-play text-emerald-400';
+        btn.classList.remove('active');
+        clearInterval(timerHandle);
+        timerHandle = null;
+      }
+      renderPipelineNetwork();
+    }
+
+    function resetSim() {
+      if (isPlaying) togglePlay();
+      simTick = 0;
+      document.getElementById('lblSimTick').innerText = '0';
+      evaluateCpuSatisfaction();
+      renderAll();
+    }
+
+    function renderAll() {
+      renderPipelineNetwork();
+      renderHexBoard();
+      renderTimelineTracks();
+    }
+
+    // 初始化加载
+    window.addEventListener('DOMContentLoaded', () => {
+      loadRoute('wave');
+    });
+  </script>
+</body>
+</html>
